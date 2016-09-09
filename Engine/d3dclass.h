@@ -1,6 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: d3dclass.h
-////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 //////////////
@@ -8,9 +5,6 @@
 //////////////
 #include "pch.h"
 
-////////////////////////////////////////////////////////////////////////////////
-// Class name: D3DClass
-////////////////////////////////////////////////////////////////////////////////
 class D3DClass
 {
 public:
@@ -42,18 +36,18 @@ private:
 	bool m_vsync_enabled;
 	int m_videoCardMemory;
 	std::string m_videoCardDescription;
-	IDXGISwapChain* m_swapChain;
-	ID3D11Device* m_device;
-	ID3D11DeviceContext* m_deviceContext;
-	ID3D11RenderTargetView* m_renderTargetView;
-	ID3D11Texture2D* m_depthStencilBuffer;
-	ID3D11DepthStencilState* m_depthStencilState;
-	ID3D11DepthStencilView* m_depthStencilView;
-	ID3D11RasterizerState* m_rasterState;
+	Microsoft::WRL::ComPtr<IDXGISwapChain> m_swapChain;
+	Microsoft::WRL::ComPtr<ID3D11Device> m_device;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_depthStencilBuffer;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterState;
     Utils::Maths::Matrix m_projectionMatrix;
     Utils::Maths::Matrix m_worldMatrix;
     Utils::Maths::Matrix m_orthoMatrix;
-	ID3D11DepthStencilState* m_depthDisabledStencilState;
-	ID3D11BlendState* m_alphaEnableBlendingState;
-	ID3D11BlendState* m_alphaDisableBlendingState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthDisabledStencilState;
+	Microsoft::WRL::ComPtr<ID3D11BlendState> m_alphaEnableBlendingState;
+	Microsoft::WRL::ComPtr<ID3D11BlendState> m_alphaDisableBlendingState;
 };

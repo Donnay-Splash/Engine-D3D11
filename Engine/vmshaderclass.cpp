@@ -310,7 +310,7 @@ bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Util
 	// Get a pointer to the data in the constant buffer.
 	dataPtr3 = (TimeBufferType*)mappedResource.pData;
 
-	double prevTime;
+	time_t prevTime;
 
 	prevTime = timer;
 	time(&timer);  /* get current time; same as: timer = time(NULL)  */

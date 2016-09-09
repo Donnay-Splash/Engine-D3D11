@@ -32,11 +32,7 @@ bool SystemClass::Initialize()
 	InitializeWindows(screenWidth, screenHeight);
 
 	// Create the application wrapper object.
-	m_Application = new ApplicationClass;
-	if(!m_Application)
-	{
-		return false;
-	}
+	m_Application = std::make_unique<ApplicationClass>();
 
 	// Initialize the application wrapper object.
 	result = m_Application->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
@@ -51,12 +47,10 @@ bool SystemClass::Initialize()
 
 void SystemClass::Shutdown()
 {
-	// Release the application wrapper object.
 	if(m_Application)
 	{
 		m_Application->Shutdown();
-		delete m_Application;
-		m_Application = 0;
+		m_Application = nullptr;
 	}
 
 	// Shutdown the window.

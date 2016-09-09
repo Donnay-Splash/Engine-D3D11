@@ -3,8 +3,8 @@
 
 PlaneClass::PlaneClass()
 {
-	m_vertexBuffer = 0;
-	m_indexBuffer = 0;
+	m_vertexBuffer = nullptr;
+	m_indexBuffer = nullptr;
 }
 
 PlaneClass::PlaneClass(const PlaneClass& other)
@@ -46,8 +46,8 @@ bool PlaneClass::InitializeBuffers(ID3D11Device* device)
 {
 	VertexType* vertices;
 	unsigned long* indices;
-	int index, i, j, k;
-	float positionX, positionY, positionZ;
+	int index, i, j;
+	float positionX, positionZ;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;

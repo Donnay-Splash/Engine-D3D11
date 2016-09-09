@@ -135,7 +135,6 @@ void TextClass::Shutdown()
 	// Release the font object.
 	if(m_Font)
 	{
-		m_Font->Shutdown();
 		delete m_Font;
 		m_Font = 0;
 	}
@@ -449,7 +448,7 @@ bool TextClass::RenderSentence(SentenceType* sentence, ID3D11DeviceContext* devi
 	pixelColor = Utils::Maths::Color(sentence->red, sentence->green, sentence->blue, 1.0f);
 
 	// Render the text using the font shader.
-	result = FontShader->Render(deviceContext, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix, m_Font->GetTexture(), pixelColor);
+	result = FontShader->Render(deviceContext, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix, m_Font->GetTexture().Get(), pixelColor);
 	if(!result)
 	{
 		false;

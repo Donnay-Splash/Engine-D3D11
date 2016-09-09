@@ -30,25 +30,22 @@ public:
 	~MeshClass();
 
 	bool Initialize(ID3D11Device*, WCHAR*);
-	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 	bool LoadTexture(ID3D11Device*, WCHAR*);
-	ID3D11ShaderResourceView* GetTexture();
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture();
 	int GetIndexCount();
 	
 private:
 	bool InitializeBuffers(ID3D11Device*);
-	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
 	
-	void ReleaseTexture();
-	TextureClass* m_Texture;
+	std::shared_ptr<TextureClass> m_Texture;
 	
-protected:
-	
-	
-	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
-	int m_vertexCount, m_indexCount;
+protected:	
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
+	int m_vertexCount;
+	int	m_indexCount;
 };
 
 #endif

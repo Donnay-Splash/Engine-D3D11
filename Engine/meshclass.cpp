@@ -3,9 +3,8 @@
 
 MeshClass::MeshClass()
 {
-	m_vertexBuffer = 0;
-	m_indexBuffer = 0;
-	m_Texture = 0;
+	m_vertexBuffer = nullptr;
+	m_indexBuffer = nullptr;
 }
 
 
@@ -40,16 +39,6 @@ bool MeshClass::Initialize(ID3D11Device* device, WCHAR* textureFilename)
 	return true;
 }
 
-void MeshClass::Shutdown()
-{
-	// Release the model texture.
-	ReleaseTexture();
-	
-	// Release the vertex and index buffers.
-	ShutdownBuffers();
-
-	return;
-}
 
 void MeshClass::Render(ID3D11DeviceContext* deviceContext)
 {
@@ -64,7 +53,7 @@ int MeshClass::GetIndexCount()
 	return m_indexCount;
 }
 
-ID3D11ShaderResourceView* MeshClass::GetTexture()
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> MeshClass::GetTexture()
 {
 	return m_Texture->GetTexture();
 }
@@ -166,25 +155,6 @@ bool MeshClass::InitializeBuffers(ID3D11Device* device)
 	return true;
 }
 
-void MeshClass::ShutdownBuffers()
-{
-	// Release the index buffer.
-	if(m_indexBuffer)
-	{
-		m_indexBuffer->Release();
-		m_indexBuffer = 0;
-	}
-
-	// Release the vertex buffer.
-	if(m_vertexBuffer)
-	{
-		m_vertexBuffer->Release();
-		m_vertexBuffer = 0;
-	}
-
-	return;
-}
-
 void MeshClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 {
 	unsigned int stride;
@@ -196,10 +166,10 @@ void MeshClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	offset = 0;
     
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+	deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 
 	// Set the index buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	deviceContext->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -209,37 +179,12 @@ void MeshClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 bool MeshClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
-	bool result;
-
-
 	// Create the texture object.
-	m_Texture = new TextureClass;
-	if(!m_Texture)
-	{
-		return false;
-	}
+	m_Texture = std::make_shared<TextureClass>();
 
 	// Initialize the texture object.
-	result = m_Texture->Initialize(device, filename);
-	if(!result)
-	{
-		return false;
-	}
+	m_Texture->Initialize(device, filename);
 
 	return true;
 }
-
-void MeshClass::ReleaseTexture()
-{
-	// Release the texture object.
-	if(m_Texture)
-	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
-	}
-
-	return;
-}
-
 

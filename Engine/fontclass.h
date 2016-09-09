@@ -41,9 +41,8 @@ public:
 	~FontClass();
 
 	bool Initialize(ID3D11Device*, char*, WCHAR*);
-	void Shutdown();
 
-	ID3D11ShaderResourceView* GetTexture();
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture();
 
 	void BuildVertexArray(void*, char*, float, float);
 
@@ -51,11 +50,11 @@ private:
 	bool LoadFontData(char*);
 	void ReleaseFontData();
 	bool LoadTexture(ID3D11Device*, WCHAR*);
-	void ReleaseTexture();
 
 private:
-	FontType* m_Font;
-	TextureClass* m_Texture;
+	static const int kCharacterCount = 95;
+	std::array<FontType, kCharacterCount> m_Font;
+	std::shared_ptr<TextureClass> m_Texture;
 };
 
 #endif

@@ -4,8 +4,6 @@
 
 FontClass::FontClass()
 {
-	m_Font = 0;
-	m_Texture = 0;
 }
 
 
@@ -42,31 +40,12 @@ bool FontClass::Initialize(ID3D11Device* device, char* fontFilename, WCHAR* text
 }
 
 
-void FontClass::Shutdown()
-{
-	// Release the font texture.
-	ReleaseTexture();
-
-	// Release the font data.
-	ReleaseFontData();
-
-	return;
-}
-
-
 bool FontClass::LoadFontData(char* filename)
 {
 	ifstream fin;
 	int i;
 	char temp;
 
-
-	// Create the font spacing buffer.
-	m_Font = new FontType[95];
-	if(!m_Font)
-	{
-		return false;
-	}
 
 	// Read in the font size and spacing between chars.
 	fin.open(filename);
@@ -76,7 +55,7 @@ bool FontClass::LoadFontData(char* filename)
 	}
 
 	// Read in the 95 used ascii characters for text.
-	for(i=0; i<95; i++)
+	for(i = 0; i < kCharacterCount; i++)
 	{
 		fin.get(temp);
 		while(temp != ' ')
@@ -103,14 +82,6 @@ bool FontClass::LoadFontData(char* filename)
 
 void FontClass::ReleaseFontData()
 {
-	// Release the font data array.
-	if(m_Font)
-	{
-		delete [] m_Font;
-		m_Font = 0;
-	}
-
-	return;
 }
 
 
@@ -120,38 +91,16 @@ bool FontClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 
 
 	// Create the texture object.
-	m_Texture = new TextureClass;
-	if(!m_Texture)
-	{
-		return false;
-	}
+	m_Texture = std::make_shared<TextureClass>();
 
 	// Initialize the texture object.
 	result = m_Texture->Initialize(device, filename);
-	if(!result)
-	{
-		return false;
-	}
 
 	return true;
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-void FontClass::ReleaseTexture()
-{
-	// Release the texture object.
-	if(m_Texture)
-	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
-	}
-
-	return;
-}
-
-
-ID3D11ShaderResourceView* FontClass::GetTexture()
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> FontClass::GetTexture()
 {
 	return m_Texture->GetTexture();
 }

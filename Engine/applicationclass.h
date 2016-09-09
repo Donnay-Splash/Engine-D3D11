@@ -51,15 +51,15 @@ private:
 	float rotation;
 	float plane_height;
 	float plane_length;
-	InputClass* m_Input;
-	D3DClass* m_Direct3D;
-	CameraClass* m_Camera;
-	VMShaderClass* m_VMShader;
-	LightClass* m_Light1;
-	TimerClass* m_Timer;
-	PositionClass* m_Position;
-	MeshClass* m_Mesh;
-	PlaneClass* m_Plane;
+	std::shared_ptr<InputClass> m_Input;
+	std::shared_ptr<D3DClass> m_Direct3D;
+	std::shared_ptr<CameraClass> m_Camera;
+	std::shared_ptr<VMShaderClass> m_VMShader;
+	std::shared_ptr<LightClass> m_Light1;
+	std::shared_ptr<TimerClass> m_Timer;
+	std::shared_ptr<PositionClass> m_Position;
+	std::shared_ptr<MeshClass> m_Mesh;
+	std::shared_ptr<PlaneClass> m_Plane;
 };
 
 #endif

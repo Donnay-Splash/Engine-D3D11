@@ -4,7 +4,7 @@
 
 TextureClass::TextureClass()
 {
-	m_texture = 0;
+	m_texture = nullptr;
 }
 
 
@@ -29,18 +29,10 @@ bool TextureClass::Initialize(ID3D11Device* device, WCHAR* filename)
 
 void TextureClass::Shutdown()
 {
-	// Release the texture resource.
-	if(m_texture)
-	{
-		m_texture->Release();
-		m_texture = 0;
-	}
-
-	return;
 }
 
 
-ID3D11ShaderResourceView* TextureClass::GetTexture()
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TextureClass::GetTexture()
 {
 	return m_texture;
 }

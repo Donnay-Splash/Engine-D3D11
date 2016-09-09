@@ -237,7 +237,7 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	unsigned int bufferNumber;
 	
 	ID3D11ShaderResourceView* texture2;
-	texture2 = text->GetTexture();
+	texture2 = text->GetTexture().Get();
 
 	//generate MipMaps
 	deviceContext->GenerateMips(texture);
