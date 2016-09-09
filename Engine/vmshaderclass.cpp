@@ -1,5 +1,5 @@
 #include "VMShaderClass.h"
-
+#include "EngineHelpers.h"
 // Include compiled shader files
 namespace VMShader
 {
@@ -79,9 +79,6 @@ bool VMShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, U
 bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
 {
 	HRESULT result;
-	ID3D10Blob* errorMessage;
-	ID3D10Blob* vertexShaderBuffer;
-	ID3D10Blob* pixelShaderBuffer;
 
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
 	unsigned int numElements;
@@ -89,11 +86,6 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_BUFFER_DESC timeBufferDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
-
-	// Initialize the pointers this function will use to null.
-	errorMessage = 0;
-	vertexShaderBuffer = 0;
-	pixelShaderBuffer = 0;
 
 	// Create the vertex shader from the buffer.
 	result = device->CreateVertexShader(VMShader::g_VSMain, sizeof(VMShader::g_VSMain), NULL, &m_vertexShader);
@@ -123,7 +115,7 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	polygonLayout[1].SemanticIndex = 0;
 	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	polygonLayout[1].InputSlot = 0;
-	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].AlignedByteOffset = 12;
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[1].InstanceDataStepRate = 0;
 
@@ -131,7 +123,7 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	polygonLayout[2].SemanticIndex = 0;
 	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	polygonLayout[2].InputSlot = 0;
-	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].AlignedByteOffset = 20;
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[2].InstanceDataStepRate = 0;
 
@@ -139,19 +131,7 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
 	// Create the vertex input layout.
-	result = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), 
-					   &m_layout);
-	if(FAILED(result))
-	{
-		return false;
-	}
-
-	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
-	vertexShaderBuffer->Release();
-	vertexShaderBuffer = 0;
-
-	pixelShaderBuffer->Release();
-	pixelShaderBuffer = 0;
+	Utils::ThrowIfFailed(device->CreateInputLayout(polygonLayout, numElements, VMShader::g_VSMain, sizeof(VMShader::g_VSMain), &m_layout));
 
 	// Create a texture sampler state description.
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
