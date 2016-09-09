@@ -20,7 +20,7 @@ struct PixelInputType
 	float3 position3D : TEXCOORD2;
 };
 
-float4 LightPixelShader(PixelInputType input) : SV_TARGET
+float4 PSMain(PixelInputType input) : SV_TARGET
 {
     float4 textureColor;
     float3 lightDir;

@@ -1,8 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename: textureclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
+#include <DDSTextureLoader.h>
 #include "textureclass.h"
-
+#include "EngineHelpers.h"
 
 TextureClass::TextureClass()
 {
@@ -22,18 +23,8 @@ TextureClass::~TextureClass()
 
 bool TextureClass::Initialize(ID3D11Device* device, WCHAR* filename)
 {
-	HRESULT result;
-	D3DX11_IMAGE_LOAD_INFO* Info;
-	Info = new D3DX11_IMAGE_LOAD_INFO;
-	Info->MipLevels = D3DX11_DEFAULT;
-	Info->MipFilter = D3DX11_FILTER_LINEAR;
-
-	// Load the texture in.
-	result = D3DX11CreateShaderResourceViewFromFile(device, filename, Info, NULL, &m_texture, NULL);
-	if(FAILED(result))
-	{
-		return false;
-	}
+    ID3D11Resource* subresource;
+    Utils::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, filename, &subresource, &m_texture));
 
 	return true;
 }

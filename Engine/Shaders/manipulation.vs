@@ -27,7 +27,7 @@ struct PixelInputType
 };
 
 
-PixelInputType LightVertexShader(VertexInputType input)
+PixelInputType VSMain(VertexInputType input)
 {
     PixelInputType output;
 	float x_comp = 0.0f;

@@ -1,27 +1,36 @@
 #include "Math.h"
 using namespace DirectX;
 
+
 namespace Utils
 {
     namespace Maths
     {
+        // Helpers
+        namespace
+        {
+            Matrix ConvertFromXMMATRIX(const XMMATRIX& matrix)
+            {
+                Matrix convertedMatrix;
+                XMStoreFloat4x4A(&convertedMatrix, matrix);
+                return convertedMatrix;
+            }
+
+            Quaternion XMVECTORtoQuaternion(const XMVECTOR& vector)
+            {
+                Quaternion convertedQuaternion;
+                XMStoreFloat4A(&convertedQuaternion, vector);
+                return convertedQuaternion;
+            }
+        }
 
         /****************************************************************************
         *
         * Matrix operations
         *
         ****************************************************************************/
-        const Matrix Matrix::Identity = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-
-        Matrix::Matrix(Vector4 r1, Vector4 r2, Vector4 r3, Vector4 r4)
+        inline Matrix::Matrix(Vector4 r1, Vector4 r2, Vector4 r3, Vector4 r4)
             : XMFLOAT4X4A(r1.x, r1.y, r1.z, r1.w, r2.x, r2.y, r2.z, r2.w, r3.x, r3.y, r3.z, r3.w, r4.x, r4.y, r4.z, r4.w) {}
-
-        Matrix ConvertFromXMMATRIX(const XMMATRIX& matrix)
-        {
-            Matrix convertedMatrix;
-            XMStoreFloat4x4A(&convertedMatrix, matrix);
-            return convertedMatrix;
-        }
 
         inline Matrix Matrix::CreateFromTranslation(Vector3 translation)
         {
@@ -73,7 +82,7 @@ namespace Utils
             return ConvertFromXMMATRIX(projectionMatrix);
         }
 
-        Matrix Matrix::GetTranspose()
+        inline Matrix Matrix::GetTranspose()
         {
             FXMMATRIX matrix = XMLoadFloat4x4A(this);
             XMMATRIX transposeMatrix = XMMatrixTranspose(matrix);
@@ -86,40 +95,26 @@ namespace Utils
         * Vector4 operations
         *
         ****************************************************************************/
-        const Vector4 Vector4::Zero = {0.0f, 0.0f, 0.0f, 0.0f};
-        const Vector4 Vector4::One = {1.0f, 1.0f, 1.0f, 1.0f};
 
         /****************************************************************************
         *
         * Vector3 operations
         *
         ****************************************************************************/
-        const Vector3 Vector3::Zero = { 0.0f, 0.0f, 0.0f};
-        const Vector3 Vector3::One = { 1.0f, 1.0f, 1.0f};
 
         /****************************************************************************
         *
         * Vector2 operations
         *
         ****************************************************************************/
-        const Vector2 Vector2::Zero = { 0.0f, 0.0f };
-        const Vector2 Vector2::One = { 1.0f, 1.0f };
 
         /****************************************************************************
         *
         * Quaternion operations
         *
         ****************************************************************************/
-        const Quaternion Quaternion::Identity = {0.0f, 0.0f, 0.0f, 1.0f};
 
-        Quaternion XMVECTORtoQuaternion(const XMVECTOR& vector)
-        {
-            Quaternion convertedQuaternion;
-            XMStoreFloat4A(&convertedQuaternion, vector);
-            return convertedQuaternion;
-        }
-
-        Quaternion Quaternion::CreateFromAxisAngle(Vector3 axis, float angle)
+        inline Quaternion Quaternion::CreateFromAxisAngle(Vector3 axis, float angle)
         {
             FXMVECTOR xmAxis = XMLoadFloat3A(&axis);
             XMVECTOR quaternionVector = XMQuaternionRotationAxis(xmAxis, angle);
@@ -127,7 +122,7 @@ namespace Utils
             return XMVECTORtoQuaternion(quaternionVector);
         }
 
-        Quaternion Quaternion::CreateFromYawPitchRoll(float yaw, float pitch, float roll)
+        inline Quaternion Quaternion::CreateFromYawPitchRoll(float yaw, float pitch, float roll)
         {
             XMVECTOR quaternionVector = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
 
@@ -139,7 +134,7 @@ namespace Utils
         * Color operations
         *
         ****************************************************************************/
-        Color::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255U)
+        inline Color::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255U)
         {
             float red = static_cast<float>(r) / 255.0f;
             float green = static_cast<float>(g) / 255.0f;
@@ -149,7 +144,7 @@ namespace Utils
             ::XMFLOAT4A(red, green, blue, alpha);
         }
 
-        Color Color::FromRGBA(uint32_t rgba)
+        inline Color Color::FromRGBA(uint32_t rgba)
         {
             uint8_t r = static_cast<uint8_t>(rgba >> 24);
             uint8_t g = static_cast<uint8_t>(rgba >> 16);
@@ -159,7 +154,7 @@ namespace Utils
             return Color(r, g, b, a);
         }
 
-        Color Color::FromBGRA(uint32_t bgra)
+        inline Color Color::FromBGRA(uint32_t bgra)
         {
             uint8_t b = static_cast<uint8_t>(bgra >> 24);
             uint8_t g = static_cast<uint8_t>(bgra >> 16);
@@ -169,7 +164,7 @@ namespace Utils
             return Color(r, g, b, a);
         }
 
-        Color Color::FromARGB(uint32_t argb)
+        inline Color Color::FromARGB(uint32_t argb)
         {
             uint8_t a = static_cast<uint8_t>(argb >> 24);
             uint8_t r = static_cast<uint8_t>(argb >> 16);
@@ -179,7 +174,7 @@ namespace Utils
             return Color(r, g, b, a);
         }
 
-        Color Color::FromABGR(uint32_t abgr)
+        inline Color Color::FromABGR(uint32_t abgr)
         {
             uint8_t a = static_cast<uint8_t>(abgr >> 24);
             uint8_t b = static_cast<uint8_t>(abgr >> 16);

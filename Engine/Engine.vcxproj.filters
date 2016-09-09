@@ -19,6 +19,9 @@
     <Filter Include="Utils\Math">
       <UniqueIdentifier>{8ba68c32-10fb-4dfd-8528-2213ba4d9899}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\Compiled Shaders">
+      <UniqueIdentifier>{1d1840c2-fb12-49e9-ae5d-127545aa7c3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="applicationclass.cpp">
@@ -149,43 +152,79 @@
     <ClInclude Include="planeclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXHelpers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EngineHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Math.h">
       <Filter>Utils\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\color.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\color.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\font.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\font.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\light.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\light.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\manipulation.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\manipulation.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\texture.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\texture.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="font.ps">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="font.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="texture.ps">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="texture.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="light.ps">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="light.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="manipulation.ps">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="manipulation.vs">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="Math.inl">
       <Filter>Utils\Math</Filter>
     </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\texture.ps">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\color.ps">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\color.vs">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\font.ps">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\font.vs">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\light.ps">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\light.vs">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\manipulation.ps">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\manipulation.vs">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\texture.vs">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

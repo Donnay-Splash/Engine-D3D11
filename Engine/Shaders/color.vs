@@ -23,7 +23,7 @@ struct PixelInputType
 };
 
 // Vertex Shader
-PixelInputType ColorVertexShader(VertexInputType input)
+PixelInputType VSMain(VertexInputType input)
 {
     PixelInputType output;
     

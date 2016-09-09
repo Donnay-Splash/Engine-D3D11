@@ -21,7 +21,7 @@ struct PixelInputType
 	float3 normal : NORMAL;
 };
 
-PixelInputType TextureVertexShader(VertexInputType input)
+PixelInputType VSMain(VertexInputType input)
 {
     PixelInputType output;
     

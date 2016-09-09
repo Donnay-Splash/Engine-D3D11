@@ -25,10 +25,10 @@ namespace Utils
         public:
             static const Matrix Identity;
 
-            Matrix() : XMFLOAT4X4A(Matrix::Identity) {}
+            inline Matrix() : XMFLOAT4X4A(Matrix::Identity) {}
             Matrix(Vector4 r1, Vector4 r2, Vector4 r3, Vector4 r4);
 
-            Matrix(float m00, float m01, float m02, float m03,
+            inline Matrix(float m00, float m01, float m02, float m03,
                 float m10, float m11, float m12, float m13,
                 float m20, float m21, float m22, float m23,
                 float m30, float m31, float m32, float m33)
@@ -105,7 +105,7 @@ namespace Utils
             Color(float r, float g, float b, float a = 1.0f)
                 : XMFLOAT4A(r, g, b, a) {}
             Color(DirectX::XMVECTORF32 color) : XMFLOAT4A(color.f) {}
-            Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+            inline Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
             static Color FromRGBA(uint32_t rgba);
             static Color FromBGRA(uint32_t bgra);
