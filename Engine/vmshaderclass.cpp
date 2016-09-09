@@ -48,8 +48,8 @@ void VMShaderClass::Shutdown()
 	return;
 }
 
-bool VMShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-			      D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* mlight, float height_in, float length_in)
+bool VMShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, Utils::Maths::Matrix worldMatrix, Utils::Maths::Matrix viewMatrix,
+    Utils::Maths::Matrix projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* mlight, float height_in, float length_in)
 {
 	bool result;
 
@@ -347,8 +347,8 @@ void VMShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd
 	return;
 }
 
-bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-					   D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light)
+bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Utils::Maths::Matrix worldMatrix, Utils::Maths::Matrix viewMatrix,
+    Utils::Maths::Matrix projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -358,10 +358,11 @@ bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DX
 	TimeBufferType* dataPtr3;
 
 
-	// Transpose the matrices to prepare them for the shader.
-	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
-	D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
-	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
+    // TODO: Evaluate reasons for transposing matrices before use in shaders.
+    // Transpose the matrices to prepare them for the shader.
+    worldMatrix = worldMatrix.GetTranspose();
+    viewMatrix = viewMatrix.GetTranspose();
+    projectionMatrix = projectionMatrix.GetTranspose();
 
 	// Lock the constant buffer so it can be written to.
 	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

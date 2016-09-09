@@ -9,7 +9,6 @@
 // INCLUDES //
 //////////////
 #include <d3d11.h>
-#include <DirectXMath.h>
 #include <fstream>
 using namespace std;
 
@@ -18,7 +17,7 @@ using namespace std;
 // MY CLASS INCLUDES //
 ///////////////////////
 #include "textureclass.h"
-
+#include "Math.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: FontClass
@@ -34,8 +33,8 @@ private:
 
 	struct VertexType
 	{
-		D3DXVECTOR3 position;
-	    D3DXVECTOR2 texture;
+		Utils::Maths::Vector3 position;
+        Utils::Maths::Vector2 texture;
 	};
 
 public:

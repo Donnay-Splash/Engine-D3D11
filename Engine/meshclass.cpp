@@ -100,21 +100,21 @@ bool MeshClass::InitializeBuffers(ID3D11Device* device)
 
 	// Load the vertex array with data.
 	//Front Square
-	vertices[0].position = D3DXVECTOR3(-1.0f, -1.0f, 0.0f);  // Bottom left.
-	vertices[0].texture = D3DXVECTOR2(0.0f, 1.0f);
-	vertices[0].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
+	vertices[0].position = Utils::Maths::Vector3(-1.0f, -1.0f, 0.0f);  // Bottom left.
+	vertices[0].texture = Utils::Maths::Vector2(0.0f, 1.0f);
+	vertices[0].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
 
-	vertices[1].position = D3DXVECTOR3(-1.0f, 1.0f, 0.0f);  // Top left.
-	vertices[1].texture = D3DXVECTOR2(0.0f, 0.0f);
-	vertices[1].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
+	vertices[1].position = Utils::Maths::Vector3(-1.0f, 1.0f, 0.0f);  // Top left.
+	vertices[1].texture = Utils::Maths::Vector2(0.0f, 0.0f);
+	vertices[1].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
 	
-	vertices[2].position = D3DXVECTOR3(1.0f, 1.0f, 0.0f);  // Top right.
-	vertices[2].texture = D3DXVECTOR2(1.0f, 0.0f);
-	vertices[2].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
+	vertices[2].position = Utils::Maths::Vector3(1.0f, 1.0f, 0.0f);  // Top right.
+	vertices[2].texture = Utils::Maths::Vector2(1.0f, 0.0f);
+	vertices[2].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
 
-	vertices[3].position = D3DXVECTOR3(1.0f, -1.0f, 0.0f);  // Bottom right.
-	vertices[3].texture = D3DXVECTOR2(1.0f, 1.0f);
-	vertices[3].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
+	vertices[3].position = Utils::Maths::Vector3(1.0f, -1.0f, 0.0f);  // Bottom right.
+	vertices[3].texture = Utils::Maths::Vector2(1.0f, 1.0f);
+	vertices[3].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
 
 
 	// Load the index array with data.

@@ -9,9 +9,8 @@
 // INCLUDES //
 //////////////
 #include <d3d11.h>
-#include <DirectXMath.h>
 #include "textureclass.h"
-
+#include "Math.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: MeshClass
@@ -22,9 +21,9 @@ private:
 
 	struct VertexType
 	{
-		D3DXVECTOR3 position;
-		D3DXVECTOR2 texture;
-		D3DXVECTOR3 normal;
+		Utils::Maths::Vector3 position;
+        Utils::Maths::Vector2 texture;
+        Utils::Maths::Vector3 normal;
 	};
 
 public:

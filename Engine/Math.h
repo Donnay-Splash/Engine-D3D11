@@ -74,6 +74,17 @@ namespace Utils
 
         };
 
+        class Vector2 : public DirectX::XMFLOAT2A
+        {
+        public:
+            static const Vector2 Zero;
+            static const Vector2 One;
+
+            Vector2() : XMFLOAT2A(Zero) {}
+            Vector2(float x, float y)
+                : XMFLOAT2A(x, y) {}
+        };
+
         class Quaternion : public DirectX::XMFLOAT4A
         {
         public:

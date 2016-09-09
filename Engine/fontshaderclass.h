@@ -9,9 +9,8 @@
 // INCLUDES //
 //////////////
 #include <d3d11.h>
-#include <DirectXMath.h>
-#include <d3dx11async.h>
 #include <fstream>
+#include "Math.h"
 using namespace std;
 
 
@@ -23,14 +22,14 @@ class FontShaderClass
 private:
 	struct ConstantBufferType
 	{
-		D3DXMATRIX world;
-		D3DXMATRIX view;
-		D3DXMATRIX projection;
+		Utils::Maths::Matrix world;
+        Utils::Maths::Matrix view;
+        Utils::Maths::Matrix projection;
 	};
 
 	struct PixelBufferType
 	{
-		D3DXVECTOR4 pixelColor;
+        Utils::Maths::Color pixelColor;
 	};
 
 public:
@@ -40,14 +39,14 @@ public:
 
 	bool Initialize(ID3D11Device*, HWND);
 	void Shutdown();
-	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR4);
+	bool Render(ID3D11DeviceContext*, int, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, Utils::Maths::Color);
 
 private:
 	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
 
-	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR4);
+	bool SetShaderParameters(ID3D11DeviceContext*, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, Utils::Maths::Color);
 	void RenderShader(ID3D11DeviceContext*, int);
 
 private:

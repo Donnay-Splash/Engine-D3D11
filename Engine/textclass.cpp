@@ -31,7 +31,7 @@ TextClass::~TextClass()
 
 
 bool TextClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight, 
-						   D3DXMATRIX baseViewMatrix)
+    Utils::Maths::Matrix baseViewMatrix)
 {
 	bool result;
 
@@ -158,7 +158,7 @@ void TextClass::Shutdown()
 }
 
 
-bool TextClass::Render(ID3D11DeviceContext* deviceContext, FontShaderClass* FontShader, D3DXMATRIX worldMatrix, D3DXMATRIX orthoMatrix)
+bool TextClass::Render(ID3D11DeviceContext* deviceContext, FontShaderClass* FontShader, Utils::Maths::Matrix worldMatrix, Utils::Maths::Matrix orthoMatrix)
 {
 	bool result;
 
@@ -426,11 +426,11 @@ void TextClass::ReleaseSentence(SentenceType** sentence)
 }
 
 
-bool TextClass::RenderSentence(SentenceType* sentence, ID3D11DeviceContext* deviceContext, FontShaderClass* FontShader, D3DXMATRIX worldMatrix, 
-							   D3DXMATRIX orthoMatrix)
+bool TextClass::RenderSentence(SentenceType* sentence, ID3D11DeviceContext* deviceContext, FontShaderClass* FontShader, Utils::Maths::Matrix worldMatrix,
+    Utils::Maths::Matrix orthoMatrix)
 {
 	unsigned int stride, offset;
-	D3DXVECTOR4 pixelColor;
+	Utils::Maths::Color pixelColor;
 	bool result;
 
 
@@ -448,7 +448,7 @@ bool TextClass::RenderSentence(SentenceType* sentence, ID3D11DeviceContext* devi
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Create a pixel color vector with the input sentence color.
-	pixelColor = D3DXVECTOR4(sentence->red, sentence->green, sentence->blue, 1.0f);
+	pixelColor = Utils::Maths::Color(sentence->red, sentence->green, sentence->blue, 1.0f);
 
 	// Render the text using the font shader.
 	result = FontShader->Render(deviceContext, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix, m_Font->GetTexture(), pixelColor);

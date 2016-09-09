@@ -3,9 +3,9 @@
 
 
 #include <d3d11.h>
-#include <DirectXMath.h>
 #include <math.h>
 #include "meshclass.h"
+#include "Math.h"
 
 class PlaneClass : public MeshClass
 {
@@ -13,9 +13,9 @@ private:
 
 	struct VertexType
 	{
-		D3DXVECTOR3 position;
-		D3DXVECTOR2 texture;
-		D3DXVECTOR3 normal;
+		Utils::Maths::Vector3 position;
+        Utils::Maths::Vector2 texture;
+        Utils::Maths::Vector3 normal;
 	};
 
 public:

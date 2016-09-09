@@ -50,8 +50,8 @@ void FontShaderClass::Shutdown()
 }
 
 
-bool FontShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-							 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, D3DXVECTOR4 pixelColor)
+bool FontShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, Utils::Maths::Matrix worldMatrix, Utils::Maths::Matrix viewMatrix,
+    Utils::Maths::Matrix projectionMatrix, ID3D11ShaderResourceView* texture, Utils::Maths::Color pixelColor)
 {
 	bool result;
 
@@ -101,7 +101,7 @@ bool FontShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* v
 		// If there was  nothing in the error message then it simply could not find the shader file itself.
 		else
 		{
-			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+			MessageBox(hwnd, vsFilename, "Missing Shader File", MB_OK);
 		}
 
 		return false;
@@ -120,7 +120,7 @@ bool FontShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* v
 		// If there was  nothing in the error message then it simply could not find the file itself.
 		else
 		{
-			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+			MessageBox(hwnd, psFilename, "Missing Shader File", MB_OK);
 		}
 
 		return false;
@@ -312,14 +312,14 @@ void FontShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hw
 	errorMessage = 0;
 
 	// Pop a message up on the screen to notify the user to check the text file for compile errors.
-	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+	MessageBox(hwnd, "Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
 
 	return;
 }
 
 
-bool FontShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-										  D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, D3DXVECTOR4 pixelColor)
+bool FontShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Utils::Maths::Matrix worldMatrix, Utils::Maths::Matrix viewMatrix,
+    Utils::Maths::Matrix projectionMatrix, ID3D11ShaderResourceView* texture, Utils::Maths::Color pixelColor)
 {
 	HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -338,10 +338,11 @@ bool FontShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3
 	// Get a pointer to the data in the constant buffer.
 	dataPtr = (ConstantBufferType*)mappedResource.pData;
 
+    // TODO: Evaluate reasons for transposing matrices before use in shader
 	// Transpose the matrices to prepare them for the shader.
-	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
-	D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
-	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
+    worldMatrix = worldMatrix.GetTranspose();
+    viewMatrix = viewMatrix.GetTranspose();
+    projectionMatrix = projectionMatrix.GetTranspose();
 
 	// Copy the matrices into the constant buffer.
 	dataPtr->world = worldMatrix;

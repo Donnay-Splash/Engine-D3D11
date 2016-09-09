@@ -85,9 +85,9 @@ bool PlaneClass::InitializeBuffers(ID3D11Device* device)
 			positionZ = (float)(j);
 
 
-			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
-			vertices[index].texture = D3DXVECTOR2(0.0, 0.0);
-			vertices[index].normal = D3DXVECTOR3(0.0, 1.0, 0.0);
+			vertices[index].position = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+			vertices[index].texture = Utils::Maths::Vector2(0.0, 0.0);
+			vertices[index].normal = Utils::Maths::Vector3(0.0, 1.0, 0.0);
 			indices[index] = index;
 			index++;
 
@@ -95,9 +95,9 @@ bool PlaneClass::InitializeBuffers(ID3D11Device* device)
 			positionX = (float)(i);
 			positionZ = (float)(j+1);
 
-			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
-			vertices[index].texture = D3DXVECTOR2(0.0, 0.0);
-			vertices[index].normal = D3DXVECTOR3(0.0, 1.0, 0.0);
+			vertices[index].position = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+			vertices[index].texture = Utils::Maths::Vector2(0.0, 0.0);
+			vertices[index].normal = Utils::Maths::Vector3(0.0, 1.0, 0.0);
 			indices[index] = index;
 			index++;
 
@@ -105,9 +105,9 @@ bool PlaneClass::InitializeBuffers(ID3D11Device* device)
 			positionX = (float)(i+1);
 			positionZ = (float)(j);
 
-			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
-			vertices[index].texture = D3DXVECTOR2(0.0, 0.0);
-			vertices[index].normal = D3DXVECTOR3(0.0, 1.0, 0.0);
+			vertices[index].position = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+			vertices[index].texture = Utils::Maths::Vector2(0.0, 0.0);
+			vertices[index].normal = Utils::Maths::Vector3(0.0, 1.0, 0.0);
 			indices[index] = index;
 			index++;
 
@@ -115,9 +115,9 @@ bool PlaneClass::InitializeBuffers(ID3D11Device* device)
 			positionX = (float)(i);
 			positionZ = (float)(j+1);
 
-			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
-			vertices[index].texture = D3DXVECTOR2(0.0, 0.0);
-			vertices[index].normal = D3DXVECTOR3(0.0, 1.0, 0.0);
+			vertices[index].position = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+			vertices[index].texture = Utils::Maths::Vector2(0.0, 0.0);
+			vertices[index].normal = Utils::Maths::Vector3(0.0, 1.0, 0.0);
 			indices[index] = index;
 			index++;
 
@@ -125,9 +125,9 @@ bool PlaneClass::InitializeBuffers(ID3D11Device* device)
 			positionX = (float)(i+1);
 			positionZ = (float)(j+1);
 
-			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
-			vertices[index].texture = D3DXVECTOR2(0.0, 0.0);
-			vertices[index].normal = D3DXVECTOR3(0.0, 1.0, 0.0);
+			vertices[index].position = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+			vertices[index].texture = Utils::Maths::Vector2(0.0, 0.0);
+			vertices[index].normal = Utils::Maths::Vector3(0.0, 1.0, 0.0);
 			indices[index] = index;
 			index++;
 
@@ -135,9 +135,9 @@ bool PlaneClass::InitializeBuffers(ID3D11Device* device)
 			positionX = (float)(i+1);
 			positionZ = (float)(j);
 
-			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
-			vertices[index].texture = D3DXVECTOR2(0.0, 0.0);
-			vertices[index].normal = D3DXVECTOR3(0.0, 1.0, 0.0);
+			vertices[index].position = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+			vertices[index].texture = Utils::Maths::Vector2(0.0, 0.0);
+			vertices[index].normal = Utils::Maths::Vector3(0.0, 1.0, 0.0);
 			indices[index] = index;
 			index++;
 

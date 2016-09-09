@@ -31,66 +31,66 @@ ApplicationClass::~ApplicationClass()
 
 bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {
-	bool result;
-	float cameraX, cameraY, cameraZ;
-	D3DXMATRIX baseViewMatrix;
-	//char videoCard[128];
-	//int videoMemory;
+    bool result;
+    float cameraX, cameraY, cameraZ;
+    Utils::Maths::Matrix baseViewMatrix;
+    //char videoCard[128];
+    //int videoMemory;
 
-	plane_height = 0.0f;
-	plane_length = 0.0f;
-	
-	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
-	m_Input = new InputClass;
-	if(!m_Input)
-	{
-		return false;
-	}
+    plane_height = 0.0f;
+    plane_length = 0.0f;
 
-	// Initialize the input object.
-	result = m_Input->Initialize(hinstance, hwnd, screenWidth, screenHeight);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
-		return false;
-	}
+    // Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
+    m_Input = new InputClass;
+    if (!m_Input)
+    {
+        return false;
+    }
 
-	// Create the Direct3D object.
-	m_Direct3D = new D3DClass;
-	if(!m_Direct3D)
-	{
-		return false;
-	}
+    // Initialize the input object.
+    result = m_Input->Initialize(hinstance, hwnd, screenWidth, screenHeight);
+    if (!result)
+    {
+        MessageBox(hwnd, "Could not initialize the input object.", "Error", MB_OK);
+        return false;
+    }
 
-	// Initialize the Direct3D object.
-	result = m_Direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
-		return false;
-	}
+    // Create the Direct3D object.
+    m_Direct3D = new D3DClass;
+    if (!m_Direct3D)
+    {
+        return false;
+    }
 
-	// Create the camera object.
-	m_Camera = new CameraClass;
-	if(!m_Camera)
-	{
-		return false;
-	}
+    // Initialize the Direct3D object.
+    result = m_Direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+    if (!result)
+    {
+        MessageBox(hwnd, "Could not initialize DirectX 11.", "Error", MB_OK);
+        return false;
+    }
 
-	// Initialize a base view matrix with the camera for 2D user interface rendering.
-	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
-	m_Camera->Render();
-	m_Camera->GetViewMatrix(baseViewMatrix);
+    // Create the camera object.
+    m_Camera = new CameraClass;
+    if (!m_Camera)
+    {
+        return false;
+    }
 
-	m_Light1 = new LightClass;
-	if(!m_Light1)
-	{
-		return false;
-	}
-	m_Light1->SetAmbientColor(0.2f, 0.2f, 0.2f, 1.0f);
-	m_Light1->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_Light1->SetDirection(0.0f, -1.0f, .0f);
-	m_Light1->SetPosition(0.0f, 0.0f, -0.5f);
+    // Initialize a base view matrix with the camera for 2D user interface rendering.
+    m_Camera->SetPosition({ 0.0f, 0.0f, -10.0f });
+    m_Camera->Render();
+    baseViewMatrix = m_Camera->GetViewMatrix();
+
+    m_Light1 = new LightClass;
+    if (!m_Light1)
+    {
+        return false;
+    }
+    m_Light1->SetAmbientColor({ 0.2f, 0.2f, 0.2f, 1.0f });
+    m_Light1->SetDiffuseColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+    m_Light1->SetDirection({ 0.0f, -1.0f, .0f });
+    m_Light1->SetPosition({ 0.0f, 0.0f, -0.5f });
 	//m_Light1->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
 	//m_Light1->SetSpecularPower(1.0f);
 
@@ -109,7 +109,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	result = m_Mesh->Initialize(m_Direct3D->GetDevice(), L"data/brick1.dds");
 	if(!result)
 	{
-		MessageBox(hwnd, L"Could not initialise the mesh object.", L"Error", MB_OK);
+		MessageBox(hwnd, "Could not initialise the mesh object.", "Error", MB_OK);
 		return false;
 	}
 
@@ -118,7 +118,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	result = m_Plane->Initialize(m_Direct3D->GetDevice(), L"data/brick1.dds");
 	if(!result)
 	{
-		MessageBox(hwnd, L"Could no initialise the plane object.", L"Error", MB_OK);
+		MessageBox(hwnd, "Could no initialise the plane object.", "Error", MB_OK);
 		return false;
 	}
 
@@ -133,7 +133,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	result = m_VMShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	if(!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, "Could not initialize the texture shader object.", "Error", MB_OK);
 		return false;
 	}
 
@@ -148,7 +148,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	result = m_Timer->Initialize();
 	if(!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		MessageBox(hwnd, "Could not initialize the timer object.", "Error", MB_OK);
 		return false;
 	}
 
@@ -237,7 +237,7 @@ bool ApplicationClass::Frame()
 {
 	bool result;
 
-	rotation += (float)D3DX_PI * 0.001f;
+	rotation += Utils::Maths::kPI * 0.001f;
 	if(rotation > 360.0f)
 	{
 		rotation -= 360.0f;
@@ -280,62 +280,63 @@ bool ApplicationClass::Frame()
 
 bool ApplicationClass::HandleInput(float frameTime)
 {
-	bool keyDown, result;
-	float posX, posY, posZ, rotX, rotY, rotZ;
+    bool keyDown, result;
+    float posX, posY, posZ, rotX, rotY, rotZ;
 
 
-	// Set the frame time for calculating the updated position.
-	m_Position->SetFrameTime(frameTime);
+    // Set the frame time for calculating the updated position.
+    m_Position->SetFrameTime(frameTime);
 
-	// Handle the input.
-	keyDown = m_Input->IsLeftPressed();
-	m_Position->TurnLeft(keyDown);
+    // Handle the input.
+    keyDown = m_Input->IsLeftPressed();
+    m_Position->TurnLeft(keyDown);
 
-	keyDown = m_Input->IsRightPressed();
-	m_Position->TurnRight(keyDown);
+    keyDown = m_Input->IsRightPressed();
+    m_Position->TurnRight(keyDown);
 
-	keyDown = m_Input->IsUpPressed();
-	m_Position->MoveForward(keyDown);
+    keyDown = m_Input->IsUpPressed();
+    m_Position->MoveForward(keyDown);
 
-	keyDown = m_Input->IsDownPressed();
-	m_Position->MoveBackward(keyDown);
+    keyDown = m_Input->IsDownPressed();
+    m_Position->MoveBackward(keyDown);
 
-	keyDown = m_Input->IsAPressed();
-	m_Position->MoveUpward(keyDown);
+    keyDown = m_Input->IsAPressed();
+    m_Position->MoveUpward(keyDown);
 
-	keyDown = m_Input->IsZPressed();
-	m_Position->MoveDownward(keyDown);
+    keyDown = m_Input->IsZPressed();
+    m_Position->MoveDownward(keyDown);
 
-	keyDown = m_Input->IsPgUpPressed();
-	m_Position->LookUpward(keyDown);
+    keyDown = m_Input->IsPgUpPressed();
+    m_Position->LookUpward(keyDown);
 
-	keyDown = m_Input->IsPgDownPressed();
-	m_Position->LookDownward(keyDown);
+    keyDown = m_Input->IsPgDownPressed();
+    m_Position->LookDownward(keyDown);
 
-	if(m_Input->IsHPressed())
-	{
-		plane_height -= 0.01;
-	}
-	if(m_Input->IsYPressed())
-	{
-		plane_height += 0.01;
-	}
-	if(m_Input->IsJPressed())
-	{
-		plane_length -= 0.01;
-	}
-	if(m_Input->IsUPressed())
-	{
-		plane_length += 0.01;
-	}
-	
-	// Get the view point position/rotation.
-	m_Position->GetPosition(posX, posY, posZ);
-	m_Position->GetRotation(rotX, rotY, rotZ);
+    if (m_Input->IsHPressed())
+    {
+        plane_height -= 0.01;
+    }
+    if (m_Input->IsYPressed())
+    {
+        plane_height += 0.01;
+    }
+    if (m_Input->IsJPressed())
+    {
+        plane_length -= 0.01;
+    }
+    if (m_Input->IsUPressed())
+    {
+        plane_length += 0.01;
+    }
 
-	// Set the position of the camera.
-	m_Camera->SetPosition(posX, posY, posZ);
-	m_Camera->SetRotation(rotX, rotY, rotZ);
+    // Get the view point position/rotation.
+    m_Position->GetPosition(posX, posY, posZ);
+    m_Position->GetRotation(rotX, rotY, rotZ);
+
+    // Set the position of the camera.
+    m_Camera->SetPosition({ posX, posY, posZ });
+    auto rotation = Utils::Maths::Quaternion::CreateFromYawPitchRoll(rotY, rotX, rotZ);
+    m_Camera->SetRotation(rotation);
 
 	return true;
 }
@@ -343,10 +344,6 @@ bool ApplicationClass::HandleInput(float frameTime)
 
 bool ApplicationClass::RenderGraphics()
 {
-	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
-	bool result;
-
-
 	// Clear the scene.
 	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -354,9 +351,9 @@ bool ApplicationClass::RenderGraphics()
 	m_Camera->Render();
 
 	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetViewMatrix(viewMatrix);
-	m_Direct3D->GetProjectionMatrix(projectionMatrix);
+	auto worldMatrix = m_Direct3D->GetWorldMatrix();
+	auto viewMatrix = m_Camera->GetViewMatrix();
+	auto projectionMatrix = m_Direct3D->GetProjectionMatrix();
 
 	//D3DXMatrixRotationY(&worldMatrix, rotation);
 
@@ -367,7 +364,7 @@ bool ApplicationClass::RenderGraphics()
 	m_Plane->Render(m_Direct3D->GetDeviceContext());
 
 	// Render the Mesh (data being pushed above) using the color shader.
-	result = m_VMShader->Render(m_Direct3D->GetDeviceContext(), m_Plane->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Plane->GetTexture(), m_Light1, plane_height, plane_length);
+	bool result = m_VMShader->Render(m_Direct3D->GetDeviceContext(), m_Plane->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Plane->GetTexture(), m_Light1, plane_height, plane_length);
 	if(!result)
 	{
 		return false;
