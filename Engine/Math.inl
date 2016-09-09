@@ -90,6 +90,15 @@ namespace Utils
             return ConvertFromXMMATRIX(transposeMatrix);
         }
 
+		inline Matrix Matrix::GetInverse()
+		{
+			FXMMATRIX matrix = XMLoadFloat4x4A(this);
+			XMVECTOR determinant = XMMatrixDeterminant(matrix);
+			XMMATRIX inverseMatrix = XMMatrixInverse(&determinant, matrix);
+
+			return ConvertFromXMMATRIX(inverseMatrix);
+		}
+
         /****************************************************************************
         *
         * Vector4 operations
@@ -125,8 +134,9 @@ namespace Utils
         inline Quaternion Quaternion::CreateFromYawPitchRoll(float yaw, float pitch, float roll)
         {
             XMVECTOR quaternionVector = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
+			XMVECTOR normalizedQuaternion = XMVector4Normalize(quaternionVector);
 
-            return XMVECTORtoQuaternion(quaternionVector);
+            return XMVECTORtoQuaternion(normalizedQuaternion);
         }
 
         /****************************************************************************

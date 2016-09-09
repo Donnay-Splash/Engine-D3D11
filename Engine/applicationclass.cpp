@@ -345,7 +345,7 @@ bool ApplicationClass::HandleInput(float frameTime)
 bool ApplicationClass::RenderGraphics()
 {
 	// Clear the scene.
-	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+	m_Direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
 
 	// Generate the view matrix based on the camera's position.
 	m_Camera->Render();
@@ -360,11 +360,8 @@ bool ApplicationClass::RenderGraphics()
 	// Push mesh data onto gfx hardware
 	m_Mesh->Render(m_Direct3D->GetDeviceContext());
 
-	// Push mesh data onto gfx hardware
-	m_Plane->Render(m_Direct3D->GetDeviceContext());
-
 	// Render the Mesh (data being pushed above) using the color shader.
-	bool result = m_VMShader->Render(m_Direct3D->GetDeviceContext(), m_Plane->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Plane->GetTexture(), m_Light1, plane_height, plane_length);
+	bool result = m_VMShader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Plane->GetTexture(), m_Light1, plane_height, plane_length);
 	if(!result)
 	{
 		return false;

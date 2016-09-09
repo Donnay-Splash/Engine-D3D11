@@ -45,6 +45,7 @@ namespace Utils
             static Matrix CreateOrthographicProjectionMatrix(float viewWidth, float viewHeight, float nearClip, float farClip);
             
             Matrix GetTranspose();
+			Matrix GetInverse();
 
         private:
 

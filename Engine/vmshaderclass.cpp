@@ -271,13 +271,6 @@ bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Util
 	LightBufferType* dataPtr2;
 	TimeBufferType* dataPtr3;
 
-
-    // TODO: Evaluate reasons for transposing matrices before use in shaders.
-    // Transpose the matrices to prepare them for the shader.
-    worldMatrix = worldMatrix.GetTranspose();
-    viewMatrix = viewMatrix.GetTranspose();
-    projectionMatrix = projectionMatrix.GetTranspose();
-
 	// Lock the constant buffer so it can be written to.
 	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(result))

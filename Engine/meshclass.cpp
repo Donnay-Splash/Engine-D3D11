@@ -79,10 +79,10 @@ bool MeshClass::InitializeBuffers(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 	// Set the number of vertices in the vertex array.
-	m_vertexCount = 8;
+	m_vertexCount = 3;
 
 	// Set the number of indices in the index array.
-	m_indexCount = 12;
+	m_indexCount = 3;
 
 	// Create the vertex array.
 	vertices = new VertexType[m_vertexCount];
@@ -100,32 +100,23 @@ bool MeshClass::InitializeBuffers(ID3D11Device* device)
 
 	// Load the vertex array with data.
 	//Front Square
-	vertices[0].position = Utils::Maths::Vector3(-1.0f, -1.0f, 0.0f);  // Bottom left.
+	vertices[0].position = Utils::Maths::Vector3(-1.0f, -1.0f, 1.0f);  // Bottom left.
 	vertices[0].texture = Utils::Maths::Vector2(0.0f, 1.0f);
 	vertices[0].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
 
-	vertices[1].position = Utils::Maths::Vector3(-1.0f, 1.0f, 0.0f);  // Top left.
+	vertices[1].position = Utils::Maths::Vector3(0.0f, 1.0f, 1.0f);  // Top left.
 	vertices[1].texture = Utils::Maths::Vector2(0.0f, 0.0f);
 	vertices[1].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
 	
-	vertices[2].position = Utils::Maths::Vector3(1.0f, 1.0f, 0.0f);  // Top right.
+	vertices[2].position = Utils::Maths::Vector3(1.0f, -1.0f, 1.0f);  // bottom right.
 	vertices[2].texture = Utils::Maths::Vector2(1.0f, 0.0f);
 	vertices[2].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
-
-	vertices[3].position = Utils::Maths::Vector3(1.0f, -1.0f, 0.0f);  // Bottom right.
-	vertices[3].texture = Utils::Maths::Vector2(1.0f, 1.0f);
-	vertices[3].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
-
 
 	// Load the index array with data.
 	//front square
 	indices[0] = 0;  // Bottom left.
 	indices[1] = 1;  // Top left.
 	indices[2] = 2;  // Top right.
-
-	indices[3] = 0;	// bottom left
-	indices[4] = 2;	// top right
-	indices[5] = 3;	// bottom right
 
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;

@@ -40,9 +40,8 @@ void CameraClass::Render()
     if (m_dirtyFlag)
     {
         // Since the viewmatrix is composed of only rotations and translations it is orthogonal
-        // thus its inverse which we need for the shader is just its transpose.
         m_viewMatrix = Utils::Maths::Matrix::CreateFromTranslationRotationScale(m_position, m_rotation, 1.0f);
-        m_viewMatrix = m_viewMatrix.GetTranspose();
+        m_viewMatrix = m_viewMatrix.GetInverse();
         m_dirtyFlag = false;
     }
 }

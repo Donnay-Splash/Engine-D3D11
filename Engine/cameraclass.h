@@ -34,6 +34,9 @@ private:
     bool m_dirtyFlag = true;
 	Utils::Maths::Vector3 m_position;
     Utils::Maths::Quaternion m_rotation;
+
+	// Note: Given an identity matrix the camera will be centred at the origin
+	// looking down the positive z axis with up on the y axis
 	Utils::Maths::Matrix m_viewMatrix;
 };
 
