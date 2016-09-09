@@ -1,26 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename: d3dclass.h
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _D3DCLASS_H_
-#define _D3DCLASS_H_
-
-
-/////////////
-// LINKING //
-/////////////
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3d11.lib")
-
+#pragma once
 
 //////////////
 // INCLUDES //
 //////////////
-#include <string>
-
-#include <dxgi.h>
-#include <d3dcommon.h>
-#include <d3d11.h>
-#include "Math.h"
+#include "pch.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: D3DClass
@@ -71,5 +57,3 @@ private:
 	ID3D11BlendState* m_alphaEnableBlendingState;
 	ID3D11BlendState* m_alphaDisableBlendingState;
 };
-
-#endif

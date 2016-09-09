@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "planeclass.h"
 
 PlaneClass::PlaneClass()

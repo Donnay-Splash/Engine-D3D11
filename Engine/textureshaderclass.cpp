@@ -1,6 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: textureshaderclass.cpp
-////////////////////////////////////////////////////////////////////////////////
+#include "pch.h"
 #include "textureshaderclass.h"
 
 // Include compiled shader files
@@ -300,6 +298,3 @@ void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int in
 
 	return;
 }
-
-
-

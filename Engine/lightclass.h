@@ -1,7 +1,6 @@
 #ifndef _LIGHTCLASS_H_
 #define _LIGHTCLASS_H_
 
-#include "Math.h"
 class LightClass
 {
 public:

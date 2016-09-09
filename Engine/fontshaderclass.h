@@ -8,9 +8,7 @@
 //////////////
 // INCLUDES //
 //////////////
-#include <d3d11.h>
 #include <fstream>
-#include "Math.h"
 using namespace std;
 
 

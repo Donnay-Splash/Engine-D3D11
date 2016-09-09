@@ -90,6 +90,12 @@
     <ClCompile Include="Math.cpp">
       <Filter>Utils\Math</Filter>
     </ClCompile>
+    <ClCompile Include="Shaders\CoreShaders.cpp">
+      <Filter>Shader Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h">
@@ -187,6 +193,12 @@
     </ClInclude>
     <ClInclude Include="Shaders\Compiled shaders\texture.vs.h">
       <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\CoreShaders.h">
+      <Filter>Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

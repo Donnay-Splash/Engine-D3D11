@@ -8,7 +8,6 @@
 //////////////
 // INCLUDES //
 //////////////
-#include <d3d11.h>
 #include <fstream>
 using namespace std;
 
@@ -17,7 +16,6 @@ using namespace std;
 // MY CLASS INCLUDES //
 ///////////////////////
 #include "textureclass.h"
-#include "Math.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: FontClass

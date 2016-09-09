@@ -2,10 +2,7 @@
 #define _PLANECLASS_H_
 
 
-#include <d3d11.h>
-#include <math.h>
 #include "meshclass.h"
-#include "Math.h"
 
 class PlaneClass : public MeshClass
 {

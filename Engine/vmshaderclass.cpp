@@ -1,5 +1,5 @@
+#include "pch.h"
 #include "VMShaderClass.h"
-#include "EngineHelpers.h"
 // Include compiled shader files
 namespace VMShader
 {
@@ -88,6 +88,7 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	D3D11_BUFFER_DESC lightBufferDesc;
 
 	// Create the vertex shader from the buffer.
+	// Shader creation should be easier. Load all shaders at start up swap between them using enums
 	result = device->CreateVertexShader(VMShader::g_VSMain, sizeof(VMShader::g_VSMain), NULL, &m_vertexShader);
 	if(FAILED(result))
 	{
@@ -100,6 +101,8 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	{
 		return false;
 	}
+
+	// Input layout creation should be made easier. Use some sort of flag to decide what inputs are included.
 
 	// Create the vertex input layout description.
 	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
@@ -133,6 +136,7 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	// Create the vertex input layout.
 	Utils::ThrowIfFailed(device->CreateInputLayout(polygonLayout, numElements, VMShader::g_VSMain, sizeof(VMShader::g_VSMain), &m_layout));
 
+	// Sampler and blend states should be able to be created easier. Create some defaults at start up and then hand them out.
 	// Create a texture sampler state description.
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -155,6 +159,7 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 		return false;
 	}
 
+	// Constant buffer creation should be kept to no more than two lines.
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
@@ -376,4 +381,3 @@ void VMShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCo
 
 	return;
 }
-

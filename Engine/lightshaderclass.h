@@ -1,9 +1,7 @@
 #ifndef _LIGHTSHADERCLASS_H_
 #define _LIGHTSHADERCLASS_H_
 
-#include <d3d11.h>
 #include <fstream>
-#include "Math.h"
 #include "lightclass.h"
 using namespace std;
 

@@ -1,10 +1,8 @@
 #ifndef _VMSHADERCLASS_H_
 #define _VMSHADERCLASS_H_
 
-#include <d3d11.h>
 #include <fstream>
 using namespace std;
-#include <time.h>
 #include "lightclass.h"
 
 
@@ -41,6 +39,8 @@ public:
 
 	bool Initialize(ID3D11Device*, HWND);
 	void Shutdown();
+
+	// This function should become part of an interface so that all rendering can be done in a single call to multiple objects.
 	bool Render(ID3D11DeviceContext*, int, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, LightClass*, float, float);
 
 private:
@@ -51,15 +51,20 @@ private:
 	void RenderShader(ID3D11DeviceContext*, int);
 
 private:
+	// Create shader pipeline object to manage
+	// shaders and samplers and input layout.
 	ID3D11VertexShader* m_vertexShader;
 	ID3D11PixelShader* m_pixelShader;
 	ID3D11InputLayout* m_layout;
 	ID3D11SamplerState* m_sampleState;
-	ID3D11Buffer* m_matrixBuffer;
 
+	// Need some sort of constant buffer class.
+	// How we manage these internally I am unsure.
+	ID3D11Buffer* m_matrixBuffer;
 	ID3D11Buffer* m_lightBuffer;
 	ID3D11Buffer* m_timeBuffer;
 
+	// This is technique/shader specific.
 	time_t timer;
 	float elapsedTime;
 	float height;

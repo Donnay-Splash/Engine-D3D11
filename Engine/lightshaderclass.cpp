@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "lightshaderclass.h"
 
 // Include compiled shader

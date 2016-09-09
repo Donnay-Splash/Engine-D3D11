@@ -8,10 +8,8 @@
 //////////////
 // INCLUDES //
 //////////////
-#include <d3d11.h>
 #include <fstream>
 #include "textureclass.h"
-#include "Math.h"
 using namespace std;
 
 
