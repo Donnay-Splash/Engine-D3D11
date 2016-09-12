@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <locale.h>
 #include <malloc.h>
+#include <map>
 #include <math.h>
 #include <memory>
 #include <stdarg.h>

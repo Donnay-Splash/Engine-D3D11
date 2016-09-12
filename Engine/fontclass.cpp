@@ -87,14 +87,11 @@ void FontClass::ReleaseFontData()
 
 bool FontClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
-	bool result;
-
-
 	// Create the texture object.
-	m_Texture = std::make_shared<TextureClass>();
+	m_Texture = std::make_shared<Texture>();
 
 	// Initialize the texture object.
-	result = m_Texture->Initialize(device, filename);
+	m_Texture->CreateFromFile(device, filename);
 
 	return true;
 }
@@ -102,7 +99,7 @@ bool FontClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> FontClass::GetTexture()
 {
-	return m_Texture->GetTexture();
+	return m_Texture->GetSRV();
 }
 
 

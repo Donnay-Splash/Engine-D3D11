@@ -55,7 +55,7 @@ int MeshClass::GetIndexCount()
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> MeshClass::GetTexture()
 {
-	return m_Texture->GetTexture();
+	return m_Texture->GetSRV();
 }
 
 bool MeshClass::InitializeBuffers(ID3D11Device* device)
@@ -180,10 +180,10 @@ void MeshClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 bool MeshClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
 	// Create the texture object.
-	m_Texture = std::make_shared<TextureClass>();
+	m_Texture = std::make_shared<Texture>();
 
 	// Initialize the texture object.
-	m_Texture->Initialize(device, filename);
+	m_Texture->CreateFromFile(device, filename);
 
 	return true;
 }

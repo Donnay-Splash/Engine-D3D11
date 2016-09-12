@@ -27,6 +27,7 @@ const float SCREEN_NEAR = 0.1f;
 #include "vmshaderclass.h"
 #include "lightclass.h"
 #include "planeclass.h"
+#include "ShaderManager.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,7 @@ private:
 	std::shared_ptr<PositionClass> m_Position;
 	std::shared_ptr<MeshClass> m_Mesh;
 	std::shared_ptr<PlaneClass> m_Plane;
+	ShaderManager::Ptr m_shaderManager;
 };
 
 #endif

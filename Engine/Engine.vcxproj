@@ -133,9 +133,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="applicationclass.cpp" />
+    <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="cameraclass.cpp" />
     <ClCompile Include="cpuclass.cpp" />
     <ClCompile Include="d3dclass.cpp" />
+    <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="fontclass.cpp" />
     <ClCompile Include="fontshaderclass.cpp" />
     <ClCompile Include="fpsclass.cpp" />
@@ -143,6 +145,7 @@
     <ClCompile Include="lightclass.cpp" />
     <ClCompile Include="lightshaderclass.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="meshclass.cpp" />
     <ClCompile Include="pch.cpp">
@@ -157,20 +160,26 @@
     </ClCompile>
     <ClCompile Include="planeclass.cpp" />
     <ClCompile Include="positionclass.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Shaders\CoreShaders.cpp" />
     <ClCompile Include="systemclass.cpp" />
     <ClCompile Include="terrainclass.cpp" />
     <ClCompile Include="textclass.cpp" />
-    <ClCompile Include="textureclass.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="textureshaderclass.cpp" />
     <ClCompile Include="timerclass.cpp" />
     <ClCompile Include="vmshaderclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h" />
+    <ClInclude Include="BlendState.h" />
     <ClInclude Include="cameraclass.h" />
+    <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="cpuclass.h" />
     <ClInclude Include="d3dclass.h" />
+    <ClInclude Include="DepthBuffer.h" />
     <ClInclude Include="EngineHelpers.h" />
     <ClInclude Include="fontclass.h" />
     <ClInclude Include="fontshaderclass.h" />
@@ -178,11 +187,14 @@
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="lightclass.h" />
     <ClInclude Include="lightshaderclass.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="meshclass.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="planeclass.h" />
     <ClInclude Include="positionclass.h" />
+    <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="Shaders\Compiled shaders\color.ps.h" />
     <ClInclude Include="Shaders\Compiled shaders\color.vs.h" />
     <ClInclude Include="Shaders\Compiled shaders\font.ps.h" />
@@ -197,7 +209,7 @@
     <ClInclude Include="systemclass.h" />
     <ClInclude Include="terrainclass.h" />
     <ClInclude Include="textclass.h" />
-    <ClInclude Include="textureclass.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="textureshaderclass.h" />
     <ClInclude Include="timerclass.h" />
     <ClInclude Include="vmshaderclass.h" />

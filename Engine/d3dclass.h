@@ -38,6 +38,7 @@ private:
 	std::string m_videoCardDescription;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> m_swapChain;
 	Microsoft::WRL::ComPtr<ID3D11Device> m_device;
+	Microsoft::WRL::ComPtr<ID3D11Debug> m_debugDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTargetView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_depthStencilBuffer;

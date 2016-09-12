@@ -28,6 +28,7 @@ D3DClass::D3DClass(const D3DClass& other)
 
 D3DClass::~D3DClass()
 {
+	m_debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_FLAGS::D3D11_RLDO_DETAIL);
 }
 
 
@@ -211,12 +212,11 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
     UINT creationFlags = D3D11_CREATE_DEVICE_DEBUG;
 
 	// Create the swap chain, Direct3D device, and Direct3D device context.
-	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, creationFlags, featureLevelsSupported, ARRAYSIZE(featureLevelsSupported),
-										   D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
-	if(FAILED(result))
-	{
-		return false;
-	}
+	Utils::ThrowIfFailed(D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, creationFlags, featureLevelsSupported, ARRAYSIZE(featureLevelsSupported),
+		D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext));
+
+	// Query the debug device from the device
+	Utils::ThrowIfFailed(m_device.As(&m_debugDevice));
 
 	// Get the pointer to the back buffer.
 	result = m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBufferPtr));

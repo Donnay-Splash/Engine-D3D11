@@ -15,7 +15,7 @@ using namespace std;
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
-#include "textureclass.h"
+#include "Texture.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: FontClass
@@ -54,7 +54,7 @@ private:
 private:
 	static const int kCharacterCount = 95;
 	std::array<FontType, kCharacterCount> m_Font;
-	std::shared_ptr<TextureClass> m_Texture;
+	std::shared_ptr<Texture> m_Texture;
 };
 
 #endif

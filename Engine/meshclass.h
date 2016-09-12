@@ -8,7 +8,7 @@
 //////////////
 // INCLUDES //
 //////////////
-#include "textureclass.h"
+#include "Texture.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: MeshClass
@@ -39,7 +39,7 @@ private:
 	bool InitializeBuffers(ID3D11Device*);
 	void RenderBuffers(ID3D11DeviceContext*);
 	
-	std::shared_ptr<TextureClass> m_Texture;
+	std::shared_ptr<Texture> m_Texture;
 	
 protected:	
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;

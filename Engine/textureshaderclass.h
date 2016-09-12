@@ -9,7 +9,7 @@
 // INCLUDES //
 //////////////
 #include <fstream>
-#include "textureclass.h"
+#include "Texture.h"
 using namespace std;
 
 
@@ -25,7 +25,7 @@ private:
         Utils::Maths::Matrix view;
         Utils::Maths::Matrix projection;
 	};
-	TextureClass* text;
+	Texture* text;
 
 public:
 	TextureShaderClass();

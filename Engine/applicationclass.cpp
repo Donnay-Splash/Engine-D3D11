@@ -112,6 +112,9 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	// Set the initial position of the viewer to the same as the initial camera position.
 	m_Position->SetPosition(0.0f, 0.0f, -10.0f);
 
+	// Initialise the shader manager
+	m_shaderManager = std::make_shared<ShaderManager>(m_Direct3D->GetDevice());
+
 	return true;
 }
 

@@ -33,8 +33,8 @@ bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 	bool result;
 	
 	// Initialize the vertex and pixel shaders.
-	text = new TextureClass;
-	text->Initialize(device, L"data/stone_wall.dds");
+	text = new Texture;
+	text->CreateFromFile(device, L"data/stone_wall.dds");
 	result = InitializeShader(device, hwnd, L"texture.vs", L"texture.ps");
 	if(!result)
 	{
@@ -237,7 +237,7 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	unsigned int bufferNumber;
 	
 	ID3D11ShaderResourceView* texture2;
-	texture2 = text->GetTexture().Get();
+	texture2 = text->GetSRV().Get();
 
 	//generate MipMaps
 	deviceContext->GenerateMips(texture);
