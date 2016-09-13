@@ -102,9 +102,6 @@
     <ClCompile Include="meshclass.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Source Files\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
@@ -125,6 +122,15 @@
     </ClCompile>
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputLayout.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderPipeline.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Source Files\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -227,9 +233,6 @@
     <ClInclude Include="meshclass.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Header Files\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="BlendState.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
@@ -247,6 +250,15 @@
     </ClInclude>
     <ClInclude Include="ShaderManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputLayout.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderPipeline.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -142,6 +142,7 @@
     <ClCompile Include="fontshaderclass.cpp" />
     <ClCompile Include="fpsclass.cpp" />
     <ClCompile Include="inputclass.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="lightclass.cpp" />
     <ClCompile Include="lightshaderclass.cpp" />
     <ClCompile Include="main.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="positionclass.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShaderPipeline.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Shaders\CoreShaders.cpp" />
     <ClCompile Include="systemclass.cpp" />
@@ -176,6 +178,8 @@
     <ClInclude Include="applicationclass.h" />
     <ClInclude Include="BlendState.h" />
     <ClInclude Include="cameraclass.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="InputLayout.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="cpuclass.h" />
     <ClInclude Include="d3dclass.h" />
@@ -194,7 +198,7 @@
     <ClInclude Include="planeclass.h" />
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="RenderTarget.h" />
-    <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderPipeline.h" />
     <ClInclude Include="Shaders\Compiled shaders\color.ps.h" />
     <ClInclude Include="Shaders\Compiled shaders\color.vs.h" />
     <ClInclude Include="Shaders\Compiled shaders\font.ps.h" />

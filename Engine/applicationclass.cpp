@@ -48,6 +48,9 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
         return false;
     }
 
+	// Initialise the shader manager
+	m_shaderManager = std::make_shared<ShaderManager>(m_Direct3D->GetDevice());
+
     // Create the camera object.
     m_Camera = std::make_shared<CameraClass>();
 
@@ -88,7 +91,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	m_VMShader = std::make_shared<VMShaderClass>();
 
 	// Initialize the color shader object.
-	result = m_VMShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	result = m_VMShader->Initialize(m_Direct3D->GetDevice(), m_shaderManager, hwnd);
 	if(!result)
 	{
 		MessageBox(hwnd, "Could not initialize the texture shader object.", "Error", MB_OK);
@@ -111,9 +114,6 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 
 	// Set the initial position of the viewer to the same as the initial camera position.
 	m_Position->SetPosition(0.0f, 0.0f, -10.0f);
-
-	// Initialise the shader manager
-	m_shaderManager = std::make_shared<ShaderManager>(m_Direct3D->GetDevice());
 
 	return true;
 }

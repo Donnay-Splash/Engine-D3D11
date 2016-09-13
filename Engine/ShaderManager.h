@@ -1,18 +1,12 @@
 #pragma once
 
 #include "pch.h"
+#include "ShaderPipeline.h"
 
 // TODO: Come up with a better sounding name
 enum class ShaderName
 {
 	VertexManipulation = 0
-};
-
-struct ShaderBundle
-{
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> VertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> PixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> InputLayout;
 };
 
 class ShaderManager
@@ -24,11 +18,13 @@ public:
 	// so that it can set this up without having to pass too much shit around.
 	ShaderManager(ID3D11Device* device);
 
-	ShaderBundle GetShaderBundle(ShaderName);
+	ShaderPipeline::Ptr GetShaderPipeline(ShaderName);
 private:
+	using ShaderMap = std::map<ShaderName, ShaderPipeline::Ptr>;
+	using ShaderMapObject = ShaderMap::value_type;
 	void LoadCoreShaders(ID3D11Device* device);
 
 private:
-	std::map<ShaderName, ShaderBundle> m_shaderMap;
+	ShaderMap m_shaderMap;
 };
 

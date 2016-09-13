@@ -1,10 +1,9 @@
-#ifndef _VMSHADERCLASS_H_
-#define _VMSHADERCLASS_H_
+#pragma once
 
 #include <fstream>
 using namespace std;
 #include "lightclass.h"
-
+#include "ShaderManager.h"
 
 class VMShaderClass
 {
@@ -37,14 +36,14 @@ public:
 	VMShaderClass(const VMShaderClass&);
 	~VMShaderClass();
 
-	bool Initialize(ID3D11Device*, HWND);
+	bool Initialize(ID3D11Device*, ShaderManager::Ptr shaderManager, HWND);
 	void Shutdown();
 
 	// This function should become part of an interface so that all rendering can be done in a single call to multiple objects.
 	bool Render(ID3D11DeviceContext*, int, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, LightClass*, float, float);
 
 private:
-	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	bool InitializeShader(ID3D11Device*, ShaderManager::Ptr shaderManager, HWND, WCHAR*, WCHAR*);
 	void ShutdownShader();
 
 	bool SetShaderParameters(ID3D11DeviceContext*, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, LightClass*);
@@ -53,9 +52,7 @@ private:
 private:
 	// Create shader pipeline object to manage
 	// shaders and samplers and input layout.
-	ID3D11VertexShader* m_vertexShader;
-	ID3D11PixelShader* m_pixelShader;
-	ID3D11InputLayout* m_layout;
+	ShaderPipeline::Ptr m_vmShaderPipeline;
 	ID3D11SamplerState* m_sampleState;
 
 	// Need some sort of constant buffer class.
@@ -71,4 +68,3 @@ private:
 	float length;
 };
 
-#endif
