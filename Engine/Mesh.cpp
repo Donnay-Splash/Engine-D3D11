@@ -18,64 +18,6 @@ void Mesh::Render(ID3D11DeviceContext* deviceContext)
     return;
 }
 
-//bool Mesh::InitializeBuffers(ID3D11Device* device)
-//{
-//    VertexType* vertices;
-//    unsigned long* indices;
-//    // Set the number of vertices in the vertex array.
-//    m_vertexCount = 3;
-//
-//    // Set the number of indices in the index array.
-//    m_indexCount = 3;
-//
-//    // Create the vertex array.
-//    vertices = new VertexType[m_vertexCount];
-//    if(!vertices)
-//    {
-//        return false;
-//    }
-//
-//    // Create the index array.
-//    indices = new unsigned long[m_indexCount];
-//    if(!indices)
-//    {
-//        return false;
-//    }
-//
-//    // Load the vertex array with data.
-//    //Front Square
-//    vertices[0].position = Utils::Maths::Vector3(-1.0f, -1.0f, 1.0f);  // Bottom left.
-//    vertices[0].texture = Utils::Maths::Vector2(0.0f, 1.0f);
-//    vertices[0].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
-//
-//    vertices[1].position = Utils::Maths::Vector3(0.0f, 1.0f, 1.0f);  // Top left.
-//    vertices[1].texture = Utils::Maths::Vector2(0.0f, 0.0f);
-//    vertices[1].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
-//    
-//    vertices[2].position = Utils::Maths::Vector3(1.0f, -1.0f, 1.0f);  // bottom right.
-//    vertices[2].texture = Utils::Maths::Vector2(1.0f, 0.0f);
-//    vertices[2].normal = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
-//
-//    // Load the index array with data.
-//    //front square
-//    indices[0] = 0;  // Bottom left.
-//    indices[1] = 1;  // Top left.
-//    indices[2] = 2;  // Top right.
-//
-//    m_vertexBuffer = std::make_shared<VertexBuffer>(vertices, m_vertexCount, sizeof(VertexType), device);
-//
-//    m_indexBuffer = std::make_shared<IndexBuffer>(indices, m_indexCount, device);
-//
-//    // Release the arrays now that the vertex and index buffers have been created and loaded.
-//    delete [] vertices;
-//    vertices = 0;
-//
-//    delete [] indices;
-//    indices = 0;
-//
-//    return true;
-//}
-
 void Mesh::RenderBuffers(ID3D11DeviceContext* deviceContext)
 {
     UINT index = 0;
