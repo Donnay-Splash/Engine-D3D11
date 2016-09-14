@@ -34,6 +34,9 @@
     <Filter Include="Source Files\Scene\Components">
       <UniqueIdentifier>{328841de-261a-4643-9525-be6501290d8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils\MeshMaker">
+      <UniqueIdentifier>{4ebca92c-4aef-4728-9c4a-f1ce48f2f8c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="applicationclass.cpp">
@@ -137,6 +140,9 @@
     </ClCompile>
     <ClCompile Include="IndexBuffer.cpp">
       <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshMaker.cpp">
+      <Filter>Utils\MeshMaker</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -271,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="IndexBuffer.h">
       <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshMaker.h">
+      <Filter>Utils\MeshMaker</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -21,6 +21,7 @@ public:
 
 
 public:
+    using Ptr = std::shared_ptr<Mesh>;
     Mesh();
     Mesh(const Mesh&) = delete;
     ~Mesh();

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "applicationclass.h"
-
+#include "MeshMaker.h"
 
 ApplicationClass::ApplicationClass()
 {
@@ -55,7 +55,8 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     m_Camera = std::make_shared<CameraClass>();
 
     // Initialize a base view matrix with the camera for 2D user interface rendering.
-    m_Camera->SetPosition({ 0.0f, 0.0f, -10.0f });
+    m_Camera->SetPosition({ 0.0f, 0.0f, 10.0f });
+    m_Camera->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(3.14f, 0.0f, 0.0f));
     m_Camera->Render();
     baseViewMatrix = m_Camera->GetViewMatrix();
 
@@ -68,39 +69,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     //m_Light1->SetSpecularPower(1.0f);
 
     // Create Mesh object
-    m_Mesh = std::make_shared<Mesh>();
-    
-    // TODO: Move to MeshGenerator helper class.
-    // Initialise the mesh object
-    // Load the vertex array with data.
-    Mesh::PositionContainer m_positions(3);
-    Mesh::NormalContainer m_normals(3);
-    Mesh::UVContainer m_uvs(3);
-    Mesh::IndexContainer m_indices(3);
-    //    //Front Square
-    m_positions[0] = Utils::Maths::Vector3(-1.0f, -1.0f, 1.0f);  // Bottom left.
-    m_uvs[0] = Utils::Maths::Vector2(0.0f, 1.0f);
-    m_normals[0] = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
-    
-    m_positions[1] = Utils::Maths::Vector3(0.0f, 1.0f, 1.0f);  // Top left.
-    m_uvs[1] = Utils::Maths::Vector2(0.0f, 0.0f);
-    m_normals[1] = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
-    
-    m_positions[2] = Utils::Maths::Vector3(1.0f, -1.0f, 1.0f);  // bottom right.
-    m_uvs[2] = Utils::Maths::Vector2(1.0f, 0.0f);
-    m_normals[2] = Utils::Maths::Vector3(0.0f, 0.0f, -1.0f);
-    
-    // Load the index array with data.
-    //front square
-    m_indices[0] = 0;  // Bottom left.
-    m_indices[1] = 1;  // Top left.
-    m_indices[2] = 2;  // Top right.
-
-    m_Mesh->SetPositions(m_positions);
-    m_Mesh->SetNormals(m_normals);
-    m_Mesh->SetUVs(m_uvs);
-    m_Mesh->SetIndices(m_indices);
-    m_Mesh->FinaliseMesh(m_Direct3D->GetDevice());
+    m_Mesh = Utils::MeshMaker::CreateCube(m_Direct3D->GetDevice());
 
     // Create the color shader object.
     m_VMShader = std::make_shared<VMShaderClass>();
@@ -241,7 +210,7 @@ bool ApplicationClass::HandleInput(float frameTime)
 
     // Set the position of the camera.
     m_Camera->SetPosition({ posX, posY, posZ });
-    auto rotation = Utils::Maths::Quaternion::CreateFromYawPitchRoll(rotY, rotX, rotZ);
+    auto rotation = Utils::Maths::Quaternion::CreateFromYawPitchRoll(Utils::Maths::DegreesToRadians(rotY), Utils::Maths::DegreesToRadians(rotX), Utils::Maths::DegreesToRadians(rotZ));
     m_Camera->SetRotation(rotation);
 
     return true;

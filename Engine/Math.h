@@ -113,6 +113,9 @@ namespace Utils
             static Color FromARGB(uint32_t argb);
             static Color FromABGR(uint32_t abgr);
         };
+
+        inline float DegreesToRadians(float degrees) { return degrees * (kPI / 180.0f); }
+        inline float RadiansToDegrees(float radians) { return radians * (180.0f / kPI); }
         
     }// End namespace Maths
 } // End namespace Utils
