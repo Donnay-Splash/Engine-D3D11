@@ -23,7 +23,7 @@ const float SCREEN_NEAR = 0.1f;
 #include "textureshaderclass.h"
 #include "timerclass.h"
 #include "positionclass.h"
-#include "meshclass.h"
+#include "Mesh.h"
 #include "vmshaderclass.h"
 #include "lightclass.h"
 #include "planeclass.h"
@@ -59,8 +59,7 @@ private:
 	std::shared_ptr<LightClass> m_Light1;
 	std::shared_ptr<TimerClass> m_Timer;
 	std::shared_ptr<PositionClass> m_Position;
-	std::shared_ptr<MeshClass> m_Mesh;
-	std::shared_ptr<PlaneClass> m_Plane;
+	std::shared_ptr<Mesh> m_Mesh;
 	ShaderManager::Ptr m_shaderManager;
 };
 

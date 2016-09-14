@@ -99,9 +99,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="meshclass.cpp">
-      <Filter>Source Files\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
@@ -130,6 +127,15 @@
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -230,9 +236,6 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="meshclass.h">
-      <Filter>Header Files\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="BlendState.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
@@ -258,6 +261,15 @@
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBuffer.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
   </ItemGroup>

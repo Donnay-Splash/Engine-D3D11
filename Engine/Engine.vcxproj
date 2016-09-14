@@ -141,6 +141,7 @@
     <ClCompile Include="fontclass.cpp" />
     <ClCompile Include="fontshaderclass.cpp" />
     <ClCompile Include="fpsclass.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="lightclass.cpp" />
@@ -148,7 +149,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
-    <ClCompile Include="meshclass.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.h</PrecompiledHeaderFile>
@@ -172,12 +173,14 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="textureshaderclass.cpp" />
     <ClCompile Include="timerclass.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="vmshaderclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h" />
     <ClInclude Include="BlendState.h" />
     <ClInclude Include="cameraclass.h" />
+    <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -193,7 +196,7 @@
     <ClInclude Include="lightshaderclass.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
-    <ClInclude Include="meshclass.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="planeclass.h" />
     <ClInclude Include="positionclass.h" />
@@ -216,6 +219,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="textureshaderclass.h" />
     <ClInclude Include="timerclass.h" />
+    <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="vmshaderclass.h" />
   </ItemGroup>
   <ItemGroup>
