@@ -31,7 +31,7 @@ void Shader::ValidateInputSignature(InputLayout::Ptr inputLayout, ID3D11Device* 
 	device->CreateInputLayout(inputLayout->m_inputElements.data(), numElements, m_shaderCode, m_shaderLength, inputLayout->m_inputLayout.GetAddressOf());
 }
 
-void Shader::SetData(ID3D11DeviceContext* deviceContext)
+void Shader::UploadData(ID3D11DeviceContext* deviceContext)
 {
 	switch (m_type)
 	{

@@ -90,14 +90,50 @@ namespace Utils
             return ConvertFromXMMATRIX(transposeMatrix);
         }
 
-		inline Matrix Matrix::GetInverse()
-		{
-			FXMMATRIX matrix = XMLoadFloat4x4A(this);
-			XMVECTOR determinant = XMMatrixDeterminant(matrix);
-			XMMATRIX inverseMatrix = XMMatrixInverse(&determinant, matrix);
+        inline Matrix Matrix::GetInverse()
+        {
+            FXMMATRIX matrix = XMLoadFloat4x4A(this);
+            XMVECTOR determinant = XMMatrixDeterminant(matrix);
+            XMMATRIX inverseMatrix = XMMatrixInverse(&determinant, matrix);
 
-			return ConvertFromXMMATRIX(inverseMatrix);
-		}
+            return ConvertFromXMMATRIX(inverseMatrix);
+        }
+
+        inline bool Matrix::operator == (const Matrix& rhs) const
+        {
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&_11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&_21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&_31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&_41));
+
+            XMVECTOR y1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&rhs._11));
+            XMVECTOR y2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&rhs._21));
+            XMVECTOR y3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&rhs._31));
+            XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&rhs._41));
+
+            return (XMVector4Equal(x1, y1)
+                && XMVector4Equal(x2, y2)
+                && XMVector4Equal(x3, y3)
+                && XMVector4Equal(x4, y4)) != 0;
+        }
+
+        inline bool Matrix::operator != (const Matrix& rhs) const
+        {
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&_11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&_21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&_31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&_41));
+
+            XMVECTOR y1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&rhs._11));
+            XMVECTOR y2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&rhs._21));
+            XMVECTOR y3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&rhs._31));
+            XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&rhs._41));
+
+            return (XMVector4NotEqual(x1, y1)
+                || XMVector4NotEqual(x2, y2)
+                || XMVector4NotEqual(x3, y3)
+                || XMVector4NotEqual(x4, y4)) != 0;
+        }
 
         /****************************************************************************
         *
@@ -105,17 +141,65 @@ namespace Utils
         *
         ****************************************************************************/
 
+        inline bool Vector4::operator == (const Vector4& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat4(this);
+            XMVECTOR rhsVector = XMLoadFloat4(&rhs);
+
+            return XMVector4Equal(thisVector, rhsVector);
+        }
+
+        inline bool Vector4::operator != (const Vector4& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat4(this);
+            XMVECTOR rhsVector = XMLoadFloat4(&rhs);
+
+            return XMVector4NotEqual(thisVector, rhsVector);
+        }
+
         /****************************************************************************
         *
         * Vector3 operations
         *
         ****************************************************************************/
 
+        inline bool Vector3::operator == (const Vector3& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat3(this);
+            XMVECTOR rhsVector = XMLoadFloat3(&rhs);
+
+            return XMVector3Equal(thisVector, rhsVector);
+        }
+
+        inline bool Vector3::operator != (const Vector3& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat3(this);
+            XMVECTOR rhsVector = XMLoadFloat3(&rhs);
+
+            return XMVector3NotEqual(thisVector, rhsVector);
+        }
+
         /****************************************************************************
         *
         * Vector2 operations
         *
         ****************************************************************************/
+
+        inline bool Vector2::operator == (const Vector2& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat2(this);
+            XMVECTOR rhsVector = XMLoadFloat2(&rhs);
+
+            return XMVector3Equal(thisVector, rhsVector);
+        }
+
+        inline bool Vector2::operator != (const Vector2& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat2(this);
+            XMVECTOR rhsVector = XMLoadFloat2(&rhs);
+
+            return XMVector2NotEqual(thisVector, rhsVector);
+        }
 
         /****************************************************************************
         *
@@ -134,9 +218,25 @@ namespace Utils
         inline Quaternion Quaternion::CreateFromYawPitchRoll(float yaw, float pitch, float roll)
         {
             XMVECTOR quaternionVector = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
-			XMVECTOR normalizedQuaternion = XMVector4Normalize(quaternionVector);
+            XMVECTOR normalizedQuaternion = XMVector4Normalize(quaternionVector);
 
             return XMVECTORtoQuaternion(normalizedQuaternion);
+        }
+
+        inline bool Quaternion::operator == (const Quaternion& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat4(this);
+            XMVECTOR rhsVector = XMLoadFloat4(&rhs);
+
+            return XMVector4Equal(thisVector, rhsVector);
+        }
+
+        inline bool Quaternion::operator != (const Quaternion& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat4(this);
+            XMVECTOR rhsVector = XMLoadFloat4(&rhs);
+
+            return XMVector4NotEqual(thisVector, rhsVector);
         }
 
         /****************************************************************************
@@ -192,6 +292,22 @@ namespace Utils
             uint8_t r = static_cast<uint8_t>(abgr >> 0);
 
             return Color(r, g, b, a);
+        }
+
+        inline bool Color::operator == (const Color& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat4(this);
+            XMVECTOR rhsVector = XMLoadFloat4(&rhs);
+
+            return XMVector4Equal(thisVector, rhsVector);
+        }
+
+        inline bool Color::operator != (const Color& rhs) const
+        {
+            XMVECTOR thisVector = XMLoadFloat4(this);
+            XMVECTOR rhsVector = XMLoadFloat4(&rhs);
+
+            return XMVector4NotEqual(thisVector, rhsVector);
         }
 
     } // end namespace Maths

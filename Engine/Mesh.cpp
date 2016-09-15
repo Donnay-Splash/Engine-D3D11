@@ -27,25 +27,25 @@ void Mesh::RenderBuffers(ID3D11DeviceContext* deviceContext)
     {
         // If the mesh has been finalised the position buffer should not be empty.
         EngineAssert(m_positionBuffer != nullptr);
-        m_positionBuffer->SetData(deviceContext, index, 0);
+        m_positionBuffer->UploadData(deviceContext, index, 0);
         index++;
     }
     if (HasNormals())
     {
         // If the mesh has been finalised the normal buffer should not be empty.
         EngineAssert(m_normalBuffer != nullptr);
-        m_normalBuffer->SetData(deviceContext, index, 0);
+        m_normalBuffer->UploadData(deviceContext, index, 0);
         index++;
     }
     if (HasUVs())
     {
         // If the mesh has been finalised the UV buffer should not be empty.
         EngineAssert(m_uvBuffer != nullptr);
-        m_uvBuffer->SetData(deviceContext, index, 0);
+        m_uvBuffer->UploadData(deviceContext, index, 0);
         index++;
     }
 
-    m_indexBuffer->SetData(deviceContext);
+    m_indexBuffer->UploadData(deviceContext);
 
     // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

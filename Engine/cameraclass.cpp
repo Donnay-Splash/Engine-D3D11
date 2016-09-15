@@ -21,7 +21,7 @@ void CameraClass::SetPosition(Utils::Maths::Vector3 position)
 {
     m_position = position;
     m_dirtyFlag = true;
-	return;
+    return;
 }
 
 
@@ -29,7 +29,7 @@ void CameraClass::SetRotation(Utils::Maths::Quaternion rotation)
 {
     m_rotation = rotation;
     m_dirtyFlag = true;
-	return;
+    return;
 }
 
 

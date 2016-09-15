@@ -1,11 +1,7 @@
 #include "pch.h"
 #include "VMShaderClass.h"
+#include "ConstantBuffer.h"
 // Include compiled shader files
-namespace VMShader
-{
-#include "Shaders\Compiled shaders\manipulation.ps.h"
-#include "Shaders\Compiled shaders\manipulation.vs.h"
-}
 
 VMShaderClass::VMShaderClass()
 {
@@ -15,8 +11,8 @@ VMShaderClass::VMShaderClass()
     m_lightBuffer = 0;
     m_timeBuffer = 0;
 
-    timer = 0;
-    elapsedTime = 0;
+    m_timer = 0;
+    m_elapsedTime = 0;
 }
 
 VMShaderClass::VMShaderClass(const VMShaderClass& other)
@@ -29,12 +25,12 @@ VMShaderClass::~VMShaderClass()
 }
 
 
-bool VMShaderClass::Initialize(ID3D11Device* device, ShaderManager::Ptr shaderManager, HWND hwnd)
+bool VMShaderClass::Initialize(ID3D11Device* device, ShaderManager::Ptr shaderManager)
 {
     bool result;
 
     // Initialize the vertex and pixel shaders.
-    result = InitializeShader(device, shaderManager, hwnd, L"manipulation.vs", L"manipulation.ps");
+    result = InitializeShader(device, shaderManager);
     if(!result)
     {
         return false;
@@ -57,8 +53,8 @@ bool VMShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, U
 {
     bool result;
 
-    height = height_in;
-    length = length_in;
+    m_height = height_in;
+    m_length = length_in;
     // Set the shader parameters that it will use for rendering.
     result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, mlight);
     if(!result)
@@ -73,14 +69,11 @@ bool VMShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, U
 }
 
 
-bool VMShaderClass::InitializeShader(ID3D11Device* device, ShaderManager::Ptr shaderManager, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+bool VMShaderClass::InitializeShader(ID3D11Device* device, ShaderManager::Ptr shaderManager)
 {
     HRESULT result;
 
     D3D11_SAMPLER_DESC samplerDesc;
-    D3D11_BUFFER_DESC matrixBufferDesc;
-    D3D11_BUFFER_DESC timeBufferDesc;
-    D3D11_BUFFER_DESC lightBufferDesc;
 
     m_vmShaderPipeline = shaderManager->GetShaderPipeline(ShaderName::VertexManipulation);
 
@@ -107,52 +100,9 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, ShaderManager::Ptr sh
         return false;
     }
 
-    // Constant buffer creation should be kept to no more than two lines.
-    // Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
-    matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-    matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    matrixBufferDesc.MiscFlags = 0;
-    matrixBufferDesc.StructureByteStride = 0;
-
-    // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-    result = device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-    if(FAILED(result))
-    {
-        return false;
-    }
-
-    // Setup the description of the camera dynamic constant buffer that is in the vertex shader.
-    timeBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    timeBufferDesc.ByteWidth = sizeof(TimeBufferType);
-    timeBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    timeBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    timeBufferDesc.MiscFlags = 0;
-    timeBufferDesc.StructureByteStride = 0;
-
-    // Create the camera constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-    result = device->CreateBuffer(&timeBufferDesc, NULL, &m_timeBuffer);
-    if(FAILED(result))
-    {
-        return false;
-    }
-
-    // Setup the description of the light dynamic constant buffer that is in the pixel shader.
-    // Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
-    lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    lightBufferDesc.ByteWidth = sizeof(LightBufferType);
-    lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    lightBufferDesc.MiscFlags = 0;
-    lightBufferDesc.StructureByteStride = 0;
-
-    // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-    result = device->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
-    if(FAILED(result))
-    {
-        return false;
-    }
+    m_matrixBuffer = std::make_shared<ConstantBuffer<MatrixBuffer>>(0, PipelineStage::Vertex, device);
+    m_timeBuffer = std::make_shared<ConstantBuffer<TimeBuffer>>(1, PipelineStage::Vertex, device);
+    m_lightBuffer = std::make_shared<ConstantBuffer<LightBuffer>>(0, PipelineStage::Pixel, device);
 
     return true;
 }
@@ -160,28 +110,6 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, ShaderManager::Ptr sh
 
 void VMShaderClass::ShutdownShader()
 {
-
-        // Release the light constant buffer.
-    if(m_lightBuffer)
-    {
-        m_lightBuffer->Release();
-        m_lightBuffer = 0;
-    }
-
-    // Release the camera constant buffer.
-    if(m_timeBuffer)
-    {
-        m_timeBuffer->Release();
-        m_timeBuffer = 0;
-    }
-
-    // Release the matrix constant buffer.
-    if(m_matrixBuffer)
-    {
-        m_matrixBuffer->Release();
-        m_matrixBuffer = 0;
-    }
-
     // Release the sampler state.
     if(m_sampleState)
     {
@@ -196,95 +124,24 @@ void VMShaderClass::ShutdownShader()
 bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Utils::Maths::Matrix worldMatrix, Utils::Maths::Matrix viewMatrix,
     Utils::Maths::Matrix projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light)
 {
-    HRESULT result;
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
-    unsigned int bufferNumber;
-    MatrixBufferType* dataPtr;
-    LightBufferType* dataPtr2;
-    TimeBufferType* dataPtr3;
+    MatrixBuffer matrixData{ worldMatrix, viewMatrix, projectionMatrix };
+    m_matrixBuffer->SetData(matrixData);
+    m_matrixBuffer->UploadData(deviceContext);
 
-    // Lock the constant buffer so it can be written to.
-    result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-    if(FAILED(result))
-    {
-        return false;
-    }
+    time_t prevTime = m_timer;
+    time(&m_timer);  /* get current time; same as: timer = time(NULL)  */
+    m_elapsedTime += 0.1f;
 
-    // Get a pointer to the data in the constant buffer.
-    dataPtr = (MatrixBufferType*)mappedResource.pData;
+    TimeBuffer timeData{ m_elapsedTime, m_height, m_length };
+    m_timeBuffer->SetData(timeData);
+    m_timeBuffer->UploadData(deviceContext);
 
-    // Copy the matrices into the constant buffer.
-    dataPtr->world = worldMatrix;
-    dataPtr->view = viewMatrix;
-    dataPtr->projection = projectionMatrix;
-
-    // Unlock the constant buffer.
-    deviceContext->Unmap(m_matrixBuffer, 0);
-
-    // Set the position of the constant buffer in the vertex shader.
-    bufferNumber = 0;
-
-    // Now set the constant buffer in the vertex shader with the updated values.
-    deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
-
-    // Lock the time constant buffer so it can be written to.
-    result = deviceContext->Map(m_timeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-    if(FAILED(result))
-    {
-        return false;
-    }
-
-    // Get a pointer to the data in the constant buffer.
-    dataPtr3 = (TimeBufferType*)mappedResource.pData;
-
-    time_t prevTime;
-
-    prevTime = timer;
-    time(&timer);  /* get current time; same as: timer = time(NULL)  */
-    elapsedTime += 0.1f;
-
-    // Copy the camera position into the constant buffer.
-    dataPtr3->time = elapsedTime;
-    dataPtr3->height = height;
-    dataPtr3->length = length;
-    //dataPtr3->padding = 0.0f;
-
-    // Unlock the time constant buffer.
-    deviceContext->Unmap(m_timeBuffer, 0);
-
-    // Set the position of the camera constant buffer in the vertex shader.
-    bufferNumber = 1;
-
-    // Now set the camera constant buffer in the vertex shader with the updated values.
-    deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_timeBuffer);
+    LightBuffer lightData{ light->GetAmbientColor(), light->GetDiffuseColor(), light->GetDirection() };
+    m_lightBuffer->SetData(lightData);
+    m_lightBuffer->UploadData(deviceContext);
 
     // Set shader texture resource in the pixel shader.
     deviceContext->PSSetShaderResources(0, 1, &texture);
-
-    // Lock the light constant buffer so it can be written to.
-    result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-    if(FAILED(result))
-    {
-        return false;
-    }
-
-    // Get a pointer to the data in the constant buffer.
-    dataPtr2 = (LightBufferType*)mappedResource.pData;
-
-    // Copy the lighting variables into the constant buffer.
-    dataPtr2->ambientColor = light->GetAmbientColor();
-    dataPtr2->diffuseColor = light->GetDiffuseColor();
-    dataPtr2->lightDirection = light->GetDirection();
-    dataPtr2->padding = 0.0f;
-
-    // Unlock the constant buffer.
-    deviceContext->Unmap(m_lightBuffer, 0);
-
-    // Set the position of the light constant buffer in the pixel shader.
-    bufferNumber = 0;
-
-    // Finally set the light constant buffer in the pixel shader with the updated values.
-    deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
 
     return true;
 }
@@ -293,7 +150,7 @@ bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Util
 void VMShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
      
-    m_vmShaderPipeline->SetData(deviceContext);
+    m_vmShaderPipeline->UploadData(deviceContext);
 
     // Set the sampler state in the pixel shader.
     deviceContext->PSSetSamplers(0, 1, &m_sampleState);

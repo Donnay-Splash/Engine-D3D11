@@ -19,7 +19,7 @@ public:
 	InputLayout(const uint32_t& inputFlags);
 
 private:
-	void SetData(ID3D11DeviceContext* deviceContext);
+	void UploadData(ID3D11DeviceContext* deviceContext);
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;

@@ -1,6 +1,6 @@
 cbuffer MatrixBuffer
 {
-	// Matrices are set to row_major to match DirectXMath
+    // Matrices are set to row_major to match DirectXMath
     row_major matrix worldMatrix;
     row_major matrix viewMatrix;
     row_major matrix projectionMatrix;
@@ -8,9 +8,9 @@ cbuffer MatrixBuffer
 
 cbuffer TimeBuffer
 {
-	float time;
-	float height;
-	float length;
+    float time;
+    float height;
+    float length;
 };
 
 struct VertexInputType
@@ -30,14 +30,14 @@ struct PixelInputType
 
 PixelInputType VSMain(VertexInputType input)
 {
-	PixelInputType output;
-	input.position.w = 1.0f;
+    PixelInputType output;
+    input.position.w = 1.0f;
     // Store the texture coordinates for the pixel shader.
-	output.position = mul(input.position, worldMatrix);
+    output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
     output.tex = input.tex;
-	output.normal = input.normal;
+    output.normal = input.normal;
 
     return output;
 }

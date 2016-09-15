@@ -12,7 +12,7 @@ public:
 		InputLayout::Ptr inputLayout,
 		ID3D11Device* device);
 
-	void SetData(ID3D11DeviceContext* deviceContext);
+	void UploadData(ID3D11DeviceContext* deviceContext);
 	
 private:
 	Shader::Ptr m_vertexShader;

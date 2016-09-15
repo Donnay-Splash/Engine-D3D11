@@ -24,9 +24,9 @@ ShaderPipeline::ShaderPipeline(Shader::Ptr vertexShader,
 
 }
 
-void ShaderPipeline::SetData(ID3D11DeviceContext* deviceContext)
+void ShaderPipeline::UploadData(ID3D11DeviceContext* deviceContext)
 {
-	m_inputLayout->SetData(deviceContext);
-	m_vertexShader->SetData(deviceContext);
-	m_pixelShader->SetData(deviceContext);
+	m_inputLayout->UploadData(deviceContext);
+	m_vertexShader->UploadData(deviceContext);
+	m_pixelShader->UploadData(deviceContext);
 }

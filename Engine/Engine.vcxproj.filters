@@ -37,6 +37,9 @@
     <Filter Include="Utils\MeshMaker">
       <UniqueIdentifier>{4ebca92c-4aef-4728-9c4a-f1ce48f2f8c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Resources\ConstantBufferLayouts">
+      <UniqueIdentifier>{db7e3390-744a-433c-9814-2480dcbdbd48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="applicationclass.cpp">
@@ -143,6 +146,9 @@
     </ClCompile>
     <ClCompile Include="MeshMaker.cpp">
       <Filter>Utils\MeshMaker</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBuffer.cpp">
+      <Filter>Source Files\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -280,6 +286,12 @@
     </ClInclude>
     <ClInclude Include="MeshMaker.h">
       <Filter>Utils\MeshMaker</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBufferLayouts.h">
+      <Filter>Source Files\Resources\ConstantBufferLayouts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

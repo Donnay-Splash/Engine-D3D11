@@ -55,7 +55,7 @@ InputLayout::InputLayout(const uint32_t& inputFlags)
 	EngineAssert(!m_inputElements.empty());
 }
 
-void InputLayout::SetData(ID3D11DeviceContext* deviceContext)
+void InputLayout::UploadData(ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->IASetInputLayout(m_inputLayout.Get());
 }

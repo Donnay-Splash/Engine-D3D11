@@ -24,7 +24,7 @@ public:
 
 private:
 	void ValidateInputSignature(InputLayout::Ptr layout, ID3D11Device* device);
-	void SetData(ID3D11DeviceContext* deviceContext);
+	void UploadData(ID3D11DeviceContext* deviceContext);
 
 private:
 	const Type m_type;

@@ -41,11 +41,15 @@ namespace Utils
             // only support uniform scale at the moment
             static Matrix CreateFromScale(float uniformScaleFactor);
             static Matrix CreateFromTranslationRotationScale(Vector3 translation, Quaternion rotation, float uniformScaleFactor);
+            // Aspect ratio of viewspace x:y how many units in x per every y unit (x/y)
             static Matrix CreatePerspectiveProjectionMatrix(float fovY, float aspectHByW, float nearClip, float farClip);
             static Matrix CreateOrthographicProjectionMatrix(float viewWidth, float viewHeight, float nearClip, float farClip);
             
             Matrix GetTranspose();
             Matrix GetInverse();
+
+            bool operator==(const Matrix& rhs) const;
+            bool operator!=(const Matrix& rhs) const;
 
         private:
 
@@ -61,6 +65,8 @@ namespace Utils
             Vector4(float x, float y, float z, float w)
                 :XMFLOAT4A(x, y, z, w) {}
 
+            bool operator==(const Vector4& rhs) const;
+            bool operator!=(const Vector4& rhs) const;
         };
 
         class Vector3 : public DirectX::XMFLOAT3A
@@ -73,6 +79,9 @@ namespace Utils
             Vector3(float x, float y, float z)
                 : XMFLOAT3A(x, y, z) {}
 
+            bool operator==(const Vector3& rhs) const;
+            bool operator!=(const Vector3& rhs) const;
+
         };
 
         class Vector2 : public DirectX::XMFLOAT2A
@@ -84,6 +93,9 @@ namespace Utils
             Vector2() : XMFLOAT2A(Zero) {}
             Vector2(float x, float y)
                 : XMFLOAT2A(x, y) {}
+
+            bool operator==(const Vector2& rhs) const;
+            bool operator!=(const Vector2& rhs) const;
         };
 
         class Quaternion : public DirectX::XMFLOAT4A
@@ -97,6 +109,9 @@ namespace Utils
 
             static Quaternion CreateFromAxisAngle(Vector3 axis, float angle);
             static Quaternion CreateFromYawPitchRoll(float yaw, float pitch, float roll);
+
+            bool operator==(const Quaternion& rhs) const;
+            bool operator!=(const Quaternion& rhs) const;
         };
 
         class Color : public DirectX::XMFLOAT4A
@@ -112,6 +127,9 @@ namespace Utils
             static Color FromBGRA(uint32_t bgra);
             static Color FromARGB(uint32_t argb);
             static Color FromABGR(uint32_t abgr);
+
+            bool operator==(const Color& rhs) const;
+            bool operator!=(const Color& rhs) const;
         };
 
         inline float DegreesToRadians(float degrees) { return degrees * (kPI / 180.0f); }

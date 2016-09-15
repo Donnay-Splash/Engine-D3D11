@@ -75,7 +75,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     m_VMShader = std::make_shared<VMShaderClass>();
 
     // Initialize the color shader object.
-    result = m_VMShader->Initialize(m_Direct3D->GetDevice(), m_shaderManager, hwnd);
+    result = m_VMShader->Initialize(m_Direct3D->GetDevice(), m_shaderManager);
     if(!result)
     {
         MessageBox(hwnd, "Could not initialize the texture shader object.", "Error", MB_OK);

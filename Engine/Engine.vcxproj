@@ -135,6 +135,7 @@
     <ClCompile Include="applicationclass.cpp" />
     <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="cameraclass.cpp" />
+    <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="cpuclass.cpp" />
     <ClCompile Include="d3dclass.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
@@ -181,6 +182,8 @@
     <ClInclude Include="applicationclass.h" />
     <ClInclude Include="BlendState.h" />
     <ClInclude Include="cameraclass.h" />
+    <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="ConstantBufferLayouts.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="MeshMaker.h" />
     <ClInclude Include="Shader.h" />

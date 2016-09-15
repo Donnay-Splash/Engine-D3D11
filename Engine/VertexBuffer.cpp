@@ -25,7 +25,7 @@ VertexBuffer::VertexBuffer(void* data, uint32_t vertexCount, size_t vertexSizeIn
 	Utils::ThrowIfFailed(device->CreateBuffer(&vertexBufferDesc, &vertexData, m_buffer.GetAddressOf()));
 }
 
-void VertexBuffer::SetData(ID3D11DeviceContext* deviceContext, UINT inputSlot, UINT offset)
+void VertexBuffer::UploadData(ID3D11DeviceContext* deviceContext, UINT inputSlot, UINT offset)
 {
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
 	deviceContext->IASetVertexBuffers(inputSlot, 1, m_buffer.GetAddressOf(), &m_stride, &offset);

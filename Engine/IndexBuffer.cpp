@@ -25,7 +25,7 @@ IndexBuffer::IndexBuffer(void* data, uint32_t indexCount, ID3D11Device* device, 
 	Utils::ThrowIfFailed(device->CreateBuffer(&indexBufferDesc, &indexData, m_buffer.GetAddressOf()));
 }
 
-void IndexBuffer::SetData(ID3D11DeviceContext* deviceContext)
+void IndexBuffer::UploadData(ID3D11DeviceContext* deviceContext)
 {
 	// Set the index buffer to active in the input assembler so it can be rendered.
 	deviceContext->IASetIndexBuffer(m_buffer.Get(), m_indexFormat, 0);
