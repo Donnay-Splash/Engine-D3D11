@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "fontclass.h"
 
-
+using namespace std;
 FontClass::FontClass()
 {
 }

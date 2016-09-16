@@ -1,26 +1,25 @@
-#ifndef _LIGHTCLASS_H_
-#define _LIGHTCLASS_H_
+#pragma once
 
 class LightClass
 {
 public:
-	LightClass();
-	LightClass(const LightClass&);
-	~LightClass();
+    LightClass();
+    LightClass(const LightClass&);
+    ~LightClass();
 
-	void SetDiffuseColor(Utils::Maths::Color);
-	void SetDirection(Utils::Maths::Vector3);
-	void SetAmbientColor(Utils::Maths::Color);
-	void SetSpecularColor(Utils::Maths::Color);
-	void SetSpecularPower(float);
-	void SetPosition(Utils::Maths::Vector3);
+    void SetDiffuseColor(Utils::Maths::Color);
+    void SetDirection(Utils::Maths::Vector3);
+    void SetAmbientColor(Utils::Maths::Color);
+    void SetSpecularColor(Utils::Maths::Color);
+    void SetSpecularPower(float);
+    void SetPosition(Utils::Maths::Vector3);
 
-	Utils::Maths::Color GetDiffuseColor();
+    Utils::Maths::Color GetDiffuseColor();
     Utils::Maths::Vector3 GetDirection();
     Utils::Maths::Color GetAmbientColor();
     Utils::Maths::Color GetSpecularColor();
     Utils::Maths::Vector3 GetPosition();
-	float GetSpecularPower();
+    float GetSpecularPower();
 
 private:
     Utils::Maths::Color m_diffuseColor;
@@ -28,7 +27,6 @@ private:
     Utils::Maths::Color m_ambientColor;
     Utils::Maths::Color m_specularColor;
     Utils::Maths::Vector3 m_position;
-	float m_specularPower;
+    float m_specularPower;
 };
 
-#endif

@@ -150,6 +150,9 @@
     <ClCompile Include="ConstantBuffer.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="Sampler.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h">
@@ -292,6 +295,9 @@
     </ClInclude>
     <ClInclude Include="ConstantBufferLayouts.h">
       <Filter>Source Files\Resources\ConstantBufferLayouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.h">
+      <Filter>Header Files\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

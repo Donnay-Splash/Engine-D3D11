@@ -6,6 +6,7 @@ using namespace std;
 #include "ShaderManager.h"
 #include "ConstantBufferLayouts.h"
 #include "ConstantBuffer.h"
+#include "Sampler.h"
 
 class VMShaderClass
 {
@@ -49,7 +50,7 @@ private:
     // Create shader pipeline object to manage
     // shaders and samplers and input layout.
     ShaderPipeline::Ptr m_vmShaderPipeline;
-    ID3D11SamplerState* m_sampleState;
+    Sampler::Ptr m_sampler;
 
     // Need some sort of constant buffer class.
     // How we manage these internally I am unsure.

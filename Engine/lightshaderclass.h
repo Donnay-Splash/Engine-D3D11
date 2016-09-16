@@ -1,65 +1,58 @@
-#ifndef _LIGHTSHADERCLASS_H_
-#define _LIGHTSHADERCLASS_H_
+#pragma once
 
 #include <fstream>
 #include "lightclass.h"
-using namespace std;
-
 
 class LightShaderClass
 {
 private:
-	struct MatrixBufferType
-	{
-		Utils::Maths::Matrix world;
+    struct MatrixBufferType
+    {
+        Utils::Maths::Matrix world;
         Utils::Maths::Matrix view;
         Utils::Maths::Matrix projection;
-	};
+    };
 
-	struct LightBufferType
-	{
+    struct LightBufferType
+    {
         Utils::Maths::Color ambientColor;
         Utils::Maths::Color diffuseColor;
         Utils::Maths::Vector3 lightDirection;
-		float padding;
+        float padding;
         Utils::Maths::Vector3 position;
-		float padding2;
-		//float specularPower;
-		//D3DXVECTOR4 specularColor;	
-	};
+        float padding2;
+    };
 
-	struct CameraBufferType
-	{
+    struct CameraBufferType
+    {
         Utils::Maths::Vector3 CameraPosition;
-		float padding;
-	};
+        float padding;
+    };
 
 public:
-	LightShaderClass();
-	LightShaderClass(const LightShaderClass&);
-	~LightShaderClass();
+    LightShaderClass();
+    LightShaderClass(const LightShaderClass&);
+    ~LightShaderClass();
 
-	bool Initialize(ID3D11Device*, HWND);
-	void Shutdown();
-	bool Render(ID3D11DeviceContext*, int, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, LightClass*, Utils::Maths::Vector3);
-
-private:
-	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
-	void ShutdownShader();
-
-	bool SetShaderParameters(ID3D11DeviceContext*, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, LightClass*, Utils::Maths::Vector3);
-	void RenderShader(ID3D11DeviceContext*, int);
+    bool Initialize(ID3D11Device*, HWND);
+    void Shutdown();
+    bool Render(ID3D11DeviceContext*, int, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, LightClass*, Utils::Maths::Vector3);
 
 private:
-	ID3D11VertexShader* m_vertexShader;
-	ID3D11PixelShader* m_pixelShader;
-	ID3D11InputLayout* m_layout;
-	ID3D11SamplerState* m_sampleState;
-	ID3D11Buffer* m_matrixBuffer;
+    bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+    void ShutdownShader();
 
-	ID3D11Buffer* m_lightBuffer;
+    bool SetShaderParameters(ID3D11DeviceContext*, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, LightClass*, Utils::Maths::Vector3);
+    void RenderShader(ID3D11DeviceContext*, int);
 
-	ID3D11Buffer* m_cameraBuffer;
+private:
+    ID3D11VertexShader* m_vertexShader;
+    ID3D11PixelShader* m_pixelShader;
+    ID3D11InputLayout* m_layout;
+    ID3D11SamplerState* m_sampleState;
+    ID3D11Buffer* m_matrixBuffer;
+
+    ID3D11Buffer* m_lightBuffer;
+
+    ID3D11Buffer* m_cameraBuffer;
 };
-
-#endif

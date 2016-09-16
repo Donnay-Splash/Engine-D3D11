@@ -1,4 +1,4 @@
-cbuffer MatrixBuffer
+cbuffer MatrixBuffer : register(b0)
 {
     // Matrices are set to row_major to match DirectXMath
     row_major matrix worldMatrix;
@@ -6,7 +6,7 @@ cbuffer MatrixBuffer
     row_major matrix projectionMatrix;
 };
 
-cbuffer TimeBuffer
+cbuffer TimeBuffer : register(b1)
 {
     float time;
     float height;
@@ -36,7 +36,7 @@ PixelInputType VSMain(VertexInputType input)
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
-    output.tex = input.tex;
+    output.tex = float2(sin(time), cos(time));
     output.normal = input.normal;
 
     return output;

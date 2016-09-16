@@ -1,9 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: applicationclass.h
-////////////////////////////////////////////////////////////////////////////////
-#ifndef _APPLICATIONCLASS_H_
-#define _APPLICATIONCLASS_H_
-
+#pragma once
 
 /////////////
 // GLOBALS //
@@ -30,14 +25,10 @@ const float SCREEN_NEAR = 0.1f;
 #include "ShaderManager.h"
 
 
-////////////////////////////////////////////////////////////////////////////////
-// Class name: ApplicationClass
-////////////////////////////////////////////////////////////////////////////////
 class ApplicationClass
 {
 public:
 	ApplicationClass();
-	ApplicationClass(const ApplicationClass&);
 	~ApplicationClass();
 
 	bool Initialize(HINSTANCE, HWND, int, int);
@@ -49,9 +40,6 @@ private:
 	bool RenderGraphics();
 
 private:
-	float rotation;
-	float plane_height;
-	float plane_length;
 	std::shared_ptr<InputClass> m_Input;
 	std::shared_ptr<D3DClass> m_Direct3D;
 	std::shared_ptr<CameraClass> m_Camera;
@@ -63,4 +51,3 @@ private:
 	ShaderManager::Ptr m_shaderManager;
 };
 
-#endif

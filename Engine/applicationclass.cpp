@@ -4,12 +4,6 @@
 
 ApplicationClass::ApplicationClass()
 {
-    rotation = 0.0f;
-}
-
-
-ApplicationClass::ApplicationClass(const ApplicationClass& other)
-{
 }
 
 
@@ -21,10 +15,6 @@ ApplicationClass::~ApplicationClass()
 bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {
     bool result;
-    Utils::Maths::Matrix baseViewMatrix;
-
-    plane_height = 0.0f;
-    plane_length = 0.0f;
 
     // Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
     m_Input = std::make_shared<InputClass>();
@@ -58,15 +48,12 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     m_Camera->SetPosition({ 0.0f, 0.0f, 10.0f });
     m_Camera->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(3.14f, 0.0f, 0.0f));
     m_Camera->Render();
-    baseViewMatrix = m_Camera->GetViewMatrix();
 
     m_Light1 = std::make_shared<LightClass>();
     m_Light1->SetAmbientColor({ 0.2f, 0.2f, 0.2f, 1.0f });
     m_Light1->SetDiffuseColor({ 1.0f, 1.0f, 1.0f, 1.0f });
     m_Light1->SetDirection({ 0.0f, -1.0f, .0f });
     m_Light1->SetPosition({ 0.0f, 0.0f, -0.5f });
-    //m_Light1->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-    //m_Light1->SetSpecularPower(1.0f);
 
     // Create Mesh object
     m_Mesh = Utils::MeshMaker::CreateCube(m_Direct3D->GetDevice());
@@ -111,13 +98,6 @@ void ApplicationClass::Shutdown()
 bool ApplicationClass::Frame()
 {
     bool result;
-
-    rotation += Utils::Maths::kPI * 0.001f;
-    if(rotation > 360.0f)
-    {
-        rotation -= 360.0f;
-    }
-
 
     // Read the user input.
     result = m_Input->Frame();
@@ -187,23 +167,6 @@ bool ApplicationClass::HandleInput(float frameTime)
     keyDown = m_Input->IsPgDownPressed();
     m_Position->LookDownward(keyDown);
 
-    if (m_Input->IsHPressed())
-    {
-        plane_height -= 0.01f;
-    }
-    if (m_Input->IsYPressed())
-    {
-        plane_height += 0.01f;
-    }
-    if (m_Input->IsJPressed())
-    {
-        plane_length -= 0.01f;
-    }
-    if (m_Input->IsUPressed())
-    {
-        plane_length += 0.01f;
-    }
-
     // Get the view point position/rotation.
     m_Position->GetPosition(posX, posY, posZ);
     m_Position->GetRotation(rotX, rotY, rotZ);
@@ -236,7 +199,7 @@ bool ApplicationClass::RenderGraphics()
     m_Mesh->Render(m_Direct3D->GetDeviceContext());
 
     // Render the Mesh (data being pushed above) using the color shader.
-    bool result = m_VMShader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, nullptr, m_Light1.get(), plane_height, plane_length);
+    bool result = m_VMShader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, nullptr, m_Light1.get(), 0.0f, 0.0f);
     if(!result)
     {
         return false;
