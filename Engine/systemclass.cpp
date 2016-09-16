@@ -49,7 +49,6 @@ void SystemClass::Shutdown()
 {
 	if(m_Application)
 	{
-		m_Application->Shutdown();
 		m_Application = nullptr;
 	}
 

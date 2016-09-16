@@ -15,39 +15,38 @@ const float SCREEN_NEAR = 0.1f;
 #include "inputclass.h"
 #include "d3dclass.h"
 #include "cameraclass.h"
-#include "textureshaderclass.h"
 #include "timerclass.h"
 #include "positionclass.h"
 #include "Mesh.h"
 #include "vmshaderclass.h"
 #include "lightclass.h"
-#include "planeclass.h"
 #include "ShaderManager.h"
+#include "Scene.h"
 
 
 class ApplicationClass
 {
 public:
-	ApplicationClass();
-	~ApplicationClass();
+    ApplicationClass();
+    ~ApplicationClass();
 
-	bool Initialize(HINSTANCE, HWND, int, int);
-	void Shutdown();
-	bool Frame();
-
-private:
-	bool HandleInput(float);
-	bool RenderGraphics();
+    bool Initialize(HINSTANCE, HWND, int, int);
+    bool Frame();
 
 private:
-	std::shared_ptr<InputClass> m_Input;
-	std::shared_ptr<D3DClass> m_Direct3D;
-	std::shared_ptr<CameraClass> m_Camera;
-	std::shared_ptr<VMShaderClass> m_VMShader;
-	std::shared_ptr<LightClass> m_Light1;
-	std::shared_ptr<TimerClass> m_Timer;
-	std::shared_ptr<PositionClass> m_Position;
-	std::shared_ptr<Mesh> m_Mesh;
-	ShaderManager::Ptr m_shaderManager;
+    bool HandleInput(float);
+    bool RenderGraphics();
+
+private:
+    std::shared_ptr<InputClass> m_input;
+    std::shared_ptr<D3DClass> m_direct3D;
+    std::shared_ptr<CameraClass> m_camera;
+    std::shared_ptr<VMShaderClass> m_vmShader;
+    std::shared_ptr<LightClass> m_light1;
+    std::shared_ptr<TimerClass> m_timer;
+    std::shared_ptr<PositionClass> m_position;
+    std::shared_ptr<Mesh> m_mesh;
+    ShaderManager::Ptr m_shaderManager;
+    Scene::Ptr m_scene;
 };
 

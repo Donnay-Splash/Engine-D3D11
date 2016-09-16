@@ -20,6 +20,12 @@ namespace Utils
         class Quaternion;
         class Color;
 
+
+        /****************************************************************************
+        *
+        * Matrix
+        *
+        ****************************************************************************/
         class Matrix : public DirectX::XMFLOAT4X4A
         {
         public:
@@ -51,10 +57,32 @@ namespace Utils
             bool operator==(const Matrix& rhs) const;
             bool operator!=(const Matrix& rhs) const;
 
+            Matrix& operator+= (const Matrix& M);
+            Matrix& operator-= (const Matrix& M);
+            Matrix& operator*= (const Matrix& M);
+            Matrix& operator*= (float S);
+            Matrix& operator/= (float S);
+            Matrix& operator/= (const Matrix& M);
+
         private:
 
         };
 
+        // Binary operators
+        Matrix operator+ (const Matrix& M1, const Matrix& M2);
+        Matrix operator- (const Matrix& M1, const Matrix& M2);
+        Matrix operator* (const Matrix& M1, const Matrix& M2);
+        Matrix operator* (const Matrix& M, float S);
+        Matrix operator/ (const Matrix& M, float S);
+        Matrix operator/ (const Matrix& M1, const Matrix& M2);
+        // Element-wise divide
+        Matrix operator* (float S, const Matrix& M);
+
+        /****************************************************************************
+        *
+        * Vector4
+        *
+        ****************************************************************************/
         class Vector4 : public DirectX::XMFLOAT4A
         {
         public:
@@ -69,6 +97,11 @@ namespace Utils
             bool operator!=(const Vector4& rhs) const;
         };
 
+        /****************************************************************************
+        *
+        * Vector3
+        *
+        ****************************************************************************/
         class Vector3 : public DirectX::XMFLOAT3A
         {
         public :
@@ -84,6 +117,11 @@ namespace Utils
 
         };
 
+        /****************************************************************************
+        *
+        * Vector2
+        *
+        ****************************************************************************/
         class Vector2 : public DirectX::XMFLOAT2A
         {
         public:
@@ -98,6 +136,11 @@ namespace Utils
             bool operator!=(const Vector2& rhs) const;
         };
 
+        /****************************************************************************
+        *
+        * Quaternion
+        *
+        ****************************************************************************/
         class Quaternion : public DirectX::XMFLOAT4A
         {
         public:
@@ -114,6 +157,11 @@ namespace Utils
             bool operator!=(const Quaternion& rhs) const;
         };
 
+        /****************************************************************************
+        *
+        * Color
+        *
+        ****************************************************************************/
         class Color : public DirectX::XMFLOAT4A
         {
         public:

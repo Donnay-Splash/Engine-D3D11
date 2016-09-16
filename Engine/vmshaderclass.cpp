@@ -85,7 +85,7 @@ void VMShaderClass::ShutdownShader()
 bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Utils::Maths::Matrix worldMatrix, Utils::Maths::Matrix viewMatrix,
     Utils::Maths::Matrix projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light)
 {
-    MatrixBuffer matrixData{ worldMatrix, viewMatrix, projectionMatrix };
+    MatrixBuffer matrixData{ viewMatrix, projectionMatrix };
     m_matrixBuffer->SetData(matrixData);
     m_matrixBuffer->UploadData(deviceContext);
 
@@ -111,12 +111,5 @@ bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Util
 void VMShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
      
-    m_vmShaderPipeline->UploadData(deviceContext);
-
-    m_sampler->UploadData(deviceContext, 1);
-
-    // Render the triangle.
-    deviceContext->DrawIndexed(indexCount, 0, 0);
-
     return;
 }

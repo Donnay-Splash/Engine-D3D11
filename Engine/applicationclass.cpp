@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "applicationclass.h"
 #include "MeshMaker.h"
+#include "MeshInstance.h"
 
 ApplicationClass::ApplicationClass()
 {
@@ -17,10 +18,10 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     bool result;
 
     // Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
-    m_Input = std::make_shared<InputClass>();
+    m_input = std::make_shared<InputClass>();
 
     // Initialize the input object.
-    result = m_Input->Initialize(hinstance, hwnd, screenWidth, screenHeight);
+    result = m_input->Initialize(hinstance, hwnd, screenWidth, screenHeight);
     if (!result)
     {
         MessageBox(hwnd, "Could not initialize the input object.", "Error", MB_OK);
@@ -28,10 +29,10 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     }
 
     // Create the Direct3D object.
-    m_Direct3D = std::make_shared<D3DClass>();
+    m_direct3D = std::make_shared<D3DClass>();
 
     // Initialize the Direct3D object.
-    result = m_Direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+    result = m_direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
     if (!result)
     {
         MessageBox(hwnd, "Could not initialize DirectX 11.", "Error", MB_OK);
@@ -39,30 +40,40 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     }
 
     // Initialise the shader manager
-    m_shaderManager = std::make_shared<ShaderManager>(m_Direct3D->GetDevice());
+    m_shaderManager = std::make_shared<ShaderManager>(m_direct3D->GetDevice());
 
     // Create the camera object.
-    m_Camera = std::make_shared<CameraClass>();
+    m_camera = std::make_shared<CameraClass>();
 
     // Initialize a base view matrix with the camera for 2D user interface rendering.
-    m_Camera->SetPosition({ 0.0f, 0.0f, 10.0f });
-    m_Camera->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(3.14f, 0.0f, 0.0f));
-    m_Camera->Render();
+    m_camera->SetPosition({ 0.0f, 0.0f, 10.0f });
+    m_camera->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(3.14f, 0.0f, 0.0f));
+    m_camera->Render();
 
-    m_Light1 = std::make_shared<LightClass>();
-    m_Light1->SetAmbientColor({ 0.2f, 0.2f, 0.2f, 1.0f });
-    m_Light1->SetDiffuseColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-    m_Light1->SetDirection({ 0.0f, -1.0f, .0f });
-    m_Light1->SetPosition({ 0.0f, 0.0f, -0.5f });
+    m_light1 = std::make_shared<LightClass>();
+    m_light1->SetAmbientColor({ 0.2f, 0.2f, 0.2f, 1.0f });
+    m_light1->SetDiffuseColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+    m_light1->SetDirection({ 0.0f, -1.0f, .0f });
+    m_light1->SetPosition({ 0.0f, 0.0f, -0.5f });
 
     // Create Mesh object
-    m_Mesh = Utils::MeshMaker::CreateCube(m_Direct3D->GetDevice());
+    m_mesh = Utils::MeshMaker::CreateCube(m_direct3D->GetDevice());
+
+    // Initialise Scene
+    m_scene = std::make_shared<Scene>();
+    m_scene->Initialize();
+    auto meshNode = m_scene->AddNode();
+    auto meshInstance = meshNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
+    auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::VertexManipulation);
+    auto material = std::make_shared<Material>(shaderPipeline);
+    meshInstance->SetMesh(m_mesh);
+    meshInstance->SetMaterial(material);
 
     // Create the color shader object.
-    m_VMShader = std::make_shared<VMShaderClass>();
+    m_vmShader = std::make_shared<VMShaderClass>();
 
     // Initialize the color shader object.
-    result = m_VMShader->Initialize(m_Direct3D->GetDevice(), m_shaderManager);
+    result = m_vmShader->Initialize(m_direct3D->GetDevice(), m_shaderManager);
     if(!result)
     {
         MessageBox(hwnd, "Could not initialize the texture shader object.", "Error", MB_OK);
@@ -70,10 +81,10 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     }
 
     // Create the timer object.
-    m_Timer = std::make_shared<TimerClass>();
+    m_timer = std::make_shared<TimerClass>();
 
     // Initialize the timer object.
-    result = m_Timer->Initialize();
+    result = m_timer->Initialize();
     if(!result)
     {
         MessageBox(hwnd, "Could not initialize the timer object.", "Error", MB_OK);
@@ -81,17 +92,12 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     }
 
     // Create the position object.
-    m_Position = std::make_shared<PositionClass>();
+    m_position = std::make_shared<PositionClass>();
 
     // Set the initial position of the viewer to the same as the initial camera position.
-    m_Position->SetPosition(0.0f, 0.0f, -10.0f);
+    m_position->SetPosition(0.0f, 0.0f, -10.0f);
 
     return true;
-}
-
-
-void ApplicationClass::Shutdown()
-{
 }
 
 
@@ -100,27 +106,30 @@ bool ApplicationClass::Frame()
     bool result;
 
     // Read the user input.
-    result = m_Input->Frame();
+    result = m_input->Frame();
     if(!result)
     {
         return false;
     }
     
     // Check if the user pressed escape and wants to exit the application.
-    if(m_Input->IsEscapePressed() == true)
+    if(m_input->IsEscapePressed() == true)
     {
         return false;
     }
 
     // Update the system stats.
-    m_Timer->Frame();
+    m_timer->Frame();
     
     // Do the frame input processing.
-    result = HandleInput(m_Timer->GetTime());
+    result = HandleInput(m_timer->GetTime());
     if(!result)
     {
         return false;
     }
+
+    // Update the scene
+    m_scene->Update(m_timer->GetTime());
 
     // Render the graphics.
     result = RenderGraphics();
@@ -140,41 +149,41 @@ bool ApplicationClass::HandleInput(float frameTime)
 
 
     // Set the frame time for calculating the updated position.
-    m_Position->SetFrameTime(frameTime);
+    m_position->SetFrameTime(frameTime);
 
     // Handle the input.
-    keyDown = m_Input->IsLeftPressed();
-    m_Position->TurnLeft(keyDown);
+    keyDown = m_input->IsLeftPressed();
+    m_position->TurnLeft(keyDown);
 
-    keyDown = m_Input->IsRightPressed();
-    m_Position->TurnRight(keyDown);
+    keyDown = m_input->IsRightPressed();
+    m_position->TurnRight(keyDown);
 
-    keyDown = m_Input->IsUpPressed();
-    m_Position->MoveForward(keyDown);
+    keyDown = m_input->IsUpPressed();
+    m_position->MoveForward(keyDown);
 
-    keyDown = m_Input->IsDownPressed();
-    m_Position->MoveBackward(keyDown);
+    keyDown = m_input->IsDownPressed();
+    m_position->MoveBackward(keyDown);
 
-    keyDown = m_Input->IsAPressed();
-    m_Position->MoveUpward(keyDown);
+    keyDown = m_input->IsAPressed();
+    m_position->MoveUpward(keyDown);
 
-    keyDown = m_Input->IsZPressed();
-    m_Position->MoveDownward(keyDown);
+    keyDown = m_input->IsZPressed();
+    m_position->MoveDownward(keyDown);
 
-    keyDown = m_Input->IsPgUpPressed();
-    m_Position->LookUpward(keyDown);
+    keyDown = m_input->IsPgUpPressed();
+    m_position->LookUpward(keyDown);
 
-    keyDown = m_Input->IsPgDownPressed();
-    m_Position->LookDownward(keyDown);
+    keyDown = m_input->IsPgDownPressed();
+    m_position->LookDownward(keyDown);
 
     // Get the view point position/rotation.
-    m_Position->GetPosition(posX, posY, posZ);
-    m_Position->GetRotation(rotX, rotY, rotZ);
+    m_position->GetPosition(posX, posY, posZ);
+    m_position->GetRotation(rotX, rotY, rotZ);
 
     // Set the position of the camera.
-    m_Camera->SetPosition({ posX, posY, posZ });
+    m_camera->SetPosition({ posX, posY, posZ });
     auto rotation = Utils::Maths::Quaternion::CreateFromYawPitchRoll(Utils::Maths::DegreesToRadians(rotY), Utils::Maths::DegreesToRadians(rotX), Utils::Maths::DegreesToRadians(rotZ));
-    m_Camera->SetRotation(rotation);
+    m_camera->SetRotation(rotation);
 
     return true;
 }
@@ -183,30 +192,29 @@ bool ApplicationClass::HandleInput(float frameTime)
 bool ApplicationClass::RenderGraphics()
 {
     // Clear the scene.
-    m_Direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
+    m_direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
 
     // Generate the view matrix based on the camera's position.
-    m_Camera->Render();
+    m_camera->Render();
 
     // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-    auto worldMatrix = m_Direct3D->GetWorldMatrix();
-    auto viewMatrix = m_Camera->GetViewMatrix();
-    auto projectionMatrix = m_Direct3D->GetProjectionMatrix();
+    auto worldMatrix = m_direct3D->GetWorldMatrix();
+    auto viewMatrix = m_camera->GetViewMatrix();
+    auto projectionMatrix = m_direct3D->GetProjectionMatrix();
 
     //D3DXMatrixRotationY(&worldMatrix, rotation);
 
-    // Push mesh data onto gfx hardware
-    m_Mesh->Render(m_Direct3D->GetDeviceContext());
-
     // Render the Mesh (data being pushed above) using the color shader.
-    bool result = m_VMShader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, nullptr, m_Light1.get(), 0.0f, 0.0f);
+    bool result = m_vmShader->Render(m_direct3D->GetDeviceContext(), m_mesh->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, nullptr, m_light1.get(), 0.0f, 0.0f);
     if(!result)
     {
         return false;
     }
 
+    m_scene->Render(m_direct3D->GetDeviceContext());
+
     // Present the rendered scene to the screen.
-    m_Direct3D->EndScene();
+    m_direct3D->EndScene();
 
     return true;
 }

@@ -135,6 +135,7 @@
     <ClCompile Include="applicationclass.cpp" />
     <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="cameraclass.cpp" />
+    <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="cpuclass.cpp" />
     <ClCompile Include="d3dclass.cpp" />
@@ -151,6 +152,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshInstance.cpp" />
     <ClCompile Include="MeshMaker.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -166,6 +168,8 @@
     <ClCompile Include="positionclass.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Sampler.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderPipeline.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
@@ -183,11 +187,15 @@
     <ClInclude Include="applicationclass.h" />
     <ClInclude Include="BlendState.h" />
     <ClInclude Include="cameraclass.h" />
+    <ClInclude Include="Component.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConstantBufferLayouts.h" />
     <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="MeshInstance.h" />
     <ClInclude Include="MeshMaker.h" />
     <ClInclude Include="Sampler.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneNode.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -342,6 +350,7 @@
       </ObjectFileOutput>
     </FxCompile>
     <None Include="packages.config" />
+    <None Include="SceneNode.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

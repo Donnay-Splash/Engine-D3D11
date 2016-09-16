@@ -4,22 +4,35 @@
 _declspec(align(16))
 struct MatrixBuffer
 {
-    Utils::Maths::Matrix world;
     Utils::Maths::Matrix view;
     Utils::Maths::Matrix projection;
 
     bool operator!=(const MatrixBuffer& rhs)
     {
-        return  (this->world != rhs.world) || 
-                (this->view != rhs.view) ||
+        return  (this->view != rhs.view) ||
                 (this->projection != rhs.projection);
     }
 
     bool operator==(const MatrixBuffer& rhs)
     {
-        return  (this->world == rhs.world) &&
-                (this->view == rhs.view) &&
+        return  (this->view == rhs.view) &&
                 (this->projection == rhs.projection);
+    }
+};
+
+_declspec(align(16))
+struct ObjectConstants
+{
+    Utils::Maths::Matrix objectTransform;
+
+    bool operator!=(const ObjectConstants& rhs)
+    {
+        return  (this->objectTransform != rhs.objectTransform);
+    }
+
+    bool operator==(const ObjectConstants& rhs)
+    {
+        return  (this->objectTransform == rhs.objectTransform);
     }
 };
 

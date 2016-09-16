@@ -135,6 +135,292 @@ namespace Utils
                 || XMVector4NotEqual(x4, y4)) != 0;
         }
 
+        inline Matrix operator+ (const Matrix& M1, const Matrix& M2)
+        {
+            using namespace DirectX;
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._41));
+
+            XMVECTOR y1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._11));
+            XMVECTOR y2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._21));
+            XMVECTOR y3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._31));
+            XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._41));
+
+            x1 = XMVectorAdd(x1, y1);
+            x2 = XMVectorAdd(x2, y2);
+            x3 = XMVectorAdd(x3, y3);
+            x4 = XMVectorAdd(x4, y4);
+
+            Matrix R;
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._41), x4);
+            return R;
+        }
+
+        inline Matrix& Matrix::operator+= (const Matrix& M)
+        {
+            using namespace DirectX;
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_41));
+
+            XMVECTOR y1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._11));
+            XMVECTOR y2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._21));
+            XMVECTOR y3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._31));
+            XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._41));
+
+            x1 = XMVectorAdd(x1, y1);
+            x2 = XMVectorAdd(x2, y2);
+            x3 = XMVectorAdd(x3, y3);
+            x4 = XMVectorAdd(x4, y4);
+
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_41), x4);
+            return *this;
+        }
+
+        inline Matrix& Matrix::operator-= (const Matrix& M)
+        {
+            using namespace DirectX;
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_41));
+
+            XMVECTOR y1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._11));
+            XMVECTOR y2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._21));
+            XMVECTOR y3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._31));
+            XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._41));
+
+            x1 = XMVectorSubtract(x1, y1);
+            x2 = XMVectorSubtract(x2, y2);
+            x3 = XMVectorSubtract(x3, y3);
+            x4 = XMVectorSubtract(x4, y4);
+
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_41), x4);
+            return *this;
+        }
+
+        inline Matrix& Matrix::operator*= (const Matrix& M)
+        {
+            using namespace DirectX;
+            XMMATRIX M1 = XMLoadFloat4x4(this);
+            XMMATRIX M2 = XMLoadFloat4x4(&M);
+            XMMATRIX X = XMMatrixMultiply(M1, M2);
+            XMStoreFloat4x4(this, X);
+            return *this;
+        }
+
+        inline Matrix& Matrix::operator*= (float S)
+        {
+            using namespace DirectX;
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_41));
+
+            x1 = XMVectorScale(x1, S);
+            x2 = XMVectorScale(x2, S);
+            x3 = XMVectorScale(x3, S);
+            x4 = XMVectorScale(x4, S);
+
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_41), x4);
+            return *this;
+        }
+
+        inline Matrix& Matrix::operator/= (float S)
+        {
+            using namespace DirectX;
+            assert(S != 0.f);
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_41));
+
+            float rs = 1.f / S;
+
+            x1 = XMVectorScale(x1, rs);
+            x2 = XMVectorScale(x2, rs);
+            x3 = XMVectorScale(x3, rs);
+            x4 = XMVectorScale(x4, rs);
+
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_41), x4);
+            return *this;
+        }
+
+        inline Matrix& Matrix::operator/= (const Matrix& M)
+        {
+            using namespace DirectX;
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<XMFLOAT4*>(&_41));
+
+            XMVECTOR y1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._11));
+            XMVECTOR y2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._21));
+            XMVECTOR y3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._31));
+            XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._41));
+
+            x1 = XMVectorDivide(x1, y1);
+            x2 = XMVectorDivide(x2, y2);
+            x3 = XMVectorDivide(x3, y3);
+            x4 = XMVectorDivide(x4, y4);
+
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&_41), x4);
+            return *this;
+        }
+
+        inline Matrix operator- (const Matrix& M1, const Matrix& M2)
+        {
+            using namespace DirectX;
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._41));
+
+            XMVECTOR y1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._11));
+            XMVECTOR y2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._21));
+            XMVECTOR y3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._31));
+            XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._41));
+
+            x1 = XMVectorSubtract(x1, y1);
+            x2 = XMVectorSubtract(x2, y2);
+            x3 = XMVectorSubtract(x3, y3);
+            x4 = XMVectorSubtract(x4, y4);
+
+            Matrix R;
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._41), x4);
+            return R;
+        }
+
+        inline Matrix operator* (const Matrix& M1, const Matrix& M2)
+        {
+            using namespace DirectX;
+            XMMATRIX m1 = XMLoadFloat4x4(&M1);
+            XMMATRIX m2 = XMLoadFloat4x4(&M2);
+            XMMATRIX X = XMMatrixMultiply(m1, m2);
+
+            Matrix R;
+            XMStoreFloat4x4(&R, X);
+            return R;
+        }
+
+        inline Matrix operator* (const Matrix& M, float S)
+        {
+            using namespace DirectX;
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._41));
+
+            x1 = XMVectorScale(x1, S);
+            x2 = XMVectorScale(x2, S);
+            x3 = XMVectorScale(x3, S);
+            x4 = XMVectorScale(x4, S);
+
+            Matrix R;
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._41), x4);
+            return R;
+        }
+
+        inline Matrix operator/ (const Matrix& M, float S)
+        {
+            using namespace DirectX;
+            assert(S != 0.f);
+
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._41));
+
+            float rs = 1.f / S;
+
+            x1 = XMVectorScale(x1, rs);
+            x2 = XMVectorScale(x2, rs);
+            x3 = XMVectorScale(x3, rs);
+            x4 = XMVectorScale(x4, rs);
+
+            Matrix R;
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._41), x4);
+            return R;
+        }
+
+        inline Matrix operator/ (const Matrix& M1, const Matrix& M2)
+        {
+            using namespace DirectX;
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M1._41));
+
+            XMVECTOR y1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._11));
+            XMVECTOR y2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._21));
+            XMVECTOR y3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._31));
+            XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M2._41));
+
+            x1 = XMVectorDivide(x1, y1);
+            x2 = XMVectorDivide(x2, y2);
+            x3 = XMVectorDivide(x3, y3);
+            x4 = XMVectorDivide(x4, y4);
+
+            Matrix R;
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._41), x4);
+            return R;
+        }
+
+        inline Matrix operator* (float S, const Matrix& M)
+        {
+            using namespace DirectX;
+
+            XMVECTOR x1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._11));
+            XMVECTOR x2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._21));
+            XMVECTOR x3 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._31));
+            XMVECTOR x4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._41));
+
+            x1 = XMVectorScale(x1, S);
+            x2 = XMVectorScale(x2, S);
+            x3 = XMVectorScale(x3, S);
+            x4 = XMVectorScale(x4, S);
+
+            Matrix R;
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._11), x1);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._21), x2);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._31), x3);
+            XMStoreFloat4(reinterpret_cast<XMFLOAT4*>(&R._41), x4);
+            return R;
+        }
+
         /****************************************************************************
         *
         * Vector4 operations

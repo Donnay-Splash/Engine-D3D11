@@ -47,7 +47,7 @@ float4 PSMain(PixelInputType input) : SV_TARGET
     // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
     color = color * textureColor;
     
-    return float4(abs(input.tex), cos(input.tex.x + 0.5f), 1.0f);
+    return float4(abs(input.tex), cos(input.tex.x + 0.5f), 1.0f) * float4((input.normal + 1) / 2.0f, 1.0f);
 
 }
 
