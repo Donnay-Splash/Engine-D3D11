@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <d3d11.h>
 #include <d3dcommon.h>
-#include <dxgi.h>
+#include <dxgi1_3.h>
 #include <float.h>
 #include <limits.h>
 #include <locale.h>

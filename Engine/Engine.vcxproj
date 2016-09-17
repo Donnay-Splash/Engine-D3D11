@@ -23,6 +23,7 @@
     <ProjectGuid>{06F1D1D5-1FA9-4A5D-A157-E6EDF139FC0A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Engine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -134,12 +135,13 @@
   <ItemGroup>
     <ClCompile Include="applicationclass.cpp" />
     <ClCompile Include="BlendState.cpp" />
-    <ClCompile Include="cameraclass.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="cpuclass.cpp" />
     <ClCompile Include="d3dclass.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
+    <ClCompile Include="DepthState.cpp" />
     <ClCompile Include="fontclass.cpp" />
     <ClCompile Include="fontshaderclass.cpp" />
     <ClCompile Include="fpsclass.cpp" />
@@ -164,8 +166,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="PipelineState.cpp" />
     <ClCompile Include="planeclass.cpp" />
     <ClCompile Include="positionclass.cpp" />
+    <ClCompile Include="RasterizerState.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -178,7 +182,6 @@
     <ClCompile Include="terrainclass.cpp" />
     <ClCompile Include="textclass.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="textureshaderclass.cpp" />
     <ClCompile Include="timerclass.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="vmshaderclass.cpp" />
@@ -186,13 +189,16 @@
   <ItemGroup>
     <ClInclude Include="applicationclass.h" />
     <ClInclude Include="BlendState.h" />
-    <ClInclude Include="cameraclass.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConstantBufferLayouts.h" />
+    <ClInclude Include="DepthState.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="MeshInstance.h" />
     <ClInclude Include="MeshMaker.h" />
+    <ClInclude Include="PipelineState.h" />
+    <ClInclude Include="RasterizerState.h" />
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneNode.h" />
@@ -232,7 +238,6 @@
     <ClInclude Include="terrainclass.h" />
     <ClInclude Include="textclass.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="textureshaderclass.h" />
     <ClInclude Include="timerclass.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="vmshaderclass.h" />

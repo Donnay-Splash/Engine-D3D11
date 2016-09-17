@@ -69,7 +69,7 @@ bool VMShaderClass::InitializeShader(ID3D11Device* device, ShaderManager::Ptr sh
 
     m_sampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP);
 
-    m_matrixBuffer = std::make_shared<ConstantBuffer<MatrixBuffer>>(0, PipelineStage::Vertex, device);
+    m_matrixBuffer = std::make_shared<ConstantBuffer<ViewConstants>>(0, PipelineStage::Vertex, device);
     m_timeBuffer = std::make_shared<ConstantBuffer<TimeBuffer>>(1, PipelineStage::Vertex, device);
     m_lightBuffer = std::make_shared<ConstantBuffer<LightBuffer>>(0, PipelineStage::Pixel, device);
 
@@ -85,7 +85,7 @@ void VMShaderClass::ShutdownShader()
 bool VMShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, Utils::Maths::Matrix worldMatrix, Utils::Maths::Matrix viewMatrix,
     Utils::Maths::Matrix projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light)
 {
-    MatrixBuffer matrixData{ viewMatrix, projectionMatrix };
+    ViewConstants matrixData{ viewMatrix, projectionMatrix };
     m_matrixBuffer->SetData(matrixData);
     m_matrixBuffer->UploadData(deviceContext);
 

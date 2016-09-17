@@ -88,10 +88,7 @@ void FontClass::ReleaseFontData()
 bool FontClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
 	// Create the texture object.
-	m_Texture = std::make_shared<Texture>();
-
-	// Initialize the texture object.
-	m_Texture->CreateFromFile(device, filename);
+	m_Texture = std::make_shared<Texture>(device, filename);
 
 	return true;
 }

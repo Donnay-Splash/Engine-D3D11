@@ -2,54 +2,81 @@
 #include <DDSTextureLoader.h>
 #include "Texture.h"
 
-Texture::Texture()
+Texture::Texture(void* data, uint32_t height, uint32_t width, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device)
 {
-	m_texture = nullptr;
+    bool bindToShader = (flags & TextureCreationFlags::BindShaderResource) != 0;
+    bool bindToRenderTarget = (flags & TextureCreationFlags::BindShaderResource) != 0;
+    bool bindDepthStencil = (flags & TextureCreationFlags::BindDepthStencil) != 0;
+
+    D3D11_TEXTURE2D_DESC desc;
+    desc.Height = height;
+    desc.Width = width;
+    desc.MipLevels = desc.ArraySize = 1;
+    desc.Format = format;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.MiscFlags = 0;
+
+    if (bindToShader)
+    {
+        desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+    }
+    if (bindToRenderTarget)
+    {
+        desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+    }
+    if (bindDepthStencil)
+    {
+        desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    }
+
+    D3D11_SUBRESOURCE_DATA* initData = nullptr;
+    // Initialization data passed in
+    if (data != nullptr)
+    {
+        // Presumes texture data coming in is 32 bits per pixel.
+        uint32_t bytesPerPixel = static_cast<uint32_t>(Utils::BitsPerPixel(format)) / 8;
+        D3D11_SUBRESOURCE_DATA subresourceData;
+        subresourceData.pSysMem = data;
+        subresourceData.SysMemPitch = width * bytesPerPixel;
+        subresourceData.SysMemSlicePitch = width * height * bytesPerPixel;
+        initData = &subresourceData;
+    }
+
+    Utils::ThrowIfFailed(device->CreateTexture2D(&desc, initData, m_texture.GetAddressOf()));
+
+    if (bindToShader)
+    {
+        Utils::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
+    }
 }
 
-
-Texture::Texture(const Texture& other)
+// Create texture from D3D11 resource.
+Texture::Texture(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device)
 {
+    m_texture = texture;
+    D3D11_TEXTURE2D_DESC textureDesc;
+    m_texture->GetDesc(&textureDesc);
+
+    m_height = textureDesc.Height;
+    m_width = textureDesc.Width;
+    bool bindToShader = (textureDesc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0;
+
+    if (bindToShader)
+    {
+        Utils::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
+    }
 }
 
-
-Texture::~Texture()
+// Create a texture from a file
+Texture::Texture(ID3D11Device* device, const wchar_t* filename)
 {
-}
-
-void Texture::Create(void* data, uint32_t height, uint32_t width, uint32_t flags, ID3D11Device* device /*.format*/)
-{
-	D3D11_TEXTURE2D_DESC desc;
-	desc.Height = height;
-	desc.Width = width;
-	desc.MipLevels = desc.ArraySize = 1;
-	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	desc.SampleDesc.Count = 1;
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	desc.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA* initData = nullptr;
-	// Initialization data passed in
-	if (data != nullptr)
-	{
-		uint32_t bytesPerPixel = 4;
-		D3D11_SUBRESOURCE_DATA subresourceData;
-		subresourceData.pSysMem = data;
-		subresourceData.SysMemPitch = width * bytesPerPixel;
-		subresourceData.SysMemSlicePitch = width * height * bytesPerPixel;
-		initData = &subresourceData;
-	}
-
-	Utils::ThrowIfFailed(device->CreateTexture2D(&desc, initData, m_texture.GetAddressOf()));
-	Utils::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
-}
-
-void Texture::CreateFromFile(ID3D11Device* device, const wchar_t* filename)
-{
-	// Add support for additional file types.
+    // Add support for additional file types.
     ID3D11Resource* subresource;
     Utils::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, filename, &subresource, m_srv.GetAddressOf()));
 }
 
+Texture::~Texture()
+{
+}
 

@@ -54,7 +54,7 @@ private:
 
     // Need some sort of constant buffer class.
     // How we manage these internally I am unsure.
-    ConstantBuffer<MatrixBuffer>::Ptr m_matrixBuffer;
+    ConstantBuffer<ViewConstants>::Ptr m_matrixBuffer;
     ConstantBuffer<LightBuffer>::Ptr m_lightBuffer;
     ConstantBuffer<TimeBuffer>::Ptr m_timeBuffer;
 

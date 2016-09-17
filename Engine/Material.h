@@ -1,6 +1,6 @@
 #pragma once
 #include "ShaderPipeline.h"
-#include "BlendState.h"
+#include "PipelineState.h"
 
 class Material
 {
@@ -12,5 +12,5 @@ public:
 
 private:
     ShaderPipeline::Ptr m_shaderPipeline;
-    //BlendState::Ptr m_blendState;
+    PipelineState::Ptr m_pipelineState;
 };

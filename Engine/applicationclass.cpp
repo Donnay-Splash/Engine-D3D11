@@ -32,23 +32,13 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     m_direct3D = std::make_shared<D3DClass>();
 
     // Initialize the Direct3D object.
-    result = m_direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
-    if (!result)
-    {
-        MessageBox(hwnd, "Could not initialize DirectX 11.", "Error", MB_OK);
-        return false;
-    }
+    m_direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 
     // Initialise the shader manager
     m_shaderManager = std::make_shared<ShaderManager>(m_direct3D->GetDevice());
 
     // Create the camera object.
-    m_camera = std::make_shared<CameraClass>();
-
-    // Initialize a base view matrix with the camera for 2D user interface rendering.
-    m_camera->SetPosition({ 0.0f, 0.0f, 10.0f });
-    m_camera->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(3.14f, 0.0f, 0.0f));
-    m_camera->Render();
+    EngineAssert(false); // Need to create camera node
 
     m_light1 = std::make_shared<LightClass>();
     m_light1->SetAmbientColor({ 0.2f, 0.2f, 0.2f, 1.0f });
@@ -181,10 +171,7 @@ bool ApplicationClass::HandleInput(float frameTime)
     m_position->GetRotation(rotX, rotY, rotZ);
 
     // Set the position of the camera.
-    m_camera->SetPosition({ posX, posY, posZ });
-    auto rotation = Utils::Maths::Quaternion::CreateFromYawPitchRoll(Utils::Maths::DegreesToRadians(rotY), Utils::Maths::DegreesToRadians(rotX), Utils::Maths::DegreesToRadians(rotZ));
-    m_camera->SetRotation(rotation);
-
+    EngineAssert(false); // Need to update camera position
     return true;
 }
 
@@ -195,17 +182,16 @@ bool ApplicationClass::RenderGraphics()
     m_direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
 
     // Generate the view matrix based on the camera's position.
-    m_camera->Render();
+    EngineAssert(false); // Need to render scene cameras
+    //m_camera->Render();
 
     // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-    auto worldMatrix = m_direct3D->GetWorldMatrix();
-    auto viewMatrix = m_camera->GetViewMatrix();
-    auto projectionMatrix = m_direct3D->GetProjectionMatrix();
+    EngineAssert(false); // Need to Set projection and view matrix from camera
 
     //D3DXMatrixRotationY(&worldMatrix, rotation);
 
     // Render the Mesh (data being pushed above) using the color shader.
-    bool result = m_vmShader->Render(m_direct3D->GetDeviceContext(), m_mesh->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, nullptr, m_light1.get(), 0.0f, 0.0f);
+    bool result = m_vmShader->Render(m_direct3D->GetDeviceContext(), m_mesh->GetIndexCount(), Utils::Maths::Matrix::Identity, Utils::Maths::Matrix::Identity, Utils::Maths::Matrix::Identity, nullptr, m_light1.get(), 0.0f, 0.0f);
     if(!result)
     {
         return false;

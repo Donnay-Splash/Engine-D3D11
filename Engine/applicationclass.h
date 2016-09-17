@@ -14,7 +14,7 @@ const float SCREEN_NEAR = 0.1f;
 ///////////////////////
 #include "inputclass.h"
 #include "d3dclass.h"
-#include "cameraclass.h"
+#include "Camera.h"
 #include "timerclass.h"
 #include "positionclass.h"
 #include "Mesh.h"
@@ -40,12 +40,12 @@ private:
 private:
     std::shared_ptr<InputClass> m_input;
     std::shared_ptr<D3DClass> m_direct3D;
-    std::shared_ptr<CameraClass> m_camera;
     std::shared_ptr<VMShaderClass> m_vmShader;
     std::shared_ptr<LightClass> m_light1;
     std::shared_ptr<TimerClass> m_timer;
     std::shared_ptr<PositionClass> m_position;
-    std::shared_ptr<Mesh> m_mesh;
+    Mesh::Ptr m_mesh;
+    Camera::Ptr m_camera;
     ShaderManager::Ptr m_shaderManager;
     Scene::Ptr m_scene;
 };

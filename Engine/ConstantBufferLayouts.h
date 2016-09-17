@@ -2,18 +2,18 @@
 #include "Math.h"
 
 _declspec(align(16))
-struct MatrixBuffer
+struct ViewConstants
 {
     Utils::Maths::Matrix view;
     Utils::Maths::Matrix projection;
 
-    bool operator!=(const MatrixBuffer& rhs)
+    bool operator!=(const ViewConstants& rhs)
     {
         return  (this->view != rhs.view) ||
                 (this->projection != rhs.projection);
     }
 
-    bool operator==(const MatrixBuffer& rhs)
+    bool operator==(const ViewConstants& rhs)
     {
         return  (this->view == rhs.view) &&
                 (this->projection == rhs.projection);
