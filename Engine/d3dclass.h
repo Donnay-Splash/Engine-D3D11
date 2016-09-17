@@ -25,11 +25,6 @@ public:
 
     void GetVideoCardInfo(char*, int&);
 
-    void TurnZBufferOn();
-    void TurnZBufferOff();
-    void TurnOnAlphaBlending();
-    void TurnOffAlphaBlending();
-
 private:
     void GetAdapterInformation();
     void CreateDeviceAndSwapChain(int screenWidth, int screenHeight, HWND hwnd);
@@ -42,13 +37,10 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Device1> m_device;
     Microsoft::WRL::ComPtr<ID3D11Debug> m_debugDevice;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext;
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> m_depthStencilBuffer;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterState;
     Microsoft::WRL::ComPtr<IDXGIFactory2> m_factory;
     Microsoft::WRL::ComPtr<IDXGIAdapter> m_adapter;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthDisabledStencilState;
-    Microsoft::WRL::ComPtr<ID3D11BlendState> m_alphaEnableBlendingState;
     Microsoft::WRL::ComPtr<ID3D11BlendState> m_alphaDisableBlendingState;
     RenderTarget::Ptr m_backBufferRT;
     DepthBuffer::Ptr m_depthBuffer;

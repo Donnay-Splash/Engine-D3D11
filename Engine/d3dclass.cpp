@@ -10,11 +10,8 @@ D3DClass::D3DClass()
     m_swapChain = nullptr;
     m_device = nullptr;
     m_deviceContext = nullptr;
-    m_depthStencilBuffer = nullptr;
     m_depthStencilState = nullptr;
     m_rasterState = nullptr;
-    m_depthDisabledStencilState = nullptr;
-    m_alphaEnableBlendingState = nullptr;
     m_alphaDisableBlendingState = nullptr;
 }
 
@@ -90,9 +87,6 @@ void D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
     // that DepthEnable is set to false, all other parameters are the same as the other depth stencil state.
     depthDisabledStencilDesc.DepthEnable = false;
 
-    // Create the state using the device.
-    Utils::ThrowIfFailed(m_device->CreateDepthStencilState(&depthDisabledStencilDesc, &m_depthDisabledStencilState));
-
     // Set the depth stencil state.
     m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 1);
 
@@ -136,9 +130,6 @@ void D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
     blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
     blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
     blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
-
-    // Create the blend state using the description.
-    Utils::ThrowIfFailed(m_device->CreateBlendState(&blendStateDescription, &m_alphaEnableBlendingState));
 
     // Modify the description to create an alpha disabled blend state description.
     blendStateDescription.RenderTarget[0].BlendEnable = FALSE;
@@ -222,12 +213,9 @@ void D3DClass::Shutdown()
         m_swapChain->SetFullscreenState(false, NULL);
     }
 
-    m_alphaEnableBlendingState = nullptr;
     m_alphaDisableBlendingState = nullptr;
-    m_depthDisabledStencilState = nullptr;
     m_rasterState = nullptr;
     m_depthStencilState = nullptr;
-    m_depthStencilBuffer = nullptr;
     m_deviceContext = nullptr;
     m_device = nullptr;
     m_swapChain = nullptr;
@@ -292,52 +280,3 @@ void D3DClass::GetVideoCardInfo(char* cardName, int& memory)
     return;
 }
 
-
-void D3DClass::TurnZBufferOn()
-{
-    m_deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 1);
-    return;
-}
-
-
-void D3DClass::TurnZBufferOff()
-{
-    m_deviceContext->OMSetDepthStencilState(m_depthDisabledStencilState.Get(), 1);
-    return;
-}
-
-
-void D3DClass::TurnOnAlphaBlending()
-{
-    float blendFactor[4];
-    
-
-    // Setup the blend factor.
-    blendFactor[0] = 0.0f;
-    blendFactor[1] = 0.0f;
-    blendFactor[2] = 0.0f;
-    blendFactor[3] = 0.0f;
-    
-    // Turn on the alpha blending.
-    m_deviceContext->OMSetBlendState(m_alphaEnableBlendingState.Get(), blendFactor, 0xffffffff);
-
-    return;
-}
-
-
-void D3DClass::TurnOffAlphaBlending()
-{
-    float blendFactor[4];
-    
-
-    // Setup the blend factor.
-    blendFactor[0] = 0.0f;
-    blendFactor[1] = 0.0f;
-    blendFactor[2] = 0.0f;
-    blendFactor[3] = 0.0f;
-    
-    // Turn off the alpha blending.
-    m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState.Get(), blendFactor, 0xffffffff);
-
-    return;
-}
