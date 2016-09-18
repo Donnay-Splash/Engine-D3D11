@@ -192,15 +192,6 @@ bool ApplicationClass::RenderGraphics()
     // Generate the view matrix based on the camera's position.
     m_camera->Render(m_direct3D, m_scene);
 
-    // Render the Mesh (data being pushed above) using the color shader.
-    /*bool result = m_vmShader->Render(m_direct3D->GetDeviceContext(), m_mesh->GetIndexCount(), Utils::Maths::Matrix::Identity, Utils::Maths::Matrix::Identity, Utils::Maths::Matrix::Identity, nullptr, m_light1.get(), 0.0f, 0.0f);
-    if(!result)
-    {
-        return false;
-    }*/
-
-    //m_scene->Render(m_direct3D->GetDeviceContext());
-
     // Present the rendered scene to the screen.
     m_direct3D->EndScene();
 
