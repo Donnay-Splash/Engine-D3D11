@@ -38,8 +38,6 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     m_shaderManager = std::make_shared<ShaderManager>(m_direct3D->GetDevice());
 
     // Create the camera object.
-    EngineAssert(false); // Need to create camera node
-
     m_light1 = std::make_shared<LightClass>();
     m_light1->SetAmbientColor({ 0.2f, 0.2f, 0.2f, 1.0f });
     m_light1->SetDiffuseColor({ 1.0f, 1.0f, 1.0f, 1.0f });
@@ -52,10 +50,16 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     // Initialise Scene
     m_scene = std::make_shared<Scene>();
     m_scene->Initialize();
+
+    // Create the camera object
+    auto cameraNode = m_scene->AddNode();
+    m_camera = cameraNode->AddComponent<Camera>(m_direct3D->GetDevice());
+
+    // Create the mesh object and add it to the scene.
     auto meshNode = m_scene->AddNode();
     auto meshInstance = meshNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
     auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::VertexManipulation);
-    auto material = std::make_shared<Material>(shaderPipeline);
+    auto material = std::make_shared<Material>(m_direct3D->GetDevice(), shaderPipeline);
     meshInstance->SetMesh(m_mesh);
     meshInstance->SetMaterial(material);
 
@@ -169,9 +173,13 @@ bool ApplicationClass::HandleInput(float frameTime)
     // Get the view point position/rotation.
     m_position->GetPosition(posX, posY, posZ);
     m_position->GetRotation(rotX, rotY, rotZ);
+    auto rotation = Utils::Maths::Quaternion::CreateFromYawPitchRoll(
+                Utils::Maths::DegreesToRadians(rotY),
+                Utils::Maths::DegreesToRadians(rotX),
+                Utils::Maths::DegreesToRadians(rotZ));
 
-    // Set the position of the camera.
-    EngineAssert(false); // Need to update camera position
+    m_camera->GetSceneNode()->SetPosition({ posX, posY, posZ });
+    m_camera->GetSceneNode()->SetRotation(rotation);
     return true;
 }
 
@@ -182,22 +190,16 @@ bool ApplicationClass::RenderGraphics()
     m_direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
 
     // Generate the view matrix based on the camera's position.
-    EngineAssert(false); // Need to render scene cameras
-    //m_camera->Render();
-
-    // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-    EngineAssert(false); // Need to Set projection and view matrix from camera
-
-    //D3DXMatrixRotationY(&worldMatrix, rotation);
+    m_camera->Render(m_direct3D, m_scene);
 
     // Render the Mesh (data being pushed above) using the color shader.
-    bool result = m_vmShader->Render(m_direct3D->GetDeviceContext(), m_mesh->GetIndexCount(), Utils::Maths::Matrix::Identity, Utils::Maths::Matrix::Identity, Utils::Maths::Matrix::Identity, nullptr, m_light1.get(), 0.0f, 0.0f);
+    /*bool result = m_vmShader->Render(m_direct3D->GetDeviceContext(), m_mesh->GetIndexCount(), Utils::Maths::Matrix::Identity, Utils::Maths::Matrix::Identity, Utils::Maths::Matrix::Identity, nullptr, m_light1.get(), 0.0f, 0.0f);
     if(!result)
     {
         return false;
-    }
+    }*/
 
-    m_scene->Render(m_direct3D->GetDeviceContext());
+    //m_scene->Render(m_direct3D->GetDeviceContext());
 
     // Present the rendered scene to the screen.
     m_direct3D->EndScene();

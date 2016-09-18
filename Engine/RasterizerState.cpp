@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "RasterizerState.h"
 
-RasterizerState::RasterizerState(ID3D11Device* device, D3D11_CULL_MODE cullMode = D3D11_CULL_BACK)
+RasterizerState::RasterizerState(ID3D11Device* device, D3D11_CULL_MODE cullMode /*= D3D11_CULL_BACK*/)
 {
     // Setup the raster description which will determine how and what polygons will be drawn.
     m_rasterizerDesc.AntialiasedLineEnable = false;
@@ -17,4 +17,9 @@ RasterizerState::RasterizerState(ID3D11Device* device, D3D11_CULL_MODE cullMode 
 
     // Create the rasterizer state from the description we just filled out.
     Utils::ThrowIfFailed(device->CreateRasterizerState(&m_rasterizerDesc, m_rasterizerState.GetAddressOf()));
+}
+
+void RasterizerState::UploadData(ID3D11DeviceContext* deviceContext)
+{
+    deviceContext->RSSetState(m_rasterizerState.Get());
 }

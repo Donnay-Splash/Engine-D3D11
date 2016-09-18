@@ -27,3 +27,8 @@ void DepthState::InitializeDescription(bool depthEnabled)
     m_depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
     m_depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 }
+
+void DepthState::UploadData(ID3D11DeviceContext * deviceContext)
+{
+    deviceContext->OMSetDepthStencilState(m_depthStencilState.Get(), 1);
+}

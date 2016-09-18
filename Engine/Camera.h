@@ -4,6 +4,8 @@
 #include "ConstantBufferLayouts.h"
 #include "RenderTarget.h"
 #include "DepthBuffer.h"
+#include "d3dclass.h"
+#include "Scene.h"
 
 class Camera : public Component
 {
@@ -15,10 +17,12 @@ public:
     };
 
 public:
+    using Ptr = std::shared_ptr<Camera>;
     Camera(const Camera&) = delete;
     ~Camera();
 
     void Render(ID3D11DeviceContext* deviceContext) const override;
+    void Render(D3DClass::Ptr d3dClass, Scene::Ptr scene);
     void Update(float frameTime) override;
 
     // Sets the vertical field of view for the camera
@@ -41,9 +45,12 @@ private:
     float m_fov;
     float m_nearClip;
     float m_farClip;
+    float m_aspectRatio;
     ProjectionMode m_projectionMode;
     
     // Note: Given an identity matrix the camera will be centred at the origin
     // looking down the positive z axis with up on the y axis
     Utils::Maths::Matrix m_projectionMatrix;
+
+    friend class SceneNode;
 };

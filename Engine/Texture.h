@@ -14,7 +14,7 @@ public:
 
     using Ptr = std::shared_ptr<Texture>;
     // Create a texture from set of parameters
-    Texture(void* data, uint32_t height, uint32_t width, uint32_t flags, DXGI_FORMAT textureFormat, ID3D11Device* device);
+    Texture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT textureFormat, ID3D11Device* device);
     // Create texture from D3D11 resource.
     Texture(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device);
     // Create a texture from a file
@@ -24,6 +24,9 @@ public:
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> GetTexture() { return m_texture; }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV() { return m_srv; }
+
+    uint32_t GetHeight() const { return m_height; }
+    uint32_t GetWidth() const { return m_width; }
 
 private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_srv;

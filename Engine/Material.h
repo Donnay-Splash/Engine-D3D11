@@ -6,7 +6,7 @@ class Material
 {
 public:
     using Ptr = std::shared_ptr<Material>;
-    Material(ShaderPipeline::Ptr shaderPipeline);// , BlendState blendState = BlendState());
+    Material(ID3D11Device* device, ShaderPipeline::Ptr shaderPipeline);// , BlendState blendState = BlendState());
 
     void Render(ID3D11DeviceContext* deviceContext);
 

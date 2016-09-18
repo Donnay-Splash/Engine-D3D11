@@ -2,7 +2,8 @@
 #include <DDSTextureLoader.h>
 #include "Texture.h"
 
-Texture::Texture(void* data, uint32_t height, uint32_t width, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device)
+Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device) :
+    m_height(height), m_width(width)
 {
     bool bindToShader = (flags & TextureCreationFlags::BindShaderResource) != 0;
     bool bindToRenderTarget = (flags & TextureCreationFlags::BindShaderResource) != 0;
@@ -14,8 +15,10 @@ Texture::Texture(void* data, uint32_t height, uint32_t width, uint32_t flags, DX
     desc.MipLevels = desc.ArraySize = 1;
     desc.Format = format;
     desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.MiscFlags = 0;
+    desc.BindFlags = 0;
 
     if (bindToShader)
     {
@@ -27,7 +30,7 @@ Texture::Texture(void* data, uint32_t height, uint32_t width, uint32_t flags, DX
     }
     if (bindDepthStencil)
     {
-        desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+        desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
     }
 
     D3D11_SUBRESOURCE_DATA* initData = nullptr;

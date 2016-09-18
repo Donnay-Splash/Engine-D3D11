@@ -9,6 +9,7 @@ Camera::Camera(Component::SceneNodePtr sceneNode) : Component(sceneNode)
     m_projectionMode = ProjectionMode::Perspective;
     m_nearClip = 0.1f;
     m_farClip = 1000.0f;
+    m_aspectRatio = 0.0f;
 }
 
 Camera::~Camera()
@@ -27,27 +28,47 @@ void Camera::Update(float frameTime)
 
 void Camera::Render(ID3D11DeviceContext* deviceContext) const
 {
+}
+
+void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene)
+{
     auto sceneNode = GetSceneNode();
     auto transform = sceneNode->GetWorldTransform();
     auto viewMatrix = transform.GetInverse();
 
-    EngineAssert(false); // Need to set render targets here.
-    // Probably via d3d/renderer
+    // TODO: None of this is very solid.
+    // Needs tidying up.
+    if (m_aspectRatio == 0.0f)
+    {
+        // Calculate aspect ratio from backbuffer dimensions
+        auto screenSize = d3dClass->GetScreenSize();
+        m_aspectRatio = screenSize.x / screenSize.y;
+    }
+
+    CalculateProjectionMatrix();
+    ViewConstants viewConstants;
+    viewConstants.view = viewMatrix;
+    viewConstants.projection = m_projectionMatrix;
+
+    m_viewConstants->SetData(viewConstants);
+    m_viewConstants->UploadData(d3dClass->GetDeviceContext());
+    d3dClass->SetRenderTarget(m_renderTarget, m_depthBuffer);
+    
+    scene->Render(d3dClass->GetDeviceContext());
 
 }
 
 void Camera::CalculateProjectionMatrix()
 {
-    // Implementation unfinished.
-    EngineAssert(false);
     if (m_projectionMode == ProjectionMode::Perspective)
     {
         // aspect ratio needs to come from render target or viewport.
-        auto aspectRatio = 0.0f;
-        m_projectionMatrix = Utils::Maths::Matrix::CreatePerspectiveProjectionMatrix(m_fov, aspectRatio, m_nearClip, m_farClip);
+        m_projectionMatrix = Utils::Maths::Matrix::CreatePerspectiveProjectionMatrix(m_fov, m_aspectRatio, m_nearClip, m_farClip);
     }
     else if (m_projectionMode == ProjectionMode::Orthographic)
     {
+        // Not yet implemented
+        EngineAssert(false);
         // Need to get width and height from render target or something.
         float width = 0.0f;
         float height = 0.0f;
@@ -56,3 +77,22 @@ void Camera::CalculateProjectionMatrix()
 
 }
 
+void Camera::SetRenderTarget(RenderTarget::Ptr renderTarget)
+{
+    m_renderTarget = renderTarget;
+    if (m_renderTarget == nullptr)
+    {
+        m_aspectRatio = 0.0f;
+    }
+    else
+    {
+        auto height = static_cast<float>(m_renderTarget->GetHeight());
+        auto width = static_cast<float>(m_renderTarget->GetWidth());
+        m_aspectRatio = width / height;
+    }
+}
+
+void Camera::SetDepthBuffer(DepthBuffer::Ptr depthBuffer)
+{
+    m_depthBuffer = depthBuffer;
+}
