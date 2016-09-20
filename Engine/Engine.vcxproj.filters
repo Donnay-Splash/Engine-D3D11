@@ -48,19 +48,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="applicationclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpuclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="d3dclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fontclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fontshaderclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fpsclass.cpp">
@@ -75,28 +63,7 @@
     <ClCompile Include="positionclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="systemclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="terrainclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="textclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="timerclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lightshaderclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lightclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="planeclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vmshaderclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Math.cpp">
@@ -177,21 +144,30 @@
     <ClCompile Include="RasterizerState.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="PerformanceTracker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FontShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="applicationclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpuclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="d3dclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fontclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fontshaderclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fpsclass.h">
@@ -203,28 +179,7 @@
     <ClInclude Include="positionclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="systemclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="terrainclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="timerclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lightclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lightshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vmshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="planeclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Math.h">
@@ -340,6 +295,27 @@
     </ClInclude>
     <ClInclude Include="RasterizerState.h">
       <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="PerformanceTracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FontShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

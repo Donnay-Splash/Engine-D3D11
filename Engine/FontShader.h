@@ -5,7 +5,7 @@
 //////////////
 #include <fstream>
 
-class FontShaderClass
+class FontShader
 {
 private:
     struct ConstantBufferType
@@ -21,9 +21,9 @@ private:
     };
 
 public:
-    FontShaderClass();
-    FontShaderClass(const FontShaderClass&);
-    ~FontShaderClass();
+    FontShader();
+    FontShader(const FontShader&) = delete;
+    ~FontShader();
 
     bool Initialize(ID3D11Device*, HWND);
     void Shutdown();

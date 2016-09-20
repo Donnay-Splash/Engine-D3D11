@@ -45,7 +45,6 @@ namespace Utils
 
         Mesh::Ptr MeshMaker::CreateCube(ID3D11Device* device)
         {
-            // Not yet implemented.
             Mesh::PositionContainer positions(24);
             Mesh::NormalContainer normals(24);
             Mesh::UVContainer uvs(24);
@@ -222,6 +221,100 @@ namespace Utils
             // Not yet implemented.
             EngineAssert(false);
             return nullptr;
+        }
+
+        Mesh::Ptr MeshMaker::CreateTesselatedGroundPlane(ID3D11Device* device, uint32_t width, uint32_t height)
+        {
+            // Calculate the number of vertices in the terrain mesh.
+            uint32_t vertexCount = (width - 1) * (height - 1) * 8;
+            
+            // Set the index count to the same as the vertex count.
+            uint32_t indexCount = vertexCount;
+
+            Mesh::PositionContainer positions(vertexCount);
+            Mesh::NormalContainer normals(vertexCount);
+            Mesh::UVContainer uvs(vertexCount);
+            Mesh::IndexContainer indices(indexCount);
+            
+            // Load the vertex and index arrays with the terrain data.
+            float positionX, positionZ;
+            uint32_t index = 0;
+            for(uint32_t j=0; j<(height-1); j++)
+            {
+                for(uint32_t i=0; i<(width-1); i++)
+                {
+                    // Upper left.
+                    positionX = (float)i;
+                    positionZ = (float)(j);
+            
+            
+                    positions[index] = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+                    normals[index] = Utils::Maths::Vector3(0.0, 1.0, 0.0);
+                    uvs[index] = Utils::Maths::Vector2(0.0, 0.0);
+                    indices[index] = index;
+                    index++;
+            
+                    // Upper right.
+                    positionX = (float)(i);
+                    positionZ = (float)(j+1);
+            
+                    positions[index] = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+                    normals[index] = Utils::Maths::Vector3(0.0, 1.0, 0.0);
+                    uvs[index] = Utils::Maths::Vector2(0.0, 0.0);
+                    indices[index] = index;
+                    index++;
+            
+                    // lower left
+                    positionX = (float)(i+1);
+                    positionZ = (float)(j);
+            
+                    positions[index] = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+                    normals[index] = Utils::Maths::Vector3(0.0, 1.0, 0.0);
+                    uvs[index] = Utils::Maths::Vector2(0.0, 0.0);
+                    indices[index] = index;
+                    index++;
+            
+                    // Bottom right.  lower left
+                    positionX = (float)(i);
+                    positionZ = (float)(j+1);
+            
+                    positions[index] = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+                    normals[index] = Utils::Maths::Vector3(0.0, 1.0, 0.0);
+                    uvs[index] = Utils::Maths::Vector2(0.0, 0.0);
+                    indices[index] = index;
+                    index++;
+            
+                    // Bottom right.  upper right
+                    positionX = (float)(i+1);
+                    positionZ = (float)(j+1);
+            
+                    positions[index] = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+                    normals[index] = Utils::Maths::Vector3(0.0, 1.0, 0.0);
+                    uvs[index] = Utils::Maths::Vector2(0.0, 0.0);
+                    indices[index] = index;
+                    index++;
+            
+                    // Bottom rigjht.
+                    positionX = (float)(i+1);
+                    positionZ = (float)(j);
+            
+                    positions[index] = Utils::Maths::Vector3(positionX, 0.0f, positionZ);
+                    normals[index] = Utils::Maths::Vector3(0.0, 1.0, 0.0);
+                    uvs[index] = Utils::Maths::Vector2(0.0, 0.0);
+                    indices[index] = index;
+                    index++;
+            
+                    
+                }
+            }
+            
+            Mesh::Ptr mesh = std::make_shared<Mesh>();
+            mesh->SetPositions(positions);
+            mesh->SetNormals(normals);
+            mesh->SetUVs(uvs);
+            mesh->SetIndices(indices);
+            mesh->FinaliseMesh(device);
+            return mesh;
         }
 
         Mesh::Ptr MeshMaker::CreateFullScreenQuad(ID3D11Device* device)

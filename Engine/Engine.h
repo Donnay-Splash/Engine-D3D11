@@ -18,17 +18,16 @@ const float SCREEN_NEAR = 0.1f;
 #include "timerclass.h"
 #include "positionclass.h"
 #include "Mesh.h"
-#include "vmshaderclass.h"
-#include "lightclass.h"
+#include "Light.h"
 #include "ShaderManager.h"
 #include "Scene.h"
 
 
-class ApplicationClass
+class Engine
 {
 public:
-    ApplicationClass();
-    ~ApplicationClass();
+    Engine();
+    ~Engine();
 
     bool Initialize(HINSTANCE, HWND, int, int);
     bool Frame();
@@ -40,8 +39,7 @@ private:
 private:
     std::shared_ptr<InputClass> m_input;
     std::shared_ptr<D3DClass> m_direct3D;
-    std::shared_ptr<VMShaderClass> m_vmShader;
-    std::shared_ptr<LightClass> m_light1;
+    std::shared_ptr<Light> m_light1;
     std::shared_ptr<TimerClass> m_timer;
     std::shared_ptr<PositionClass> m_position;
     Mesh::Ptr m_mesh;

@@ -1,24 +1,18 @@
 #include "pch.h"
-#include "systemclass.h"
+#include "Application.h"
 
 
-SystemClass::SystemClass()
-{
-	m_Application = 0;
-}
-
-
-SystemClass::SystemClass(const SystemClass& other)
+Application::Application()
 {
 }
 
 
-SystemClass::~SystemClass()
+Application::~Application()
 {
 }
 
 
-bool SystemClass::Initialize()
+bool Application::Initialize()
 {
 	int screenWidth, screenHeight;
 	bool result;
@@ -32,7 +26,7 @@ bool SystemClass::Initialize()
 	InitializeWindows(screenWidth, screenHeight);
 
 	// Create the application wrapper object.
-	m_Application = std::make_unique<ApplicationClass>();
+	m_Application = std::make_unique<Engine>();
 
 	// Initialize the application wrapper object.
 	result = m_Application->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
@@ -45,7 +39,7 @@ bool SystemClass::Initialize()
 }
 
 
-void SystemClass::Shutdown()
+void Application::Shutdown()
 {
 	if(m_Application)
 	{
@@ -59,7 +53,7 @@ void SystemClass::Shutdown()
 }
 
 
-void SystemClass::Run()
+void Application::Run()
 {
 	MSG msg;
 	bool done, result;
@@ -100,7 +94,7 @@ void SystemClass::Run()
 }
 
 
-bool SystemClass::Frame()
+bool Application::Frame()
 {
 	bool result;
 
@@ -116,13 +110,13 @@ bool SystemClass::Frame()
 }
 
 
-LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+LRESULT CALLBACK Application::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
 
 
-void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
+void Application::InitializeWindows(int& screenWidth, int& screenHeight)
 {
 	WNDCLASSEX wc;
 	DEVMODE dmScreenSettings;
@@ -204,7 +198,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 }
 
 
-void SystemClass::ShutdownWindows()
+void Application::ShutdownWindows()
 {
 	// Show the mouse cursor.
 	ShowCursor(true);

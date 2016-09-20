@@ -1,23 +1,18 @@
 #include "pch.h"
-#include "fontclass.h"
+#include "Font.h"
 
 using namespace std;
-FontClass::FontClass()
+Font::Font()
 {
 }
 
 
-FontClass::FontClass(const FontClass& other)
+Font::~Font()
 {
 }
 
 
-FontClass::~FontClass()
-{
-}
-
-
-bool FontClass::Initialize(ID3D11Device* device, char* fontFilename, WCHAR* textureFilename)
+bool Font::Initialize(ID3D11Device* device, char* fontFilename, WCHAR* textureFilename)
 {
 	bool result;
 
@@ -40,7 +35,7 @@ bool FontClass::Initialize(ID3D11Device* device, char* fontFilename, WCHAR* text
 }
 
 
-bool FontClass::LoadFontData(char* filename)
+bool Font::LoadFontData(char* filename)
 {
 	ifstream fin;
 	int i;
@@ -80,27 +75,26 @@ bool FontClass::LoadFontData(char* filename)
 }
 
 
-void FontClass::ReleaseFontData()
+void Font::ReleaseFontData()
 {
 }
 
 
-bool FontClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+bool Font::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
 	// Create the texture object.
 	m_Texture = std::make_shared<Texture>(device, filename);
 
 	return true;
 }
-///////////////////////////////////////////////////////////////////////////////
 
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> FontClass::GetTexture()
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Font::GetTexture()
 {
 	return m_Texture->GetSRV();
 }
 
 
-void FontClass::BuildVertexArray(void* vertices, char* sentence, float drawX, float drawY)
+void Font::BuildVertexArray(void* vertices, char* sentence, float drawX, float drawY)
 {
 	VertexType* vertexPtr;
 	int numLetters, index, i, letter;

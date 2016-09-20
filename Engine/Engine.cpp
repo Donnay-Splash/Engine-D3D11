@@ -1,19 +1,19 @@
 #include "pch.h"
-#include "applicationclass.h"
+#include "Engine.h"
 #include "MeshMaker.h"
 #include "MeshInstance.h"
 
-ApplicationClass::ApplicationClass()
+Engine::Engine()
 {
 }
 
 
-ApplicationClass::~ApplicationClass()
+Engine::~Engine()
 {
 }
 
 
-bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {
     bool result;
 
@@ -38,7 +38,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     m_shaderManager = std::make_shared<ShaderManager>(m_direct3D->GetDevice());
 
     // Create the camera object.
-    m_light1 = std::make_shared<LightClass>();
+    m_light1 = std::make_shared<Light>();
     m_light1->SetAmbientColor({ 0.2f, 0.2f, 0.2f, 1.0f });
     m_light1->SetDiffuseColor({ 1.0f, 1.0f, 1.0f, 1.0f });
     m_light1->SetDirection({ 0.0f, -1.0f, .0f });
@@ -63,17 +63,6 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
     meshInstance->SetMesh(m_mesh);
     meshInstance->SetMaterial(material);
 
-    // Create the color shader object.
-    m_vmShader = std::make_shared<VMShaderClass>();
-
-    // Initialize the color shader object.
-    result = m_vmShader->Initialize(m_direct3D->GetDevice(), m_shaderManager);
-    if(!result)
-    {
-        MessageBox(hwnd, "Could not initialize the texture shader object.", "Error", MB_OK);
-        return false;
-    }
-
     // Create the timer object.
     m_timer = std::make_shared<TimerClass>();
 
@@ -95,7 +84,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 }
 
 
-bool ApplicationClass::Frame()
+bool Engine::Frame()
 {
     bool result;
 
@@ -136,11 +125,10 @@ bool ApplicationClass::Frame()
 }
 
 
-bool ApplicationClass::HandleInput(float frameTime)
+bool Engine::HandleInput(float frameTime)
 {
     bool keyDown;
     float posX, posY, posZ, rotX, rotY, rotZ;
-
 
     // Set the frame time for calculating the updated position.
     m_position->SetFrameTime(frameTime);
@@ -164,11 +152,40 @@ bool ApplicationClass::HandleInput(float frameTime)
     keyDown = m_input->IsZPressed();
     m_position->MoveDownward(keyDown);
 
-    keyDown = m_input->IsPgUpPressed();
-    m_position->LookUpward(keyDown);
+    //keyDown = m_input->IsPgUpPressed();
+    //m_position->LookUpward(keyDown);
 
-    keyDown = m_input->IsPgDownPressed();
-    m_position->LookDownward(keyDown);
+    //keyDown = m_input->IsPgDownPressed();
+    //m_position->LookDownward(keyDown);
+
+    if (m_input->IsHPressed())
+    {
+        m_camera->SetProjectionMode(Camera::ProjectionMode::Orthographic);
+    }
+
+    if (m_input->IsYPressed())
+    {
+        m_camera->SetProjectionMode(Camera::ProjectionMode::Perspective);
+    }
+
+    if (m_input->IsPgUpPressed())
+    {
+        frameTime /= 1000.0f;
+        auto orthoSize = m_camera->GetOrthographicSize();
+        orthoSize += frameTime * 10.0f;
+        m_camera->SetOrthographicSize(orthoSize);
+    }
+
+    if (m_input->IsPgDownPressed())
+    {
+        frameTime /= 1000.0f;
+        auto orthoSize = m_camera->GetOrthographicSize();
+        orthoSize -= frameTime * 10.0f;
+        if (orthoSize > 0.1f)
+        {
+            m_camera->SetOrthographicSize(orthoSize);
+        }
+    }
 
     // Get the view point position/rotation.
     m_position->GetPosition(posX, posY, posZ);
@@ -184,7 +201,7 @@ bool ApplicationClass::HandleInput(float frameTime)
 }
 
 
-bool ApplicationClass::RenderGraphics()
+bool Engine::RenderGraphics()
 {
     // Clear the scene.
     m_direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\directxtk_desktop_2015.2016.9.1.2\build\native\directxtk_desktop_2015.props" Condition="Exists('..\packages\directxtk_desktop_2015.2016.9.1.2\build\native\directxtk_desktop_2015.props')" />
+  <Import Project="..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.props" Condition="Exists('..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -133,23 +133,22 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="applicationclass.cpp" />
+    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
-    <ClCompile Include="cpuclass.cpp" />
+    <ClCompile Include="PerformanceTracker.cpp" />
     <ClCompile Include="d3dclass.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="DepthState.cpp" />
-    <ClCompile Include="fontclass.cpp" />
-    <ClCompile Include="fontshaderclass.cpp" />
+    <ClCompile Include="Font.cpp" />
+    <ClCompile Include="FontShader.cpp" />
     <ClCompile Include="fpsclass.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="InputLayout.cpp" />
-    <ClCompile Include="lightclass.cpp" />
-    <ClCompile Include="lightshaderclass.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
@@ -167,7 +166,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="PipelineState.cpp" />
-    <ClCompile Include="planeclass.cpp" />
     <ClCompile Include="positionclass.cpp" />
     <ClCompile Include="RasterizerState.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
@@ -178,16 +176,14 @@
     <ClCompile Include="ShaderPipeline.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Shaders\CoreShaders.cpp" />
-    <ClCompile Include="systemclass.cpp" />
-    <ClCompile Include="terrainclass.cpp" />
-    <ClCompile Include="textclass.cpp" />
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="timerclass.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
-    <ClCompile Include="vmshaderclass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="applicationclass.h" />
+    <ClInclude Include="Engine.h" />
     <ClInclude Include="BlendState.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
@@ -205,21 +201,19 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="ShaderManager.h" />
-    <ClInclude Include="cpuclass.h" />
+    <ClInclude Include="PerformanceTracker.h" />
     <ClInclude Include="d3dclass.h" />
     <ClInclude Include="DepthBuffer.h" />
     <ClInclude Include="EngineHelpers.h" />
-    <ClInclude Include="fontclass.h" />
-    <ClInclude Include="fontshaderclass.h" />
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="FontShader.h" />
     <ClInclude Include="fpsclass.h" />
     <ClInclude Include="inputclass.h" />
-    <ClInclude Include="lightclass.h" />
-    <ClInclude Include="lightshaderclass.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="planeclass.h" />
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="ShaderPipeline.h" />
@@ -234,13 +228,11 @@
     <ClInclude Include="Shaders\Compiled shaders\texture.ps.h" />
     <ClInclude Include="Shaders\Compiled shaders\texture.vs.h" />
     <ClInclude Include="Shaders\CoreShaders.h" />
-    <ClInclude Include="systemclass.h" />
-    <ClInclude Include="terrainclass.h" />
-    <ClInclude Include="textclass.h" />
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="timerclass.h" />
     <ClInclude Include="VertexBuffer.h" />
-    <ClInclude Include="vmshaderclass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Math.inl" />
@@ -359,13 +351,17 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\directxtk_desktop_2015.2016.9.1.2\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\packages\directxtk_desktop_2015.2016.9.1.2\build\native\directxtk_desktop_2015.targets')" />
+    <Import Project="..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets" Condition="Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" />
+    <Import Project="..\packages\Assimp.3.0.0\build\native\Assimp.targets" Condition="Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" />
+    <Import Project="..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2016.9.1.2\build\native\directxtk_desktop_2015.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2016.9.1.2\build\native\directxtk_desktop_2015.props'))" />
-    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2016.9.1.2\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2016.9.1.2\build\native\directxtk_desktop_2015.targets'))" />
+    <Error Condition="!Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.3.0.0\build\native\Assimp.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.props'))" />
+    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.targets'))" />
   </Target>
 </Project>

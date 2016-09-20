@@ -10,6 +10,7 @@ Camera::Camera(Component::SceneNodePtr sceneNode) : Component(sceneNode)
     m_nearClip = 0.1f;
     m_farClip = 1000.0f;
     m_aspectRatio = 0.0f;
+    m_orthographicSize = 20.0f;
 }
 
 Camera::~Camera()
@@ -67,12 +68,11 @@ void Camera::CalculateProjectionMatrix()
     }
     else if (m_projectionMode == ProjectionMode::Orthographic)
     {
-        // Not yet implemented
-        EngineAssert(false);
-        // Need to get width and height from render target or something.
-        float width = 0.0f;
-        float height = 0.0f;
-        m_projectionMatrix = Utils::Maths::Matrix::CreateOrthographicProjectionMatrix(width, height, m_nearClip, m_farClip);
+        EngineAssert(m_orthographicSize > 0.0f);
+        EngineAssert(m_aspectRatio > 0.0f);
+        float sizeX = m_orthographicSize * m_aspectRatio;
+        float sizeY = m_orthographicSize;
+        m_projectionMatrix = Utils::Maths::Matrix::CreateOrthographicProjectionMatrix(sizeX, sizeY, m_nearClip, m_farClip);
     }
 
 }

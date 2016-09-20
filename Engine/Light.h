@@ -1,11 +1,10 @@
 #pragma once
 
-class LightClass
+class Light
 {
 public:
-    LightClass();
-    LightClass(const LightClass&);
-    ~LightClass();
+    Light();
+    ~Light();
 
     void SetDiffuseColor(Utils::Maths::Color);
     void SetDirection(Utils::Maths::Vector3);

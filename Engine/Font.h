@@ -1,16 +1,9 @@
 #pragma once
 
-//////////////
-// INCLUDES //
-//////////////
 #include <fstream>
-
-///////////////////////
-// MY CLASS INCLUDES //
-///////////////////////
 #include "Texture.h"
 
-class FontClass
+class Font
 {
 private:
     struct FontType
@@ -26,9 +19,9 @@ private:
     };
 
 public:
-    FontClass();
-    FontClass(const FontClass&);
-    ~FontClass();
+    Font();
+    Font(const Font&) = delete;
+    ~Font();
 
     bool Initialize(ID3D11Device*, char*, WCHAR*);
 
