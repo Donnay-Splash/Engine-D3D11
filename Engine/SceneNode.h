@@ -22,6 +22,9 @@ public:
     inline ComponentContainer GetComponents() const { return m_components; }
     inline SceneNodeContainer GetChildNodes() const { return m_childNodes; }
 
+    template <class ComponentType>
+    inline std::shared_ptr<ComponentType> GetComponentOfType();
+
     // Temporary change. Move device somewhere else
     template <class ComponentType>
     std::shared_ptr<ComponentType> AddComponent(ID3D11Device* device);
@@ -39,9 +42,11 @@ public:
 
     std::shared_ptr<Scene> GetScene() const { return m_scene; }
 
+    bool IsRootNode() const { return m_isRootNode; }
+
 private:
-    SceneNode(ScenePtr scene);
-    static Ptr Create(ScenePtr scene) { return std::shared_ptr<SceneNode>(new SceneNode(scene)); }
+    SceneNode(ScenePtr scene, bool isRoot = false);
+    static Ptr Create(ScenePtr scene, bool isRoot = false) { return std::shared_ptr<SceneNode>(new SceneNode(scene, isRoot)); }
 
     friend class Scene;
 private:
@@ -56,6 +61,8 @@ private:
     Utils::Maths::Vector3 m_scale;
     Utils::Maths::Quaternion m_rotation;
 
+    // Flag to signal if this SceneNode is the root of a scene.
+    bool m_isRootNode;
 };
 
 #include "SceneNode.inl"

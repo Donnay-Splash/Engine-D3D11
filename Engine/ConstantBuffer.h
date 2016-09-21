@@ -12,8 +12,8 @@ class ConstantBuffer
 {
 public:
     using Ptr = std::shared_ptr<ConstantBuffer<T>>;
-    ConstantBuffer(UINT inputSlot, uint32_t pipelineStages, ID3D11Device* device) :
-        m_pipelineStages(pipelineStages), m_inputSlot(inputSlot)
+    ConstantBuffer(uint32_t pipelineStages, ID3D11Device* device) :
+        m_pipelineStages(pipelineStages)
     {
         // Constant buffer must be bound to atleast one pipeline stage
         EngineAssert(pipelineStages > 0);
@@ -78,7 +78,6 @@ private:
     __declspec(align(16))
     T m_data;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_buffer;
-    const UINT m_inputSlot;
     const uint32_t m_pipelineStages;
     bool m_dataChanged = true;
 };

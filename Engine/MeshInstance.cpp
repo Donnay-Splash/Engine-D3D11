@@ -10,7 +10,7 @@ MeshInstance::MeshInstance(Component::SceneNodePtr sceneNode) : Component(sceneN
 void MeshInstance::Initialize(ID3D11Device* device)
 {
     // Initialize object constants buffer
-    m_objectConstants = std::make_shared<ConstantBuffer<ObjectConstants>>(2, PipelineStage::Vertex, device);
+    m_objectConstants = std::make_shared<ConstantBuffer<ObjectConstants>>(PipelineStage::Vertex, device);
 }
 
 void MeshInstance::Update(float frameTime)

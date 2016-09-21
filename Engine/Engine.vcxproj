@@ -138,6 +138,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
+    <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="PerformanceTracker.cpp" />
     <ClCompile Include="d3dclass.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
@@ -175,7 +176,6 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderPipeline.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
-    <ClCompile Include="Shaders\CoreShaders.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -191,6 +191,7 @@
     <ClInclude Include="ConstantBufferLayouts.h" />
     <ClInclude Include="DepthState.h" />
     <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="LightManager.h" />
     <ClInclude Include="MeshInstance.h" />
     <ClInclude Include="MeshMaker.h" />
     <ClInclude Include="PipelineState.h" />
@@ -225,7 +226,6 @@
     <ClInclude Include="Shaders\Compiled shaders\light.vs.h" />
     <ClInclude Include="Shaders\Compiled shaders\texture.ps.h" />
     <ClInclude Include="Shaders\Compiled shaders\texture.vs.h" />
-    <ClInclude Include="Shaders\CoreShaders.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
@@ -278,6 +278,7 @@
       <ObjectFileOutput>
       </ObjectFileOutput>
     </FxCompile>
+    <None Include="Scene.inl" />
     <None Include="Shaders\Globals_ps.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <FileType>Document</FileType>

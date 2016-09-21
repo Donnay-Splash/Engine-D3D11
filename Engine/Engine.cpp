@@ -44,6 +44,30 @@ bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
     m_scene = std::make_shared<Scene>();
     m_scene->Initialize();
 
+    // Initialize light manager
+    m_lightManager.Initialize(m_direct3D->GetDevice());
+
+    // Add lights to the scene
+    auto lightNode = m_scene->AddNode();
+    lightNode->SetPosition({ -1.0f, -1.0f, -1.0f });
+    auto light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
+    light->SetColor({ DirectX::Colors::Yellow });
+
+    lightNode = m_scene->AddNode();
+    lightNode->SetPosition({ -1.0f, 1.0f, -1.0f });
+    light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
+    light->SetColor({ DirectX::Colors::Blue });
+
+    lightNode = m_scene->AddNode();
+    lightNode->SetPosition({ 1.0f, 1.0f, 1.0f });
+    light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
+    light->SetColor({ DirectX::Colors::Green });
+
+    lightNode = m_scene->AddNode();
+    lightNode->SetPosition({ 1.0f, -1.0f, 1.0f });
+    light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
+    light->SetColor({ DirectX::Colors::Red });
+
     // Create the camera object
     auto cameraNode = m_scene->AddNode();
     m_camera = cameraNode->AddComponent<Camera>(m_direct3D->GetDevice());
@@ -55,13 +79,6 @@ bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
     auto material = std::make_shared<Material>(m_direct3D->GetDevice(), shaderPipeline);
     meshInstance->SetMesh(m_mesh);
     meshInstance->SetMaterial(material);
-
-    // Create another mesh object that we attach to the camera
-    auto trackedMeshNode = m_scene->AddNode(cameraNode);
-    auto trackedMeshInstance = trackedMeshNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
-    trackedMeshInstance->SetMaterial(material);
-    trackedMeshInstance->SetMesh(m_mesh);
-    trackedMeshNode->SetPosition({ 0.0f, 0.0f, 10.0f });
 
     // Create the timer object.
     m_timer = std::make_shared<TimerClass>();
@@ -206,6 +223,7 @@ bool Engine::RenderGraphics()
     // Clear the scene.
     m_direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
 
+    m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext());
     // Generate the view matrix based on the camera's position.
     m_camera->Render(m_direct3D, m_scene);
 

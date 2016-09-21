@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "SceneNode.h"
 
-SceneNode::SceneNode(ScenePtr scene) :
-    m_scene(scene)
+SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) :
+    m_scene(scene), m_isRootNode(isRoot)
 {
     // Initialise scale to 1
     SetScale(1.0f);

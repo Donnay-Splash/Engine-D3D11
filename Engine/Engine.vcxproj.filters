@@ -69,9 +69,6 @@
     <ClCompile Include="Math.cpp">
       <Filter>Utils\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Shaders\CoreShaders.cpp">
-      <Filter>Shader Files</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -165,6 +162,9 @@
     <ClCompile Include="Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LightManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dclass.h">
@@ -208,9 +208,6 @@
     </ClInclude>
     <ClInclude Include="Shaders\Compiled shaders\texture.vs.h">
       <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Shaders\CoreShaders.h">
-      <Filter>Shader Files</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
@@ -311,6 +308,9 @@
     <ClInclude Include="Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LightManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math.inl">
@@ -328,6 +328,9 @@
     </None>
     <None Include="Shaders\Globals_vs.hlsl">
       <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Scene.inl">
+      <Filter>Header Files\Scene</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

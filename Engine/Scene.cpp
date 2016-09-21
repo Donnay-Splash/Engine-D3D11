@@ -8,7 +8,8 @@ Scene::Scene()
 
 void Scene::Initialize()
 {
-    m_rootNode = SceneNode::Create(shared_from_this());
+    m_rootNode = SceneNode::Create(shared_from_this(), true);
+    EngineAssert(m_rootNode->IsRootNode());
 }
 
 SceneNode::Ptr Scene::AddNode(SceneNode::Ptr parentNode /*= nullptr*/)

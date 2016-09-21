@@ -1,5 +1,8 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
 // System includes
 #include <array>
 #include <ctype.h>
@@ -32,5 +35,4 @@
 #include "Math.h"
 
 // Windows
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

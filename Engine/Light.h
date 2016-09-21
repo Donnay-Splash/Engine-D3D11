@@ -8,6 +8,20 @@ struct LightData
     Utils::Maths::Vector3 Position;
     Utils::Maths::Vector3 Direction;
     Utils::Maths::Color Color;
+
+    bool operator!=(const LightData& rhs)
+    {
+        return  (this->Position != rhs.Position) ||
+            (this->Direction != rhs.Direction) ||
+            (this->Color != rhs.Color);
+    }
+
+    bool operator==(const LightData& rhs)
+    {
+        return  (this->Position == rhs.Position) &&
+            (this->Direction == rhs.Direction) &&
+            (this->Color == rhs.Color);
+    }
 };
 
 class Light : public Component

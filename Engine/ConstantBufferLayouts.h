@@ -1,6 +1,9 @@
 #pragma once
 #include "Math.h"
+#include "Light.h"
 #define ALIGN_16 _declspec(align(16))
+
+static const uint32_t kMaxLightCount = 4;
 
 ALIGN_16
 struct ViewConstants
@@ -41,25 +44,37 @@ struct ObjectConstants
 
 
 ALIGN_16
-struct LightBuffer
+struct LightConstants
 {
     static const UINT kRegister = 0;
-    Utils::Maths::Color ambientColor;
-    Utils::Maths::Color diffuseColor;
-    Utils::Maths::Vector3 lightDirection;
-    float padding;
+    LightData lights[kMaxLightCount];
+    float activeLights;
 
-    bool operator!=(const LightBuffer& rhs)
+    bool operator!=(const LightConstants& rhs)
     {
-        return  (this->ambientColor != rhs.ambientColor) ||
-            (this->diffuseColor != rhs.diffuseColor) ||
-            (this->lightDirection != rhs.lightDirection);
+        for (int i = 0; i < kMaxLightCount; i++)
+        {
+            if(this->lights[i] != rhs.lights[i])
+            {
+                return true;
+            }
+        }
+
+        return activeLights != rhs.activeLights;
     }
 
-    bool operator==(const LightBuffer& rhs)
+    bool operator==(const LightConstants& rhs)
     {
-        return  (this->ambientColor == rhs.ambientColor) &&
-            (this->diffuseColor == rhs.diffuseColor) &&
-            (this->lightDirection == rhs.lightDirection);
+        bool result = true;
+        for (int i = 0; i < kMaxLightCount; i++)
+        {
+            result &= (lights[i] == rhs.lights[i]);
+            if (!result)
+            {
+                break;
+            }
+        }
+
+        return result && (activeLights == rhs.activeLights);
     }
 };

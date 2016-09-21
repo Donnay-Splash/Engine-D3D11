@@ -21,6 +21,7 @@ const float SCREEN_NEAR = 0.1f;
 #include "Light.h"
 #include "ShaderManager.h"
 #include "Scene.h"
+#include "LightManager.h"
 
 
 class Engine
@@ -46,5 +47,6 @@ private:
     Camera::Ptr m_camera;
     ShaderManager::Ptr m_shaderManager;
     Scene::Ptr m_scene;
+    LightManager m_lightManager;
 };
 
