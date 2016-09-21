@@ -22,7 +22,7 @@ VertexBuffer::VertexBuffer(void* data, uint32_t vertexCount, size_t vertexSizeIn
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
-	Utils::ThrowIfFailed(device->CreateBuffer(&vertexBufferDesc, &vertexData, m_buffer.GetAddressOf()));
+	Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&vertexBufferDesc, &vertexData, m_buffer.GetAddressOf()));
 }
 
 void VertexBuffer::UploadData(ID3D11DeviceContext* deviceContext, UINT inputSlot, UINT offset)

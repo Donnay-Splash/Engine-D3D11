@@ -1,31 +1,34 @@
 #pragma once
+#include "Math.h"
+#include "Component.h"
+// light information to be consumed by shader
+// TODO: May need to add padding
+struct LightData
+{
+    Utils::Maths::Vector3 Position;
+    Utils::Maths::Vector3 Direction;
+    Utils::Maths::Color Color;
+};
 
-class Light
+class Light : public Component
 {
 public:
-    Light();
-    ~Light();
+    virtual void Update(float frameTime) override;
+    virtual void Render(ID3D11DeviceContext* deviceContext) const override;
 
-    void SetDiffuseColor(Utils::Maths::Color);
+    void SetColor(Utils::Maths::Color);
     void SetDirection(Utils::Maths::Vector3);
-    void SetAmbientColor(Utils::Maths::Color);
-    void SetSpecularColor(Utils::Maths::Color);
-    void SetSpecularPower(float);
-    void SetPosition(Utils::Maths::Vector3);
 
-    Utils::Maths::Color GetDiffuseColor();
-    Utils::Maths::Vector3 GetDirection();
-    Utils::Maths::Color GetAmbientColor();
-    Utils::Maths::Color GetSpecularColor();
-    Utils::Maths::Vector3 GetPosition();
-    float GetSpecularPower();
+    LightData GetLightData();
+
+protected:
+    Light(Component::SceneNodePtr sceneNode);
+    virtual void Initialize(ID3D11Device* device) override;
 
 private:
-    Utils::Maths::Color m_diffuseColor;
-    Utils::Maths::Vector3 m_direction;
-    Utils::Maths::Color m_ambientColor;
-    Utils::Maths::Color m_specularColor;
-    Utils::Maths::Vector3 m_position;
+    LightData m_lightData;
     float m_specularPower;
+
+    friend class SceneNode;
 };
 

@@ -203,12 +203,6 @@
     <ClInclude Include="Shaders\Compiled shaders\light.vs.h">
       <Filter>Shader Files\Compiled Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\Compiled shaders\manipulation.ps.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Shaders\Compiled shaders\manipulation.vs.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="Shaders\Compiled shaders\texture.ps.h">
       <Filter>Shader Files\Compiled Shaders</Filter>
     </ClInclude>
@@ -326,6 +320,15 @@
     <None Include="SceneNode.inl">
       <Filter>Header Files\Scene</Filter>
     </None>
+    <None Include="Shaders\InputStructs.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\Globals_ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shaders\Globals_vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\texture.ps">
@@ -349,13 +352,13 @@
     <FxCompile Include="Shaders\light.vs">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\manipulation.ps">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\manipulation.vs">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\texture.vs">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Uber.vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Uber.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

@@ -6,7 +6,7 @@
 // TODO: Come up with a better sounding name
 enum class ShaderName
 {
-	VertexManipulation = 0
+	Uber = 0
 };
 
 class ShaderManager

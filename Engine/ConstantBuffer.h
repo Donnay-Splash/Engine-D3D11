@@ -28,7 +28,7 @@ public:
         matrixBufferDesc.StructureByteStride = 0;
 
         // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-        Utils::ThrowIfFailed(device->CreateBuffer(&matrixBufferDesc, NULL, &m_buffer));
+        Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&matrixBufferDesc, NULL, &m_buffer));
     }
 
     // TODO Need to find better name for this 
@@ -65,12 +65,12 @@ public:
 
         if (m_pipelineStages & PipelineStage::Vertex)
         {
-            deviceContext->VSSetConstantBuffers(m_inputSlot, 1, m_buffer.GetAddressOf());
+            deviceContext->VSSetConstantBuffers(T::kRegister, 1, m_buffer.GetAddressOf());
         }
 
         if (m_pipelineStages & PipelineStage::Pixel)
         {
-            deviceContext->PSSetConstantBuffers(m_inputSlot, 1, m_buffer.GetAddressOf());
+            deviceContext->PSSetConstantBuffers(T::kRegister, 1, m_buffer.GetAddressOf());
         }
     }
 

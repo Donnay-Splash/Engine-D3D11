@@ -36,7 +36,7 @@ BlendState::BlendState(ID3D11Device* device, BlendMode initMode /* = BlendMode::
     }
 
     // Create the second blend state using the description.
-    Utils::ThrowIfFailed(device->CreateBlendState(&blendStateDescription, m_blendState.GetAddressOf()));
+    Utils::DirectXHelpers::ThrowIfFailed(device->CreateBlendState(&blendStateDescription, m_blendState.GetAddressOf()));
 }
 
 void BlendState::SetBlendMode(BlendMode mode)

@@ -37,13 +37,6 @@ bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
     // Initialise the shader manager
     m_shaderManager = std::make_shared<ShaderManager>(m_direct3D->GetDevice());
 
-    // Create the camera object.
-    m_light1 = std::make_shared<Light>();
-    m_light1->SetAmbientColor({ 0.2f, 0.2f, 0.2f, 1.0f });
-    m_light1->SetDiffuseColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-    m_light1->SetDirection({ 0.0f, -1.0f, .0f });
-    m_light1->SetPosition({ 0.0f, 0.0f, -0.5f });
-
     // Create Mesh object
     m_mesh = Utils::MeshMaker::CreateCube(m_direct3D->GetDevice());
 
@@ -58,10 +51,17 @@ bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
     // Create the mesh object and add it to the scene.
     auto meshNode = m_scene->AddNode();
     auto meshInstance = meshNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
-    auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::VertexManipulation);
+    auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
     auto material = std::make_shared<Material>(m_direct3D->GetDevice(), shaderPipeline);
     meshInstance->SetMesh(m_mesh);
     meshInstance->SetMaterial(material);
+
+    // Create another mesh object that we attach to the camera
+    auto trackedMeshNode = m_scene->AddNode(cameraNode);
+    auto trackedMeshInstance = trackedMeshNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
+    trackedMeshInstance->SetMaterial(material);
+    trackedMeshInstance->SetMesh(m_mesh);
+    trackedMeshNode->SetPosition({ 0.0f, 0.0f, 10.0f });
 
     // Create the timer object.
     m_timer = std::make_shared<TimerClass>();
@@ -152,11 +152,11 @@ bool Engine::HandleInput(float frameTime)
     keyDown = m_input->IsZPressed();
     m_position->MoveDownward(keyDown);
 
-    //keyDown = m_input->IsPgUpPressed();
-    //m_position->LookUpward(keyDown);
+    keyDown = m_input->IsPgUpPressed();
+    m_position->LookUpward(keyDown);
 
-    //keyDown = m_input->IsPgDownPressed();
-    //m_position->LookDownward(keyDown);
+    keyDown = m_input->IsPgDownPressed();
+    m_position->LookDownward(keyDown);
 
     if (m_input->IsHPressed())
     {

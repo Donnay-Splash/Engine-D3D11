@@ -223,8 +223,6 @@
     <ClInclude Include="Shaders\Compiled shaders\font.vs.h" />
     <ClInclude Include="Shaders\Compiled shaders\light.ps.h" />
     <ClInclude Include="Shaders\Compiled shaders\light.vs.h" />
-    <ClInclude Include="Shaders\Compiled shaders\manipulation.ps.h" />
-    <ClInclude Include="Shaders\Compiled shaders\manipulation.vs.h" />
     <ClInclude Include="Shaders\Compiled shaders\texture.ps.h" />
     <ClInclude Include="Shaders\Compiled shaders\texture.vs.h" />
     <ClInclude Include="Shaders\CoreShaders.h" />
@@ -280,6 +278,27 @@
       <ObjectFileOutput>
       </ObjectFileOutput>
     </FxCompile>
+    <None Include="Shaders\Globals_ps.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Shaders\Globals_vs.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Shaders\InputStructs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="Shaders\light.ps">
       <FileType>Document</FileType>
       <EntryPointName>PSMain</EntryPointName>
@@ -302,7 +321,7 @@
       <ObjectFileOutput>
       </ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shaders\manipulation.ps">
+    <FxCompile Include="Shaders\Uber.ps.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>PSMain</EntryPointName>
       <DisableOptimizations>false</DisableOptimizations>
@@ -313,7 +332,7 @@
       <ObjectFileOutput>
       </ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shaders\manipulation.vs">
+    <FxCompile Include="Shaders\Uber.vs.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>VSMain</EntryPointName>
       <DisableOptimizations>false</DisableOptimizations>

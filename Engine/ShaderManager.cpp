@@ -3,10 +3,10 @@
 #include "ShaderPipeline.h"
 #include "InputLayout.h"
 
-namespace VMShader
+namespace UberShader
 {
-	#include "Shaders\Compiled shaders\manipulation.ps.h"
-	#include "Shaders\Compiled shaders\manipulation.vs.h"
+	#include "Shaders\Compiled shaders\Uber.ps.hlsl.h"
+	#include "Shaders\Compiled shaders\Uber.vs.hlsl.h"
 }
 
 ShaderManager::ShaderManager(ID3D11Device* device)
@@ -23,11 +23,11 @@ void ShaderManager::LoadCoreShaders(ID3D11Device* device)
 	{
 
 		InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0);
-		Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, VMShader::g_VSMain, sizeof(VMShader::g_VSMain), device);
-		Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, VMShader::g_PSMain, sizeof(VMShader::g_PSMain), device);
+		Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, UberShader::g_VSMain, sizeof(UberShader::g_VSMain), device);
+		Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, UberShader::g_PSMain, sizeof(UberShader::g_PSMain), device);
 		ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(vertexShader, pixelShader, layout, device);
 
-		m_shaderMap.insert(ShaderMapObject(ShaderName::VertexManipulation, shaderPipeline));
+		m_shaderMap.insert(ShaderMapObject(ShaderName::Uber, shaderPipeline));
 	}
 }
 

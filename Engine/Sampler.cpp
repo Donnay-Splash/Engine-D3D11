@@ -29,7 +29,7 @@ Sampler::Sampler(ID3D11Device* device,
     samplerDesc.MaxLOD = maxLOD;
 
     // Create the texture sampler state.
-    Utils::ThrowIfFailed(device->CreateSamplerState(&samplerDesc, m_samplerState.GetAddressOf()));
+    Utils::DirectXHelpers::ThrowIfFailed(device->CreateSamplerState(&samplerDesc, m_samplerState.GetAddressOf()));
 }
 
 void Sampler::UploadData(ID3D11DeviceContext* deviceContext, UINT inputSlot)

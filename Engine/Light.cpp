@@ -1,75 +1,40 @@
 #include "pch.h"
 #include "Light.h"
+#include "SceneNode.h"
 
-
-Light::Light()
+Light::Light(Component::SceneNodePtr sceneNode) : Component(sceneNode)
 {
+
 }
 
-
-Light::~Light()
+void Light::Initialize(ID3D11Device* device)
 {
+
 }
 
-
-void Light::SetDiffuseColor(Utils::Maths::Color color)
+void Light::Update(float frameTime)
 {
-    m_diffuseColor = color;
+
+}
+
+void Light::Render(ID3D11DeviceContext* deviceContext) const
+{
+
+}
+
+void Light::SetColor(Utils::Maths::Color color)
+{
+    m_lightData.Color = color;
 }
 
 
 void Light::SetDirection(Utils::Maths::Vector3 direction)
 {
-    m_direction = direction;
+    m_lightData.Direction = direction;
 }
 
-void Light::SetAmbientColor(Utils::Maths::Color color)
+LightData Light::GetLightData()
 {
-    m_ambientColor = color;
-}
-
-void Light::SetSpecularColor(Utils::Maths::Color color)
-{
-    m_specularColor = color;
-}
-
-void Light::SetSpecularPower(float power)
-{
-    m_specularPower = power;
-}
-
-void Light::SetPosition(Utils::Maths::Vector3 position)
-{
-    m_position = position;
-}
-
-Utils::Maths::Color Light::GetDiffuseColor()
-{
-    return m_diffuseColor;
-}
-
-
-Utils::Maths::Vector3 Light::GetDirection()
-{
-    return m_direction;
-}
-
-Utils::Maths::Color Light::GetAmbientColor()
-{
-    return m_ambientColor;
-}
-
-Utils::Maths::Color Light::GetSpecularColor()
-{
-    return m_specularColor;
-}
-
-Utils::Maths::Vector3 Light::GetPosition()
-{
-    return m_position;
-}
-
-float Light::GetSpecularPower()
-{
-    return m_specularPower;
+    m_lightData.Position = GetSceneNode()->GetWorldSpacePosition();
+    return m_lightData;
 }

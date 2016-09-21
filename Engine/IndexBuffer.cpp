@@ -22,7 +22,7 @@ IndexBuffer::IndexBuffer(void* data, uint32_t indexCount, ID3D11Device* device, 
 	indexData.SysMemSlicePitch = 0;
 
 	// Create the index buffer.
-	Utils::ThrowIfFailed(device->CreateBuffer(&indexBufferDesc, &indexData, m_buffer.GetAddressOf()));
+	Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&indexBufferDesc, &indexData, m_buffer.GetAddressOf()));
 }
 
 void IndexBuffer::UploadData(ID3D11DeviceContext* deviceContext)

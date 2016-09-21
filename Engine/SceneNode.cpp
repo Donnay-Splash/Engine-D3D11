@@ -13,23 +13,6 @@ SceneNode::~SceneNode()
 
 }
 
-Utils::Maths::Matrix SceneNode::GetTransform()
-{
-    return Utils::Maths::Matrix::CreateFromTranslationRotationScale(m_position, m_rotation, m_scale.x);
-}
-
-Utils::Maths::Matrix SceneNode::GetWorldTransform()
-{
-    if (m_parentNode)
-    {
-        return GetTransform() * m_parentNode->GetWorldTransform();
-    }
-    else
-    {
-        return GetTransform();
-    }
-}
-
 void SceneNode::Update(float frameTime)
 {
     for (auto child : m_childNodes)
@@ -54,4 +37,35 @@ void SceneNode::Render(ID3D11DeviceContext* deviceContext)
     {
         component->Render(deviceContext);
     }
+}
+
+Utils::Maths::Matrix SceneNode::GetTransform() const
+{
+    return Utils::Maths::Matrix::CreateFromTranslationRotationScale(m_position, m_rotation, m_scale.x);
+}
+
+Utils::Maths::Matrix SceneNode::GetWorldTransform() const
+{
+    if (m_parentNode)
+    {
+        return GetTransform() * m_parentNode->GetWorldTransform();
+    }
+    else
+    {
+        return GetTransform();
+    }
+}
+
+Utils::Maths::Vector3 SceneNode::GetPosition() const
+{
+    return m_position;
+}
+
+Utils::Maths::Vector3 SceneNode::GetWorldSpacePosition() const
+{
+    if (m_parentNode)
+    {
+        return m_position * m_parentNode->GetWorldTransform();
+    }
+    return m_position;
 }

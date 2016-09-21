@@ -1,9 +1,11 @@
 #pragma once
 #include "Math.h"
+#define ALIGN_16 _declspec(align(16))
 
-_declspec(align(16))
+ALIGN_16
 struct ViewConstants
 {
+    static const UINT kRegister = 0;
     Utils::Maths::Matrix view;
     Utils::Maths::Matrix projection;
 
@@ -20,9 +22,10 @@ struct ViewConstants
     }
 };
 
-_declspec(align(16))
+ALIGN_16
 struct ObjectConstants
 {
+    static const UINT kRegister = 1;
     Utils::Maths::Matrix objectTransform;
 
     bool operator!=(const ObjectConstants& rhs)
@@ -36,32 +39,11 @@ struct ObjectConstants
     }
 };
 
-_declspec(align(16))
-struct TimeBuffer
-{
-    float time;
-    float height;
-    float length;
-    float padding;
 
-    bool operator!=(const TimeBuffer& rhs)
-    {
-        return  (this->time != rhs.time) ||
-            (this->height != rhs.height) ||
-            (this->length != rhs.length);
-    }
-
-    bool operator==(const TimeBuffer& rhs)
-    {
-        return  (this->time == rhs.time) &&
-            (this->height == rhs.height) &&
-            (this->length == rhs.length);
-    }
-};
-
-_declspec(align(16))
+ALIGN_16
 struct LightBuffer
 {
+    static const UINT kRegister = 0;
     Utils::Maths::Color ambientColor;
     Utils::Maths::Color diffuseColor;
     Utils::Maths::Vector3 lightDirection;

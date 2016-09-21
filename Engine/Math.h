@@ -97,6 +97,10 @@ namespace Utils
             bool operator!=(const Vector4& rhs) const;
         };
 
+        // Binary operators
+        Vector4 operator* (const Vector4& vector, const Matrix& matrix);
+
+
         /****************************************************************************
         *
         * Vector3
@@ -117,6 +121,9 @@ namespace Utils
 
         };
 
+        // Binary operators
+        Vector3 operator* (const Vector3& vector, const Matrix& matrix);
+
         /****************************************************************************
         *
         * Vector2
@@ -135,6 +142,9 @@ namespace Utils
             bool operator==(const Vector2& rhs) const;
             bool operator!=(const Vector2& rhs) const;
         };
+
+        // Binary operators
+        Vector2 operator* (const Vector2& vector, const Matrix& matrix);
 
         /****************************************************************************
         *

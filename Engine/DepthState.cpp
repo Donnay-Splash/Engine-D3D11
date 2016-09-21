@@ -4,7 +4,7 @@
 DepthState::DepthState(ID3D11Device* device, bool depthEnabled /*= true*/)
 {
     InitializeDescription(depthEnabled);
-    Utils::ThrowIfFailed(device->CreateDepthStencilState(&m_depthStencilDesc, m_depthStencilState.GetAddressOf()));
+    Utils::DirectXHelpers::ThrowIfFailed(device->CreateDepthStencilState(&m_depthStencilDesc, m_depthStencilState.GetAddressOf()));
 }
 
 void DepthState::InitializeDescription(bool depthEnabled)

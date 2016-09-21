@@ -36,7 +36,7 @@ void D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
     m_screenSize = { static_cast<float>(screenWidth), static_cast<float>(screenHeight) };
 
     // Create a DirectX graphics interface factory.
-    Utils::ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(m_factory.GetAddressOf())));
+    Utils::DirectXHelpers::ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(m_factory.GetAddressOf())));
 
     // Retrieve information from the adapter.
     GetAdapterInformation();
@@ -45,7 +45,7 @@ void D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
     CreateDeviceAndSwapChain(screenWidth, screenHeight, hwnd);
 
     // Get the pointer to the back buffer.
-    Utils::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBufferPtr)));
+    Utils::DirectXHelpers::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBufferPtr)));
 
     // Create the render target view with the back buffer pointer.
     m_backBufferRT = std::make_shared<RenderTarget>(backBufferPtr, 0, m_device.Get());
@@ -74,10 +74,10 @@ void D3DClass::GetAdapterInformation()
     DXGI_ADAPTER_DESC adapterDesc;
 
     // Use the factory to create an adapter for the primary graphics interface (video card).
-    Utils::ThrowIfFailed(m_factory->EnumAdapters(0, m_adapter.GetAddressOf()));
+    Utils::DirectXHelpers::ThrowIfFailed(m_factory->EnumAdapters(0, m_adapter.GetAddressOf()));
 
     // Get the adapter (video card) description.
-    Utils::ThrowIfFailed(m_adapter->GetDesc(&adapterDesc));
+    Utils::DirectXHelpers::ThrowIfFailed(m_adapter->GetDesc(&adapterDesc));
 
     // Store the dedicated video card memory in megabytes.
     m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
@@ -121,18 +121,18 @@ void D3DClass::CreateDeviceAndSwapChain(int screenWidth, int screenHeight, HWND 
 
     UINT creationFlags = D3D11_CREATE_DEVICE_DEBUG;
     Microsoft::WRL::ComPtr<ID3D11Device> tempDevice;
-    Utils::ThrowIfFailed(D3D11CreateDevice(m_adapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, NULL, creationFlags, featureLevelsSupported, ARRAYSIZE(featureLevelsSupported), D3D11_SDK_VERSION,
+    Utils::DirectXHelpers::ThrowIfFailed(D3D11CreateDevice(m_adapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, NULL, creationFlags, featureLevelsSupported, ARRAYSIZE(featureLevelsSupported), D3D11_SDK_VERSION,
         tempDevice.GetAddressOf(), NULL, m_deviceContext.GetAddressOf()));
     // Now convert the device to a ID3D11Device1
-    Utils::ThrowIfFailed(tempDevice.As(&m_device));
+    Utils::DirectXHelpers::ThrowIfFailed(tempDevice.As(&m_device));
     // Remove the temp device
     tempDevice = nullptr;
     // Query the debug device from the device
-    Utils::ThrowIfFailed(m_device.As(&m_debugDevice));
+    Utils::DirectXHelpers::ThrowIfFailed(m_device.As(&m_debugDevice));
 
     // Create the swap chain
     auto hr = m_factory->CreateSwapChainForHwnd(m_device.Get(), hwnd, &swapChainDesc, NULL, NULL, m_swapChain.GetAddressOf());
-    Utils::ThrowIfFailed(hr);
+    Utils::DirectXHelpers::ThrowIfFailed(hr);
 }
 
 

@@ -16,6 +16,9 @@ public:
     SceneNode(const SceneNode&) = delete;
     ~SceneNode();
 
+    void Update(float frameTime);
+    void Render(ID3D11DeviceContext* deviceContext);
+
     inline ComponentContainer GetComponents() const { return m_components; }
     inline SceneNodeContainer GetChildNodes() const { return m_childNodes; }
 
@@ -28,11 +31,11 @@ public:
     void SetScale(float scale) { m_scale = {scale, scale, scale}; }
     void SetRotation(Utils::Maths::Quaternion rotation) { m_rotation = rotation; }
 
-    Utils::Maths::Matrix GetTransform();
-    Utils::Maths::Matrix GetWorldTransform();
+    Utils::Maths::Matrix GetTransform() const;
+    Utils::Maths::Matrix GetWorldTransform() const;
 
-    void Update(float frameTime);
-    void Render(ID3D11DeviceContext* deviceContext);
+    Utils::Maths::Vector3 GetPosition() const;
+    Utils::Maths::Vector3 GetWorldSpacePosition() const;
 
     std::shared_ptr<Scene> GetScene() const { return m_scene; }
 
