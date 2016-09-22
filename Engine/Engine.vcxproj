@@ -232,6 +232,16 @@
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="ShaderPipeline.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Shaders\Compiled shaders\color.ps.h" />
+    <ClInclude Include="Shaders\Compiled shaders\color.vs.h" />
+    <ClInclude Include="Shaders\Compiled shaders\font.ps.h" />
+    <ClInclude Include="Shaders\Compiled shaders\font.vs.h" />
+    <ClInclude Include="Shaders\Compiled shaders\light.ps.h" />
+    <ClInclude Include="Shaders\Compiled shaders\light.vs.h" />
+    <ClInclude Include="Shaders\Compiled shaders\texture.ps.h" />
+    <ClInclude Include="Shaders\Compiled shaders\texture.vs.h" />
+    <ClInclude Include="Shaders\Compiled shaders\Uber.ps.hlsl.h" />
+    <ClInclude Include="Shaders\Compiled shaders\Uber.vs.hlsl.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="timerclass.h" />

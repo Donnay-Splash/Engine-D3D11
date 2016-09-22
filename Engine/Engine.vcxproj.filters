@@ -287,6 +287,36 @@
     <ClInclude Include="LightManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\color.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\color.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\font.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\font.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\light.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\light.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\texture.ps.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\texture.vs.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\Uber.ps.hlsl.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Compiled shaders\Uber.vs.hlsl.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math.inl">
