@@ -7,5 +7,8 @@ namespace Engine_WinRT
     {
     public:
         Class1();
+
+    private:
+        Engine::Ptr m_engine;
     };
 }

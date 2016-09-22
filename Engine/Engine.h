@@ -27,6 +27,7 @@ const float SCREEN_NEAR = 0.1f;
 class Engine
 {
 public:
+    using Ptr = std::shared_ptr<Engine>;
     Engine();
     ~Engine();
 
