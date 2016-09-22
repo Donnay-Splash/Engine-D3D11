@@ -12,7 +12,7 @@ float4 PSMain(PixelInputType input) : SV_TARGET
         float3 lightDir = light.position - input.worldPosition.xyz;
         float attenuation = 1.0f / pow(length(lightDir), 2);
         float lightContribution = saturate(dot(normalize(lightDir), normal)) * attenuation;
-        fragmentColor += light.color * lightContribution * intensity;
+        fragmentColor += light.color.rgb * lightContribution * intensity;
     }
 
     return float4(fragmentColor, 1.0f);
