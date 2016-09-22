@@ -45,11 +45,7 @@ bool Text::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 
     // Initialize the font object.
     result = m_Font->Initialize(device, "../Engine/data/fontdata.txt", L"../Engine/data/font.dds");
-    if(!result)
-    {
-        MessageBox(hwnd, "Could not initialize the font object.", "Error", MB_OK);
-        return false;
-    }
+    EngineAssert(result);
 
     // Initialize the first sentence.
     result = InitializeSentence(&m_sentence1, 150, device);

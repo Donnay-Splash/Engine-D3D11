@@ -21,9 +21,9 @@ namespace Utils
             }
         }
 
-        inline std::string GetAssetsPath()
+        inline std::wstring GetAssetsPath()
         {
-            CHAR path[512];
+            wchar_t path[512];
             DWORD pathSize = static_cast<DWORD>(sizeof(path));
             DWORD size = GetModuleFileName(nullptr, path, pathSize);
 
@@ -33,13 +33,13 @@ namespace Utils
                 throw;
             }
 
-            CHAR* lastSlash = strrchr(path, '\\');
+            wchar_t* lastSlash = wcsrchr(path, '\\');
             if (lastSlash)
             {
                 *(lastSlash + 1) = NULL;
             }
 
-            std::string stringPath(path);
+            std::wstring stringPath(path);
             return stringPath;
         }
 

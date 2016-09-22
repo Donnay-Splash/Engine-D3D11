@@ -18,15 +18,15 @@ bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
     bool result;
 
     // Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
-    m_input = std::make_shared<InputClass>();
+    //m_input = std::make_shared<InputClass>();
 
     // Initialize the input object.
-    result = m_input->Initialize(hinstance, hwnd, screenWidth, screenHeight);
+    /*result = m_input->Initialize(hinstance, hwnd, screenWidth, screenHeight);
     if (!result)
     {
         MessageBox(hwnd, "Could not initialize the input object.", "Error", MB_OK);
         return false;
-    }
+    }*/
 
     // Create the Direct3D object.
     m_direct3D = std::make_shared<D3DClass>();
@@ -85,11 +85,7 @@ bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
 
     // Initialize the timer object.
     result = m_timer->Initialize();
-    if(!result)
-    {
-        MessageBox(hwnd, "Could not initialize the timer object.", "Error", MB_OK);
-        return false;
-    }
+    EngineAssert(result);
 
     // Create the position object.
     m_position = std::make_shared<PositionClass>();
@@ -106,27 +102,27 @@ bool Engine::Frame()
     bool result;
 
     // Read the user input.
-    result = m_input->Frame();
+    /*result = m_input->Frame();
     if(!result)
     {
         return false;
-    }
+    }*/
     
     // Check if the user pressed escape and wants to exit the application.
-    if(m_input->IsEscapePressed() == true)
+    /*if(m_input->IsEscapePressed() == true)
     {
         return false;
-    }
+    }*/
 
     // Update the system stats.
     m_timer->Frame();
     
     // Do the frame input processing.
-    result = HandleInput(m_timer->GetTime());
+    /*result = HandleInput(m_timer->GetTime());
     if(!result)
     {
         return false;
-    }
+    }*/
 
     // Update the scene
     m_scene->Update(m_timer->GetTime());
@@ -142,80 +138,80 @@ bool Engine::Frame()
 }
 
 
-bool Engine::HandleInput(float frameTime)
-{
-    bool keyDown;
-    float posX, posY, posZ, rotX, rotY, rotZ;
-
-    // Set the frame time for calculating the updated position.
-    m_position->SetFrameTime(frameTime);
-
-    // Handle the input.
-    keyDown = m_input->IsLeftPressed();
-    m_position->TurnLeft(keyDown);
-
-    keyDown = m_input->IsRightPressed();
-    m_position->TurnRight(keyDown);
-
-    keyDown = m_input->IsUpPressed();
-    m_position->MoveForward(keyDown);
-
-    keyDown = m_input->IsDownPressed();
-    m_position->MoveBackward(keyDown);
-
-    keyDown = m_input->IsAPressed();
-    m_position->MoveUpward(keyDown);
-
-    keyDown = m_input->IsZPressed();
-    m_position->MoveDownward(keyDown);
-
-    keyDown = m_input->IsPgUpPressed();
-    m_position->LookUpward(keyDown);
-
-    keyDown = m_input->IsPgDownPressed();
-    m_position->LookDownward(keyDown);
-
-    if (m_input->IsHPressed())
-    {
-        m_camera->SetProjectionMode(Camera::ProjectionMode::Orthographic);
-    }
-
-    if (m_input->IsYPressed())
-    {
-        m_camera->SetProjectionMode(Camera::ProjectionMode::Perspective);
-    }
-
-    if (m_input->IsPgUpPressed())
-    {
-        frameTime /= 1000.0f;
-        auto orthoSize = m_camera->GetOrthographicSize();
-        orthoSize += frameTime * 10.0f;
-        m_camera->SetOrthographicSize(orthoSize);
-    }
-
-    if (m_input->IsPgDownPressed())
-    {
-        frameTime /= 1000.0f;
-        auto orthoSize = m_camera->GetOrthographicSize();
-        orthoSize -= frameTime * 10.0f;
-        if (orthoSize > 0.1f)
-        {
-            m_camera->SetOrthographicSize(orthoSize);
-        }
-    }
-
-    // Get the view point position/rotation.
-    m_position->GetPosition(posX, posY, posZ);
-    m_position->GetRotation(rotX, rotY, rotZ);
-    auto rotation = Utils::Maths::Quaternion::CreateFromYawPitchRoll(
-                Utils::Maths::DegreesToRadians(rotY),
-                Utils::Maths::DegreesToRadians(rotX),
-                Utils::Maths::DegreesToRadians(rotZ));
-
-    m_camera->GetSceneNode()->SetPosition({ posX, posY, posZ });
-    m_camera->GetSceneNode()->SetRotation(rotation);
-    return true;
-}
+//bool Engine::HandleInput(float frameTime)
+//{
+//    bool keyDown;
+//    float posX, posY, posZ, rotX, rotY, rotZ;
+//
+//    // Set the frame time for calculating the updated position.
+//    m_position->SetFrameTime(frameTime);
+//
+//    // Handle the input.
+//    keyDown = m_input->IsLeftPressed();
+//    m_position->TurnLeft(keyDown);
+//
+//    keyDown = m_input->IsRightPressed();
+//    m_position->TurnRight(keyDown);
+//
+//    keyDown = m_input->IsUpPressed();
+//    m_position->MoveForward(keyDown);
+//
+//    keyDown = m_input->IsDownPressed();
+//    m_position->MoveBackward(keyDown);
+//
+//    keyDown = m_input->IsAPressed();
+//    m_position->MoveUpward(keyDown);
+//
+//    keyDown = m_input->IsZPressed();
+//    m_position->MoveDownward(keyDown);
+//
+//    keyDown = m_input->IsPgUpPressed();
+//    m_position->LookUpward(keyDown);
+//
+//    keyDown = m_input->IsPgDownPressed();
+//    m_position->LookDownward(keyDown);
+//
+//    if (m_input->IsHPressed())
+//    {
+//        m_camera->SetProjectionMode(Camera::ProjectionMode::Orthographic);
+//    }
+//
+//    if (m_input->IsYPressed())
+//    {
+//        m_camera->SetProjectionMode(Camera::ProjectionMode::Perspective);
+//    }
+//
+//    if (m_input->IsPgUpPressed())
+//    {
+//        frameTime /= 1000.0f;
+//        auto orthoSize = m_camera->GetOrthographicSize();
+//        orthoSize += frameTime * 10.0f;
+//        m_camera->SetOrthographicSize(orthoSize);
+//    }
+//
+//    if (m_input->IsPgDownPressed())
+//    {
+//        frameTime /= 1000.0f;
+//        auto orthoSize = m_camera->GetOrthographicSize();
+//        orthoSize -= frameTime * 10.0f;
+//        if (orthoSize > 0.1f)
+//        {
+//            m_camera->SetOrthographicSize(orthoSize);
+//        }
+//    }
+//
+//    // Get the view point position/rotation.
+//    m_position->GetPosition(posX, posY, posZ);
+//    m_position->GetRotation(rotX, rotY, rotZ);
+//    auto rotation = Utils::Maths::Quaternion::CreateFromYawPitchRoll(
+//                Utils::Maths::DegreesToRadians(rotY),
+//                Utils::Maths::DegreesToRadians(rotX),
+//                Utils::Maths::DegreesToRadians(rotZ));
+//
+//    m_camera->GetSceneNode()->SetPosition({ posX, posY, posZ });
+//    m_camera->GetSceneNode()->SetRotation(rotation);
+//    return true;
+//}
 
 
 bool Engine::RenderGraphics()

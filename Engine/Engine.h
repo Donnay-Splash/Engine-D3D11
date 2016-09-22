@@ -12,7 +12,7 @@ const float SCREEN_NEAR = 0.1f;
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
-#include "inputclass.h"
+//#include "inputclass.h"
 #include "d3dclass.h"
 #include "Camera.h"
 #include "timerclass.h"
@@ -34,11 +34,11 @@ public:
     bool Frame();
 
 private:
-    bool HandleInput(float);
+    //bool HandleInput(float);
     bool RenderGraphics();
 
 private:
-    std::shared_ptr<InputClass> m_input;
+    //std::shared_ptr<InputClass> m_input;
     std::shared_ptr<D3DClass> m_direct3D;
     std::shared_ptr<Light> m_light1;
     std::shared_ptr<TimerClass> m_timer;
