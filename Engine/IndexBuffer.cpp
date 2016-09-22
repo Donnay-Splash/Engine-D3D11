@@ -8,6 +8,7 @@ IndexBuffer::IndexBuffer(void* data, uint32_t indexCount, ID3D11Device* device, 
 {
 	// Set up the description of the static index buffer.
 	D3D11_BUFFER_DESC indexBufferDesc;
+    SecureZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	indexBufferDesc.ByteWidth = m_indexSizeInBytes * m_indexCount;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;

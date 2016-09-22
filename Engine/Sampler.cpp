@@ -12,6 +12,7 @@ Sampler::Sampler(ID3D11Device* device,
     float maxLOD /*= D3D11_FLOAT32_MAX*/)
 {
     D3D11_SAMPLER_DESC samplerDesc;
+    SecureZeroMemory(&samplerDesc, sizeof(samplerDesc));
     // Sampler and blend states should be able to be created easier. Create some defaults at start up and then hand them out.
     // Create a texture sampler state description.
     samplerDesc.Filter = filterMode;

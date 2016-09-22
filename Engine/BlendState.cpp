@@ -5,7 +5,7 @@ BlendState::BlendState(ID3D11Device* device, BlendMode initMode /* = BlendMode::
 {
     // Create an alpha enabled blend state description.
     D3D11_BLEND_DESC blendStateDescription;
-
+    SecureZeroMemory(&blendStateDescription, sizeof(blendStateDescription));
     // Set the blend state for all bound rendertargets
     for (uint32_t i = 0; i < kRenderTargetMax; i++)
     {

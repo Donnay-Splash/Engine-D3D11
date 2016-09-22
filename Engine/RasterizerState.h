@@ -12,5 +12,4 @@ public:
 
 private:
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
-    D3D11_RASTERIZER_DESC m_rasterizerDesc;
 };

@@ -90,6 +90,7 @@ void D3DClass::GetAdapterInformation()
 void D3DClass::CreateDeviceAndSwapChain(int screenWidth, int screenHeight, HWND hwnd)
 {
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+    SecureZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 
     // Set to a single back buffer.
     swapChainDesc.BufferCount = 1;

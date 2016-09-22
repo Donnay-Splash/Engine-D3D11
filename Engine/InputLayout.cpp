@@ -9,6 +9,7 @@ InputLayout::InputLayout(const uint32_t& inputFlags)
     if (inputFlags & InputElement::Position)
     {
         D3D11_INPUT_ELEMENT_DESC element;
+        SecureZeroMemory(&element, sizeof(element));
         element.SemanticName = "POSITION";
         element.SemanticIndex = 0;
         element.Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -24,6 +25,7 @@ InputLayout::InputLayout(const uint32_t& inputFlags)
     if (inputFlags & InputElement::Normal0)
     {
         D3D11_INPUT_ELEMENT_DESC element;
+        SecureZeroMemory(&element, sizeof(element));
         element.SemanticName = "NORMAL";
         element.SemanticIndex = 0;
         element.Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -39,6 +41,7 @@ InputLayout::InputLayout(const uint32_t& inputFlags)
     if (inputFlags & InputElement::TexCoord0)
     {
         D3D11_INPUT_ELEMENT_DESC element;
+        SecureZeroMemory(&element, sizeof(element));
         element.SemanticName = "TEXCOORD";
         element.SemanticIndex = 0;
         element.Format = DXGI_FORMAT_R32G32_FLOAT;

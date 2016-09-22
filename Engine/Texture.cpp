@@ -10,6 +10,7 @@ Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t flags, DX
     bool bindDepthStencil = (flags & TextureCreationFlags::BindDepthStencil) != 0;
 
     D3D11_TEXTURE2D_DESC desc;
+    SecureZeroMemory(&desc, sizeof(desc));
     desc.Height = height;
     desc.Width = width;
     desc.MipLevels = desc.ArraySize = 1;

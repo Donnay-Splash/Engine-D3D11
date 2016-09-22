@@ -20,6 +20,7 @@ public:
         // Constant buffer creation should be kept to no more than two lines.
         // Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
         D3D11_BUFFER_DESC matrixBufferDesc;
+        SecureZeroMemory(&matrixBufferDesc, sizeof(matrixBufferDesc));
         matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
         matrixBufferDesc.ByteWidth = sizeof(T);
         matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;

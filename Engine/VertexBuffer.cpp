@@ -10,7 +10,8 @@ VertexBuffer::VertexBuffer(void* data, uint32_t vertexCount, size_t vertexSizeIn
 	EngineAssert(vertexCount > 0);
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    SecureZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
+    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = m_stride * vertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
