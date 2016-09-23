@@ -154,37 +154,46 @@ void D3DClass::CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight)
 {
     if (m_swapChain == nullptr)
     {
-        DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
-        SecureZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+        //DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+        //SecureZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 
-        // Set to a single back buffer.
-        swapChainDesc.BufferCount = kBufferCount;
-        swapChainDesc.Width = screenWidth;
-        swapChainDesc.Height = screenHeight;
-        swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        //// Set to a single back buffer.
+        //swapChainDesc.BufferCount = kBufferCount;
+        //swapChainDesc.Width = screenWidth;
+        //swapChainDesc.Height = screenHeight;
+        //swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-        // Set the usage of the back buffer.
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        //// Set the usage of the back buffer.
+        //swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 
-        // Turn multisampling off.
-        swapChainDesc.SampleDesc.Count = 1;
+        //// Turn multisampling off.
+        //swapChainDesc.SampleDesc.Count = 1;
+        //swapChainDesc.SampleDesc.Quality = 0;
+
+        //// Discard the back buffer contents after presenting.
+        //swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+        //// Don't set the advanced flags.
+        //swapChainDesc.Flags = 0;
+
+        DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
+
+        swapChainDesc.Width = lround(screenWidth);		// Match the size of the window.
+        swapChainDesc.Height = lround(screenHeight);
+        swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;				// This is the most common swap chain format.
+        swapChainDesc.Stereo = false;
+        swapChainDesc.SampleDesc.Count = 1;								// Don't use multi-sampling.
         swapChainDesc.SampleDesc.Quality = 0;
-
-        // Discard the back buffer contents after presenting.
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-
-        // Don't set the advanced flags.
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDesc.BufferCount = 2;									// Use double-buffering to minimize latency.
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	// All Windows Store apps must use _FLIP_ SwapEffects.
         swapChainDesc.Flags = 0;
+        swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+        swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
         // Create the swap chain
         auto hr = m_factory->CreateSwapChainForComposition(m_device.Get(), &swapChainDesc, nullptr, m_swapChain.GetAddressOf());
         Utils::DirectXHelpers::ThrowIfFailed(hr);
-
-        ID3D11Texture2D* backBufferPtr = nullptr;
-        m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBufferPtr));
-        CreateBackBufferResources(backBufferPtr);
-        backBufferPtr->Release();
-        backBufferPtr = nullptr;
     }
     else
     {
@@ -317,6 +326,13 @@ void D3DClass::GetVideoCardInfo(char* cardName, int& memory)
     strcpy_s(cardName, 128, m_videoCardDescription.c_str());
     memory = m_videoCardMemory;
     return;
+}
+
+Utils::Maths::Vector2 D3DClass::GetScreenSize() const
+{
+    EngineAssert(m_backBufferRT != nullptr);
+
+    return Utils::Maths::Vector2(static_cast<float>(m_backBufferRT->GetWidth()), static_cast<float>(m_backBufferRT->GetHeight()));
 }
 
 void D3DClass::SetRenderTarget(RenderTarget::Ptr renderTarget, DepthBuffer::Ptr depthBuffer) const

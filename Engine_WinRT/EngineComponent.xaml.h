@@ -7,6 +7,7 @@
 
 #include "EngineComponent.g.h"
 #include <Engine\Engine.h>
+#include <concrt.h>
 
 namespace Engine_WinRT
 {
@@ -28,6 +29,8 @@ namespace Engine_WinRT
         void OnPointerReleased(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
 
         static void InitializeSwapChain(IUnknown* swapChain, void* userData);
+        
+        void StartRendererThread();
 
     private:
         Engine::Ptr m_engine;
@@ -35,5 +38,9 @@ namespace Engine_WinRT
         // Input management
         Windows::Foundation::IAsyncAction^ m_inputLoopWorker;
         Windows::UI::Core::CoreIndependentInputSource^ m_coreInput;
+
+        // Render thread
+        Windows::Foundation::IAsyncAction^ m_renderThreadWorker;
+        Concurrency::critical_section m_criticalSection;
     };
 }

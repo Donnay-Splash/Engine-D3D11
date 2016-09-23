@@ -8,9 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <dc:EngineComponent x:Name="engineComponent"/>
-    </Grid>
+   <dc:EngineComponent x:Name="engineComponent"/>
 
   <Page.BottomAppBar>
     <AppBar x:Name="bottomAppBar" Padding="10,0,10,0">

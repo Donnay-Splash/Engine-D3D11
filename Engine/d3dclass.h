@@ -34,7 +34,7 @@ public:
 
     void GetVideoCardInfo(char*, int&);
 
-    Utils::Maths::Vector2 GetScreenSize() const { return m_screenSize; }
+    Utils::Maths::Vector2 GetScreenSize() const;
 
 private:
     void GetAdapterInformation();
@@ -61,6 +61,6 @@ private:
     Utils::Maths::Vector2 m_screenSize;
 
     // Use a single back buffer for now.
-    static const UINT kBufferCount = 1;
+    static const UINT kBufferCount = 2;
     EngineCreateOptions m_createOptions;
 };

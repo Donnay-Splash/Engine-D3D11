@@ -40,8 +40,8 @@ EngineComponent::EngineComponent()
     createOptions.RendererMode = EngineRendererMode::XAML;
     createOptions.UserData = (void*)this;
     createOptions.Callback = &EngineComponent::InitializeSwapChain;
-    createOptions.ScreenWidth = static_cast<int>(logicalWidth);
-    createOptions.ScreenHeight = static_cast<int>(logicalHeight);
+    createOptions.ScreenWidth = static_cast<int>(std::max(logicalWidth, 1.0));
+    createOptions.ScreenHeight = static_cast<int>(std::max(logicalHeight, 1.0));
     m_engine->Initialize(createOptions);
     //m_engine->Initialize()
 
@@ -73,12 +73,41 @@ EngineComponent::EngineComponent()
 
     // Run task on a dedicated high priority background thread.
     m_inputLoopWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
+
+    StartRendererThread();
 }
 
 EngineComponent::~EngineComponent()
 {
     // Stop processing events on destruction
     m_coreInput->Dispatcher->StopProcessEvents();
+}
+
+void Engine_WinRT::EngineComponent::StartRendererThread()
+{
+    // If the animation render loop is already running then do not start another thread.
+    if (m_renderThreadWorker != nullptr && m_renderThreadWorker->Status == AsyncStatus::Started)
+    {
+        return;
+    }
+
+    // Create a task that will be run on a background thread.
+    WeakReference weakRef(this);
+    auto workItemHandler = ref new WorkItemHandler([weakRef](IAsyncAction ^ action)
+    {
+        // Calculate the updated frame and render once per vertical blanking interval.
+        if (auto engineComponent = weakRef.Resolve<EngineComponent>())
+        {
+            while (action->Status == AsyncStatus::Started)
+            {
+                Concurrency::critical_section::scoped_lock lock(engineComponent->m_criticalSection);
+                engineComponent->m_engine->Frame();
+            }
+        }
+    });
+
+    // Run task on a dedicated high priority background thread.
+    m_renderThreadWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
 }
 
 void Engine_WinRT::EngineComponent::OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel ^ sender, Object ^ args)
@@ -91,27 +120,29 @@ void Engine_WinRT::EngineComponent::OnSwapChainPanelSizeChanged(Platform::Object
 {
     //throw ref new Platform::NotImplementedException();
     // Update scale and resize SwapChain resources.
+    Concurrency::critical_section::scoped_lock lock(m_criticalSection);
+    m_engine->ResizeBuffers(e->NewSize.Width, e->NewSize.Height);
 }
 
 void Engine_WinRT::EngineComponent::OnPointerPressed(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
 {
-    throw ref new Platform::NotImplementedException();
+    //throw ref new Platform::NotImplementedException();
 }
 
 void Engine_WinRT::EngineComponent::OnPointerMoved(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
 {
-    throw ref new Platform::NotImplementedException();
+    //throw ref new Platform::NotImplementedException();
 }
 
 void Engine_WinRT::EngineComponent::OnPointerReleased(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
 {
-    throw ref new Platform::NotImplementedException();
+    //throw ref new Platform::NotImplementedException();
 }
 
 void Engine_WinRT::EngineComponent::InitializeSwapChain(IUnknown * swapChain, void * userData)
 {
     IDXGISwapChain* swapChainPtr;
-    swapChain->QueryInterface(IID_PPV_ARGS(&swapChain));
+    swapChain->QueryInterface(IID_PPV_ARGS(&swapChainPtr));
     auto engineComponent = reinterpret_cast<EngineComponent^>(userData);
 
     // Associate swap chain with SwapChainPanel
@@ -129,3 +160,4 @@ void Engine_WinRT::EngineComponent::InitializeSwapChain(IUnknown * swapChain, vo
         );
     }, CallbackContext::Any));
 }
+

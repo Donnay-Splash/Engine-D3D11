@@ -37,15 +37,12 @@ void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene)
     auto transform = sceneNode->GetWorldTransform();
     auto viewMatrix = transform.GetInverse();
 
-    // TODO: None of this is very solid.
-    // Needs tidying up.
-    if (m_aspectRatio == 0.0f)
+    // TODO: Fix this temp hack
+    if (m_renderTarget == nullptr)
     {
-        // Calculate aspect ratio from backbuffer dimensions
         auto screenSize = d3dClass->GetScreenSize();
         m_aspectRatio = screenSize.x / screenSize.y;
     }
-
     CalculateProjectionMatrix();
     ViewConstants viewConstants;
     viewConstants.view = viewMatrix;
@@ -56,7 +53,6 @@ void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene)
     d3dClass->SetRenderTarget(m_renderTarget, m_depthBuffer);
     
     scene->Render(d3dClass->GetDeviceContext());
-
 }
 
 void Camera::CalculateProjectionMatrix()
