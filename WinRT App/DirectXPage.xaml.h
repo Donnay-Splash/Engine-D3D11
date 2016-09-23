@@ -51,11 +51,9 @@ namespace WinRT_App
         void OnPointerReleased(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
 
         // Resources used to render the DirectX content in the XAML page background.
-        std::shared_ptr<DX::DeviceResources> m_deviceResources;
-        std::unique_ptr<WinRT_AppMain> m_main; 
+        //std::shared_ptr<DX::DeviceResources> m_deviceResources;
+        //std::unique_ptr<WinRT_AppMain> m_main; 
         bool m_windowVisible;
-
-        Engine_WinRT::Class1^ class1;
     };
 }
 

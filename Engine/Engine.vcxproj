@@ -164,7 +164,6 @@
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="Light.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -190,7 +189,6 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderPipeline.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
-    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="timerclass.cpp" />
@@ -204,6 +202,7 @@
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConstantBufferLayouts.h" />
     <ClInclude Include="DepthState.h" />
+    <ClInclude Include="EngineCreateOptions.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="MeshInstance.h" />
@@ -232,7 +231,6 @@
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="ShaderPipeline.h" />
-    <ClInclude Include="Application.h" />
     <ClInclude Include="Shaders\Compiled shaders\color.ps.h" />
     <ClInclude Include="Shaders\Compiled shaders\color.vs.h" />
     <ClInclude Include="Shaders\Compiled shaders\font.ps.h" />

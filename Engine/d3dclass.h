@@ -6,6 +6,10 @@
 #include "pch.h"
 #include "RenderTarget.h"
 #include "DepthBuffer.h"
+#include "EngineCreateOptions.h"
+
+// Forward Declarations
+struct EngineCreateOptions;
 
 class D3DClass
 {
@@ -15,8 +19,10 @@ public:
     D3DClass(const D3DClass&);
     ~D3DClass();
 
-    void Initialize(int, int, bool, HWND, bool, float, float);
+    void Initialize(EngineCreateOptions createOptions, float screenDepth, float screenNear);
     void Shutdown();
+    
+    void ResizeBuffers(uint32_t newWidth, uint32_t newHeight);
     
     void BeginScene(float, float, float, float);
     void EndScene();
@@ -32,7 +38,13 @@ public:
 
 private:
     void GetAdapterInformation();
-    void CreateDeviceAndSwapChain(int screenWidth, int screenHeight, HWND hwnd);
+    void CreateDeviceAndSwapChain();
+    void CreateSwapChain_HWND(uint32_t screenWidth, uint32_t screenHeight);
+    void CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight);
+
+    void CreateBackBufferResources(ID3D11Texture2D* backbufferPtr);
+
+    void ClearResources();
 
 private:
     bool m_vsync_enabled;
@@ -47,4 +59,8 @@ private:
     RenderTarget::Ptr m_backBufferRT;
     DepthBuffer::Ptr m_depthBuffer;
     Utils::Maths::Vector2 m_screenSize;
+
+    // Use a single back buffer for now.
+    static const UINT kBufferCount = 1;
+    EngineCreateOptions m_createOptions;
 };

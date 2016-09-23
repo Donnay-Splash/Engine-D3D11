@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "pch.h"
 #include "d3dclass.h"
-
+#include "Engine.h"
 
 D3DClass::D3DClass()
 {
@@ -24,16 +24,15 @@ D3DClass::~D3DClass()
 }
 
 
-void D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, 
-                          float screenDepth, float screenNear)
+void D3DClass::Initialize(EngineCreateOptions createOptions, float screenDepth, float screenNear)
 {
-    ID3D11Texture2D* backBufferPtr;
-    D3D11_VIEWPORT viewport;
-
     // Store the vsync setting.
-    m_vsync_enabled = vsync;
+    m_createOptions = createOptions;
+    m_vsync_enabled = m_createOptions.VSyncEnabled;
 
-    m_screenSize = { static_cast<float>(screenWidth), static_cast<float>(screenHeight) };
+    EngineAssert(m_createOptions.ScreenWidth > 0);
+    EngineAssert(m_createOptions.ScreenHeight > 0);
+    m_screenSize = { static_cast<float>(m_createOptions.ScreenWidth), static_cast<float>(m_createOptions.ScreenHeight) };
 
     // Create a DirectX graphics interface factory.
     Utils::DirectXHelpers::ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(m_factory.GetAddressOf())));
@@ -42,30 +41,7 @@ void D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
     GetAdapterInformation();
 
     // Create the device and swap chain
-    CreateDeviceAndSwapChain(screenWidth, screenHeight, hwnd);
-
-    // Get the pointer to the back buffer.
-    Utils::DirectXHelpers::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBufferPtr)));
-
-    // Create the render target view with the back buffer pointer.
-    m_backBufferRT = std::make_shared<RenderTarget>(backBufferPtr, 0, m_device.Get());
-
-    // Release pointer to the back buffer as we no longer need it.
-    backBufferPtr->Release();
-    backBufferPtr = nullptr;
-
-    m_depthBuffer = std::make_shared<DepthBuffer>(screenWidth, screenHeight, 0, m_device.Get());
-
-    // Setup the viewport for rendering.
-    viewport.Width = (float)screenWidth;
-    viewport.Height = (float)screenHeight;
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-    viewport.TopLeftX = 0.0f;
-    viewport.TopLeftY = 0.0f;
-
-    // Create the viewport.
-    m_deviceContext->RSSetViewports(1, &viewport);
+    CreateDeviceAndSwapChain();
 }
 
 void D3DClass::GetAdapterInformation()
@@ -87,30 +63,8 @@ void D3DClass::GetAdapterInformation()
     m_videoCardDescription = std::string(wideAdapterDescription.begin(), wideAdapterDescription.end());
 }
 
-void D3DClass::CreateDeviceAndSwapChain(int screenWidth, int screenHeight, HWND hwnd)
+void D3DClass::CreateDeviceAndSwapChain()
 {
-    DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
-    SecureZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
-
-    // Set to a single back buffer.
-    swapChainDesc.BufferCount = 1;
-    swapChainDesc.Width = screenWidth;
-    swapChainDesc.Height = screenHeight;
-    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-
-    // Set the usage of the back buffer.
-    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-
-    // Turn multisampling off.
-    swapChainDesc.SampleDesc.Count = 1;
-    swapChainDesc.SampleDesc.Quality = 0;
-
-    // Discard the back buffer contents after presenting.
-    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
-    // Don't set the advanced flags.
-    swapChainDesc.Flags = 0;
-
     // Set the feature level to DirectX 11.
     D3D_FEATURE_LEVEL featureLevelsSupported[] =
     {
@@ -131,11 +85,143 @@ void D3DClass::CreateDeviceAndSwapChain(int screenWidth, int screenHeight, HWND 
     // Query the debug device from the device
     Utils::DirectXHelpers::ThrowIfFailed(m_device.As(&m_debugDevice));
 
-    // Create the swap chain
-    auto hr = m_factory->CreateSwapChainForHwnd(m_device.Get(), hwnd, &swapChainDesc, NULL, NULL, m_swapChain.GetAddressOf());
-    Utils::DirectXHelpers::ThrowIfFailed(hr);
+    switch (m_createOptions.RendererMode)
+    {
+    case EngineRendererMode::Win32:
+        CreateSwapChain_HWND(m_createOptions.ScreenWidth, m_createOptions.ScreenHeight);
+        break;
+    case EngineRendererMode::XAML:
+        CreateSwapChain_XAML(m_createOptions.ScreenWidth, m_createOptions.ScreenHeight);
+        break;
+    default:
+        // Incorrect enum value passed in
+        EngineAssert(false);
+        break;
+    }
+
+    // Now call swapchain created callback.
+    if (m_createOptions.Callback != nullptr)
+    {
+        m_createOptions.Callback(m_swapChain.Get(), m_createOptions.UserData);
+    }
 }
 
+void D3DClass::CreateSwapChain_HWND(uint32_t screenWidth, uint32_t screenHeight)
+{
+    if (m_swapChain == nullptr)
+    {
+        DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+        SecureZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+
+        // Set to a single back buffer.
+        swapChainDesc.BufferCount = kBufferCount;
+        swapChainDesc.Width = screenWidth;
+        swapChainDesc.Height = screenHeight;
+        swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+        // Set the usage of the back buffer.
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+        // Turn multisampling off.
+        swapChainDesc.SampleDesc.Count = 1;
+        swapChainDesc.SampleDesc.Quality = 0;
+
+        // Discard the back buffer contents after presenting.
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+        // Don't set the advanced flags.
+        swapChainDesc.Flags = 0;
+
+        // Create the swap chain
+        auto hr = m_factory->CreateSwapChainForHwnd(m_device.Get(), m_createOptions.HWND, &swapChainDesc, NULL, NULL, m_swapChain.GetAddressOf());
+        Utils::DirectXHelpers::ThrowIfFailed(hr);
+    }
+    else
+    {
+        // Resize swap chain
+        // TODO: Need to remember to release back buffers.
+        m_swapChain->ResizeBuffers(kBufferCount, screenWidth, screenHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+    }
+
+    ID3D11Texture2D* backBufferPtr = nullptr;
+    Utils::DirectXHelpers::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBufferPtr)));
+    CreateBackBufferResources(backBufferPtr);
+    backBufferPtr->Release();
+    backBufferPtr = nullptr;
+}
+
+void D3DClass::CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight)
+{
+    if (m_swapChain == nullptr)
+    {
+        DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+        SecureZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+
+        // Set to a single back buffer.
+        swapChainDesc.BufferCount = kBufferCount;
+        swapChainDesc.Width = screenWidth;
+        swapChainDesc.Height = screenHeight;
+        swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+        // Set the usage of the back buffer.
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+        // Turn multisampling off.
+        swapChainDesc.SampleDesc.Count = 1;
+        swapChainDesc.SampleDesc.Quality = 0;
+
+        // Discard the back buffer contents after presenting.
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+        // Don't set the advanced flags.
+        swapChainDesc.Flags = 0;
+
+        // Create the swap chain
+        auto hr = m_factory->CreateSwapChainForComposition(m_device.Get(), &swapChainDesc, nullptr, m_swapChain.GetAddressOf());
+        Utils::DirectXHelpers::ThrowIfFailed(hr);
+
+        ID3D11Texture2D* backBufferPtr = nullptr;
+        m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBufferPtr));
+        CreateBackBufferResources(backBufferPtr);
+        backBufferPtr->Release();
+        backBufferPtr = nullptr;
+    }
+    else
+    {
+        // Resize swap chain
+        // TODO: Need to remember to release back buffers.
+        m_swapChain->ResizeBuffers(kBufferCount, screenWidth, screenHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+    }
+
+    ID3D11Texture2D* backBufferPtr = nullptr;
+    Utils::DirectXHelpers::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBufferPtr)));
+    CreateBackBufferResources(backBufferPtr);
+    backBufferPtr->Release();
+    backBufferPtr = nullptr;
+}
+
+void D3DClass::CreateBackBufferResources(ID3D11Texture2D* backBufferPtr)
+{
+    // Create the render target view with the back buffer pointer.
+    m_backBufferRT = std::make_shared<RenderTarget>(backBufferPtr, 0, m_device.Get());
+
+    auto backBufferWidth = m_backBufferRT->GetWidth();
+    auto backBufferHeight = m_backBufferRT->GetHeight();
+
+    m_depthBuffer = std::make_shared<DepthBuffer>(backBufferWidth, backBufferHeight, 0, m_device.Get());
+
+    // Setup the viewport for rendering.
+    D3D11_VIEWPORT viewport;
+    viewport.Width = (float)backBufferWidth;
+    viewport.Height = (float)backBufferHeight;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    viewport.TopLeftX = 0.0f;
+    viewport.TopLeftY = 0.0f;
+
+    // Create the viewport.
+    m_deviceContext->RSSetViewports(1, &viewport);
+}
 
 void D3DClass::Shutdown()
 {
@@ -148,6 +234,30 @@ void D3DClass::Shutdown()
     m_deviceContext = nullptr;
     m_device = nullptr;
     m_swapChain = nullptr;
+}
+
+void D3DClass::ResizeBuffers(uint32_t newWidth, uint32_t newHeight)
+{
+    if (newWidth != m_backBufferRT->GetWidth() || newHeight != m_backBufferRT->GetHeight())
+    {
+        ClearResources();
+        // Resize buffers
+        switch (m_createOptions.RendererMode)
+        {
+        case EngineRendererMode::Win32:
+            CreateSwapChain_HWND(newWidth, newHeight);
+            break;
+        case EngineRendererMode::XAML:
+            CreateSwapChain_XAML(newWidth, newHeight);
+            break;
+        default:
+            // Incorrect enum value passed in
+            EngineAssert(false);
+            break;
+        }
+        
+    }
+    // otherwise continue as normal
 }
 
 
@@ -221,4 +331,12 @@ void D3DClass::SetRenderTarget(RenderTarget::Ptr renderTarget, DepthBuffer::Ptr 
     }
 
     m_deviceContext->OMSetRenderTargets(1, renderTarget->GetRTV().GetAddressOf(), depthBuffer->GetDSV().Get());
+}
+
+void D3DClass::ClearResources()
+{
+    m_backBufferRT = nullptr;
+    m_depthBuffer = nullptr;
+
+    m_deviceContext->Flush();
 }

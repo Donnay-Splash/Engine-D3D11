@@ -13,7 +13,7 @@ Engine::~Engine()
 }
 
 
-bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+bool Engine::Initialize(EngineCreateOptions createOptions)
 {
     bool result;
 
@@ -32,7 +32,7 @@ bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
     m_direct3D = std::make_shared<D3DClass>();
 
     // Initialize the Direct3D object.
-    m_direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+    m_direct3D->Initialize(createOptions, SCREEN_DEPTH, SCREEN_NEAR);
 
     // Initialise the shader manager
     m_shaderManager = std::make_shared<ShaderManager>(m_direct3D->GetDevice());
@@ -71,6 +71,7 @@ bool Engine::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
     // Create the camera object
     auto cameraNode = m_scene->AddNode();
     m_camera = cameraNode->AddComponent<Camera>(m_direct3D->GetDevice());
+    cameraNode->SetPosition({0.0f, 0.0f, -10.0f});
 
     // Create the mesh object and add it to the scene.
     auto meshNode = m_scene->AddNode();
@@ -135,6 +136,13 @@ bool Engine::Frame()
     }
 
     return result;
+}
+
+void Engine::ResizeBuffers(uint32_t newWidth, uint32_t newHeight)
+{
+    EngineAssert(newWidth > 0);
+    EngineAssert(newHeight > 0);
+    m_direct3D->ResizeBuffers(newWidth, newHeight);
 }
 
 

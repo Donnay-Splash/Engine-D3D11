@@ -22,7 +22,7 @@ const float SCREEN_NEAR = 0.1f;
 #include "ShaderManager.h"
 #include "Scene.h"
 #include "LightManager.h"
-
+#include "EngineCreateOptions.h"
 
 class Engine
 {
@@ -31,8 +31,10 @@ public:
     Engine();
     ~Engine();
 
-    bool Initialize(HINSTANCE, HWND, int, int);
+    bool Initialize(EngineCreateOptions createOptions);
     bool Frame();
+
+    void ResizeBuffers(uint32_t newWidth, uint32_t newHeight);
 
 private:
     //bool HandleInput(float);
@@ -49,5 +51,6 @@ private:
     ShaderManager::Ptr m_shaderManager;
     Scene::Ptr m_scene;
     LightManager m_lightManager;
+    EngineCreateOptions m_createOptions;
 };
 
