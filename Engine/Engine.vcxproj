@@ -161,7 +161,7 @@
     <ClCompile Include="FontShader.cpp" />
     <ClCompile Include="fpsclass.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
-    <ClCompile Include="inputclass.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -204,6 +204,7 @@
     <ClInclude Include="DepthState.h" />
     <ClInclude Include="EngineCreateOptions.h" />
     <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="KeyCodes.h" />
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="MeshInstance.h" />
     <ClInclude Include="MeshMaker.h" />
@@ -222,7 +223,7 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="FontShader.h" />
     <ClInclude Include="fpsclass.h" />
-    <ClInclude Include="inputclass.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />

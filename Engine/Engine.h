@@ -12,7 +12,7 @@ const float SCREEN_NEAR = 0.1f;
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
-//#include "inputclass.h"
+#include "InputManager.h"
 #include "d3dclass.h"
 #include "Camera.h"
 #include "timerclass.h"
@@ -36,12 +36,16 @@ public:
 
     void ResizeBuffers(uint32_t newWidth, uint32_t newHeight);
 
+    void SetFrameInput(InputState newInputState);
+
+    InputManager::Ptr GetInputManager() const { return m_inputManager; }
+
 private:
-    //bool HandleInput(float);
+    bool HandleInput(float);
     bool RenderGraphics();
 
 private:
-    //std::shared_ptr<InputClass> m_input;
+    InputManager::Ptr m_inputManager;
     std::shared_ptr<D3DClass> m_direct3D;
     std::shared_ptr<Light> m_light1;
     std::shared_ptr<TimerClass> m_timer;

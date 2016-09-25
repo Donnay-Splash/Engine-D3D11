@@ -443,12 +443,148 @@ namespace Utils
             return XMVector4NotEqual(thisVector, rhsVector);
         }
 
+        inline Vector4& Vector4::operator+= (const Vector4& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat4A(this);
+            XMVECTOR otherVector = XMLoadFloat4A(&M);
+
+            XMVECTOR result = XMVectorAdd(thisVector, otherVector);
+
+            XMStoreFloat4A(this, result);
+            return *this;
+        }
+
+        inline Vector4& Vector4::operator-= (const Vector4& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat4A(this);
+            XMVECTOR otherVector = XMLoadFloat4A(&M);
+
+            XMVECTOR result = XMVectorSubtract(thisVector, otherVector);
+
+            XMStoreFloat4A(this, result);
+            return *this;
+        }
+
+        inline Vector4& Vector4::operator*= (const Vector4& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat4A(this);
+            XMVECTOR otherVector = XMLoadFloat4A(&M);
+
+            XMVECTOR result = XMVectorMultiply(thisVector, otherVector);
+
+            XMStoreFloat4A(this, result);
+            return *this;
+        }
+
+        inline Vector4& Vector4::operator*= (float S)
+        {
+            XMVECTOR thisVector = XMLoadFloat4A(this);
+
+            XMVECTOR result = XMVectorScale(thisVector, S);
+
+            XMStoreFloat4A(this, result);
+            return *this;
+        }
+
+        inline Vector4& Vector4::operator/= (float S)
+        {
+            XMVECTOR thisVector = XMLoadFloat4A(this);
+
+            float scale = 1.0f / S;
+            XMVECTOR result = XMVectorScale(thisVector, S);
+
+            XMStoreFloat4A(this, result);
+            return *this;
+        }
+
+        inline Vector4& Vector4::operator/= (const Vector4& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat4A(this);
+            XMVECTOR otherVector = XMLoadFloat4A(&M);
+
+            XMVECTOR result = XMVectorDivide(thisVector, otherVector);
+
+            XMStoreFloat4A(this, result);
+            return *this;
+        }
+
         // Binary operators
         inline Vector4 operator* (const Vector4& vector, const Matrix& matrix)
         {
             XMVECTOR xmVector = XMLoadFloat4A(&vector);
             XMMATRIX xmMatrix = XMLoadFloat4x4A(&matrix);
             XMVECTOR result = XMVector4Transform(xmVector, xmMatrix);
+
+            Vector4 returnVector;
+            XMStoreFloat4A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector4 operator+ (const Vector4& V1, const Vector4& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat4A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat4A(&V2);
+
+            XMVECTOR result = XMVectorAdd(Vector1, Vector2);
+
+            Vector4 returnVector;
+            XMStoreFloat4A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector4 operator- (const Vector4& V1, const Vector4& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat4A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat4A(&V2);
+
+            XMVECTOR result = XMVectorSubtract(Vector1, Vector2);
+
+            Vector4 returnVector;
+            XMStoreFloat4A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector4 operator* (const Vector4& V1, const Vector4& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat4A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat4A(&V2);
+
+            XMVECTOR result = XMVectorMultiply(Vector1, Vector2);
+
+            Vector4 returnVector;
+            XMStoreFloat4A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector4 operator* (const Vector4& V, float S)
+        {
+            XMVECTOR Vector = XMLoadFloat4A(&V);
+
+            XMVECTOR result = XMVectorScale(Vector, S);
+
+            Vector4 returnVector;
+            XMStoreFloat4A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector4 operator/ (const Vector4& V, float S)
+        {
+            XMVECTOR Vector = XMLoadFloat4A(&V);
+
+            float scale = 1.0f / S;
+            XMVECTOR result = XMVectorScale(Vector, S);
+
+            Vector4 returnVector;
+            XMStoreFloat4A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector4 operator/ (const Vector4& V1, const Vector4& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat4A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat4A(&V2);
+
+            XMVECTOR result = XMVectorDivide(Vector1, Vector2);
 
             Vector4 returnVector;
             XMStoreFloat4A(&returnVector, result);
@@ -477,12 +613,148 @@ namespace Utils
             return XMVector3NotEqual(thisVector, rhsVector);
         }
 
+        inline Vector3& Vector3::operator+= (const Vector3& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat3A(this);
+            XMVECTOR otherVector = XMLoadFloat3A(&M);
+
+            XMVECTOR result = XMVectorAdd(thisVector, otherVector);
+
+            XMStoreFloat3A(this, result);
+            return *this;
+        }
+
+        inline Vector3& Vector3::operator-= (const Vector3& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat3A(this);
+            XMVECTOR otherVector = XMLoadFloat3A(&M);
+
+            XMVECTOR result = XMVectorSubtract(thisVector, otherVector);
+
+            XMStoreFloat3A(this, result);
+            return *this;
+        }
+
+        inline Vector3& Vector3::operator*= (const Vector3& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat3A(this);
+            XMVECTOR otherVector = XMLoadFloat3A(&M);
+
+            XMVECTOR result = XMVectorMultiply(thisVector, otherVector);
+
+            XMStoreFloat3A(this, result);
+            return *this;
+        }
+
+        inline Vector3& Vector3::operator*= (float S)
+        {
+            XMVECTOR thisVector = XMLoadFloat3A(this);
+
+            XMVECTOR result = XMVectorScale(thisVector, S);
+
+            XMStoreFloat3A(this, result);
+            return *this;
+        }
+
+        inline Vector3& Vector3::operator/= (float S)
+        {
+            XMVECTOR thisVector = XMLoadFloat3A(this);
+
+            float scale = 1.0f / S;
+            XMVECTOR result = XMVectorScale(thisVector, S);
+
+            XMStoreFloat3A(this, result);
+            return *this;
+        }
+
+        inline Vector3& Vector3::operator/= (const Vector3& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat3A(this);
+            XMVECTOR otherVector = XMLoadFloat3A(&M);
+
+            XMVECTOR result = XMVectorDivide(thisVector, otherVector);
+
+            XMStoreFloat3A(this, result);
+            return *this;
+        }
+
         // Binary operators
         inline Vector3 operator* (const Vector3& vector, const Matrix& matrix)
         {
             XMVECTOR xmVector = XMLoadFloat3A(&vector);
             XMMATRIX xmMatrix = XMLoadFloat4x4A(&matrix);
             XMVECTOR result = XMVector3TransformCoord(xmVector, xmMatrix);
+
+            Vector3 returnVector;
+            XMStoreFloat3A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector3 operator+ (const Vector3& V1, const Vector3& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat3A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat3A(&V2);
+
+            XMVECTOR result = XMVectorAdd(Vector1, Vector2);
+
+            Vector3 returnVector;
+            XMStoreFloat3A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector3 operator- (const Vector3& V1, const Vector3& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat3A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat3A(&V2);
+
+            XMVECTOR result = XMVectorSubtract(Vector1, Vector2);
+
+            Vector3 returnVector;
+            XMStoreFloat3A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector3 operator* (const Vector3& V1, const Vector3& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat3A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat3A(&V2);
+
+            XMVECTOR result = XMVectorMultiply(Vector1, Vector2);
+
+            Vector3 returnVector;
+            XMStoreFloat3A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector3 operator* (const Vector3& V, float S)
+        {
+            XMVECTOR Vector = XMLoadFloat3A(&V);
+
+            XMVECTOR result = XMVectorScale(Vector, S);
+
+            Vector3 returnVector;
+            XMStoreFloat3A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector3 operator/ (const Vector3& V, float S)
+        {
+            XMVECTOR Vector = XMLoadFloat3A(&V);
+
+            float scale = 1.0f / S;
+            XMVECTOR result = XMVectorScale(Vector, S);
+
+            Vector3 returnVector;
+            XMStoreFloat3A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector3 operator/ (const Vector3& V1, const Vector3& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat3A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat3A(&V2);
+
+            XMVECTOR result = XMVectorDivide(Vector1, Vector2);
 
             Vector3 returnVector;
             XMStoreFloat3A(&returnVector, result);
@@ -511,6 +783,71 @@ namespace Utils
             return XMVector2NotEqual(thisVector, rhsVector);
         }
 
+        inline Vector2& Vector2::operator+= (const Vector2& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat2A(this);
+            XMVECTOR otherVector = XMLoadFloat2A(&M);
+
+            XMVECTOR result = XMVectorAdd(thisVector, otherVector);
+
+            XMStoreFloat2A(this, result);
+            return *this;
+        }
+
+        inline Vector2& Vector2::operator-= (const Vector2& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat2A(this);
+            XMVECTOR otherVector = XMLoadFloat2A(&M);
+
+            XMVECTOR result = XMVectorSubtract(thisVector, otherVector);
+
+            XMStoreFloat2A(this, result);
+            return *this;
+        }
+
+        inline Vector2& Vector2::operator*= (const Vector2& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat2A(this);
+            XMVECTOR otherVector = XMLoadFloat2A(&M);
+
+            XMVECTOR result = XMVectorMultiply(thisVector, otherVector);
+
+            XMStoreFloat2A(this, result);
+            return *this;
+        }
+
+        inline Vector2& Vector2::operator*= (float S)
+        {
+            XMVECTOR thisVector = XMLoadFloat2A(this);
+
+            XMVECTOR result = XMVectorScale(thisVector, S);
+
+            XMStoreFloat2A(this, result);
+            return *this;
+        }
+
+        inline Vector2& Vector2::operator/= (float S)
+        {
+            XMVECTOR thisVector = XMLoadFloat2A(this);
+
+            float scale = 1.0f / S;
+            XMVECTOR result = XMVectorScale(thisVector, S);
+
+            XMStoreFloat2A(this, result);
+            return *this;
+        }
+
+        inline Vector2& Vector2::operator/= (const Vector2& M)
+        {
+            XMVECTOR thisVector = XMLoadFloat2A(this);
+            XMVECTOR otherVector = XMLoadFloat2A(&M);
+
+            XMVECTOR result = XMVectorDivide(thisVector, otherVector);
+
+            XMStoreFloat2A(this, result);
+            return *this;
+        }
+
         // Binary operators
         inline Vector2 operator* (const Vector2& vector, const Matrix& matrix)
         {
@@ -519,6 +856,75 @@ namespace Utils
             XMVECTOR result = XMVector2TransformCoord(xmVector, xmMatrix);
 
             Vector2 returnVector;
+            XMStoreFloat2A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector2 operator+ (const Vector2& V1, const Vector2& V2)
+        {
+            XMVECTOR Vector1 = XMLoadFloat2A(&V1);
+            Vector2 returnVector;
+            XMVECTOR Vector2 = XMLoadFloat2A(&V2);
+            XMVECTOR result = XMVectorAdd(Vector1, Vector2);
+            XMStoreFloat2A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector2 operator- (const Vector2& V1, const Vector2& V2)
+        {
+            Vector2 returnVector;
+            XMVECTOR Vector1 = XMLoadFloat2A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat2A(&V2);
+
+            XMVECTOR result = XMVectorSubtract(Vector1, Vector2);
+
+            XMStoreFloat2A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector2 operator* (const Vector2& V1, const Vector2& V2)
+        {
+            Vector2 returnVector;
+            XMVECTOR Vector1 = XMLoadFloat2A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat2A(&V2);
+
+            XMVECTOR result = XMVectorMultiply(Vector1, Vector2);
+
+            XMStoreFloat2A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector2 operator* (const Vector2& V, float S)
+        {
+            XMVECTOR Vector = XMLoadFloat2A(&V);
+
+            XMVECTOR result = XMVectorScale(Vector, S);
+
+            Vector2 returnVector;
+            XMStoreFloat2A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector2 operator/ (const Vector2& V, float S)
+        {
+            XMVECTOR Vector = XMLoadFloat2A(&V);
+
+            float scale = 1.0f / S;
+            XMVECTOR result = XMVectorScale(Vector, S);
+
+            Vector2 returnVector;
+            XMStoreFloat2A(&returnVector, result);
+            return returnVector;
+        }
+
+        inline Vector2 operator/ (const Vector2& V1, const Vector2& V2)
+        {
+            Vector2 returnVector;
+            XMVECTOR Vector1 = XMLoadFloat2A(&V1);
+            XMVECTOR Vector2 = XMLoadFloat2A(&V2);
+
+            XMVECTOR result = XMVectorDivide(Vector1, Vector2);
+
             XMStoreFloat2A(&returnVector, result);
             return returnVector;
         }

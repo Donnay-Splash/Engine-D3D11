@@ -43,7 +43,6 @@ EngineComponent::EngineComponent()
     createOptions.ScreenWidth = static_cast<int>(std::max(logicalWidth, 1.0));
     createOptions.ScreenHeight = static_cast<int>(std::max(logicalHeight, 1.0));
     m_engine->Initialize(createOptions);
-    //m_engine->Initialize()
 
     // Register to SwapChainPanel events
     swapChainPanel->CompositionScaleChanged += ref new TypedEventHandler<SwapChainPanel^, Platform::Object ^>(this, &EngineComponent::OnCompositionScaleChanged);
@@ -59,8 +58,7 @@ EngineComponent::EngineComponent()
         m_coreInput = swapChainPanel->CreateCoreIndependentInputSource(
             Windows::UI::Core::CoreInputDeviceTypes::Mouse |
             Windows::UI::Core::CoreInputDeviceTypes::Touch |
-            Windows::UI::Core::CoreInputDeviceTypes::Pen
-            );
+            Windows::UI::Core::CoreInputDeviceTypes::Pen);
 
         // Register for pointer events, which will be raised on the background thread.
         m_coreInput->PointerPressed += ref new TypedEventHandler<Platform::Object^, PointerEventArgs^>(this, &EngineComponent::OnPointerPressed);
@@ -100,8 +98,16 @@ void Engine_WinRT::EngineComponent::StartRendererThread()
         {
             while (action->Status == AsyncStatus::Started)
             {
-                Concurrency::critical_section::scoped_lock lock(engineComponent->m_criticalSection);
-                engineComponent->m_engine->Frame();
+                {
+                    Concurrency::critical_section::scoped_lock lock(engineComponent->m_inputMutex);
+                    engineComponent->m_engine->SetFrameInput(engineComponent->m_inputState);
+                    engineComponent->m_inputState.KeysPressed.clear();
+                    engineComponent->m_inputState.KeysReleased.clear();
+                }
+                {
+                    Concurrency::critical_section::scoped_lock lock(engineComponent->m_renderingMutex);
+                    engineComponent->m_engine->Frame();
+                }
             }
         }
     });
@@ -120,24 +126,13 @@ void Engine_WinRT::EngineComponent::OnSwapChainPanelSizeChanged(Platform::Object
 {
     //throw ref new Platform::NotImplementedException();
     // Update scale and resize SwapChain resources.
-    Concurrency::critical_section::scoped_lock lock(m_criticalSection);
-    m_engine->ResizeBuffers(e->NewSize.Width, e->NewSize.Height);
+    Concurrency::critical_section::scoped_lock lock(m_renderingMutex);
+    m_swapChainSize.Height = e->NewSize.Height;
+    m_swapChainSize.Width = e->NewSize.Width;
+    m_engine->ResizeBuffers(static_cast<uint32_t>(m_swapChainSize.Width), static_cast<uint32_t>(m_swapChainSize.Height));
 }
 
-void Engine_WinRT::EngineComponent::OnPointerPressed(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
-{
-    //throw ref new Platform::NotImplementedException();
-}
 
-void Engine_WinRT::EngineComponent::OnPointerMoved(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
-{
-    //throw ref new Platform::NotImplementedException();
-}
-
-void Engine_WinRT::EngineComponent::OnPointerReleased(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
-{
-    //throw ref new Platform::NotImplementedException();
-}
 
 void Engine_WinRT::EngineComponent::InitializeSwapChain(IUnknown * swapChain, void * userData)
 {
@@ -154,10 +149,72 @@ void Engine_WinRT::EngineComponent::InitializeSwapChain(IUnknown * swapChain, vo
         Utils::DirectXHelpers::ThrowIfFailed(
             reinterpret_cast<IUnknown*>(engineComponent->swapChainPanel)->QueryInterface(IID_PPV_ARGS(&panelNative))
         );
-
-        Utils::DirectXHelpers::ThrowIfFailed(
-            panelNative->SetSwapChain(swapChainPtr)
-        );
+        Utils::DirectXHelpers::ThrowIfFailed(panelNative->SetSwapChain(swapChainPtr));
     }, CallbackContext::Any));
 }
 
+
+void Engine_WinRT::EngineComponent::OnUserControlLoaded(Object^ sender, RoutedEventArgs^ e)
+{
+    CoreWindow^ window = Window::Current->CoreWindow;
+    window->KeyUp += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &EngineComponent::OnKeyUp);
+    window->KeyDown += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &EngineComponent::OnKeyDown);
+}
+
+void Engine_WinRT::EngineComponent::OnPointerPressed(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
+{
+    auto pointer = e->CurrentPoint;
+    auto pointerProperties = pointer->Properties;
+    Concurrency::critical_section::scoped_lock lock(m_inputMutex);
+    if(pointerProperties->IsLeftButtonPressed)
+    {
+        m_inputState.MouseButtonPressed |= MouseButtons::Left;
+    }
+    if (pointerProperties->IsMiddleButtonPressed)
+    {
+        m_inputState.MouseButtonPressed |= MouseButtons::Middle;
+    }
+    if (pointerProperties->IsRightButtonPressed)
+    {
+        m_inputState.MouseButtonPressed |= MouseButtons::Right;
+    }
+
+    e->Handled = true;
+}
+
+void Engine_WinRT::EngineComponent::OnPointerMoved(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
+{
+    auto pointer = e->CurrentPoint;
+    auto position = pointer->Position;
+    Concurrency::critical_section::scoped_lock lock(m_inputMutex);
+    m_inputState.PointerPosition = {position.X / m_swapChainSize.Width, position.Y / m_swapChainSize.Height};
+    e->Handled = true;
+}
+
+void Engine_WinRT::EngineComponent::OnPointerReleased(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ e)
+{
+    auto pointer = e->CurrentPoint;
+    auto pointerProperties = pointer->Properties;
+    Concurrency::critical_section::scoped_lock lock(m_inputMutex);
+    m_inputState.MouseButtonPressed = 0;
+
+    e->Handled = true;
+}
+
+void Engine_WinRT::EngineComponent::OnKeyUp(CoreWindow ^sender, KeyEventArgs ^args)
+{
+    auto virtualKey = args->VirtualKey;
+    uint32_t keyCode = static_cast<uint32_t>(virtualKey);
+    Concurrency::critical_section::scoped_lock lock(m_inputMutex);
+    m_inputState.KeysReleased.insert(keyCode);
+    args->Handled = true;
+}
+
+void Engine_WinRT::EngineComponent::OnKeyDown(CoreWindow ^sender, KeyEventArgs ^args)
+{
+    auto virtualKey = args->VirtualKey;
+    uint32_t keyCode = static_cast<uint32_t>(virtualKey);
+    Concurrency::critical_section::scoped_lock lock(m_inputMutex);
+    m_inputState.KeysPressed.insert(keyCode);
+    args->Handled = true;
+}

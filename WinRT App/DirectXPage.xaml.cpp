@@ -24,28 +24,27 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace concurrency;
 
-DirectXPage::DirectXPage():
-    m_windowVisible(true),
-    m_coreInput(nullptr)
+DirectXPage::DirectXPage()
 {
     InitializeComponent();
 
-    // Register event handlers for page lifecycle.
-    CoreWindow^ window = Window::Current->CoreWindow;
+    //// Register event handlers for page lifecycle.
+    //CoreWindow^ window = Window::Current->CoreWindow;
 
-    window->VisibilityChanged +=
-        ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &DirectXPage::OnVisibilityChanged);
+    //window->VisibilityChanged +=
+    //    ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &DirectXPage::OnVisibilityChanged);
 
-    DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
+    //DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
 
-    currentDisplayInformation->DpiChanged +=
-        ref new TypedEventHandler<DisplayInformation^, Object^>(this, &DirectXPage::OnDpiChanged);
+    //currentDisplayInformation->DpiChanged +=
+    //    ref new TypedEventHandler<DisplayInformation^, Object^>(this, &DirectXPage::OnDpiChanged);
 
-    currentDisplayInformation->OrientationChanged +=
-        ref new TypedEventHandler<DisplayInformation^, Object^>(this, &DirectXPage::OnOrientationChanged);
+    //currentDisplayInformation->OrientationChanged +=
+    //    ref new TypedEventHandler<DisplayInformation^, Object^>(this, &DirectXPage::OnOrientationChanged);
 
-    DisplayInformation::DisplayContentsInvalidated +=
-        ref new TypedEventHandler<DisplayInformation^, Object^>(this, &DirectXPage::OnDisplayContentsInvalidated);
+    //DisplayInformation::DisplayContentsInvalidated +=
+    //    ref new TypedEventHandler<DisplayInformation^, Object^>(this, &DirectXPage::OnDisplayContentsInvalidated);
+
 
     /*swapChainPanel->CompositionScaleChanged += 
         ref new TypedEventHandler<SwapChainPanel^, Object^>(this, &DirectXPage::OnCompositionScaleChanged);
@@ -88,7 +87,6 @@ DirectXPage::~DirectXPage()
 {
     // Stop rendering and processing events on destruction.
     //m_main->StopRenderLoop();
-    m_coreInput->Dispatcher->StopProcessEvents();
 }
 
 // Saves the current state of the app for suspend and terminate events.
@@ -116,15 +114,15 @@ void DirectXPage::LoadInternalState(IPropertySet^ state)
 
 void DirectXPage::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ args)
 {
-    m_windowVisible = args->Visible;
-    if (m_windowVisible)
-    {
-        //m_main->StartRenderLoop();
-    }
-    else
-    {
-       //m_main->StopRenderLoop();
-    }
+    //m_windowVisible = args->Visible;
+    //if (m_windowVisible)
+    //{
+    //    //m_main->StartRenderLoop();
+    //}
+    //else
+    //{
+    //   //m_main->StopRenderLoop();
+    //}
 }
 
 // DisplayInformation event handlers.
@@ -158,39 +156,4 @@ void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
 {
     // Use the app bar if it is appropriate for your app. Design the app bar, 
     // then fill in event handlers (like this one).
-}
-
-void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
-{
-    // When the pointer is pressed begin tracking the pointer movement.
-    //m_main->StartTracking();
-}
-
-void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
-{
-    // Update the pointer tracking code.
-    //if (m_main->IsTracking())
-    //{
-    //    m_main->TrackingUpdate(e->CurrentPoint->Position.X);
-    //}
-}
-
-void DirectXPage::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
-{
-    // Stop tracking pointer movement when the pointer is released.
-    //m_main->StopTracking();
-}
-
-void DirectXPage::OnCompositionScaleChanged(SwapChainPanel^ sender, Object^ args)
-{
-    //critical_section::scoped_lock lock(m_main->GetCriticalSection());
-    //m_deviceResources->SetCompositionScale(sender->CompositionScaleX, sender->CompositionScaleY);
-    //m_main->CreateWindowSizeDependentResources();
-}
-
-void DirectXPage::OnSwapChainPanelSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
-{
-    //critical_section::scoped_lock lock(m_main->GetCriticalSection());
-    //m_deviceResources->SetLogicalSize(e->NewSize);
-    //m_main->CreateWindowSizeDependentResources();
 }

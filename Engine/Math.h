@@ -95,10 +95,23 @@ namespace Utils
 
             bool operator==(const Vector4& rhs) const;
             bool operator!=(const Vector4& rhs) const;
+
+            Vector4& operator+= (const Vector4& V);
+            Vector4& operator-= (const Vector4& V);
+            Vector4& operator*= (const Vector4& V);
+            Vector4& operator*= (float S);
+            Vector4& operator/= (float S);
+            Vector4& operator/= (const Vector4& V);
         };
 
         // Binary operators
         Vector4 operator* (const Vector4& vector, const Matrix& matrix);
+        Vector4 operator+ (const Vector4& V1, const Vector4& V2);
+        Vector4 operator- (const Vector4& V1, const Vector4& V2);
+        Vector4 operator* (const Vector4& V1, const Vector4& V2);
+        Vector4 operator* (const Vector4& M, float S);
+        Vector4 operator/ (const Vector4& M, float S);
+        Vector4 operator/ (const Vector4& V1, const Vector4& V2);
 
 
         /****************************************************************************
@@ -119,10 +132,23 @@ namespace Utils
             bool operator==(const Vector3& rhs) const;
             bool operator!=(const Vector3& rhs) const;
 
+            Vector3& operator+= (const Vector3& V);
+            Vector3& operator-= (const Vector3& V);
+            Vector3& operator*= (const Vector3& V);
+            Vector3& operator*= (float S);
+            Vector3& operator/= (float S);
+            Vector3& operator/= (const Vector3& V);
+
         };
 
         // Binary operators
         Vector3 operator* (const Vector3& vector, const Matrix& matrix);
+        Vector3 operator+ (const Vector3& V1, const Vector3& V2);
+        Vector3 operator- (const Vector3& V1, const Vector3& V2);
+        Vector3 operator* (const Vector3& V1, const Vector3& V2);
+        Vector3 operator* (const Vector3& M, float S);
+        Vector3 operator/ (const Vector3& M, float S);
+        Vector3 operator/ (const Vector3& V1, const Vector3& V2);
 
         /****************************************************************************
         *
@@ -141,10 +167,23 @@ namespace Utils
 
             bool operator==(const Vector2& rhs) const;
             bool operator!=(const Vector2& rhs) const;
+
+            Vector2& operator+= (const Vector2& V);
+            Vector2& operator-= (const Vector2& V);
+            Vector2& operator*= (const Vector2& V);
+            Vector2& operator*= (float S);
+            Vector2& operator/= (float S);
+            Vector2& operator/= (const Vector2& V);
         };
 
         // Binary operators
         Vector2 operator* (const Vector2& vector, const Matrix& matrix);
+        Vector2 operator+ (const Vector2& V1, const Vector2& V2);
+        Vector2 operator- (const Vector2& V1, const Vector2& V2);
+        Vector2 operator* (const Vector2& V1, const Vector2& V2);
+        Vector2 operator* (const Vector2& M, float S);
+        Vector2 operator/ (const Vector2& M, float S);
+        Vector2 operator/ (const Vector2& V1, const Vector2& V2);
 
         /****************************************************************************
         *

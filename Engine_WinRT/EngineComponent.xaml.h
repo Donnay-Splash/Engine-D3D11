@@ -7,6 +7,7 @@
 
 #include "EngineComponent.g.h"
 #include <Engine\Engine.h>
+#include <Engine\InputManager.h>
 #include <concrt.h>
 
 namespace Engine_WinRT
@@ -22,11 +23,15 @@ namespace Engine_WinRT
         // SwapChainPanel events
         void OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel^ sender, Object^ args);
         void OnSwapChainPanelSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
+        
+        void OnUserControlLoaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
         // Independent input handling functions.
         void OnPointerPressed(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
         void OnPointerMoved(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
         void OnPointerReleased(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
+        void OnKeyUp(Windows::UI::Core::CoreWindow ^sender, Windows::UI::Core::KeyEventArgs ^args);
+        void OnKeyDown(Windows::UI::Core::CoreWindow ^sender, Windows::UI::Core::KeyEventArgs ^args);
 
         static void InitializeSwapChain(IUnknown* swapChain, void* userData);
         
@@ -41,6 +46,11 @@ namespace Engine_WinRT
 
         // Render thread
         Windows::Foundation::IAsyncAction^ m_renderThreadWorker;
-        Concurrency::critical_section m_criticalSection;
+        Concurrency::critical_section m_renderingMutex;
+        Concurrency::critical_section m_inputMutex;
+
+        Windows::Foundation::Size m_swapChainSize;
+
+        InputState m_inputState;
     };
 }

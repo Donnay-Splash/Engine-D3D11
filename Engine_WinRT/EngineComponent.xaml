@@ -7,12 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     d:DesignHeight="300"
-    d:DesignWidth="400">
+    d:DesignWidth="400"
+    Loaded="OnUserControlLoaded">
 
-    <SwapChainPanel x:Name="swapChainPanel">
-        <TextBlock Text="Warren G is the true OG!"
-               HorizontalAlignment="Right"
-               VerticalAlignment="Top"
-               FontSize="30" />
-    </SwapChainPanel>
+    <SwapChainPanel x:Name="swapChainPanel"/>
+
 </UserControl>
