@@ -27,15 +27,22 @@ void InputManager::Update(InputState newInputState)
 
 void InputManager::ProcessInput()
 {
+    // Reset the keys pressed this frame.
+    m_keysPressedThisFrame.clear();
+
     // We presume that any keys pressed this frame wont aleady be in the keys stored for the input manager
     for (uint32_t keyCode : m_currentState.KeysPressed)
     {
-        m_pressedKeys.insert(keyCode);
+        auto ret = m_activatedKeys.insert(keyCode);
+        if (ret.second)
+        {
+            m_keysPressedThisFrame.insert(keyCode);
+        }
     }
 
     for (uint32_t keyCode : m_currentState.KeysReleased)
     {
-        m_pressedKeys.erase(keyCode);
+        m_activatedKeys.erase(keyCode);
     }
 
     m_mouseDelta = { m_currentState.PointerPosition - m_previousState.PointerPosition };
@@ -43,12 +50,12 @@ void InputManager::ProcessInput()
 
 bool InputManager::IsKeyDown(uint32_t keyCode)
 {
-    return m_pressedKeys.find(keyCode) != m_pressedKeys.end();
+    return m_activatedKeys.find(keyCode) != m_activatedKeys.end();
 }
 
 bool InputManager::IsKeyPressed(uint32_t keyCode)
 {
-    return m_currentState.KeysPressed.find(keyCode) != m_currentState.KeysPressed.end();
+    return m_keysPressedThisFrame.find(keyCode) != m_keysPressedThisFrame.end();
 }
 
 bool InputManager::IsKeyReleased(uint32_t keyCode)

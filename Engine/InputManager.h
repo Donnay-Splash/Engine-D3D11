@@ -44,6 +44,7 @@ private:
     InputState m_previousState;
     Utils::Maths::Vector2 m_mouseDelta;
 
-    std::set<uint32_t> m_pressedKeys;
+    std::set<uint32_t> m_activatedKeys;
+    std::set<uint32_t> m_keysPressedThisFrame;
 };
 

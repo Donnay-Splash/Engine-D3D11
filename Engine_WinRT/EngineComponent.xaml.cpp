@@ -215,6 +215,15 @@ void Engine_WinRT::EngineComponent::OnKeyDown(CoreWindow ^sender, KeyEventArgs ^
     auto virtualKey = args->VirtualKey;
     uint32_t keyCode = static_cast<uint32_t>(virtualKey);
     Concurrency::critical_section::scoped_lock lock(m_inputMutex);
+    static int count = 0;
+    count++;
+    if (count > 1)
+    {
+        auto keyStatus = args->KeyStatus;
+        auto tempThinger = 5;
+        tempThinger += count;
+        count = 0;
+    }
     m_inputState.KeysPressed.insert(keyCode);
     args->Handled = true;
 }

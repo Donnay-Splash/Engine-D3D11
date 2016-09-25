@@ -162,14 +162,16 @@ bool Engine::HandleInput(float frameTime)
     keyDown = m_inputManager->IsKeyDown(KeyCodes::PAGE_DOWN);
     m_position->LookDownward(keyDown);
 
-    if (m_inputManager->IsKeyDown(KeyCodes::H))
+    if (m_inputManager->IsKeyPressed(KeyCodes::H))
     {
-        m_camera->SetProjectionMode(Camera::ProjectionMode::Orthographic);
+        auto projection = m_camera->GetProjectionMode();
+        projection = projection == Camera::ProjectionMode::Orthographic ? Camera::ProjectionMode::Perspective : Camera::ProjectionMode::Orthographic;
+        m_camera->SetProjectionMode(projection);
     }
 
     if (m_inputManager->IsKeyDown(KeyCodes::Y))
     {
-        m_camera->SetProjectionMode(Camera::ProjectionMode::Perspective);
+        //m_camera->SetProjectionMode(Camera::ProjectionMode::Perspective);
     }
 
     // Get the view point position/rotation.

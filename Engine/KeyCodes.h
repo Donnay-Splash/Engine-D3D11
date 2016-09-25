@@ -3,14 +3,15 @@
 
 namespace KeyCodes
 {
+static const uint32_t BACK =        0x08;
 static const uint32_t TAB =         0x09;
 static const uint32_t CLEAR =       0x0C;
 static const uint32_t RETURN =      0x0D;
 static const uint32_t SHIFT =       0x10;
 static const uint32_t CONTROL =     0x11;
-static const uint32_t MENU =        0x12;
+static const uint32_t ALT =         0x12;
 static const uint32_t PAUSE =       0x13;
-static const uint32_t CAPITAL =     0x14;
+static const uint32_t CAPS_LOCK =   0x14;
 static const uint32_t ESCAPE =      0x1B;
 static const uint32_t SPACE =       0x20;
 static const uint32_t PAGE_UP =     0x21;
@@ -24,10 +25,11 @@ static const uint32_t DOWN =        0x28;
 static const uint32_t SELECT =      0x29;
 static const uint32_t PRINT =       0x2A;
 static const uint32_t EXECUTE =     0x2B;
-static const uint32_t SNAPSHOT =    0x2C;
+static const uint32_t PRINT_SCREEN =0x2C;
 static const uint32_t INSERT =      0x2D;
 static const uint32_t DEL =         0x2E;
 static const uint32_t HELP =        0x2F;
+
 static const uint32_t NO_0 =        0x30;
 static const uint32_t NO_1 =        0x31;
 static const uint32_t NO_2 =        0x32;
@@ -67,16 +69,16 @@ static const uint32_t Y =           0x59;
 static const uint32_t Z =           0x5A;
 
 
-static const uint32_t NUMPAD0 =     0x60;
-static const uint32_t NUMPAD1 =     0x61;
-static const uint32_t NUMPAD2 =     0x62;
-static const uint32_t NUMPAD3 =     0x63;
-static const uint32_t NUMPAD4 =     0x64;
-static const uint32_t NUMPAD5 =     0x65;
-static const uint32_t NUMPAD6 =     0x66;
-static const uint32_t NUMPAD7 =     0x67;
-static const uint32_t NUMPAD8 =     0x68;
-static const uint32_t NUMPAD9 =     0x69;
+static const uint32_t NUMPAD_0 =    0x60;
+static const uint32_t NUMPAD_1 =    0x61;
+static const uint32_t NUMPAD_2 =    0x62;
+static const uint32_t NUMPAD_3 =    0x63;
+static const uint32_t NUMPAD_4 =    0x64;
+static const uint32_t NUMPAD_5 =    0x65;
+static const uint32_t NUMPAD_6 =    0x66;
+static const uint32_t NUMPAD_7 =    0x67;
+static const uint32_t NUMPAD_8 =    0x68;
+static const uint32_t NUMPAD_9 =    0x69;
 static const uint32_t MULTIPLY =    0x6A;
 static const uint32_t ADD =         0x6B;
 static const uint32_t SEPARATOR =   0x6C;
@@ -95,8 +97,8 @@ static const uint32_t F9 =          0x78;
 static const uint32_t F10 =         0x79;
 static const uint32_t F11 =         0x7A;
 static const uint32_t F12 =         0x7B;
-static const uint32_t NUMLOCK =     0x90;
-static const uint32_t SCROLL =      0x91;
+static const uint32_t NUM_LOCK =    0x90;
+static const uint32_t SCROLL_LOCK = 0x91;
 static const uint32_t LSHIFT =      0xA0;
 static const uint32_t RSHIFT =      0xA1;
 static const uint32_t LCONTROL =    0xA2;
