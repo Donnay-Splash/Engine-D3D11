@@ -10,6 +10,76 @@ Mesh::~Mesh()
 {
 }
 
+void Mesh::Load(aiMesh* mesh, ID3D11Device* device)
+{
+    // at a minimum we expect the mesh to atleast contain vertex positions
+    EngineAssert(mesh->HasPositions());
+    // A mesh must also have faces 
+    EngineAssert(mesh->HasFaces());
+    // We only support triangles
+    EngineAssert(mesh->mFaces[0].mNumIndices == 3);
+
+    PositionContainer positions;
+    NormalContainer normals;
+    UVContainer textureCoordinates;
+    TangentContainer tangents;
+    TangentContainer bitangents;
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+    {
+        auto position = mesh->mVertices[i];
+        positions.push_back({ position.x, position.y, position.z });
+
+        if (mesh->HasNormals())
+        {
+            auto normal = mesh->mNormals[i];
+            normals.push_back({ normal.x, normal.y, normal.z });
+        }
+
+        if (mesh->HasTextureCoords(0))
+        {
+            auto textureCoord = mesh->mTextureCoords[0][i];
+            textureCoordinates.push_back({ textureCoord.x, textureCoord.y });
+        }
+
+        if (mesh->HasTangentsAndBitangents())
+        {
+            auto tangent = mesh->mTangents[i];
+            auto bitangent = mesh->mBitangents[i];
+
+            tangents.push_back({ tangent.x, tangent.y, tangent.z });
+            bitangents.push_back({ bitangent.x, bitangent.y, bitangent.z });
+        }
+    }
+
+    IndexContainer indices;
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+    {
+        auto face = mesh->mFaces[i];
+        indices.push_back(face.mIndices[0]);
+        indices.push_back(face.mIndices[1]);
+        indices.push_back(face.mIndices[2]);
+    }
+
+    // Now finalise the mesh.
+    SetPositions(positions);
+    if (!normals.empty())
+    {
+        SetNormals(normals);
+    }
+    if (!textureCoordinates.empty())
+    {
+        SetUVs(textureCoordinates);
+    }
+    if (!tangents.empty() && !bitangents.empty())
+    {
+        SetTangents(tangents, bitangents);
+    }
+
+    SetIndices(indices);
+
+    FinaliseMesh(device);
+}
+
 void Mesh::Render(ID3D11DeviceContext* deviceContext)
 {
     // Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
@@ -103,7 +173,7 @@ void Mesh::FinaliseMesh(ID3D11Device* device)
     m_meshFinalised = true;
 }
 
-void Mesh::SetPositions(PositionContainer positions)
+void Mesh::SetPositions(const PositionContainer& positions)
 {
     // Mesh has been finalised by this point so we cannot change the data.
     EngineAssert(!m_meshFinalised);
@@ -117,7 +187,7 @@ void Mesh::SetPositions(PositionContainer positions)
     m_positionData = positions;
 }
 
-void Mesh::SetNormals(NormalContainer normals)
+void Mesh::SetNormals(const NormalContainer& normals)
 {
     // Mesh has been finalised by this point so we cannot change the data.
     EngineAssert(!m_meshFinalised);
@@ -131,7 +201,26 @@ void Mesh::SetNormals(NormalContainer normals)
     m_normalData = normals;
 }
 
-void Mesh::SetUVs(UVContainer uvs)
+void Mesh::SetTangents(const TangentContainer& tangents, const TangentContainer& bitangents)
+{
+    // Mesh has been finalised by this point so we cannot change the data.
+    EngineAssert(!m_meshFinalised);
+    // Data must not be set for a mesh twice.
+    EngineAssert(m_tangentData.empty());
+    // Data must not be set for a mesh twice.
+    EngineAssert(m_bitangentData.empty());
+    // Why are you passing an empty vector to the mesh?
+    EngineAssert(!tangents.empty());
+    // Why are you passing an empty vector to the mesh?
+    EngineAssert(!bitangents.empty());
+
+    // Tangent data is stored. Later when FinaliseMesh() is called
+    // we will create the vertex buffers
+    m_tangentData = tangents;
+    m_bitangentData = bitangents;
+}
+
+void Mesh::SetUVs(const UVContainer& uvs)
 {
     // Mesh has been finalised by this point so we cannot change the data.
     EngineAssert(!m_meshFinalised);
@@ -145,7 +234,7 @@ void Mesh::SetUVs(UVContainer uvs)
     m_uvData = uvs;
 }
 
-void Mesh::SetIndices(IndexContainer indices)
+void Mesh::SetIndices(const IndexContainer& indices)
 {
     // Mesh has been finalised by this point so we cannot change the data.
     EngineAssert(!m_meshFinalised);

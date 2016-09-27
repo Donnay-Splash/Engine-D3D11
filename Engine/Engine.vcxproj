@@ -153,6 +153,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="LightManager.cpp" />
+    <ClCompile Include="Loader.cpp" />
     <ClCompile Include="PerformanceTracker.cpp" />
     <ClCompile Include="d3dclass.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="KeyCodes.h" />
     <ClInclude Include="LightManager.h" />
+    <ClInclude Include="Loader.h" />
     <ClInclude Include="MeshInstance.h" />
     <ClInclude Include="MeshMaker.h" />
     <ClInclude Include="PipelineState.h" />

@@ -12,11 +12,6 @@ InputManager::~InputManager()
 }
 
 
-void InputManager::Shutdown()
-{
-}
-
-
 void InputManager::Update(InputState newInputState)
 {
     m_previousState = m_currentState;

@@ -25,7 +25,6 @@ public:
     InputManager(const InputManager&) = delete;
     ~InputManager();
 
-    void Shutdown();
     void Update(InputState newInputState);
 
     // Returns the normalize mouse location in the range [0, 1]
