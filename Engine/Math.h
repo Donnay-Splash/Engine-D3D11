@@ -54,6 +54,9 @@ namespace Utils
             Matrix GetTranspose();
             Matrix GetInverse();
 
+            // Returns a tuple containing Translation, Rotation and Scale in that order.
+            std::tuple<Vector3, Quaternion, Vector3> Decompose() const;
+
             bool operator==(const Matrix& rhs) const;
             bool operator!=(const Matrix& rhs) const;
 

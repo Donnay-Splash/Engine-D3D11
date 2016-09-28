@@ -15,6 +15,7 @@ SceneNode::~SceneNode()
 
 void SceneNode::Update(float frameTime)
 {
+    CalculateTransform();
     for (auto child : m_childNodes)
     {
         child->Update(frameTime);
@@ -39,10 +40,52 @@ void SceneNode::Render(ID3D11DeviceContext* deviceContext)
     }
 }
 
-Utils::Maths::Matrix SceneNode::GetTransform() const
+void SceneNode::SetPosition(Utils::Maths::Vector3 position, bool forceTransformUpdate /*= false*/)
 {
-    return Utils::Maths::Matrix::CreateFromTranslationRotationScale(m_position, m_rotation, m_scale.x);
+    m_position = position;
+    m_transformDirty = true;
+    if (forceTransformUpdate)
+    {
+        CalculateTransform();
+    }
 }
+
+void SceneNode::SetScale(float scale, bool forceTransformUpdate /*= false*/)
+{
+    m_scale = {scale, scale, scale};
+    m_transformDirty = true;
+    if (forceTransformUpdate)
+    {
+        CalculateTransform();
+    }
+}
+
+void SceneNode::SetRotation(Utils::Maths::Quaternion rotation, bool forceTransformUpdate /*= false*/)
+{
+    m_rotation = rotation;
+    m_transformDirty = true;
+    if (forceTransformUpdate)
+    {
+        CalculateTransform();
+    }
+}
+
+void SceneNode::SetTransform(Utils::Maths::Matrix transform)
+{
+    // TODO: Check for finite affine transformation matrix.
+    m_transform = transform;
+    std::tie(m_position, m_rotation, m_scale) = m_transform.Decompose();
+}
+
+void SceneNode::CalculateTransform()
+{
+    if (m_transformDirty)
+    {
+        m_transform = Utils::Maths::Matrix::CreateFromTranslationRotationScale(m_position, m_rotation, m_scale.x);
+        m_transformDirty = false;
+    }
+}
+
 
 Utils::Maths::Matrix SceneNode::GetWorldTransform() const
 {

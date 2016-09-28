@@ -17,12 +17,15 @@ private:
     bool Frame();
     void InitializeWindows(int&, int&);
     void ShutdownWindows();
+    void ProcessMessage(MSG msg);
 
 private:
     LPCWSTR m_applicationName;
     HINSTANCE m_hinstance;
     HWND m_hwnd;
-    std::unique_ptr<Engine> m_Application;
+    std::unique_ptr<Engine> m_engine;
+
+    InputState m_currentInputState;
 };
 
 

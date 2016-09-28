@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "MeshMaker.h"
 #include "MeshInstance.h"
+#include "Loader.h"
 
 Engine::Engine()
 {
@@ -86,7 +87,16 @@ bool Engine::Initialize(EngineCreateOptions createOptions)
     // Set the initial position of the viewer to the same as the initial camera position.
     m_position->SetPosition(0.0f, 0.0f, -10.0f);
 
+    InitializeScene();
     return true;
+}
+
+void Engine::InitializeScene()
+{
+    auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
+    Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
+
+    loader->LoadFile(R"(E:\GitHub\Engine-D3D11\Assets\teapot\teapot.obj)");
 }
 
 void Engine::SetFrameInput(InputState newInputState)

@@ -29,12 +29,14 @@ public:
     template <class ComponentType>
     std::shared_ptr<ComponentType> AddComponent(ID3D11Device* device);
 
-    void SetPosition(Utils::Maths::Vector3 position) { m_position = position; }
+    void SetPosition(Utils::Maths::Vector3 position, bool forceTransformUpdate = false);
     // For now only support uniform scale
-    void SetScale(float scale) { m_scale = {scale, scale, scale}; }
-    void SetRotation(Utils::Maths::Quaternion rotation) { m_rotation = rotation; }
+    void SetScale(float scale, bool forceTransformUpdate = false);
+    void SetRotation(Utils::Maths::Quaternion rotation, bool forceTransformUpdate = false);
 
-    Utils::Maths::Matrix GetTransform() const;
+    void SetTransform(Utils::Maths::Matrix transform);
+
+    Utils::Maths::Matrix GetTransform() const { return m_transform; }
     Utils::Maths::Matrix GetWorldTransform() const;
 
     Utils::Maths::Vector3 GetPosition() const;
@@ -48,6 +50,8 @@ private:
     SceneNode(ScenePtr scene, bool isRoot = false);
     static Ptr Create(ScenePtr scene, bool isRoot = false) { return std::shared_ptr<SceneNode>(new SceneNode(scene, isRoot)); }
 
+    void CalculateTransform();
+
     friend class Scene;
 private:
     // The scene this node is attached to.
@@ -60,6 +64,8 @@ private:
     Utils::Maths::Vector3 m_position;
     Utils::Maths::Vector3 m_scale;
     Utils::Maths::Quaternion m_rotation;
+    Utils::Maths::Matrix m_transform;
+    bool m_transformDirty = false;
 
     // Flag to signal if this SceneNode is the root of a scene.
     bool m_isRootNode;

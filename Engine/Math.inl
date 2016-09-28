@@ -99,6 +99,24 @@ namespace Utils
             return ConvertFromXMMATRIX(inverseMatrix);
         }
 
+        inline std::tuple<Vector3, Quaternion, Vector3> Matrix::Decompose() const
+        {
+            XMMATRIX matrix = XMLoadFloat4x4A(this);
+            XMVECTOR outScale;
+            XMVECTOR outRotation;
+            XMVECTOR outTranslation;
+            XMMatrixDecompose(&outScale, &outRotation, &outTranslation, matrix);
+
+            Vector3 scale;
+            Quaternion rotation;
+            Vector3 translation;
+            XMStoreFloat3A(&scale, outScale);
+            XMStoreFloat4A(&rotation, outRotation);
+            XMStoreFloat3A(&translation, outTranslation);
+
+            return std::make_tuple(translation, rotation, scale);
+        }
+
         inline bool Matrix::operator == (const Matrix& rhs) const
         {
             XMVECTOR x1 = XMLoadFloat4A(reinterpret_cast<const XMFLOAT4A*>(&_11));

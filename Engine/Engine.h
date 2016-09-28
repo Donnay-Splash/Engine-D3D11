@@ -43,6 +43,7 @@ public:
 private:
     bool HandleInput(float);
     bool RenderGraphics();
+    void InitializeScene();
 
 private:
     InputManager::Ptr m_inputManager;

@@ -25,7 +25,7 @@ bool Application::Initialize()
     InitializeWindows(screenWidth, screenHeight);
 
     // Create the application wrapper object.
-    m_Application = std::make_unique<Engine>();
+    m_engine = std::make_unique<Engine>();
 
     // Initialize the application wrapper object.
 
@@ -36,7 +36,7 @@ bool Application::Initialize()
     createOptions.ScreenHeight = screenHeight;
     createOptions.FullScreen = false;
     createOptions.VSyncEnabled = true;
-    result = m_Application->Initialize(createOptions);
+    result = m_engine->Initialize(createOptions);
     if(!result)
     {
         return false;
@@ -48,9 +48,9 @@ bool Application::Initialize()
 
 void Application::Shutdown()
 {
-    if(m_Application)
+    if(m_engine)
     {
-        m_Application = nullptr;
+        m_engine = nullptr;
     }
 
     // Shutdown the window.
@@ -80,6 +80,7 @@ void Application::Run()
             DispatchMessage(&msg);
         }
 
+        ProcessMessage(msg);
         // If windows signals to end the application then exit out.
         if(msg.message == WM_QUIT)
         {
@@ -101,13 +102,34 @@ void Application::Run()
 }
 
 
+void Application::ProcessMessage(MSG msg)
+{
+    switch (msg.message)
+    {
+    case WM_KEYDOWN:
+    {
+        m_currentInputState.KeysPressed.insert(static_cast<uint32_t>(msg.wParam));
+        break;
+    }
+    case WM_KEYUP:
+    {
+        m_currentInputState.KeysReleased.insert(static_cast<uint32_t>(msg.wParam));
+        break;
+    }
+    }
+}
+
+
 bool Application::Frame()
 {
     bool result;
 
 
     // Do the frame processing for the application object.
-    result = m_Application->Frame();
+    m_engine->SetFrameInput(m_currentInputState);
+    m_currentInputState.KeysPressed.clear();
+    m_currentInputState.KeysReleased.clear();
+    result = m_engine->Frame();
     if(!result)
     {
         return false;
