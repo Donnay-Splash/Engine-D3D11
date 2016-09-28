@@ -6,8 +6,8 @@
 #pragma once
 
 #include "EngineComponent.g.h"
-#include <Engine\Header Files\Engine.h>
-#include <Engine\Header Files\InputManager.h>
+#include <Engine.h>
+#include <InputManager.h>
 #include <concrt.h>
 
 namespace Engine_WinRT

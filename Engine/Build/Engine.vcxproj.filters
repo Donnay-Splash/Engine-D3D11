@@ -325,10 +325,10 @@
     <None Include="..\Shaders\Globals_ps.hlsl" />
     <None Include="..\Shaders\Globals_vs.hlsl" />
     <None Include="..\Shaders\InputStructs.hlsl" />
-    <None Include="packages.config" />
     <None Include="..\Utils\Math\Math.inl">
       <Filter>Utils\Math</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">
