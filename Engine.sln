@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{06F1D1D5-1FA9-4A5D-A157-E6EDF139FC0A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Build\Engine.vcxproj", "{06F1D1D5-1FA9-4A5D-A157-E6EDF139FC0A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine_WinRT", "Engine_WinRT\Engine_WinRT.vcxproj", "{E8D41EAD-9180-4879-924A-74CFA04C696F}"
 	ProjectSection(ProjectDependencies) = postProject

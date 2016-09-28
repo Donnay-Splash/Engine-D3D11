@@ -1,0 +1,372 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.props" Condition="Exists('..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.props')" />
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{06F1D1D5-1FA9-4A5D-A157-E6EDF139FC0A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Engine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformToolset>v140</PlatformToolset>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformToolset>v140</PlatformToolset>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <TargetExt>.lib</TargetExt>
+    <OutDir>$(SolutionDir)Built\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Built\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.lib</TargetExt>
+    <OutDir>$(SolutionDir)Built\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Built\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetExt>.lib</TargetExt>
+    <OutDir>$(SolutionDir)Built\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Built\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetExt>.lib</TargetExt>
+    <OutDir>$(SolutionDir)Built\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Built\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <OmitFramePointers />
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;pdh.lib;winmm.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;pdh.lib;winmm.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <FxCompile />
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;pdh.lib;winmm.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;pdh.lib;winmm.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Source Files\d3dclass.cpp" />
+    <ClCompile Include="..\Source Files\Engine.cpp" />
+    <ClCompile Include="..\Source Files\Font.cpp" />
+    <ClCompile Include="..\Source Files\FontShader.cpp" />
+    <ClCompile Include="..\Source Files\fpsclass.cpp" />
+    <ClCompile Include="..\Source Files\InputManager.cpp" />
+    <ClCompile Include="..\Source Files\LightManager.cpp" />
+    <ClCompile Include="..\Source Files\Loader.cpp" />
+    <ClCompile Include="..\Source Files\pch.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\PerformanceTracker.cpp" />
+    <ClCompile Include="..\Source Files\positionclass.cpp" />
+    <ClCompile Include="..\Source Files\Resources\BlendState.cpp" />
+    <ClCompile Include="..\Source Files\Resources\ConstantBuffer.cpp" />
+    <ClCompile Include="..\Source Files\Resources\DepthBuffer.cpp" />
+    <ClCompile Include="..\Source Files\Resources\DepthState.cpp" />
+    <ClCompile Include="..\Source Files\Resources\IndexBuffer.cpp" />
+    <ClCompile Include="..\Source Files\Resources\InputLayout.cpp" />
+    <ClCompile Include="..\Source Files\Resources\Material.cpp" />
+    <ClCompile Include="..\Source Files\Resources\Mesh.cpp" />
+    <ClCompile Include="..\Source Files\Resources\PipelineState.cpp" />
+    <ClCompile Include="..\Source Files\Resources\RasterizerState.cpp" />
+    <ClCompile Include="..\Source Files\Resources\RenderTarget.cpp" />
+    <ClCompile Include="..\Source Files\Resources\Sampler.cpp" />
+    <ClCompile Include="..\Source Files\Resources\Shader.cpp" />
+    <ClCompile Include="..\Source Files\Resources\ShaderPipeline.cpp" />
+    <ClCompile Include="..\Source Files\Resources\Texture.cpp" />
+    <ClCompile Include="..\Source Files\Resources\VertexBuffer.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Components\Camera.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Components\Component.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Components\Light.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Components\MeshInstance.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Scene.cpp" />
+    <ClCompile Include="..\Source Files\Scene\SceneNode.cpp" />
+    <ClCompile Include="..\Source Files\ShaderManager.cpp" />
+    <ClCompile Include="..\Source Files\Text.cpp" />
+    <ClCompile Include="..\Source Files\timerclass.cpp" />
+    <ClCompile Include="..\Utils\Math\Math.cpp" />
+    <ClCompile Include="..\Utils\MeshMaker\MeshMaker.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Header Files\colorshaderclass.h" />
+    <ClInclude Include="..\Header Files\d3dclass.h" />
+    <ClInclude Include="..\Header Files\Engine.h" />
+    <ClInclude Include="..\Header Files\EngineCreateOptions.h" />
+    <ClInclude Include="..\Header Files\Font.h" />
+    <ClInclude Include="..\Header Files\FontShader.h" />
+    <ClInclude Include="..\Header Files\fpsclass.h" />
+    <ClInclude Include="..\Header Files\InputManager.h" />
+    <ClInclude Include="..\Header Files\KeyCodes.h" />
+    <ClInclude Include="..\Header Files\LightManager.h" />
+    <ClInclude Include="..\Header Files\Loader.h" />
+    <ClInclude Include="..\Header Files\pch.h" />
+    <ClInclude Include="..\Header Files\PerformanceTracker.h" />
+    <ClInclude Include="..\Header Files\positionclass.h" />
+    <ClInclude Include="..\Header Files\Resources\BlendState.h" />
+    <ClInclude Include="..\Header Files\Resources\ConstantBuffer.h" />
+    <ClInclude Include="..\Header Files\Resources\ConstantBufferLayouts.h" />
+    <ClInclude Include="..\Header Files\Resources\DepthBuffer.h" />
+    <ClInclude Include="..\Header Files\Resources\DepthState.h" />
+    <ClInclude Include="..\Header Files\Resources\IndexBuffer.h" />
+    <ClInclude Include="..\Header Files\Resources\InputLayout.h" />
+    <ClInclude Include="..\Header Files\Resources\Material.h" />
+    <ClInclude Include="..\Header Files\Resources\Mesh.h" />
+    <ClInclude Include="..\Header Files\Resources\PipelineState.h" />
+    <ClInclude Include="..\Header Files\Resources\RasterizerState.h" />
+    <ClInclude Include="..\Header Files\Resources\RenderTarget.h" />
+    <ClInclude Include="..\Header Files\Resources\Sampler.h" />
+    <ClInclude Include="..\Header Files\Resources\Shader.h" />
+    <ClInclude Include="..\Header Files\Resources\ShaderPipeline.h" />
+    <ClInclude Include="..\Header Files\Resources\Texture.h" />
+    <ClInclude Include="..\Header Files\Resources\VertexBuffer.h" />
+    <ClInclude Include="..\Header Files\Scene\Components\Camera.h" />
+    <ClInclude Include="..\Header Files\Scene\Components\Component.h" />
+    <ClInclude Include="..\Header Files\Scene\Components\Light.h" />
+    <ClInclude Include="..\Header Files\Scene\Components\MeshInstance.h" />
+    <ClInclude Include="..\Header Files\Scene\Scene.h" />
+    <ClInclude Include="..\Header Files\Scene\SceneNode.h" />
+    <ClInclude Include="..\Header Files\ShaderManager.h" />
+    <ClInclude Include="..\Header Files\Text.h" />
+    <ClInclude Include="..\Header Files\timerclass.h" />
+    <ClInclude Include="..\Utils\EngineHelpers.h" />
+    <ClInclude Include="..\Utils\Math\Math.h" />
+    <ClInclude Include="..\Utils\MeshMaker\MeshMaker.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Header Files\Scene\Scene.inl" />
+    <None Include="..\Header Files\Scene\SceneNode.inl" />
+    <None Include="..\Shaders\color.ps">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\color.vs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\font.ps">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\font.vs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\light.ps">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\light.vs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\texture.ps">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\texture.vs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Utils\Math\Math.inl" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shaders\Globals_ps.hlsl">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\Globals_vs.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\InputStructs.hlsl">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <FxCompile Include="..\Shaders\Uber.ps.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Uber.vs.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>VSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets" Condition="Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" />
+    <Import Project="..\..\packages\Assimp.3.0.0\build\native\Assimp.targets" Condition="Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" />
+    <Import Project="..\..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Assimp.3.0.0\build\native\Assimp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.3.0.0\build\native\Assimp.targets'))" />
+    <Error Condition="!Exists('..\..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.props'))" />
+    <Error Condition="!Exists('..\..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2016.9.15.1\build\native\directxtk_desktop_2015.targets'))" />
+  </Target>
+</Project>

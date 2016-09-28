@@ -1,0 +1,347 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{3da4d671-d307-4472-99ce-f26d05acc02f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\Math">
+      <UniqueIdentifier>{8ba68c32-10fb-4dfd-8528-2213ba4d9899}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Compiled Shaders">
+      <UniqueIdentifier>{1d1840c2-fb12-49e9-ae5d-127545aa7c3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Resources">
+      <UniqueIdentifier>{bf34d9d6-f7c6-46d4-a058-8339c0e52a62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Resources">
+      <UniqueIdentifier>{8145c92a-d28e-403f-a5ab-461a14699d3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene">
+      <UniqueIdentifier>{de54bd56-7702-4753-9322-1e07815ac519}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene\Components">
+      <UniqueIdentifier>{328841de-261a-4643-9525-be6501290d8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\MeshMaker">
+      <UniqueIdentifier>{4ebca92c-4aef-4728-9c4a-f1ce48f2f8c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene">
+      <UniqueIdentifier>{03fcc7ee-def4-46fc-9ba8-4e5d1e6e594f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene\Components">
+      <UniqueIdentifier>{4c9c6945-2943-4fe6-b1cf-32a7e28b4756}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Utils\Math\Math.cpp">
+      <Filter>Utils\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Utils\MeshMaker\MeshMaker.cpp">
+      <Filter>Utils\MeshMaker</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\d3dclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\FontShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\fpsclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\LightManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\PerformanceTracker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\positionclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\timerclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\BlendState.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\ConstantBuffer.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\DepthBuffer.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\DepthState.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\IndexBuffer.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\InputLayout.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\Material.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\Mesh.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\PipelineState.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\RasterizerState.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\RenderTarget.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\Sampler.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\Shader.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\ShaderPipeline.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\Texture.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\VertexBuffer.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Scene.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\SceneNode.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Components\Camera.cpp">
+      <Filter>Source Files\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Components\Component.cpp">
+      <Filter>Source Files\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Components\Light.cpp">
+      <Filter>Source Files\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Components\MeshInstance.cpp">
+      <Filter>Source Files\Scene\Components</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Header Files\colorshaderclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\d3dclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\EngineCreateOptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Font.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\FontShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\fpsclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\KeyCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\LightManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\PerformanceTracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\positionclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\ShaderManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\timerclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\BlendState.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\ConstantBuffer.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\DepthBuffer.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\DepthState.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\IndexBuffer.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\InputLayout.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\Material.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\Mesh.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\PipelineState.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\RasterizerState.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\RenderTarget.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\Sampler.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\Shader.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\ShaderPipeline.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\Texture.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\VertexBuffer.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Scene.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\SceneNode.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Components\Camera.h">
+      <Filter>Header Files\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Components\Component.h">
+      <Filter>Header Files\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Components\Light.h">
+      <Filter>Header Files\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Components\MeshInstance.h">
+      <Filter>Header Files\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utils\EngineHelpers.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utils\Math\Math.h">
+      <Filter>Utils\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utils\MeshMaker\MeshMaker.h">
+      <Filter>Utils\MeshMaker</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\ConstantBufferLayouts.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Header Files\Scene\Scene.inl">
+      <Filter>Header Files\Scene</Filter>
+    </None>
+    <None Include="..\Header Files\Scene\SceneNode.inl">
+      <Filter>Header Files\Scene</Filter>
+    </None>
+    <None Include="..\Utils\Math\Math.inl">
+      <Filter>Utils\Math</Filter>
+    </None>
+    <None Include="..\Shaders\color.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\color.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\font.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\font.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\light.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\light.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\texture.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\texture.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Shaders\Globals_ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Globals_vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\InputStructs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Uber.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\Uber.vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
