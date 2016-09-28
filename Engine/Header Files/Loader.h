@@ -3,7 +3,6 @@
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
 #include <assimp\postprocess.h>
-#include "pch.h"
 #include "d3dclass.h"
 #include "Scene.h"
 #include "ShaderPipeline.h"

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "pch.h"
 #include <Resources\ShaderPipeline.h>
 
 // TODO: Come up with a better sounding name

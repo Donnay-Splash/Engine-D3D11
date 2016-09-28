@@ -1,6 +1,6 @@
 #include "pch.h"
+#include <Resources\Texture.h>
 #include <DDSTextureLoader.h>
-#include "Texture.h"
 
 Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device) :
     m_height(height), m_width(width)

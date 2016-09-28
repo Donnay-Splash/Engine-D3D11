@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "Engine.h"
-#include "MeshMaker.h"
-#include "MeshInstance.h"
-#include "Loader.h"
+#include <Utils\MeshMaker\MeshMaker.h>
+#include <Scene\Components\MeshInstance.h>
 
 Engine::Engine()
 {
@@ -93,10 +92,10 @@ bool Engine::Initialize(EngineCreateOptions createOptions)
 
 void Engine::InitializeScene()
 {
-    auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
+    /*auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
     Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
 
-    loader->LoadFile(R"(E:\GitHub\Engine-D3D11\Assets\teapot\teapot.obj)");
+    loader->LoadFile(R"(E:\GitHub\Engine-D3D11\Assets\teapot\teapot.obj)");*/
 }
 
 void Engine::SetFrameInput(InputState newInputState)

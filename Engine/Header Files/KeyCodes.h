@@ -1,6 +1,6 @@
 #pragma once
 // Based on windows virtual keycodes
-
+#include <stdint.h>
 namespace KeyCodes
 {
 static const uint32_t BACK =        0x08;

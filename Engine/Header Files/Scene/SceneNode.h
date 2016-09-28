@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include <Scene\Components\Component.h>
 
 // Forward declaration

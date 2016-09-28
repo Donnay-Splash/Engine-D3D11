@@ -3,7 +3,6 @@
 //////////////
 // INCLUDES //
 //////////////
-#include "pch.h"
 #include "EngineCreateOptions.h"
 #include <Resources\RenderTarget.h>
 #include <Resources\DepthBuffer.h>

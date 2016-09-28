@@ -7,6 +7,7 @@
 #include "EngineComponent.xaml.h"
 #include <d3d11_3.h>
 #include <windows.ui.xaml.media.dxinterop.h>
+#include <Engine\Utils\EngineHelpers.h>
 
 using namespace Engine_WinRT;
 

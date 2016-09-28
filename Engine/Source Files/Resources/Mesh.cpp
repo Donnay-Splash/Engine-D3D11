@@ -10,75 +10,75 @@ Mesh::~Mesh()
 {
 }
 
-void Mesh::Load(aiMesh* mesh, ID3D11Device* device)
-{
-    // at a minimum we expect the mesh to atleast contain vertex positions
-    EngineAssert(mesh->HasPositions());
-    // A mesh must also have faces 
-    EngineAssert(mesh->HasFaces());
-    // We only support triangles
-    EngineAssert(mesh->mFaces[0].mNumIndices == 3);
-
-    PositionContainer positions;
-    NormalContainer normals;
-    UVContainer textureCoordinates;
-    TangentContainer tangents;
-    TangentContainer bitangents;
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-    {
-        auto position = mesh->mVertices[i];
-        positions.push_back({ position.x, position.y, position.z });
-
-        if (mesh->HasNormals())
-        {
-            auto normal = mesh->mNormals[i];
-            normals.push_back({ normal.x, normal.y, normal.z });
-        }
-
-        if (mesh->HasTextureCoords(0))
-        {
-            auto textureCoord = mesh->mTextureCoords[0][i];
-            textureCoordinates.push_back({ textureCoord.x, textureCoord.y });
-        }
-
-        if (mesh->HasTangentsAndBitangents())
-        {
-            auto tangent = mesh->mTangents[i];
-            auto bitangent = mesh->mBitangents[i];
-
-            tangents.push_back({ tangent.x, tangent.y, tangent.z });
-            bitangents.push_back({ bitangent.x, bitangent.y, bitangent.z });
-        }
-    }
-
-    IndexContainer indices;
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-    {
-        auto face = mesh->mFaces[i];
-        indices.push_back(face.mIndices[0]);
-        indices.push_back(face.mIndices[1]);
-        indices.push_back(face.mIndices[2]);
-    }
-
-    // Now finalise the mesh.
-    SetPositions(positions);
-    if (!normals.empty())
-    {
-        SetNormals(normals);
-    }
-    if (!textureCoordinates.empty())
-    {
-        SetUVs(textureCoordinates);
-    }
-    if (!tangents.empty() && !bitangents.empty())
-    {
-        SetTangents(tangents, bitangents);
-    }
-
-    SetIndices(indices);
-
-    FinaliseMesh(device);
-}
+//void Mesh::Load(aiMesh* mesh, ID3D11Device* device)
+//{
+//    // at a minimum we expect the mesh to atleast contain vertex positions
+//    EngineAssert(mesh->HasPositions());
+//    // A mesh must also have faces 
+//    EngineAssert(mesh->HasFaces());
+//    // We only support triangles
+//    EngineAssert(mesh->mFaces[0].mNumIndices == 3);
+//
+//    PositionContainer positions;
+//    NormalContainer normals;
+//    UVContainer textureCoordinates;
+//    TangentContainer tangents;
+//    TangentContainer bitangents;
+//    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+//    {
+//        auto position = mesh->mVertices[i];
+//        positions.push_back({ position.x, position.y, position.z });
+//
+//        if (mesh->HasNormals())
+//        {
+//            auto normal = mesh->mNormals[i];
+//            normals.push_back({ normal.x, normal.y, normal.z });
+//        }
+//
+//        if (mesh->HasTextureCoords(0))
+//        {
+//            auto textureCoord = mesh->mTextureCoords[0][i];
+//            textureCoordinates.push_back({ textureCoord.x, textureCoord.y });
+//        }
+//
+//        if (mesh->HasTangentsAndBitangents())
+//        {
+//            auto tangent = mesh->mTangents[i];
+//            auto bitangent = mesh->mBitangents[i];
+//
+//            tangents.push_back({ tangent.x, tangent.y, tangent.z });
+//            bitangents.push_back({ bitangent.x, bitangent.y, bitangent.z });
+//        }
+//    }
+//
+//    IndexContainer indices;
+//    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+//    {
+//        auto face = mesh->mFaces[i];
+//        indices.push_back(face.mIndices[0]);
+//        indices.push_back(face.mIndices[1]);
+//        indices.push_back(face.mIndices[2]);
+//    }
+//
+//    // Now finalise the mesh.
+//    SetPositions(positions);
+//    if (!normals.empty())
+//    {
+//        SetNormals(normals);
+//    }
+//    if (!textureCoordinates.empty())
+//    {
+//        SetUVs(textureCoordinates);
+//    }
+//    if (!tangents.empty() && !bitangents.empty())
+//    {
+//        SetTangents(tangents, bitangents);
+//    }
+//
+//    SetIndices(indices);
+//
+//    FinaliseMesh(device);
+//}
 
 void Mesh::Render(ID3D11DeviceContext* deviceContext)
 {

@@ -1,7 +1,7 @@
 #pragma once
-#include "pch.h"
 #include "KeyCodes.h"
 #include <set>
+#include <Utils\Math\Math.h>
 namespace MouseButtons
 {
     static const uint32_t Left = 0x0001;

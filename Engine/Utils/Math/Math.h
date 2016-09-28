@@ -3,8 +3,10 @@
 Helper classes to wrap DirectXMath constructs
 */
 
+#include <Math.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
+#include <tuple>
 
 namespace Utils
 {

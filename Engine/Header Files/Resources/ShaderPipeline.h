@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include "InputLayout.h"
 #include "Shader.h"
 

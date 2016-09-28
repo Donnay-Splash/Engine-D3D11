@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 
 // Forward declarations
 class SceneNode;

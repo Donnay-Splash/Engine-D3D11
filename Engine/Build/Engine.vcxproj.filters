@@ -16,9 +16,6 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{3da4d671-d307-4472-99ce-f26d05acc02f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utils\Math">
-      <UniqueIdentifier>{8ba68c32-10fb-4dfd-8528-2213ba4d9899}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader Files\Compiled Shaders">
       <UniqueIdentifier>{1d1840c2-fb12-49e9-ae5d-127545aa7c3e}</UniqueIdentifier>
     </Filter>
@@ -43,11 +40,11 @@
     <Filter Include="Header Files\Scene\Components">
       <UniqueIdentifier>{4c9c6945-2943-4fe6-b1cf-32a7e28b4756}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils\Math">
+      <UniqueIdentifier>{8f7ff71f-264d-4d4b-bb4c-8739b653fb8a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Utils\Math\Math.cpp">
-      <Filter>Utils\Math</Filter>
-    </ClCompile>
     <ClCompile Include="..\Utils\MeshMaker\MeshMaker.cpp">
       <Filter>Utils\MeshMaker</Filter>
     </ClCompile>
@@ -73,9 +70,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Source Files\Loader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source Files\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Source Files\PerformanceTracker.cpp">
@@ -159,6 +153,12 @@
     <ClCompile Include="..\Source Files\Scene\Components\MeshInstance.cpp">
       <Filter>Source Files\Scene\Components</Filter>
     </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Utils\Math\Math.cpp">
+      <Filter>Utils\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\colorshaderclass.h">
@@ -192,9 +192,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Header Files\Loader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Header Files\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Header Files\PerformanceTracker.h">
@@ -281,14 +278,17 @@
     <ClInclude Include="..\Utils\EngineHelpers.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utils\Math\Math.h">
-      <Filter>Utils\Math</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utils\MeshMaker\MeshMaker.h">
       <Filter>Utils\MeshMaker</Filter>
     </ClInclude>
     <ClInclude Include="..\Header Files\Resources\ConstantBufferLayouts.h">
       <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utils\Math\Math.h">
+      <Filter>Utils\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -297,9 +297,6 @@
     </None>
     <None Include="..\Header Files\Scene\SceneNode.inl">
       <Filter>Header Files\Scene</Filter>
-    </None>
-    <None Include="..\Utils\Math\Math.inl">
-      <Filter>Utils\Math</Filter>
     </None>
     <None Include="..\Shaders\color.ps">
       <Filter>Shader Files</Filter>
@@ -325,18 +322,15 @@
     <None Include="..\Shaders\texture.vs">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="..\Shaders\Globals_ps.hlsl" />
+    <None Include="..\Shaders\Globals_vs.hlsl" />
+    <None Include="..\Shaders\InputStructs.hlsl" />
     <None Include="packages.config" />
+    <None Include="..\Utils\Math\Math.inl">
+      <Filter>Utils\Math</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Shaders\Globals_ps.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Shaders\Globals_vs.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Shaders\InputStructs.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>

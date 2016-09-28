@@ -1,6 +1,6 @@
 #pragma once
 
-#include <assimp\mesh.h>
+//#include <assimp\mesh.h>
 #include "Texture.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -26,7 +26,7 @@ public:
     Mesh(const Mesh&) = delete;
     ~Mesh();
 
-    void Load(aiMesh* mesh, ID3D11Device* device);
+    //void Load(aiMesh* mesh, ID3D11Device* device);
 
     void Render(ID3D11DeviceContext*);
     void FinaliseMesh(ID3D11Device* device);
