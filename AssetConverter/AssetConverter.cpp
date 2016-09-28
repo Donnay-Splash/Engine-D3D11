@@ -1,15 +1,18 @@
 // AssetConverter.cpp : Defines the entry point for the console application.
 //
-#include <assimp\Importer.hpp>
-#include <assimp\scene.h>
-#include <assimp\postprocess.h>
-#include <memory>
-#include <iostream>
 
+#include <iostream>
+#include "Importer.h"
+#include "Exporter.h"
+#include "Loader.h"
 int main(int argc, char* argv[])
 {
-    std::unique_ptr<Assimp::Importer> m_importer;
-    std::cerr << "Fail";
+    auto importer = std::make_unique<Importer>(R"(E:\GitHub\Engine-D3D11\Assets\teapot\teapot.obj)");
+    auto sceneData = importer->GetSceneData();
+    Exporter exporter(R"(E:\GitHub\Engine-D3D11\Assets\teapot.mike)", sceneData);
+    Loader loader;
+    loader.LoadFile(R"(E:\GitHub\Engine-D3D11\Assets\teapot.mike)");
+    auto loadedSceneData = loader.GetSceneData();
     return 0;
 }
 
