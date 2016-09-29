@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32 App", "Win32 App\Win3
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssetConverter", "AssetConverter\AssetConverter.vcxproj", "{50C864E8-ED31-4AF7-BE04-23901AD569B2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utils", "Utils\Utils.vcxproj", "{271FD962-A2F3-40F3-A59F-E5AA17187C24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -88,6 +90,16 @@ Global
 		{50C864E8-ED31-4AF7-BE04-23901AD569B2}.Release|Win32.Build.0 = Release|Win32
 		{50C864E8-ED31-4AF7-BE04-23901AD569B2}.Release|x64.ActiveCfg = Release|x64
 		{50C864E8-ED31-4AF7-BE04-23901AD569B2}.Release|x64.Build.0 = Release|x64
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Debug|ARM.ActiveCfg = Debug|Win32
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Debug|Win32.ActiveCfg = Debug|Win32
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Debug|Win32.Build.0 = Debug|Win32
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Debug|x64.ActiveCfg = Debug|x64
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Debug|x64.Build.0 = Debug|x64
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Release|ARM.ActiveCfg = Release|Win32
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Release|Win32.ActiveCfg = Release|Win32
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Release|Win32.Build.0 = Release|Win32
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Release|x64.ActiveCfg = Release|x64
+		{271FD962-A2F3-40F3-A59F-E5AA17187C24}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

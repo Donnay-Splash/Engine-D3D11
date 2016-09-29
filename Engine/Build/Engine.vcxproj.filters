@@ -40,9 +40,6 @@
     <Filter Include="Header Files\Scene\Components">
       <UniqueIdentifier>{4c9c6945-2943-4fe6-b1cf-32a7e28b4756}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utils\Math">
-      <UniqueIdentifier>{8f7ff71f-264d-4d4b-bb4c-8739b653fb8a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utils\MeshMaker\MeshMaker.cpp">
@@ -155,9 +152,6 @@
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Utils\Math\Math.cpp">
-      <Filter>Utils\Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -275,9 +269,6 @@
     <ClInclude Include="..\Header Files\Scene\Components\MeshInstance.h">
       <Filter>Header Files\Scene\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utils\EngineHelpers.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utils\MeshMaker\MeshMaker.h">
       <Filter>Utils\MeshMaker</Filter>
     </ClInclude>
@@ -286,9 +277,6 @@
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Utils\Math\Math.h">
-      <Filter>Utils\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -322,13 +310,16 @@
     <None Include="..\Shaders\texture.vs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="..\Shaders\Globals_ps.hlsl" />
-    <None Include="..\Shaders\Globals_vs.hlsl" />
-    <None Include="..\Shaders\InputStructs.hlsl" />
-    <None Include="..\Utils\Math\Math.inl">
-      <Filter>Utils\Math</Filter>
-    </None>
     <None Include="packages.config" />
+    <None Include="..\Shaders\Globals_ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\Globals_vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\InputStructs.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">

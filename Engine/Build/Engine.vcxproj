@@ -27,14 +27,14 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -42,12 +42,12 @@
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformToolset>v140</PlatformToolset>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformToolset>v140</PlatformToolset>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -61,30 +61,33 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
-    <TargetExt>.dll</TargetExt>
+    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;E:\GitHub\Engine-D3D11;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <TargetExt>.lib</TargetExt>
     <OutDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
     <OutDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;$(IncludePath)</IncludePath>
+    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;E:\GitHub\Engine-D3D11;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
     <OutDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;$(IncludePath)</IncludePath>
+    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;E:\GitHub\Engine-D3D11;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
     <OutDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;$(IncludePath)</IncludePath>
+    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;E:\GitHub\Engine-D3D11;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -198,7 +201,6 @@
     <ClCompile Include="..\Source Files\ShaderManager.cpp" />
     <ClCompile Include="..\Source Files\Text.cpp" />
     <ClCompile Include="..\Source Files\timerclass.cpp" />
-    <ClCompile Include="..\Utils\Math\Math.cpp" />
     <ClCompile Include="..\Utils\MeshMaker\MeshMaker.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -252,8 +254,6 @@
     <ClInclude Include="..\Header Files\ShaderManager.h" />
     <ClInclude Include="..\Header Files\Text.h" />
     <ClInclude Include="..\Header Files\timerclass.h" />
-    <ClInclude Include="..\Utils\EngineHelpers.h" />
-    <ClInclude Include="..\Utils\Math\Math.h" />
     <ClInclude Include="..\Utils\MeshMaker\MeshMaker.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
@@ -284,7 +284,6 @@
     <None Include="..\Shaders\texture.vs">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </None>
-    <None Include="..\Utils\Math\Math.inl" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

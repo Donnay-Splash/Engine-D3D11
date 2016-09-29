@@ -30,7 +30,7 @@
 #include <wrl/client.h>
 
 // Utilities
-#include <Utils\EngineHelpers.h>
+#include <Utils\DirectXHelpers\EngineHelpers.h>
 #include <Utils\Math\Math.h>
 
 // Windows

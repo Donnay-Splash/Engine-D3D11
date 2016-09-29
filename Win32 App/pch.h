@@ -31,8 +31,6 @@
 #include <wrl/client.h>
 
 // Utilities
-#include <Utils\EngineHelpers.h>
-#include <Utils\Math\Math.h>
 
 // Windows
 #include <Windows.h>
