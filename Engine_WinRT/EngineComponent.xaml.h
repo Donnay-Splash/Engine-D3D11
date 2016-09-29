@@ -9,6 +9,7 @@
 #include <Engine.h>
 #include <InputManager.h>
 #include <concrt.h>
+#include <ppltasks.h>
 
 namespace Engine_WinRT
 {

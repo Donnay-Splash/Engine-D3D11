@@ -9,6 +9,7 @@
 
 #include "Common\DeviceResources.h"
 #include "WinRT_AppMain.h"
+#include <ppltasks.h>
 
 namespace WinRT_App
 {
@@ -38,6 +39,8 @@ namespace WinRT_App
 
         // Other event handlers.
         void AppBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+
+        Concurrency::task<void> OpenFile();
     };
 }
 

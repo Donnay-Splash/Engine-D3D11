@@ -161,6 +161,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Header Files\MeshMaker\MeshMaker.cpp" />
     <ClCompile Include="..\Source Files\d3dclass.cpp" />
     <ClCompile Include="..\Source Files\Engine.cpp" />
     <ClCompile Include="..\Source Files\Font.cpp" />
@@ -169,10 +170,10 @@
     <ClCompile Include="..\Source Files\InputManager.cpp" />
     <ClCompile Include="..\Source Files\LightManager.cpp" />
     <ClCompile Include="..\Source Files\Loader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source Files\PerformanceTracker.cpp" />
     <ClCompile Include="..\Source Files\positionclass.cpp" />
@@ -201,7 +202,6 @@
     <ClCompile Include="..\Source Files\ShaderManager.cpp" />
     <ClCompile Include="..\Source Files\Text.cpp" />
     <ClCompile Include="..\Source Files\timerclass.cpp" />
-    <ClCompile Include="..\Utils\MeshMaker\MeshMaker.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -221,11 +221,12 @@
     <ClInclude Include="..\Header Files\KeyCodes.h" />
     <ClInclude Include="..\Header Files\LightManager.h" />
     <ClInclude Include="..\Header Files\Loader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Header Files\MeshMaker\MeshMaker.h" />
     <ClInclude Include="..\Header Files\PerformanceTracker.h" />
     <ClInclude Include="..\Header Files\positionclass.h" />
     <ClInclude Include="..\Header Files\Resources\BlendState.h" />
@@ -254,7 +255,6 @@
     <ClInclude Include="..\Header Files\ShaderManager.h" />
     <ClInclude Include="..\Header Files\Text.h" />
     <ClInclude Include="..\Header Files\timerclass.h" />
-    <ClInclude Include="..\Utils\MeshMaker\MeshMaker.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

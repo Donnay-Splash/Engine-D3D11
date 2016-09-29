@@ -1,13 +1,14 @@
 #include "pch.h"
 #include "Loader.h"
-#include "Material.h"
-#include "Mesh.h"
-#include "MeshInstance.h"
+#include <Resources\Material.h>
+#include <Resources\Mesh.h>
+#include <Scene\Components\MeshInstance.h>
+
+using namespace Utils::Loader;
 
 Loader::Loader(D3DClass::Ptr d3dClass, Scene::Ptr scene, ShaderPipeline::Ptr shaderPipeline) :
     m_d3dClass(d3dClass), m_scene(scene), m_shaderPipeline(shaderPipeline)
 {
-    m_importer = std::make_unique<Assimp::Importer>();
 }
 
 Loader::~Loader()
@@ -19,58 +20,57 @@ void Loader::LoadFile(const std::string& filePath)
 {
     // Eventually we can add additional flags to calculate normals and tangents
     // cache optimisations, etc...
-    auto loaderFlags = aiProcess_Triangulate | aiProcess_GenSmoothNormals;
-    auto importedScene = m_importer->ReadFile(filePath, loaderFlags);
+    MikeLoader importer;
+    auto importedScene = importer.LoadFile(filePath);
     LoadScene(importedScene);
-    // Now that we have finished import we free the scene so the loader can be used again.
-    m_importer->FreeScene();
 }
 
-void Loader::LoadScene(const aiScene* importedScene)
+void Loader::LoadScene(const SceneData& importedScene)
 {
     auto rootNode = m_scene->GetRootNode();
-    LoadNode(importedScene->mRootNode, rootNode, importedScene);
+    for (const auto& sceneNode : importedScene.SceneNodes)
+    {
+        LoadNode(sceneNode);
+    }
+
+    m_nodeMap.clear();
 }
 
-void Loader::LoadNode(const aiNode* importedNode, const SceneNode::Ptr parentNode, const aiScene* importedScene)
+void Loader::LoadNode(const SceneNodeData& importedNode)
 {
     // TODO: Need to add bounds component.
     // Add a new node to the scene to represent the imported node
-    auto sceneNode = m_scene->AddNode(parentNode);
-    if (importedNode->mNumMeshes > 0)
+    SceneNode::Ptr sceneNode;
+    if (importedNode.ParentID == 0)
     {
-        // If there are meshes attached to the node then we need to create a MeshInstance component
-        // to render these meshes.
-        auto meshInstance = sceneNode->AddComponent<MeshInstance>(m_d3dClass->GetDevice());
-        for (unsigned int i = 0; i < importedNode->mNumMeshes; i++)
-        {
-            // Load the mesh information.
-            auto meshIndex = importedNode->mMeshes[i];
-            auto mesh = importedScene->mMeshes[meshIndex];
-            auto engineMesh = std::make_shared<Mesh>();
-            engineMesh->Load(mesh, m_d3dClass->GetDevice());
-            meshInstance->SetMesh(engineMesh);
-
-            // Load the material for the mesh
-            auto materialIndex = mesh->mMaterialIndex;
-            auto material = importedScene->mMaterials[materialIndex];
-            auto engineMaterial = std::make_shared<Material>(m_d3dClass->GetDevice(), m_shaderPipeline);
-            engineMaterial->Load(material);
-            meshInstance->SetMaterial(engineMaterial);
-        }
+        sceneNode = m_scene->AddNode();
     }
-    
-    // Set the transformation on the SceneNode
-    auto t = importedNode->mTransformation;
-    Utils::Maths::Matrix engineTransform = { t.a1, t.a2, t.a3, t.a4,
-                                            t.b1, t.b2, t.b3, t.b4,
-                                            t.c1, t.c2, t.c3, t.c4,
-                                            t.d1, t.d2, t.d3, t.d4 };
-    sceneNode->SetTransform(engineTransform);
-
-    // Load the sceneNodes children
-    for (unsigned int i = 0; i < importedNode->mNumChildren; i++)
+    else
     {
-        LoadNode(importedNode->mChildren[i], sceneNode, importedScene);
+        bool parentExists = (m_nodeMap.find(importedNode.ParentID) != m_nodeMap.end());
+        EngineAssert(parentExists);
+        auto parentNode = m_nodeMap[importedNode.ParentID];
+        sceneNode = m_scene->AddNode(parentNode);
+    }
+
+    // Now that we have created our new node add it to the map so
+    // other nodes can parent to it.
+    m_nodeMap[importedNode.NodeID] = sceneNode;
+    sceneNode->SetTransform(importedNode.Transform);
+
+    // If the node has vertices assigned then load the mesh data into a mesh object
+    // and attach a MeshInstance to the node
+    if (importedNode.VertexCount > 0)
+    {
+        Mesh::Ptr mesh = std::make_shared<Mesh>();
+        mesh->Load(importedNode, m_d3dClass->GetDevice());
+
+        MeshInstance::Ptr meshInstance = sceneNode->AddComponent<MeshInstance>(m_d3dClass->GetDevice());
+        meshInstance->SetMesh(mesh);
+
+        // Material will be added later when it is loaded from the scene.
+        // For now add temp empty material
+        Material::Ptr material = std::make_shared<Material>(m_d3dClass->GetDevice(), m_shaderPipeline);
+        meshInstance->SetMaterial(material);
     }
 }

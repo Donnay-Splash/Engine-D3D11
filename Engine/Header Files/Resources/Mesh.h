@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include <Utils\Loader\Data.h>
 
 class Mesh
 {
@@ -26,7 +27,7 @@ public:
     Mesh(const Mesh&) = delete;
     ~Mesh();
 
-    //void Load(aiMesh* mesh, ID3D11Device* device);
+    void Load(const Utils::Loader::SceneNodeData& mesh, ID3D11Device* device);
 
     void Render(ID3D11DeviceContext*);
     void FinaliseMesh(ID3D11Device* device);

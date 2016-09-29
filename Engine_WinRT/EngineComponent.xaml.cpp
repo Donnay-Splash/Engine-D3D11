@@ -8,6 +8,9 @@
 #include <d3d11_3.h>
 #include <windows.ui.xaml.media.dxinterop.h>
 #include <Utils\DirectXHelpers\EngineHelpers.h>
+#include <experimental\resumable>
+#include <ppltasks.h>
+#include <pplawait.h>
 
 using namespace Engine_WinRT;
 
@@ -22,6 +25,7 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::Storage;
 using namespace Windows::System::Threading;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236

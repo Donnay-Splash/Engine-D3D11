@@ -5,6 +5,9 @@
 
 #include "pch.h"
 #include "DirectXPage.xaml.h"
+#include <experimental\resumable>
+#include <ppltasks.h>
+#include <pplawait.h>
 
 using namespace WinRT_App;
 
@@ -22,6 +25,7 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::Storage;
 using namespace concurrency;
 
 DirectXPage::DirectXPage()
@@ -156,4 +160,13 @@ void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
 {
     // Use the app bar if it is appropriate for your app. Design the app bar, 
     // then fill in event handlers (like this one).
+    OpenFile();
+}
+
+Concurrency::task<void> DirectXPage::OpenFile()
+{
+    auto picker = ref new Pickers::FileOpenPicker();
+    picker->FileTypeFilter->Append(L".jpg");
+
+    auto file = co_await picker->PickSingleFileAsync();
 }

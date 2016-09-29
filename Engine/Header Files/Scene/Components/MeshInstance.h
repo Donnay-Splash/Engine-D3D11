@@ -8,6 +8,7 @@
 class MeshInstance : public Component
 {
 public:
+    using Ptr = std::shared_ptr<MeshInstance>;
     virtual void Update(float frameTime) override;
     virtual void Render(ID3D11DeviceContext* deviceContext) const override;
 

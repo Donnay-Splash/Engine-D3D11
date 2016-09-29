@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Utils">
-      <UniqueIdentifier>{3da4d671-d307-4472-99ce-f26d05acc02f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader Files\Compiled Shaders">
       <UniqueIdentifier>{1d1840c2-fb12-49e9-ae5d-127545aa7c3e}</UniqueIdentifier>
     </Filter>
@@ -31,20 +28,17 @@
     <Filter Include="Source Files\Scene\Components">
       <UniqueIdentifier>{328841de-261a-4643-9525-be6501290d8f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utils\MeshMaker">
-      <UniqueIdentifier>{4ebca92c-4aef-4728-9c4a-f1ce48f2f8c2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Scene">
       <UniqueIdentifier>{03fcc7ee-def4-46fc-9ba8-4e5d1e6e594f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Scene\Components">
       <UniqueIdentifier>{4c9c6945-2943-4fe6-b1cf-32a7e28b4756}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Resources\MeshMaker">
+      <UniqueIdentifier>{1bb1000d-cf1c-40ee-904d-e49966aa3563}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Utils\MeshMaker\MeshMaker.cpp">
-      <Filter>Utils\MeshMaker</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source Files\d3dclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -152,6 +146,9 @@
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Header Files\MeshMaker\MeshMaker.cpp">
+      <Filter>Header Files\Resources\MeshMaker</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -269,14 +266,14 @@
     <ClInclude Include="..\Header Files\Scene\Components\MeshInstance.h">
       <Filter>Header Files\Scene\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utils\MeshMaker\MeshMaker.h">
-      <Filter>Utils\MeshMaker</Filter>
-    </ClInclude>
     <ClInclude Include="..\Header Files\Resources\ConstantBufferLayouts.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\MeshMaker\MeshMaker.h">
+      <Filter>Header Files\Resources\MeshMaker</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
