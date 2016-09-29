@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include <Math\Math.h>
+#include <Utils\Math\Math.h>
 #include <vector>
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
