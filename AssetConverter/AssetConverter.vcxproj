@@ -151,19 +151,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetConverter.cpp" />
-    <ClCompile Include="Data.cpp" />
-    <ClCompile Include="Exporter.cpp" />
     <ClCompile Include="Importer.cpp" />
-    <ClCompile Include="Loader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Data.h" />
-    <ClInclude Include="Exporter.h" />
     <ClInclude Include="Importer.h" />
-    <ClInclude Include="Loader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

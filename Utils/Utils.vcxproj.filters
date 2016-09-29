@@ -11,11 +11,26 @@
     <ClInclude Include="DirectxHelpers\EngineHelpers.h">
       <Filter>DirectXHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="Loader\Data.h">
+      <Filter>Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Loader\Exporter.h">
+      <Filter>Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Loader\Loader.h">
+      <Filter>Loader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Math\Math.cpp">
       <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Loader\Exporter.cpp">
+      <Filter>Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Loader\Loader.cpp">
+      <Filter>Loader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -24,6 +39,9 @@
     </Filter>
     <Filter Include="DirectXHelpers">
       <UniqueIdentifier>{6e067366-ba45-4133-afa5-ca0e3fa61c8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Loader">
+      <UniqueIdentifier>{43190a5f-c413-4045-9f9f-1f40eeeda2f5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

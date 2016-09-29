@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include "Importer.h"
-#include "Exporter.h"
-#include "Loader.h"
+#include <Utils\Loader\Exporter.h>
+#include <Utils\Loader\Loader.h>
+using namespace Utils::Loader;
 int main(int argc, char* argv[])
 {
     auto importer = std::make_unique<Importer>(R"(E:\GitHub\Engine-D3D11\Assets\teapot\teapot.obj)");
