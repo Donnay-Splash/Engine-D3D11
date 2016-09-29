@@ -17,7 +17,7 @@
     <ClInclude Include="Loader\Exporter.h">
       <Filter>Loader</Filter>
     </ClInclude>
-    <ClInclude Include="Loader\Loader.h">
+    <ClInclude Include="Loader\MikeLoader.h">
       <Filter>Loader</Filter>
     </ClInclude>
   </ItemGroup>
@@ -29,7 +29,7 @@
     <ClCompile Include="Loader\Exporter.cpp">
       <Filter>Loader</Filter>
     </ClCompile>
-    <ClCompile Include="Loader\Loader.cpp">
+    <ClCompile Include="Loader\MikeLoader.cpp">
       <Filter>Loader</Filter>
     </ClCompile>
   </ItemGroup>

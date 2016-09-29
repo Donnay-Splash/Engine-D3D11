@@ -1,16 +1,16 @@
 #include "stdafx.h"
-#include "Loader.h"
+#include "MikeLoader.h"
 
 namespace Utils
 {
     namespace Loader
     {
-        Loader::Loader()
+        MikeLoader::MikeLoader()
         {
 
         }
 
-        SceneData Loader::LoadFile(std::string filePath)
+        SceneData MikeLoader::LoadFile(std::string filePath)
         {
             m_sceneData = SceneData();
             m_file.clear();
@@ -24,13 +24,13 @@ namespace Utils
             return m_sceneData;
         }
 
-        void Loader::LoadHeaderFromFile()
+        void MikeLoader::LoadHeaderFromFile()
         {
             ReadFromFile(&m_versionNumer);
             m_currentDataID = SceneNodeDataID;
         }
 
-        void Loader::LoadSceneNodesFromFile()
+        void MikeLoader::LoadSceneNodesFromFile()
         {
             while (!AtEndOfFile())
             {
@@ -92,17 +92,17 @@ namespace Utils
             }
         }
 
-        void Loader::LoadMaterialsFromFile()
+        void MikeLoader::LoadMaterialsFromFile()
         {
 
         }
 
-        void Loader::LoadTexturesFromFile()
+        void MikeLoader::LoadTexturesFromFile()
         {
 
         }
 
-        bool Loader::AtEndOfFile()
+        bool MikeLoader::AtEndOfFile()
         {
             if (m_file.peek() == EOF)
             {

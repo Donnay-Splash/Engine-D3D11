@@ -7,10 +7,10 @@ namespace Utils
 {
     namespace Loader
     {
-        class Loader
+        class MikeLoader
         {
         public:
-            Loader();
+            MikeLoader();
 
             SceneData LoadFile(std::string filePath);
             SceneData GetSceneData() const { return m_sceneData; }

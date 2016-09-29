@@ -148,13 +148,13 @@
     <ClInclude Include="DirectxHelpers\EngineHelpers.h" />
     <ClInclude Include="Loader\Data.h" />
     <ClInclude Include="Loader\Exporter.h" />
-    <ClInclude Include="Loader\Loader.h" />
+    <ClInclude Include="Loader\MikeLoader.h" />
     <ClInclude Include="Math\Math.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Loader\Exporter.cpp" />
-    <ClCompile Include="Loader\Loader.cpp" />
+    <ClCompile Include="Loader\MikeLoader.cpp" />
     <ClCompile Include="Math\Math.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
