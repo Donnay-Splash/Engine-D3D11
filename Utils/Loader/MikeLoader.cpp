@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MikeLoader.h"
+#include <iterator>
 
 namespace Utils
 {
@@ -13,28 +14,62 @@ namespace Utils
         SceneData MikeLoader::LoadFile(std::string filePath)
         {
             m_sceneData = SceneData();
-            m_file.clear();
-            m_file.open(filePath, std::ios::in | std::ios::binary);
+            std::ifstream file(filePath, std::ios::in | std::ios::binary);
+            LoadFileToBuffer(file);
 
-            LoadHeaderFromFile();
-            LoadSceneNodesFromFile();
-            LoadMaterialsFromFile();
-            LoadTexturesFromFile();
+            LoadDataFromBuffer();
+            
 
             return m_sceneData;
         }
 
-        void MikeLoader::LoadHeaderFromFile()
+        SceneData MikeLoader::LoadFile(const uint8_t* data, uint64_t byteCount)
         {
-            ReadFromFile(&m_versionNumer);
+            m_sceneData = SceneData();
+            m_buffer = std::vector<uint8_t>(data, data + byteCount);
+            m_readBytes = 0;
+
+            LoadDataFromBuffer();
+
+            return m_sceneData;
+        }
+
+        void MikeLoader::LoadFileToBuffer(std::ifstream& file)
+        {
+            file.unsetf(std::ios::skipws);
+            std::streampos fileSize;
+
+            file.seekg(0, std::ios::end);
+            fileSize = file.tellg();
+            file.seekg(0, std::ios::beg);
+
+            m_readBytes = 0;
+            m_buffer.clear();
+            m_buffer.reserve(fileSize);
+            m_buffer.insert(m_buffer.begin(),
+                std::istream_iterator<uint8_t>(file),
+                std::istream_iterator<uint8_t>());
+        }
+
+        void MikeLoader::LoadDataFromBuffer()
+        {
+            LoadHeaderFromBuffer();
+            LoadSceneNodesFromBuffer();
+            LoadMaterialsFromBuffer();
+            LoadTexturesFromBuffer();
+        }
+
+        void MikeLoader::LoadHeaderFromBuffer()
+        {
+            ReadFromBuffer(&m_versionNumer);
             m_currentDataID = SceneNodeDataID;
         }
 
-        void MikeLoader::LoadSceneNodesFromFile()
+        void MikeLoader::LoadSceneNodesFromBuffer()
         {
-            while (!AtEndOfFile())
+            while (!AtEndOfBuffer())
             {
-                ReadFromFile(&m_currentDataID);
+                ReadFromBuffer(&m_currentDataID);
                 if (m_currentDataID != SceneNodeDataID)
                 {
                     break;
@@ -43,80 +78,68 @@ namespace Utils
                 // Read standard scene node data in defined order.
                 SceneNodeData sceneNode;
                 // Node IDs
-                ReadFromFile(&sceneNode.NodeID);
-                ReadFromFile(&sceneNode.ParentID);
+                ReadFromBuffer(&sceneNode.NodeID);
+                ReadFromBuffer(&sceneNode.ParentID);
 
                 // Transform.
-                ReadFromFile(&sceneNode.Transform);
+                ReadFromBuffer(&sceneNode.Transform);
 
                 // Vertex and index count
-                ReadFromFile(&sceneNode.VertexCount);
-                ReadFromFile(&sceneNode.IndexCount);
+                ReadFromBuffer(&sceneNode.VertexCount);
+                ReadFromBuffer(&sceneNode.IndexCount);
 
                 // Vertex property flags
-                ReadFromFile(&sceneNode.HasPositions);
-                ReadFromFile(&sceneNode.HasNormals);
-                ReadFromFile(&sceneNode.HasTangents);
-                ReadFromFile(&sceneNode.HasUVs);
+                ReadFromBuffer(&sceneNode.HasPositions);
+                ReadFromBuffer(&sceneNode.HasNormals);
+                ReadFromBuffer(&sceneNode.HasTangents);
+                ReadFromBuffer(&sceneNode.HasUVs);
 
                 // Now load vertex data
                 if (sceneNode.HasPositions)
                 {
                     sceneNode.Positions.resize(sceneNode.VertexCount);
-                    ReadFromFile(sceneNode.Positions.data(), sceneNode.VertexCount);
+                    ReadFromBuffer(sceneNode.Positions.data(), sceneNode.VertexCount);
                 }
                 if (sceneNode.HasNormals)
                 {
                     sceneNode.Normals.resize(sceneNode.VertexCount);
-                    ReadFromFile(sceneNode.Normals.data(), sceneNode.VertexCount);
+                    ReadFromBuffer(sceneNode.Normals.data(), sceneNode.VertexCount);
                 }
                 if (sceneNode.HasTangents)
                 {
                     sceneNode.Tangents.resize(sceneNode.VertexCount);
-                    ReadFromFile(sceneNode.Tangents.data(), sceneNode.VertexCount);
+                    ReadFromBuffer(sceneNode.Tangents.data(), sceneNode.VertexCount);
                     sceneNode.Bitangents.resize(sceneNode.VertexCount);
-                    ReadFromFile(sceneNode.Bitangents.data(), sceneNode.VertexCount);
+                    ReadFromBuffer(sceneNode.Bitangents.data(), sceneNode.VertexCount);
                 }
                 if (sceneNode.HasUVs)
                 {
                     sceneNode.UVs.resize(sceneNode.VertexCount);
-                    ReadFromFile(sceneNode.UVs.data(), sceneNode.VertexCount);
+                    ReadFromBuffer(sceneNode.UVs.data(), sceneNode.VertexCount);
                 }
                 if (sceneNode.IndexCount > 0)
                 {
                     sceneNode.Indices.resize(sceneNode.IndexCount);
-                    ReadFromFile(sceneNode.Indices.data(), sceneNode.IndexCount);
+                    ReadFromBuffer(sceneNode.Indices.data(), sceneNode.IndexCount);
                 }
 
                 m_sceneData.SceneNodes.push_back(sceneNode);
             }
         }
 
-        void MikeLoader::LoadMaterialsFromFile()
+        void MikeLoader::LoadMaterialsFromBuffer()
         {
 
         }
 
-        void MikeLoader::LoadTexturesFromFile()
+        void MikeLoader::LoadTexturesFromBuffer()
         {
 
         }
 
-        bool MikeLoader::AtEndOfFile()
+        bool MikeLoader::AtEndOfBuffer()
         {
-            if (m_file.peek() == EOF)
-            {
-                if (m_file.eof())
-                {
-                    return true;
-                }
-                else
-                {
-                    throw std::exception("Error while reading file");
-                }
-            }
-
-            return false;
+            return m_readBytes >= m_buffer.size();
         }
 
     } // End namespace Loader

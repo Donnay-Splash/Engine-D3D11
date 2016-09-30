@@ -25,6 +25,13 @@ void Loader::LoadFile(const std::string& filePath)
     LoadScene(importedScene);
 }
 
+void Loader::LoadFile(const uint8_t* data, uint64_t byteCount)
+{
+    MikeLoader importer;
+    auto importedScene = importer.LoadFile(data, byteCount);
+    LoadScene(importedScene);
+}
+
 void Loader::LoadScene(const SceneData& importedScene)
 {
     auto rootNode = m_scene->GetRootNode();

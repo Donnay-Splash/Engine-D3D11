@@ -11,6 +11,7 @@
 #include <experimental\resumable>
 #include <ppltasks.h>
 #include <pplawait.h>
+#include <robuffer.h>
 
 using namespace Engine_WinRT;
 
@@ -121,6 +122,24 @@ void Engine_WinRT::EngineComponent::StartRendererThread()
     m_renderThreadWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
 }
 
+void EngineComponent::LoadFile(Windows::Storage::StorageFile^ file)
+{
+    LoadFileInternal(file);
+}
+
+Concurrency::task<void> EngineComponent::LoadFileInternal(Windows::Storage::StorageFile^ file)
+{
+    auto buffer = co_await Windows::Storage::FileIO::ReadBufferAsync(file);
+    Microsoft::WRL::ComPtr<Windows::Storage::Streams::IBufferByteAccess> bufferByteAccess;
+    reinterpret_cast<IInspectable*>(buffer)->QueryInterface(IID_PPV_ARGS(&bufferByteAccess));
+    byte* data = nullptr;
+    bufferByteAccess->Buffer(&data);
+    // Lock rendering
+    Concurrency::critical_section::scoped_lock lock(m_renderingMutex);
+    // Load file
+    m_engine->LoadFile(data, buffer->Length);
+}
+
 void Engine_WinRT::EngineComponent::OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel ^ sender, Object ^ args)
 {
     //throw ref new Platform::NotImplementedException();
@@ -136,7 +155,6 @@ void Engine_WinRT::EngineComponent::OnSwapChainPanelSizeChanged(Platform::Object
     m_swapChainSize.Width = e->NewSize.Width;
     m_engine->ResizeBuffers(static_cast<uint32_t>(m_swapChainSize.Width), static_cast<uint32_t>(m_swapChainSize.Height));
 }
-
 
 
 void Engine_WinRT::EngineComponent::InitializeSwapChain(IUnknown * swapChain, void * userData)

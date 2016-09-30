@@ -20,6 +20,8 @@ namespace Engine_WinRT
         EngineComponent();
         virtual ~EngineComponent();
 
+        void LoadFile(Windows::Storage::StorageFile^ fileToLoad);
+
     private:
         // SwapChainPanel events
         void OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel^ sender, Object^ args);
@@ -37,6 +39,8 @@ namespace Engine_WinRT
         static void InitializeSwapChain(IUnknown* swapChain, void* userData);
         
         void StartRendererThread();
+
+        Concurrency::task<void> LoadFileInternal(Windows::Storage::StorageFile^ fileToLoad);
 
     private:
         Engine::Ptr m_engine;

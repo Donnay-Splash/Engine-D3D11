@@ -1,5 +1,6 @@
 #pragma once
 #include "Data.h"
+#include <Utils\DirectxHelpers\EngineHelpers.h>
 #include <iostream>
 #include <fstream>
 
@@ -13,25 +14,36 @@ namespace Utils
             MikeLoader();
 
             SceneData LoadFile(std::string filePath);
+            SceneData LoadFile(const uint8_t* data, uint64_t byteCount);
             SceneData GetSceneData() const { return m_sceneData; }
         private:
-            void LoadHeaderFromFile();
-            void LoadSceneNodesFromFile();
-            void LoadMaterialsFromFile();
-            void LoadTexturesFromFile();
+            // For reading from file;
+            void LoadDataFromBuffer();
+            void LoadHeaderFromBuffer();
+            void LoadSceneNodesFromBuffer();
+            void LoadMaterialsFromBuffer();
+            void LoadTexturesFromBuffer();
+            bool AtEndOfBuffer();
 
-            bool AtEndOfFile();
+            void LoadFileToBuffer(std::ifstream& file);
 
-
+            // This is crude and ugly for now.
+            // TODO: Tidy this function
             template<typename T>
-            void ReadFromFile(T* dataOut, size_t count = 1)
+            void ReadFromBuffer(T* dataOut, size_t count = 1)
             {
-                m_file.read((char*)dataOut, sizeof(T) * count);
+                auto bytesToRead = sizeof(T) * count;
+                EngineAssert((m_readBytes + bytesToRead) <= m_buffer.size());
+                memcpy((uint8_t*)dataOut, m_buffer.data() + m_readBytes, bytesToRead);
+                m_readBytes += bytesToRead;
             }
 
         private:
             SceneData m_sceneData;
-            std::ifstream m_file;
+
+            std::vector<uint8_t> m_buffer;
+            uint64_t m_readBytes;
+
             uint32_t m_currentDataID;
             uint32_t m_versionNumer;
         };

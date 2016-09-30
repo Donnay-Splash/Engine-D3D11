@@ -15,6 +15,7 @@ public:
     ~Loader();
 
     void LoadFile(const std::string& filePath);
+    void LoadFile(const uint8_t* data, uint64_t byteCount);
 private:
     void LoadScene(const Utils::Loader::SceneData& importedScene);
     void LoadNode(const Utils::Loader::SceneNodeData& importedNode);

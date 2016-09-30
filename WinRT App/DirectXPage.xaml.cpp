@@ -166,7 +166,12 @@ void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
 Concurrency::task<void> DirectXPage::OpenFile()
 {
     auto picker = ref new Pickers::FileOpenPicker();
-    picker->FileTypeFilter->Append(L".jpg");
+    picker->FileTypeFilter->Append(L".mike");
 
     auto file = co_await picker->PickSingleFileAsync();
+    if (file != nullptr)
+    {
+        engineComponent->LoadFile(file);
+    }
+    // Best Idea is to pass the data to EngineComponent. do this and then lock and pass to engine to load.
 }

@@ -40,6 +40,8 @@ public:
 
     InputManager::Ptr GetInputManager() const { return m_inputManager; }
 
+    void LoadFile(const uint8_t* data, uint64_t byteCount);
+
 private:
     bool HandleInput(float);
     bool RenderGraphics();

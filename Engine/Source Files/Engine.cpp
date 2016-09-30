@@ -93,10 +93,6 @@ bool Engine::Initialize(EngineCreateOptions createOptions)
 
 void Engine::InitializeScene()
 {
-    auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
-    Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
-
-    //loader->LoadFile(R"(E:\GitHub\Engine-D3D11\Assets\teapot.mike)");
 }
 
 void Engine::SetFrameInput(InputState newInputState)
@@ -138,6 +134,14 @@ void Engine::ResizeBuffers(uint32_t newWidth, uint32_t newHeight)
     m_direct3D->ResizeBuffers(newWidth, newHeight);
 }
 
+
+void Engine::LoadFile(const uint8_t * data, uint64_t byteCount)
+{
+    auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
+    Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
+
+    loader->LoadFile(data, byteCount);
+}
 
 bool Engine::HandleInput(float frameTime)
 {
