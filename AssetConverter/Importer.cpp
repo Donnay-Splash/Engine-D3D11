@@ -3,14 +3,28 @@
 #include <Utils\DirectxHelpers\EngineHelpers.h>
 using namespace Utils::Loader;
 
-Importer::Importer(std::string filePath)
+Importer::Importer()
 {
     m_aiImporter = std::make_unique<Assimp::Importer>();
+   
+}
+
+std::string Importer::ReadFile(std::string filePath)
+{
     auto loaderFlags = aiProcess_Triangulate | aiProcess_GenSmoothNormals;
     auto importedScene = m_aiImporter->ReadFile(filePath, loaderFlags);
-    LoadScene(importedScene);
-     // Now that we have finished import we free the scene so the loader can be used again.
+    std::string error;
+    if (importedScene != nullptr)
+    {
+        LoadScene(importedScene);
+    }
+    else
+    {
+        error = m_aiImporter->GetErrorString();
+    }
+    // Now that we have finished import we free the scene so the loader can be used again.
     m_aiImporter->FreeScene();
+    return error;
 }
 
 void Importer::LoadScene(const aiScene* importedScene)

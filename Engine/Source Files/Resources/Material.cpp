@@ -4,7 +4,7 @@
 Material::Material(ID3D11Device* device, ShaderPipeline::Ptr shaderPipeline) :
     m_shaderPipeline (shaderPipeline)
 {
-    m_pipelineState = std::make_shared<PipelineState>(device, BlendMode::Opaque, D3D11_CULL_BACK, true);
+    m_pipelineState = std::make_shared<PipelineState>(device, BlendMode::Opaque, D3D11_CULL_NONE, true);
 }
 
 //void Material::Load(aiMaterial* material)

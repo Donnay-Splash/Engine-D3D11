@@ -8,7 +8,10 @@
 class Importer
 {
 public:
-    Importer(std::string filePath);
+    Importer();
+
+    // Returns an empty string if successful or the error if unsuccessful.
+    std::string ReadFile(std::string filePath);
 
     Utils::Loader::SceneData GetSceneData() const { return m_sceneData; }
 private:

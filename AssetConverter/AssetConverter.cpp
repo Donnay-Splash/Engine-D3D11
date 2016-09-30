@@ -1,85 +1,122 @@
-// AssetConverter.cpp : Defines the entry point for the console application.
-//
-
 #include <iostream>
 #include "Importer.h"
 #include <Utils\Loader\Exporter.h>
 #include <Utils\Loader\MikeLoader.h>
 using namespace Utils::Loader;
+
+std::string filePath;
+std::string fileName;
+std::string outputDirectory;
+std::string outputFilePath;
+std::string AssetConverterHelp =
+"AssetConverter.exe expects the following switches:\n"
+"-file <path to file to convert> - This is the only expected argument. If you do not specify an output file path"
+                                  "The generated .mike file will be saved alongside the given file\n"
+"-output <path to output directory> - If supplied this path will be where the generated .mike file is saved to.\n";
+
+bool CheckFilePath();
+
 int main(int argc, char* argv[])
 {
-    auto importer = std::make_unique<Importer>(R"(E:\GitHub\Engine-D3D11\Assets\teapot\teapot.obj)");
-    auto sceneData = importer->GetSceneData();
-    Exporter exporter(R"(E:\GitHub\Engine-D3D11\Assets\teapot.mike)", sceneData);
-    MikeLoader loader;
-    loader.LoadFile(R"(E:\GitHub\Engine-D3D11\Assets\teapot.mike)");
-    auto loadedSceneData = loader.GetSceneData();
+    bool correctArguments = true;
+    
+    // We expect at least two arguments. 1. The path of the executable 2. The -file identifier 3. The path of the file to convert.
+    // The number of arguments should also be odd as we expect a switch followed by the value
+    if (argc >= 3 && (argc & 1) != 0)
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            auto argument = std::string(argv[i]);
+            // We expect a '-' to start a switch
+            if (argument == "-file")
+            {
+                filePath = std::string(argv[++i]);
+            }
+            else if (argument == "-output")
+            {
+                outputDirectory = std::string(argv[++i]);
+            }
+            else
+            {
+                // Invalid argument print out usage.
+                std::cout << "Unrecognised value: " << argument << std::endl;
+                correctArguments = false;
+            }
+        }
+    }
+
+    correctArguments &= CheckFilePath();
+
+    if (correctArguments && !filePath.empty())
+    {
+        auto importer = std::make_unique<Importer>();
+        auto error = importer->ReadFile(filePath);
+        if (error.empty())
+        {
+            auto sceneData = importer->GetSceneData();
+            Exporter exporter(outputFilePath, sceneData);
+            /*MikeLoader loader;
+            loader.LoadFile(outputFilePath);
+            auto loadedSceneData = loader.GetSceneData();*/
+        }
+        else
+        {
+            std::cout << "Failed to convert model with given error: " << error << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << AssetConverterHelp << std::endl;
+    }
+
     return 0;
 }
 
+bool CheckFilePath()
+{
+    // We need to check that the file path we were given is a valid one.
+    std::ifstream test(filePath);
+    if (!test)
+    {
+        std::cout << "Cannot open given file. Either the file does not exist or the given path is invalid" << std::endl;
+        return false;
+    }
+    test.close();
 
-#pragma once
+    // Get the output directory from the input file
+    auto lastSlash = filePath.find_last_of("/\\");
+    // We could be given a file in the local directory
+    // if so then output directory should stay empty.
+    if (lastSlash == filePath.npos)
+    {
+        lastSlash = -1;
+    }
 
+    fileName = filePath.substr(lastSlash + 1);
+    auto extensionPosition = fileName.find_first_of('.');
+    fileName = fileName.substr(0, extensionPosition);
 
+    // Check that the given output directory exists.
+    if (!outputDirectory.empty())
+    {
+        DWORD fileType = GetFileAttributesA(outputDirectory.c_str());
+        if (fileType == INVALID_FILE_ATTRIBUTES)
+        {
+            std::cout << outputDirectory << " is not a valid directory.";
+            return false;
+        }
+        else if ((fileType & FILE_ATTRIBUTE_DIRECTORY) == 0)
+        {
+            std::cout << outputDirectory << " is not a valid directory.";
+            return false;
+        }
+    }
+    else
+    {
+        outputDirectory = filePath.substr(0, lastSlash);
+    }
 
+    outputFilePath = outputDirectory + "\\" + fileName + ".mike";
 
-
-//void Loader::LoadFile(const std::string& filePath)
-//{
-//    // Eventually we can add additional flags to calculate normals and tangents
-//    // cache optimisations, etc...
-//    auto loaderFlags = aiProcess_Triangulate | aiProcess_GenSmoothNormals;
-//    auto importedScene = m_importer->ReadFile(filePath, loaderFlags);
-//    LoadScene(importedScene);
-//    // Now that we have finished import we free the scene so the loader can be used again.
-//    m_importer->FreeScene();
-//}
-//
-//void Loader::LoadScene(const aiScene* importedScene)
-//{
-//    auto rootNode = m_scene->GetRootNode();
-//    LoadNode(importedScene->mRootNode, rootNode, importedScene);
-//}
-//
-//void Loader::LoadNode(const aiNode* importedNode, const SceneNode::Ptr parentNode, const aiScene* importedScene)
-//{
-//    // TODO: Need to add bounds component.
-//    // Add a new node to the scene to represent the imported node
-//    auto sceneNode = m_scene->AddNode(parentNode);
-//    if (importedNode->mNumMeshes > 0)
-//    {
-//        // If there are meshes attached to the node then we need to create a MeshInstance component
-//        // to render these meshes.
-//        auto meshInstance = sceneNode->AddComponent<MeshInstance>(m_d3dClass->GetDevice());
-//        for (unsigned int i = 0; i < importedNode->mNumMeshes; i++)
-//        {
-//            // Load the mesh information.
-//            auto meshIndex = importedNode->mMeshes[i];
-//            auto mesh = importedScene->mMeshes[meshIndex];
-//            auto engineMesh = std::make_shared<Mesh>();
-//            engineMesh->Load(mesh, m_d3dClass->GetDevice());
-//            meshInstance->SetMesh(engineMesh);
-//
-//            // Load the material for the mesh
-//            auto materialIndex = mesh->mMaterialIndex;
-//            auto material = importedScene->mMaterials[materialIndex];
-//            auto engineMaterial = std::make_shared<Material>(m_d3dClass->GetDevice(), m_shaderPipeline);
-//            engineMaterial->Load(material);
-//            meshInstance->SetMaterial(engineMaterial);
-//        }
-//    }
-//
-//    // Set the transformation on the SceneNode
-//    auto t = importedNode->mTransformation;
-//    Utils::Maths::Matrix engineTransform = { t.a1, t.a2, t.a3, t.a4,
-//        t.b1, t.b2, t.b3, t.b4,
-//        t.c1, t.c2, t.c3, t.c4,
-//        t.d1, t.d2, t.d3, t.d4 };
-//    sceneNode->SetTransform(engineTransform);
-//
-//    // Load the sceneNodes children
-//    for (unsigned int i = 0; i < importedNode->mNumChildren; i++)
-//    {
-//        LoadNode(importedNode->mChildren[i], sceneNode, importedScene);
-//    }
-//}
+    return true;
+}
