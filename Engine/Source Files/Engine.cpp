@@ -67,12 +67,12 @@ bool Engine::Initialize(EngineCreateOptions createOptions)
     cameraNode->SetPosition({0.0f, 0.0f, -10.0f});
 
     // Create the mesh object and add it to the scene.
-    auto meshNode = m_scene->AddNode();
+    /*auto meshNode = m_scene->AddNode();
     auto meshInstance = meshNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
     auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
     auto material = std::make_shared<Material>(m_direct3D->GetDevice(), shaderPipeline);
     meshInstance->SetMesh(m_mesh);
-    meshInstance->SetMaterial(material);
+    meshInstance->SetMaterial(material);*/
 
     // Create the timer object.
     m_timer = std::make_shared<TimerClass>();

@@ -10,7 +10,7 @@ std::string outputDirectory;
 std::string outputFilePath;
 std::string AssetConverterHelp =
 "AssetConverter.exe expects the following switches:\n"
-"-file <path to file to convert> - This is the only expected argument. If you do not specify an output file path"
+"-file <path to file to convert> - This is the only expected argument. If you do not specify an output file path "
                                   "The generated .mike file will be saved alongside the given file\n"
 "-output <path to output directory> - If supplied this path will be where the generated .mike file is saved to.\n";
 
