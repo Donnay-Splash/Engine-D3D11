@@ -1,7 +1,13 @@
 #include "Importer.h"
 #include <Utils\Math\Math.h>
 #include <Utils\DirectxHelpers\EngineHelpers.h>
+#include <algorithm>
 using namespace Utils::Loader;
+
+float ConvertShininessToRoughness(float shininess)
+{
+    return Utils::Maths::Clamp((log(shininess) - log(2)) / (10.0 * log(2)), 0.0, 1.0);
+}
 
 Importer::Importer()
 {
@@ -31,6 +37,7 @@ void Importer::LoadScene(const aiScene* importedScene)
 {
     auto rootNodeID = m_currentNodeID++;
     LoadNode(importedScene->mRootNode, rootNodeID, importedScene);
+    LoadTextures();
 }
 
 void Importer::LoadNode(const aiNode* importedNode, uint32_t parentNodeID, const aiScene* importedScene)
@@ -38,7 +45,7 @@ void Importer::LoadNode(const aiNode* importedNode, uint32_t parentNodeID, const
     //TODO: Need to add bounds component.
     // Add a new node to the scene to represent the imported node
     SceneNodeData sceneNode;
-    sceneNode.NodeID = m_currentNodeID++;
+    sceneNode.NodeID = m_currentNodeID;
     sceneNode.ParentID = parentNodeID;
     if (importedNode->mNumMeshes > 0)
     {
@@ -68,6 +75,9 @@ void Importer::LoadNode(const aiNode* importedNode, uint32_t parentNodeID, const
     
     // Finally add the scene node to the scene data
     m_sceneData.SceneNodes.push_back(sceneNode);
+
+    // After loading all data increment the ID of the current node.
+    m_currentNodeID++;
 
     // Load the sceneNodes children
     for (unsigned int i = 0; i < importedNode->mNumChildren; i++)
@@ -131,5 +141,102 @@ void Importer::LoadMeshData(Utils::Loader::SceneNodeData& sceneNode, const aiMes
 
 void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* material)
 {
+    aiColor3D diffuse;
+    material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
 
+    aiColor3D specular;
+    material->Get(AI_MATKEY_COLOR_SPECULAR, specular);
+
+    aiColor3D emissive;
+    material->Get(AI_MATKEY_COLOR_EMISSIVE, emissive);
+
+    float opacity;
+    material->Get(AI_MATKEY_OPACITY, opacity);
+
+    float reflectivity;
+    material->Get(AI_MATKEY_REFLECTIVITY, reflectivity);
+
+    float shininess;
+    material->Get(AI_MATKEY_SHININESS, shininess);
+
+    aiString diffuseTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), diffuseTexture);
+
+    aiString specularTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_SPECULAR, 0), specularTexture);
+
+    aiString emissiveTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_EMISSIVE, 0), emissiveTexture);
+
+    aiString normalTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0), normalTexture);
+
+    aiString shininessTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_SHININESS, 0), shininessTexture);
+
+    aiString opacityTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_OPACITY, 0), opacityTexture);
+
+    aiString ambientOcclusionTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, 0), ambientOcclusionTexture);
+
+    // TODO: some formats may save shininess as PBR roughness so
+    // we may need to check what range shininess fits in.
+    float roughness = ConvertShininessToRoughness(shininess);
+
+    materialData.ID = m_currentNodeID;
+    materialData.DiffuseColor = { diffuse.r, diffuse.g, diffuse.b, opacity };
+    materialData.SpecularColor = { specular.r, specular.g, specular.b, roughness };
+    materialData.EmissiveColor = { emissive.r, emissive.g, emissive.b };
+    AddImportedTexture(diffuseTexture, aiTextureType_DIFFUSE, materialData.ID);
+    AddImportedTexture(specularTexture, aiTextureType_SPECULAR, materialData.ID);
+    AddImportedTexture(emissiveTexture, aiTextureType_EMISSIVE, materialData.ID);
+    AddImportedTexture(normalTexture, aiTextureType_NORMALS, materialData.ID);
+    AddImportedTexture(shininessTexture, aiTextureType_SHININESS, materialData.ID);
+    AddImportedTexture(opacityTexture, aiTextureType_OPACITY, materialData.ID);
+    AddImportedTexture(ambientOcclusionTexture, aiTextureType_LIGHTMAP, materialData.ID);
+}
+
+void Importer::AddImportedTexture(const aiString& texturePath, const aiTextureType& type, const uint32_t& materialID)
+{
+    if (texturePath.length > 0)
+    {
+        std::string path(texturePath.C_Str());
+        auto it = m_importedTextures.find(path);
+        if (it != m_importedTextures.end)
+        {
+            it->second.MaterialIDs.push_back(materialID);
+            // We presume that two texture are not used for different data.
+            // e.g. Diffuse texture used as specular
+        }
+        else
+        {
+            ImportedTextureData textureData;
+            textureData.MaterialIDs.push_back(materialID);
+            textureData.Type = type;
+
+            m_importedTextures[texturePath] = textureData;
+        }
+    }
+}
+
+void Importer::LoadTextures()
+{
+    for (auto texture : m_importedTextures)
+    {
+        auto texturePath = texture.first;
+        auto textureData = texture.second;
+
+        // Need to search local directory for texture
+
+        // When done need to load texture
+
+        // Potentially decompress texture 
+
+        // Potentially need to compress texture into desired format.
+
+        // Create TextureData to add to scene.
+
+        // Update materials to point towards texture ID
+    }
 }

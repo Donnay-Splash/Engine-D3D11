@@ -23,6 +23,6 @@ cbuffer LightBuffer : register(b0)
 
 cbuffer MaterialProperties : register(b1)
 {
-    float4 diffuseColor;
+    float4 diffuseColorAndOpacity;
     float4 specularColorAndSmoothness;
 }

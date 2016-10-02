@@ -62,14 +62,13 @@ namespace Utils
         void MikeLoader::LoadHeaderFromBuffer()
         {
             ReadFromBuffer(&m_versionNumer);
-            m_currentDataID = SceneNodeDataID;
+            ReadFromBuffer(&m_currentDataID);
         }
 
         void MikeLoader::LoadSceneNodesFromBuffer()
         {
             while (!AtEndOfBuffer())
             {
-                ReadFromBuffer(&m_currentDataID);
                 if (m_currentDataID != SceneNodeDataID)
                 {
                     break;
@@ -124,12 +123,41 @@ namespace Utils
                 }
 
                 m_sceneData.SceneNodes.push_back(sceneNode);
+
+                // Now we have finished loading this node.
+                // Check what the next data type is.
+                ReadFromBuffer(&m_currentDataID);
             }
         }
 
         void MikeLoader::LoadMaterialsFromBuffer()
         {
+            while (!AtEndOfBuffer())
+            {
+                if (m_currentDataID != MaterialDataID)
+                {
+                    break;
+                }
 
+                MaterialData material;
+
+                // Material ID that matches the Node that uses it
+                ReadFromBuffer(&material.ID);
+
+                // Diffuse Color
+                ReadFromBuffer(&material.DiffuseColor);
+
+                // Specular Color
+                ReadFromBuffer(&material.SpecularColor);
+
+                // Emissive Color
+                ReadFromBuffer(&material.EmissiveColor);
+
+                m_sceneData.Materials.push_back(material);
+
+                // Now that the material has finished loading check what the next data type is.
+                ReadFromBuffer(&m_currentDataID);
+            }
         }
 
         void MikeLoader::LoadTexturesFromBuffer()

@@ -12,6 +12,8 @@ namespace Utils
         static const uint32_t MaterialDataID = 0x02;
         static const uint32_t TextureDataID = 0x04;
 
+        static const uint32_t kInvalidID = ~0;
+
         struct SceneNodeData
         {
             // Required data. Every instance of a SceneNode will supply this data.
@@ -36,10 +38,29 @@ namespace Utils
 
         struct MaterialData
         {
+            // Will be necessary if we want to avoid material duplication
+            uint32_t ID = kInvalidID;
+            Utils::Maths::Color DiffuseColor;
+            Utils::Maths::Color SpecularColor;
+            Utils::Maths::Color EmissiveColor;
+            // Will need to add bunch of texture IDs
+
+            uint32_t DiffuseTextureID = kInvalidID;
+            uint32_t SpecularTextureID = kInvalidID;
+            uint32_t EmissiveTextureID = kInvalidID;
+            uint32_t NormalTextureID = kInvalidID;
+            uint32_t ShininessTextureID = kInvalidID;
+            uint32_t OpacityTextureID = kInvalidID;
+            uint32_t AOTextureID = kInvalidID;
         };
 
         struct TextureData
         {
+            uint32_t ID = kInvalidID;
+            uint32_t Width = 0;
+            uint32_t Height = 0;
+            uint32_t BitsPerPixel = 0;
+            std::vector<uint8_t> data;
         };
 
         struct SceneData

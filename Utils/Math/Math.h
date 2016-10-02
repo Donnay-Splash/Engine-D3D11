@@ -7,6 +7,7 @@ Helper classes to wrap DirectXMath constructs
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #include <tuple>
+#include <algorithm>
 
 namespace Utils
 {
@@ -234,8 +235,20 @@ namespace Utils
             bool operator!=(const Color& rhs) const;
         };
 
+        /****************************************************************************
+        *
+        * Helper Functions
+        *
+        ****************************************************************************/
+
         inline float DegreesToRadians(float degrees) { return degrees * (kPI / 180.0f); }
         inline float RadiansToDegrees(float radians) { return radians * (180.0f / kPI); }
+
+        template <typename T>
+        inline T Clamp(const T& n, const T& low, const T& high)
+        {
+            return std::max(low, std::min(n, high));
+        }
         
     }// End namespace Maths
 } // End namespace Utils

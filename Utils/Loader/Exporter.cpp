@@ -28,7 +28,6 @@ namespace Utils
 
         void Exporter::WriteSceneNodesToFile()
         {
-            auto size = sizeof(SceneNodeData);
             for (auto sceneNode : m_sceneData.SceneNodes)
             {
                 // Scene Node Data ID
@@ -78,7 +77,23 @@ namespace Utils
 
         void Exporter::WriteMaterialsToFile()
         {
+            for (auto material : m_sceneData.Materials)
+            {
+                // ID for material data so the loader knows what it is receiving next.
+                WriteToFile(&MaterialDataID);
 
+                // Material ID
+                WriteToFile(&material.ID);
+
+                // Diffuse color
+                WriteToFile(&material.DiffuseColor);
+
+                // Specular color
+                WriteToFile(&material.SpecularColor);
+
+                // Emissive color
+                WriteToFile(&material.EmissiveColor);
+            }
         }
 
         void Exporter::WriteTexturesToFile()
