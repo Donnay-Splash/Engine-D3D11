@@ -67,7 +67,7 @@ namespace Utils
 
         void MikeLoader::LoadSceneNodesFromBuffer()
         {
-            while (!AtEndOfBuffer())
+            while (true)
             {
                 if (m_currentDataID != SceneNodeDataID)
                 {
@@ -124,15 +124,24 @@ namespace Utils
 
                 m_sceneData.SceneNodes.push_back(sceneNode);
 
-                // Now we have finished loading this node.
-                // Check what the next data type is.
-                ReadFromBuffer(&m_currentDataID);
+                // If we are yet to reach the end of the buffer
+                // then read the next data type ID
+                if (!AtEndOfBuffer())
+                {
+                    // Now we have finished loading this node.
+                    // Check what the next data type is.
+                    ReadFromBuffer(&m_currentDataID);
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
         void MikeLoader::LoadMaterialsFromBuffer()
         {
-            while (!AtEndOfBuffer())
+            while (true)
             {
                 if (m_currentDataID != MaterialDataID)
                 {
@@ -155,8 +164,17 @@ namespace Utils
 
                 m_sceneData.Materials.push_back(material);
 
-                // Now that the material has finished loading check what the next data type is.
-                ReadFromBuffer(&m_currentDataID);
+                // If we are yet to reach the end of the buffer
+                // then read the next data type ID
+                if (!AtEndOfBuffer())
+                {
+                    // Now that the material has finished loading check what the next data type is.
+                    ReadFromBuffer(&m_currentDataID);
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 

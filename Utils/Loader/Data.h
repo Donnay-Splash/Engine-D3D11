@@ -60,6 +60,7 @@ namespace Utils
             uint32_t Width = 0;
             uint32_t Height = 0;
             uint32_t BitsPerPixel = 0;
+            bool HasMipMaps = false;
             std::vector<uint8_t> data;
         };
 

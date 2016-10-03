@@ -2,10 +2,14 @@
 #include "Importer.h"
 #include <Utils\Loader\Exporter.h>
 #include <Utils\Loader\MikeLoader.h>
+
 using namespace Utils::Loader;
 
 std::string filePath;
+std::string fileDirectory;
 std::string fileName;
+std::string fileExtension;
+
 std::string outputDirectory;
 std::string outputFilePath;
 std::string AssetConverterHelp =
@@ -50,7 +54,7 @@ int main(int argc, char* argv[])
     if (correctArguments && !filePath.empty())
     {
         auto importer = std::make_unique<Importer>();
-        auto error = importer->ReadFile(filePath);
+        auto error = importer->ReadFile(fileDirectory, fileName + '.' + fileExtension);
         if (error.empty())
         {
             auto sceneData = importer->GetSceneData();
@@ -94,7 +98,9 @@ bool CheckFilePath()
 
     fileName = filePath.substr(lastSlash + 1);
     auto extensionPosition = fileName.find_first_of('.');
+    fileExtension = fileName.substr(extensionPosition + 1);
     fileName = fileName.substr(0, extensionPosition);
+    fileDirectory = filePath.substr(0, lastSlash);
 
     // Check that the given output directory exists.
     if (!outputDirectory.empty())
@@ -113,7 +119,7 @@ bool CheckFilePath()
     }
     else
     {
-        outputDirectory = filePath.substr(0, lastSlash);
+        outputDirectory = fileDirectory;
     }
 
     outputFilePath = outputDirectory + "\\" + fileName + ".mike";

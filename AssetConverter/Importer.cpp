@@ -1,6 +1,9 @@
 #include "Importer.h"
+
 #include <Utils\Math\Math.h>
 #include <Utils\DirectxHelpers\EngineHelpers.h>
+#include <DirectXTex.h>
+
 #include <algorithm>
 using namespace Utils::Loader;
 
@@ -12,13 +15,13 @@ float ConvertShininessToRoughness(float shininess)
 Importer::Importer()
 {
     m_aiImporter = std::make_unique<Assimp::Importer>();
-   
+    m_textureManager = std::make_unique<TextureManager>();
 }
 
-std::string Importer::ReadFile(std::string filePath)
+std::string Importer::ReadFile(const std::string& directory, std::string& fileNameAndExtension)
 {
     auto loaderFlags = aiProcess_Triangulate | aiProcess_GenSmoothNormals;
-    auto importedScene = m_aiImporter->ReadFile(filePath, loaderFlags);
+    auto importedScene = m_aiImporter->ReadFile(directory + "\\" + fileNameAndExtension, loaderFlags);
     std::string error;
     if (importedScene != nullptr)
     {
@@ -188,55 +191,17 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     materialData.DiffuseColor = { diffuse.r, diffuse.g, diffuse.b, opacity };
     materialData.SpecularColor = { specular.r, specular.g, specular.b, roughness };
     materialData.EmissiveColor = { emissive.r, emissive.g, emissive.b };
-    AddImportedTexture(diffuseTexture, aiTextureType_DIFFUSE, materialData.ID);
-    AddImportedTexture(specularTexture, aiTextureType_SPECULAR, materialData.ID);
-    AddImportedTexture(emissiveTexture, aiTextureType_EMISSIVE, materialData.ID);
-    AddImportedTexture(normalTexture, aiTextureType_NORMALS, materialData.ID);
-    AddImportedTexture(shininessTexture, aiTextureType_SHININESS, materialData.ID);
-    AddImportedTexture(opacityTexture, aiTextureType_OPACITY, materialData.ID);
-    AddImportedTexture(ambientOcclusionTexture, aiTextureType_LIGHTMAP, materialData.ID);
-}
 
-void Importer::AddImportedTexture(const aiString& texturePath, const aiTextureType& type, const uint32_t& materialID)
-{
-    if (texturePath.length > 0)
-    {
-        std::string path(texturePath.C_Str());
-        auto it = m_importedTextures.find(path);
-        if (it != m_importedTextures.end)
-        {
-            it->second.MaterialIDs.push_back(materialID);
-            // We presume that two texture are not used for different data.
-            // e.g. Diffuse texture used as specular
-        }
-        else
-        {
-            ImportedTextureData textureData;
-            textureData.MaterialIDs.push_back(materialID);
-            textureData.Type = type;
-
-            m_importedTextures[texturePath] = textureData;
-        }
-    }
+    // TODO: Tidy this up a bit. A lot of redundant calls.
+    m_textureManager->AddImportedTexture(diffuseTexture, aiTextureType_DIFFUSE, materialData.ID);
+    m_textureManager->AddImportedTexture(specularTexture, aiTextureType_SPECULAR, materialData.ID);
+    m_textureManager->AddImportedTexture(emissiveTexture, aiTextureType_EMISSIVE, materialData.ID);
+    m_textureManager->AddImportedTexture(normalTexture, aiTextureType_NORMALS, materialData.ID);
+    m_textureManager->AddImportedTexture(shininessTexture, aiTextureType_SHININESS, materialData.ID);
+    m_textureManager->AddImportedTexture(opacityTexture, aiTextureType_OPACITY, materialData.ID);
+    m_textureManager->AddImportedTexture(ambientOcclusionTexture, aiTextureType_LIGHTMAP, materialData.ID);
 }
 
 void Importer::LoadTextures()
 {
-    for (auto texture : m_importedTextures)
-    {
-        auto texturePath = texture.first;
-        auto textureData = texture.second;
-
-        // Need to search local directory for texture
-
-        // When done need to load texture
-
-        // Potentially decompress texture 
-
-        // Potentially need to compress texture into desired format.
-
-        // Create TextureData to add to scene.
-
-        // Update materials to point towards texture ID
-    }
 }

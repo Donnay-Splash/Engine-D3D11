@@ -100,12 +100,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);E:\Development\assimp-3.3.1\assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);E:\Development\assimp-3.3.1\assimp-3.3.1\include;E:\GitHub\DirectXTex\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -122,12 +122,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);E:\Development\assimp-3.3.1\assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);E:\Development\assimp-3.3.1\assimp-3.3.1\include;E:\GitHub\DirectXTex\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -146,14 +146,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);E:\Development\assimp-3.3.1\assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);E:\Development\assimp-3.3.1\assimp-3.3.1\include;E:\GitHub\DirectXTex\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -172,14 +172,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);E:\Development\assimp-3.3.1\assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);E:\Development\assimp-3.3.1\assimp-3.3.1\include;E:\GitHub\DirectXTex\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -192,9 +192,11 @@
   <ItemGroup>
     <ClCompile Include="AssetConverter.cpp" />
     <ClCompile Include="Importer.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Importer.h" />
+    <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
