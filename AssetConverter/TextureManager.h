@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+
 // Data specific to imported textures. e.g. a list of 
 // materials that require it and the texture type
 // e.g. Diffuse, Specular, Opacity, etc...
@@ -26,15 +27,17 @@ public:
     // referenced material.
     void AddImportedTexture(const aiString& texturePath, const aiTextureType& type, const uint32_t& materialID);
 
-    void SetCurrentDirectory(const std::string& currentFileDirectory) { m_currentFileDirectory = currentFileDirectory; }
-
-private:
+    void SetAssetPath(const std::string& currentFileDirectory) { m_currentFileDirectory = GetPathAsWideString(currentFileDirectory); }
+    
     void ProcessTextures();
-    void LoadTextureFromFile(const std::string& path, const aiTextureType& type);
-    void FindFile(const std::string& currentDirectory, const std::string& fileName, const std::string& extension);
 
 private:
-    std::map<std::string, ImportedTextureData> m_importedTextures;
-    std::string m_currentFileDirectory;
+    void LoadTextureFromFile(const std::wstring& path, const aiTextureType& type);
+    std::wstring FindFile(const std::wstring& filePath);
+    std::wstring GetPathAsWideString(const std::string& path);
+
+private:
+    std::map<std::wstring, ImportedTextureData> m_importedTextures;
+    std::wstring m_currentFileDirectory;
 
 };

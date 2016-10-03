@@ -105,7 +105,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -127,7 +127,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -153,7 +153,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -179,7 +179,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>

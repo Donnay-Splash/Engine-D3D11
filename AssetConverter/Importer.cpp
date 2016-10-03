@@ -20,6 +20,8 @@ Importer::Importer()
 
 std::string Importer::ReadFile(const std::string& directory, std::string& fileNameAndExtension)
 {
+    m_textureManager->SetAssetPath(directory);
+
     auto loaderFlags = aiProcess_Triangulate | aiProcess_GenSmoothNormals;
     auto importedScene = m_aiImporter->ReadFile(directory + "\\" + fileNameAndExtension, loaderFlags);
     std::string error;
@@ -204,4 +206,5 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
 
 void Importer::LoadTextures()
 {
+    m_textureManager->ProcessTextures();
 }
