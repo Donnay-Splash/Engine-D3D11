@@ -71,58 +71,38 @@ void TextureManager::LoadTextureFromFile(const std::wstring& path, const aiTextu
         std::transform(extension.begin(), extension.end(), extension.begin(),
             [](unsigned char c) { return std::toupper(c); });
 
-        if (extension == L"DDS")
+        DirectX::ScratchImage image;
+        DirectX::TexMetadata metadata;
+        auto success = GetImageFromFile(realFilePath, image, metadata);
+        if (success)
         {
-            DWORD flags = 0;
-            DirectX::TexMetadata metadata;
-            auto hr = DirectX::GetMetadataFromDDSFile(realFilePath.c_str(), flags, metadata);
-            if (hr != S_OK)
+            // Now depending on the type of texture e.g. Diffuse, Specular, Normal, etc..
+            // We may need to do some additional processing.
+            
+            switch (type)
             {
-                std::wcout << "Failed to get metadata for file: " << path << std::endl;
-
-            }
-
-            DirectX::ScratchImage image;
-            hr = DirectX::LoadFromDDSFile(realFilePath.c_str(), flags, &metadata, image);
-            if (hr != S_OK)
-            {
-                std::wcout << "Failed to load image file: " << path << std::endl;
-            }
-        }
-        else if (extension == L"TGA")
-        {
-            DWORD flags = 0;
-            DirectX::TexMetadata metadata;
-            auto hr = DirectX::GetMetadataFromTGAFile(realFilePath.c_str(), metadata);
-            if (hr != S_OK)
-            {
-                std::wcout << "Failed to get metadata for file: " << path << std::endl;
-
-            }
-
-            DirectX::ScratchImage image;
-            hr = DirectX::LoadFromTGAFile(realFilePath.c_str(), &metadata, image);
-            if (hr != S_OK)
-            {
-                std::wcout << "Failed to load image file: " << path << std::endl;
-            }
-        }
-        else // Presume WIC supported format
-        {
-            DWORD flags = 0;
-            DirectX::TexMetadata metadata;
-            auto hr = DirectX::GetMetadataFromWICFile(realFilePath.c_str(), flags, metadata);
-            if (hr != S_OK)
-            {
-                std::wcout << "Failed to get metadata for file: " << path << std::endl;
-
-            }
-
-            DirectX::ScratchImage image;
-            hr = DirectX::LoadFromWICFile(realFilePath.c_str(), flags, &metadata, image);
-            if (hr != S_OK)
-            {
-                std::wcout << "Failed to load image file: " << path << std::endl;
+                case aiTextureType_DIFFUSE:
+                {
+                    // Convert to premultiplied alpha
+                    DWORD flags = 0;
+                    DirectX::PremultiplyAlpha(image.GetImages(), image.GetImageCount(), metadata, flags, image);
+                    // Generate MipMaps
+                    DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), metadata, flags, 0, image);
+                    // Compress BC3
+                    break;
+                }
+                case aiTextureType_SPECULAR:
+                {
+                    // Generate MipMaps
+                    // Compress BC3
+                    break;
+                }
+                case aiTextureType_NORMALS:
+                {
+                    // Generate MipMaps
+                    // Compress Bc3
+                    break;
+                }
             }
         }
     }
@@ -181,4 +161,68 @@ std::wstring TextureManager::GetPathAsWideString(const std::string& path)
 {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     return converter.from_bytes(path);
+}
+
+bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::ScratchImage& image, DirectX::TexMetadata& metadata)
+{
+    auto extensionPosition = path.find_first_of('.', 0);
+    std::wstring extension = path.substr(extensionPosition + 1);
+
+    // Transform the file extension to upper case
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+        [](unsigned char c) { return std::toupper(c); });
+
+    if (extension == L"DDS")
+    {
+        DWORD flags = 0;
+        auto hr = DirectX::GetMetadataFromDDSFile(path.c_str(), flags, metadata);
+        if (hr != S_OK)
+        {
+            std::wcout << "Failed to get metadata for file: " << path << std::endl;
+            return false;
+        }
+
+        hr = DirectX::LoadFromDDSFile(path.c_str(), flags, &metadata, image);
+        if (hr != S_OK)
+        {
+            std::wcout << "Failed to load image file: " << path << std::endl;
+            return false;
+        }
+    }
+    else if (extension == L"TGA")
+    {
+        DWORD flags = 0;
+        auto hr = DirectX::GetMetadataFromTGAFile(path.c_str(), metadata);
+        if (hr != S_OK)
+        {
+            std::wcout << "Failed to get metadata for file: " << path << std::endl;
+            return false;
+        }
+
+        hr = DirectX::LoadFromTGAFile(path.c_str(), &metadata, image);
+        if (hr != S_OK)
+        {
+            std::wcout << "Failed to load image file: " << path << std::endl;
+            return false;
+        }
+    }
+    else // Presume WIC supported format
+    {
+        DWORD flags = 0;
+        auto hr = DirectX::GetMetadataFromWICFile(path.c_str(), flags, metadata);
+        if (hr != S_OK)
+        {
+            std::wcout << "Failed to get metadata for file: " << path << std::endl;
+            return false;
+        }
+
+        hr = DirectX::LoadFromWICFile(path.c_str(), flags, &metadata, image);
+        if (hr != S_OK)
+        {
+            std::wcout << "Failed to load image file: " << path << std::endl;
+            return false;
+        }
+    }
+
+    return true;
 }

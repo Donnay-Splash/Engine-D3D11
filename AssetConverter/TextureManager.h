@@ -35,6 +35,7 @@ private:
     void LoadTextureFromFile(const std::wstring& path, const aiTextureType& type);
     std::wstring FindFile(const std::wstring& filePath);
     std::wstring GetPathAsWideString(const std::string& path);
+    bool GetImageFromFile(const std::wstring& path, DirectX::ScratchImage& image, DirectX::TexMetadata& metadata);
 
 private:
     std::map<std::wstring, ImportedTextureData> m_importedTextures;
