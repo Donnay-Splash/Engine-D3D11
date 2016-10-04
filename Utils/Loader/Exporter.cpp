@@ -93,12 +93,47 @@ namespace Utils
 
                 // Emissive color
                 WriteToFile(&material.EmissiveColor);
+
+                // Now write all of the material texture IDs
+                // Diffuse
+                WriteToFile(&material.DiffuseTextureID);
+
+                // Specular
+                WriteToFile(&material.SpecularTextureID);
+
+                // Emissive
+                WriteToFile(&material.EmissiveTextureID);
+
+                // Normal
+                WriteToFile(&material.NormalTextureID);
+
+                // Shininess
+                WriteToFile(&material.ShininessTextureID);
+
+                // Opacity
+                WriteToFile(&material.OpacityTextureID);
+
+                // AO
+                WriteToFile(&material.AOTextureID);
             }
         }
 
         void Exporter::WriteTexturesToFile()
         {
+            for (auto texture : m_sceneData.Textures)
+            {
+                // Write ID for texture data so the loader knows what it is receiving next.
+                WriteToFile(&TextureDataID);
 
+                // Texture ID
+                WriteToFile(&texture.ID);
+
+                // Size of texture file in bytes
+                WriteToFile(&texture.dataSize);
+
+                // Raw .dds texture memory
+                WriteToFile(texture.data.data(), texture.dataSize);
+            }
         }
     } // End namespace Loader
 } // End namespace Utils

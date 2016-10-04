@@ -1,4 +1,5 @@
 #include "Importer.h"
+#define NOMINMAX
 
 #include <Utils\Math\Math.h>
 #include <Utils\DirectxHelpers\EngineHelpers.h>
@@ -195,16 +196,17 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     materialData.EmissiveColor = { emissive.r, emissive.g, emissive.b };
 
     // TODO: Tidy this up a bit. A lot of redundant calls.
-    m_textureManager->AddImportedTexture(diffuseTexture, aiTextureType_DIFFUSE, materialData.ID);
-    m_textureManager->AddImportedTexture(specularTexture, aiTextureType_SPECULAR, materialData.ID);
-    m_textureManager->AddImportedTexture(emissiveTexture, aiTextureType_EMISSIVE, materialData.ID);
-    m_textureManager->AddImportedTexture(normalTexture, aiTextureType_NORMALS, materialData.ID);
-    m_textureManager->AddImportedTexture(shininessTexture, aiTextureType_SHININESS, materialData.ID);
-    m_textureManager->AddImportedTexture(opacityTexture, aiTextureType_OPACITY, materialData.ID);
-    m_textureManager->AddImportedTexture(ambientOcclusionTexture, aiTextureType_LIGHTMAP, materialData.ID);
+    materialData.DiffuseTextureID = m_textureManager->AddImportedTexture(diffuseTexture, aiTextureType_DIFFUSE);
+    materialData.SpecularTextureID = m_textureManager->AddImportedTexture(specularTexture, aiTextureType_SPECULAR);
+    materialData.EmissiveTextureID = m_textureManager->AddImportedTexture(emissiveTexture, aiTextureType_EMISSIVE);
+    materialData.NormalTextureID = m_textureManager->AddImportedTexture(normalTexture, aiTextureType_NORMALS);
+    materialData.ShininessTextureID = m_textureManager->AddImportedTexture(shininessTexture, aiTextureType_SHININESS);
+    materialData.OpacityTextureID = m_textureManager->AddImportedTexture(opacityTexture, aiTextureType_OPACITY);
+    materialData.AOTextureID = m_textureManager->AddImportedTexture(ambientOcclusionTexture, aiTextureType_LIGHTMAP);
 }
 
 void Importer::LoadTextures()
 {
     m_textureManager->ProcessTextures();
+    m_sceneData.Textures = m_textureManager->GetLoadedTextures();
 }

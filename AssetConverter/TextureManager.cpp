@@ -1,7 +1,6 @@
 #include "TextureManager.h"
 #include <cctype>
 #include <codecvt>
-#include <DirectXTex.h>
 #include <iostream>
 #include <locale>
 #include <Shlwapi.h>
@@ -13,7 +12,7 @@ TextureManager::TextureManager()
     Utils::DirectXHelpers::ThrowIfFailed(CoInitializeEx(NULL, COINIT::COINIT_MULTITHREADED));
 }
 
-void TextureManager::AddImportedTexture(const aiString& texturePath, const aiTextureType& type, const uint32_t& materialID)
+uint32_t TextureManager::AddImportedTexture(const aiString& texturePath, const aiTextureType& type)
 {
     if (texturePath.length > 0)
     {
@@ -21,19 +20,18 @@ void TextureManager::AddImportedTexture(const aiString& texturePath, const aiTex
         auto it = m_importedTextures.find(path);
         if (it != m_importedTextures.end())
         {
-            it->second.MaterialIDs.push_back(materialID);
-            // We presume that two texture are not used for different data.
-            // e.g. Diffuse texture used as specular
+            return it->second.ID;
         }
         else
         {
             ImportedTextureData textureData;
-            textureData.MaterialIDs.push_back(materialID);
+            textureData.ID = m_currentID++;
             textureData.Type = type;
 
             m_importedTextures[path] = textureData;
         }
     }
+    return Utils::Loader::kInvalidID;
 }
 
 void TextureManager::ProcessTextures()
@@ -41,9 +39,9 @@ void TextureManager::ProcessTextures()
     for (auto texture : m_importedTextures)
     {
         auto texturePath = texture.first;
-        auto textureData = texture.second;
+        auto textureInfo = texture.second;
 
-        LoadTextureFromFile(texturePath, textureData.Type);
+        LoadTextureFromFile(texturePath, textureInfo);
         // Need to search local directory for texture
 
         // When done need to load texture
@@ -58,7 +56,7 @@ void TextureManager::ProcessTextures()
     }
 }
 
-void TextureManager::LoadTextureFromFile(const std::wstring& path, const aiTextureType& type)
+void TextureManager::LoadTextureFromFile(const std::wstring& path, const ImportedTextureData& textureInfo)
 {
     // Determine texture type
     auto realFilePath = FindFile(path);
@@ -71,39 +69,60 @@ void TextureManager::LoadTextureFromFile(const std::wstring& path, const aiTextu
         std::transform(extension.begin(), extension.end(), extension.begin(),
             [](unsigned char c) { return std::toupper(c); });
 
-        DirectX::ScratchImage image;
-        DirectX::TexMetadata metadata;
-        auto success = GetImageFromFile(realFilePath, image, metadata);
+        // The original image loaded from disk without any processing
+        DirectX::ScratchImage rawImage;
+        // The final compressed image with all processing that we will save to disk.
+        DirectX::ScratchImage compressedImage;
+        auto success = GetImageFromFile(realFilePath, rawImage);
         if (success)
         {
             // Now depending on the type of texture e.g. Diffuse, Specular, Normal, etc..
             // We may need to do some additional processing.
             
-            switch (type)
+            switch (textureInfo.Type)
             {
                 case aiTextureType_DIFFUSE:
                 {
                     // Convert to premultiplied alpha
                     DWORD flags = 0;
-                    DirectX::PremultiplyAlpha(image.GetImages(), image.GetImageCount(), metadata, flags, image);
+                    DirectX::ScratchImage preMultipliedImage;
+                    DirectX::PremultiplyAlpha(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, preMultipliedImage);
                     // Generate MipMaps
-                    DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), metadata, flags, 0, image);
+                    DirectX::ScratchImage mipMapImage;
+                    DirectX::GenerateMipMaps(preMultipliedImage.GetImages(), preMultipliedImage.GetImageCount(), preMultipliedImage.GetMetadata(), flags, 0, mipMapImage);
                     // Compress BC3
+                    DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
                     break;
                 }
                 case aiTextureType_SPECULAR:
                 {
+                    DWORD flags = 0;
                     // Generate MipMaps
                     // Compress BC3
+                    DirectX::Compress(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
                     break;
                 }
                 case aiTextureType_NORMALS:
                 {
                     // Generate MipMaps
                     // Compress Bc3
+                    DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
+                    DirectX::Compress(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
                     break;
                 }
             }
+
+            // Now we have processed the data we will save it to DDS memory for storage in the .mike.
+            DWORD flags = 0;
+            DirectX::Blob fileData;
+            DirectX::SaveToDDSMemory(compressedImage.GetImages(), compressedImage.GetImageCount(), compressedImage.GetMetadata(), flags, fileData);
+            Utils::Loader::TextureData textureData;
+            textureData.ID = textureInfo.ID;
+            textureData.dataSize = fileData.GetBufferSize();
+            // Copy data to vector
+            uint8_t* pixels = reinterpret_cast<uint8_t*>(fileData.GetBufferPointer());
+            textureData.data = std::vector<uint8_t>(pixels, pixels + textureData.dataSize);
+            m_loadedTextures.push_back(textureData);
         }
     }
     else
@@ -163,7 +182,7 @@ std::wstring TextureManager::GetPathAsWideString(const std::string& path)
     return converter.from_bytes(path);
 }
 
-bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::ScratchImage& image, DirectX::TexMetadata& metadata)
+bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::ScratchImage& image)
 {
     auto extensionPosition = path.find_first_of('.', 0);
     std::wstring extension = path.substr(extensionPosition + 1);
@@ -175,14 +194,7 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
     if (extension == L"DDS")
     {
         DWORD flags = 0;
-        auto hr = DirectX::GetMetadataFromDDSFile(path.c_str(), flags, metadata);
-        if (hr != S_OK)
-        {
-            std::wcout << "Failed to get metadata for file: " << path << std::endl;
-            return false;
-        }
-
-        hr = DirectX::LoadFromDDSFile(path.c_str(), flags, &metadata, image);
+        auto hr = DirectX::LoadFromDDSFile(path.c_str(), flags, nullptr, image);
         if (hr != S_OK)
         {
             std::wcout << "Failed to load image file: " << path << std::endl;
@@ -192,14 +204,7 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
     else if (extension == L"TGA")
     {
         DWORD flags = 0;
-        auto hr = DirectX::GetMetadataFromTGAFile(path.c_str(), metadata);
-        if (hr != S_OK)
-        {
-            std::wcout << "Failed to get metadata for file: " << path << std::endl;
-            return false;
-        }
-
-        hr = DirectX::LoadFromTGAFile(path.c_str(), &metadata, image);
+        auto hr = DirectX::LoadFromTGAFile(path.c_str(), nullptr, image);
         if (hr != S_OK)
         {
             std::wcout << "Failed to load image file: " << path << std::endl;
@@ -209,14 +214,7 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
     else // Presume WIC supported format
     {
         DWORD flags = 0;
-        auto hr = DirectX::GetMetadataFromWICFile(path.c_str(), flags, metadata);
-        if (hr != S_OK)
-        {
-            std::wcout << "Failed to get metadata for file: " << path << std::endl;
-            return false;
-        }
-
-        hr = DirectX::LoadFromWICFile(path.c_str(), flags, &metadata, image);
+        auto hr = DirectX::LoadFromWICFile(path.c_str(), flags, nullptr, image);
         if (hr != S_OK)
         {
             std::wcout << "Failed to load image file: " << path << std::endl;

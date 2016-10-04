@@ -1,4 +1,6 @@
 #pragma once
+#define NOMINMAX
+
 #include "TextureManager.h"
 #include <Utils\Loader\Data.h>
 #include <assimp\Importer.hpp>

@@ -2,7 +2,7 @@
 /*
 Helper classes to wrap DirectXMath constructs
 */
-
+#define NOMINMAX
 #include <Math.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>

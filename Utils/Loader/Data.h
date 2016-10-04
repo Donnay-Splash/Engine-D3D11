@@ -57,10 +57,7 @@ namespace Utils
         struct TextureData
         {
             uint32_t ID = kInvalidID;
-            uint32_t Width = 0;
-            uint32_t Height = 0;
-            uint32_t BitsPerPixel = 0;
-            bool HasMipMaps = false;
+            size_t dataSize = 0;
             std::vector<uint8_t> data;
         };
 

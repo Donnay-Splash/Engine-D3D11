@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <iostream>
 #include "Importer.h"
 #include <Utils\Loader\Exporter.h>
@@ -59,9 +60,9 @@ int main(int argc, char* argv[])
         {
             auto sceneData = importer->GetSceneData();
             Exporter exporter(outputFilePath, sceneData);
-            /*MikeLoader loader;
+            MikeLoader loader;
             loader.LoadFile(outputFilePath);
-            auto loadedSceneData = loader.GetSceneData();*/
+            auto loadedSceneData = loader.GetSceneData();
         }
         else
         {

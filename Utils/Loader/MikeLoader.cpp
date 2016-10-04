@@ -162,6 +162,28 @@ namespace Utils
                 // Emissive Color
                 ReadFromBuffer(&material.EmissiveColor);
 
+                // Now read all of the material texture IDs
+                // Diffuse
+                ReadFromBuffer(&material.DiffuseTextureID);
+
+                // Specular
+                ReadFromBuffer(&material.SpecularTextureID);
+
+                // Emissive
+                ReadFromBuffer(&material.EmissiveTextureID);
+
+                // Normal
+                ReadFromBuffer(&material.NormalTextureID);
+
+                // Shininess
+                ReadFromBuffer(&material.ShininessTextureID);
+
+                // Opacity
+                ReadFromBuffer(&material.OpacityTextureID);
+
+                // AO
+                ReadFromBuffer(&material.AOTextureID);
+
                 m_sceneData.Materials.push_back(material);
 
                 // If we are yet to reach the end of the buffer
@@ -180,7 +202,39 @@ namespace Utils
 
         void MikeLoader::LoadTexturesFromBuffer()
         {
+            while (true)
+            {
+                if (m_currentDataID != TextureDataID)
+                {
+                    break;
+                }
 
+                TextureData texture;
+
+                // Texture ID that will be used to match the textures with materials
+                ReadFromBuffer(&texture.ID);
+
+                // The size of the texture file in bytes
+                ReadFromBuffer(&texture.dataSize);
+
+                // The .dds texture data
+                texture.data.resize(texture.dataSize);
+                ReadFromBuffer(texture.data.data(), texture.dataSize);
+
+                m_sceneData.Textures.push_back(texture);
+
+                // If we are yet to reach the end of the buffer
+                // then read the next data type ID
+                if (!AtEndOfBuffer())
+                {
+                    // Now that the material has finished loading check what the next data type is.
+                    ReadFromBuffer(&m_currentDataID);
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
 
         bool MikeLoader::AtEndOfBuffer()
