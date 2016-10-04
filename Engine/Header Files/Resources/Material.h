@@ -13,6 +13,7 @@ public:
     void Render(ID3D11DeviceContext* deviceContext);
 
 private:
+    // TODO: Fill out material class so properties and textures can be loaded to it.
     ShaderPipeline::Ptr m_shaderPipeline;
     PipelineState::Ptr m_pipelineState;
 };

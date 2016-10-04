@@ -80,6 +80,13 @@ Texture::Texture(ID3D11Device* device, const wchar_t* filename)
     Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, filename, &subresource, m_srv.GetAddressOf()));
 }
 
+// Create a texture from imported texture data
+Texture::Texture(ID3D11Device* device, const Utils::Loader::TextureData& importedTextureData)
+{
+    ID3D11Resource* subresource;
+    Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, importedTextureData.data.data(), importedTextureData.dataSize, &subresource, m_srv.GetAddressOf()));
+}
+
 Texture::~Texture()
 {
 }

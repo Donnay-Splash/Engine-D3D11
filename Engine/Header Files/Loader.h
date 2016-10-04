@@ -3,6 +3,7 @@
 #include "d3dclass.h"
 #include <Scene\Scene.h>
 #include <Resources\ShaderPipeline.h>
+#include <Resources\Texture.h>
 #include <Utils\Loader\MikeLoader.h>
 #include <map>
 
@@ -18,6 +19,9 @@ public:
     void LoadFile(const uint8_t* data, uint64_t byteCount);
 private:
     void LoadScene(const Utils::Loader::SceneData& importedScene);
+    void LoadSceneNodes(const std::vector<Utils::Loader::SceneNodeData>& importedSceneNodes);
+    void LoadMaterials(const std::vector<Utils::Loader::MaterialData>& importedMaterials);
+    void LoadTextures(const std::vector<Utils::Loader::TextureData>& importedTextures);
     void LoadNode(const Utils::Loader::SceneNodeData& importedNode);
 
 private:
@@ -25,4 +29,6 @@ private:
     Scene::Ptr m_scene;
     ShaderPipeline::Ptr m_shaderPipeline;
     std::map<uint32_t, SceneNode::Ptr> m_nodeMap;
+    std::map<uint32_t, Material::Ptr> m_materialMap;
+    std::map<uint32_t, Texture::Ptr> m_textureMap;
 };

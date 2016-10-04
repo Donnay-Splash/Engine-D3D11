@@ -1,5 +1,5 @@
 #pragma once
-
+#include <Utils\Loader\Data.h>
 namespace TextureCreationFlags
 {
     static const uint32_t BindRenderTarget = 0x0001;
@@ -18,6 +18,8 @@ public:
     Texture(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device);
     // Create a texture from a file
     Texture(ID3D11Device* device, const wchar_t* filename);
+    // Create a texture from imported texture data
+    Texture(ID3D11Device* device, const Utils::Loader::TextureData& importedTextureData);
     Texture(const Texture&) = delete;
     ~Texture();
 
