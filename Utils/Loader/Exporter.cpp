@@ -110,8 +110,8 @@ namespace Utils
                 // Normal
                 WriteToFile(&material.NormalTextureID);
 
-                // Shininess
-                WriteToFile(&material.ShininessTextureID);
+                // Smoothness
+                WriteToFile(&material.SmoothnessTextureID);
 
                 // Opacity
                 WriteToFile(&material.OpacityTextureID);

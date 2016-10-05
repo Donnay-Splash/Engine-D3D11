@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <Resources\Texture.h>
 #include <DDSTextureLoader.h>
+#include <Resources\ConstantBuffer.h>
 
 Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device) :
     m_height(height), m_width(width)
@@ -87,7 +88,15 @@ Texture::Texture(ID3D11Device* device, const Utils::Loader::TextureData& importe
     Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, importedTextureData.data.data(), importedTextureData.dataSize, &subresource, m_srv.GetAddressOf()));
 }
 
-Texture::~Texture()
+void Texture::UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister)
 {
-}
+    if (pipelineStage & PipelineStage::Pixel)
+    {
+        deviceContext->PSSetShaderResources(textureRegister, 1, m_srv.GetAddressOf());
+    }
 
+    if (pipelineStage & PipelineStage::Vertex)
+    {
+        deviceContext->VSSetShaderResources(textureRegister, 1, m_srv.GetAddressOf());
+    }
+}

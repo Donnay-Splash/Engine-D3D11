@@ -4,6 +4,7 @@
 #include <Scene\Scene.h>
 #include <Resources\ShaderPipeline.h>
 #include <Resources\Texture.h>
+#include <Resources\Material.h>
 #include <Utils\Loader\MikeLoader.h>
 #include <map>
 

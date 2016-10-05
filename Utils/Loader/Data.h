@@ -52,7 +52,7 @@ namespace Utils
             uint32_t SpecularTextureID = kInvalidID;
             uint32_t EmissiveTextureID = kInvalidID;
             uint32_t NormalTextureID = kInvalidID;
-            uint32_t ShininessTextureID = kInvalidID;
+            uint32_t SmoothnessTextureID = kInvalidID;
             uint32_t OpacityTextureID = kInvalidID;
             uint32_t AOTextureID = kInvalidID;
         };

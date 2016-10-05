@@ -78,3 +78,27 @@ struct LightConstants
         return result && (activeLights == rhs.activeLights);
     }
 };
+
+ALIGN_16
+struct MaterialConstants
+{
+    static const UINT kRegister = 1;
+    
+    Utils::Maths::Color diffuseColorAndOpacity;
+    Utils::Maths::Color specularColorAndSmoothness;
+    Utils::Maths::Color emissiveColor;
+
+    bool operator!=(const MaterialConstants& rhs)
+    {
+        return (diffuseColorAndOpacity != rhs.diffuseColorAndOpacity) || 
+               (specularColorAndSmoothness != rhs.specularColorAndSmoothness) ||
+               (emissiveColor != rhs.emissiveColor);
+    }
+
+    bool operator==(const MaterialConstants& rhs)
+    {
+        return (diffuseColorAndOpacity == rhs.diffuseColorAndOpacity) &&
+            (specularColorAndSmoothness == rhs.specularColorAndSmoothness) &&
+            (emissiveColor == rhs.emissiveColor);
+    }
+};

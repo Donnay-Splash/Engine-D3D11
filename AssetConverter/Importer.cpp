@@ -8,7 +8,7 @@
 #include <algorithm>
 using namespace Utils::Loader;
 
-float ConvertShininessToRoughness(float shininess)
+float ConvertShininessToSmoothness(float shininess)
 {
     return Utils::Maths::Clamp((log(shininess) - log(2)) / (10.0 * log(2)), 0.0, 1.0);
 }
@@ -191,11 +191,11 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
 
     // TODO: some formats may save shininess as PBR roughness so
     // we may need to check what range shininess fits in.
-    float roughness = ConvertShininessToRoughness(shininess);
+    float smoothness = ConvertShininessToSmoothness(shininess);
 
     materialData.ID = m_currentNodeID;
     materialData.DiffuseColor = { diffuse.r, diffuse.g, diffuse.b, opacity };
-    materialData.SpecularColor = { specular.r, specular.g, specular.b, roughness };
+    materialData.SpecularColor = { specular.r, specular.g, specular.b, smoothness };
     materialData.EmissiveColor = { emissive.r, emissive.g, emissive.b };
 
     // TODO: Tidy this up a bit. A lot of redundant calls.
@@ -203,7 +203,7 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     materialData.SpecularTextureID = m_textureManager->AddImportedTexture(specularTexture, aiTextureType_SPECULAR);
     materialData.EmissiveTextureID = m_textureManager->AddImportedTexture(emissiveTexture, aiTextureType_EMISSIVE);
     materialData.NormalTextureID = m_textureManager->AddImportedTexture(normalTexture, aiTextureType_NORMALS);
-    materialData.ShininessTextureID = m_textureManager->AddImportedTexture(shininessTexture, aiTextureType_SHININESS);
+    materialData.SmoothnessTextureID = m_textureManager->AddImportedTexture(shininessTexture, aiTextureType_SHININESS);
     materialData.OpacityTextureID = m_textureManager->AddImportedTexture(opacityTexture, aiTextureType_OPACITY);
     materialData.AOTextureID = m_textureManager->AddImportedTexture(ambientOcclusionTexture, aiTextureType_LIGHTMAP);
 }

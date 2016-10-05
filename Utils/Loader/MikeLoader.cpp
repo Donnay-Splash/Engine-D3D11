@@ -178,8 +178,8 @@ namespace Utils
                 // Normal
                 ReadFromBuffer(&material.NormalTextureID);
 
-                // Shininess
-                ReadFromBuffer(&material.ShininessTextureID);
+                // Smoothness
+                ReadFromBuffer(&material.SmoothnessTextureID);
 
                 // Opacity
                 ReadFromBuffer(&material.OpacityTextureID);

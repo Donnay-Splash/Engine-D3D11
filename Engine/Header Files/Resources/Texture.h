@@ -21,7 +21,8 @@ public:
     // Create a texture from imported texture data
     Texture(ID3D11Device* device, const Utils::Loader::TextureData& importedTextureData);
     Texture(const Texture&) = delete;
-    ~Texture();
+
+    void UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister);
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> GetTexture() { return m_texture; }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV() { return m_srv; }
