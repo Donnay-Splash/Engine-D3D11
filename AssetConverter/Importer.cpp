@@ -22,9 +22,9 @@ Importer::Importer()
 std::string Importer::ReadFile(const std::string& directory, std::string& fileNameAndExtension)
 {
     m_textureManager->SetAssetPath(directory);
-
+    auto filePath = directory.empty() ? fileNameAndExtension : directory + "\\" + fileNameAndExtension;
     auto loaderFlags = aiProcess_Triangulate | aiProcess_GenSmoothNormals;
-    auto importedScene = m_aiImporter->ReadFile(directory + "\\" + fileNameAndExtension, loaderFlags);
+    auto importedScene = m_aiImporter->ReadFile(filePath, loaderFlags);
     std::string error;
     if (importedScene != nullptr)
     {

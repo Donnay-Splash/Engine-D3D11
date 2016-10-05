@@ -92,16 +92,16 @@ bool CheckFilePath()
     auto lastSlash = filePath.find_last_of("/\\");
     // We could be given a file in the local directory
     // if so then output directory should stay empty.
-    if (lastSlash == filePath.npos)
+    if (lastSlash != filePath.npos)
     {
-        lastSlash = -1;
+        fileDirectory = filePath.substr(0, lastSlash);
     }
 
     fileName = filePath.substr(lastSlash + 1);
     auto extensionPosition = fileName.find_first_of('.');
     fileExtension = fileName.substr(extensionPosition + 1);
     fileName = fileName.substr(0, extensionPosition);
-    fileDirectory = filePath.substr(0, lastSlash);
+    
 
     // Check that the given output directory exists.
     if (!outputDirectory.empty())
@@ -123,7 +123,7 @@ bool CheckFilePath()
         outputDirectory = fileDirectory;
     }
 
-    outputFilePath = outputDirectory + "\\" + fileName + ".mike";
+    outputFilePath = outputDirectory.empty() ? fileName + ".mike" : outputDirectory + "\\" + fileName + ".mike";
 
     return true;
 }

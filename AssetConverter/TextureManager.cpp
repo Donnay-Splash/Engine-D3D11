@@ -149,7 +149,7 @@ std::wstring TextureManager::FindFile(const std::wstring& filePath)
     auto slashPos = filePath.find(L"/\\");
     bool inFolder = slashPos != filePath.npos;
     // If not try to load file from current directory e.g. currentDirectory + filePath
-    std::wstring localPath = m_currentFileDirectory + L"\\" + filePath;
+    std::wstring localPath = m_currentFileDirectory.empty() ? filePath : m_currentFileDirectory + L"\\" + filePath;
     if (PathFileExists(localPath.c_str()))
     {
         return localPath;
@@ -163,7 +163,7 @@ std::wstring TextureManager::FindFile(const std::wstring& filePath)
     {
         auto lastSlashPos = fileName.find_last_of(L"/\\");
         fileName = fileName.substr(lastSlashPos + 1);
-        localPath = m_currentFileDirectory + L"\\" + fileName;
+        localPath = m_currentFileDirectory.empty() ? fileName : m_currentFileDirectory + L"\\" + fileName;
         if (PathFileExists(localPath.c_str()))
         {
             return localPath;
