@@ -29,6 +29,7 @@ uint32_t TextureManager::AddImportedTexture(const aiString& texturePath, const a
             textureData.Type = type;
 
             m_importedTextures[path] = textureData;
+            return textureData.ID;
         }
     }
     return Utils::Loader::kInvalidID;
