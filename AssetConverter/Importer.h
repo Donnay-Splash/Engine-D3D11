@@ -23,7 +23,7 @@ private:
     void LoadNode(const aiNode* importedNode, uint32_t parentNodeID, const aiScene* importedScene);
     void LoadMeshData(Utils::Loader::SceneNodeData& sceneNodeData, const aiMesh* mesh);
     void LoadMaterialData(Utils::Loader::MaterialData& materialData, const aiMaterial* mesh, uint32_t materialID);
-    void LoadTextures();
+    void LoadTextures(aiTexture** embeddedTextures, uint32_t embeddedTextureCount);
 
 private:
     std::unique_ptr<Assimp::Importer> m_aiImporter;

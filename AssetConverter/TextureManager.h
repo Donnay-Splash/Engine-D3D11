@@ -1,5 +1,6 @@
 #pragma once
 #include <assimp\material.h>
+#include <assimp\texture.h>
 #include <map>
 #include <memory>
 #include <vector>
@@ -32,18 +33,23 @@ public:
 
     void SetAssetPath(const std::string& currentFileDirectory) { m_currentFileDirectory = GetPathAsWideString(currentFileDirectory); }
     
-    void ProcessTextures();
+    void ProcessTextures(aiTexture** embeddedTextures, uint32_t embeddedTextureCount);
 
     std::vector<Utils::Loader::TextureData> GetLoadedTextures() const { return m_loadedTextures; }
 
 private:
     void LoadTextureFromFile(const std::wstring& path, const ImportedTextureData& textureInfo);
+    void LoadTextureFromMemory(const aiTexture* texture, const ImportedTextureData& textureInfo);
     std::wstring FindFile(const std::wstring& filePath);
     std::wstring GetPathAsWideString(const std::string& path);
     bool GetImageFromFile(const std::wstring& path, DirectX::ScratchImage& image);
+    bool GetImageFromMemory(const aiTexture* texture, DirectX::ScratchImage& image);
+    uint32_t ExtractEmbeddedTextureID(std::wstring ID);
+    bool PostProcessTexture(DirectX::ScratchImage& rawImage, const ImportedTextureData& textureInfo);
 
 private:
-    std::map<std::wstring, ImportedTextureData> m_importedTextures;
+    std::map<std::wstring, ImportedTextureData> m_externalTextures;
+    std::map<uint32_t, ImportedTextureData> m_embeddedTextures;
     std::vector<Utils::Loader::TextureData> m_loadedTextures;
     std::wstring m_currentFileDirectory;
 

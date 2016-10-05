@@ -43,7 +43,7 @@ void Importer::LoadScene(const aiScene* importedScene)
 {
     auto rootNodeID = m_currentNodeID++;
     LoadNode(importedScene->mRootNode, rootNodeID, importedScene);
-    LoadTextures();
+    LoadTextures(importedScene->mTextures, importedScene->mNumTextures);
 }
 
 void Importer::LoadNode(const aiNode* importedNode, uint32_t parentNodeID, const aiScene* importedScene)
@@ -223,8 +223,8 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     materialData.AOTextureID = m_textureManager->AddImportedTexture(ambientOcclusionTexture, aiTextureType_LIGHTMAP);
 }
 
-void Importer::LoadTextures()
+void Importer::LoadTextures(aiTexture** embeddedTextures, uint32_t embeddedTextureCount)
 {
-    m_textureManager->ProcessTextures();
+    m_textureManager->ProcessTextures(embeddedTextures, embeddedTextureCount);
     m_sceneData.Textures = m_textureManager->GetLoadedTextures();
 }
