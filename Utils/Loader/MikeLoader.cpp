@@ -93,6 +93,9 @@ namespace Utils
                 ReadFromBuffer(&sceneNode.HasTangents);
                 ReadFromBuffer(&sceneNode.HasUVs);
 
+                // Load the bounding box
+                ReadFromBuffer(&sceneNode.Bounds);
+
                 // Now load vertex data
                 if (sceneNode.HasPositions)
                 {

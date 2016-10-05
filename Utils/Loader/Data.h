@@ -27,6 +27,9 @@ namespace Utils
             bool HasTangents = false;
             bool HasUVs = false;
 
+            // Store the bounding box for the mesh
+            Utils::Maths::BoundingBox Bounds;
+
             // Now we store the Mesh Data.
             std::vector<Utils::Maths::Vector3> Positions;
             std::vector<Utils::Maths::Vector3> Normals;

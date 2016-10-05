@@ -50,6 +50,9 @@ namespace Utils
                 WriteToFile(&sceneNode.HasTangents);
                 WriteToFile(&sceneNode.HasUVs);
 
+                // Write the bounding box
+                WriteToFile(&sceneNode.Bounds);
+
                 // Now write vertex data depending on what the scene node contains
                 if (sceneNode.HasPositions)
                 {

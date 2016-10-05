@@ -8,6 +8,7 @@ Helper classes to wrap DirectXMath constructs
 #include <DirectXColors.h>
 #include <tuple>
 #include <algorithm>
+#include <vector>
 
 namespace Utils
 {
@@ -233,6 +234,32 @@ namespace Utils
 
             bool operator==(const Color& rhs) const;
             bool operator!=(const Color& rhs) const;
+        };
+
+        /****************************************************************************
+        *
+        * Bounding box
+        *
+        ****************************************************************************/
+        class BoundingBox
+        {
+        public:
+            BoundingBox() {}
+            BoundingBox(Vector3 centre, Vector3 size);
+
+            // Adds a new position to be encapsulated by the bounding box.
+            void AddPosition(Vector3 Position);
+
+            inline Vector3 GetSize() const { return m_size; }
+            inline Vector3 GetCentre() const { return m_centre; }
+
+            static BoundingBox CreateFromVertices(std::vector<Vector3> positions);
+
+        private:
+            Vector3 m_maxPos = {-1.0f, -1.0f, -1.0f};
+            Vector3 m_minPos = {1.0f, 1.0f, 1.0f};
+            Vector3 m_centre;
+            Vector3 m_size;
         };
 
         /****************************************************************************

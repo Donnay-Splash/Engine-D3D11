@@ -105,11 +105,14 @@ void Importer::LoadMeshData(Utils::Loader::SceneNodeData& sceneNode, const aiMes
     sceneNode.HasNormals = mesh->HasNormals();
     sceneNode.HasUVs = mesh->HasTextureCoords(0);
     sceneNode.HasTangents = mesh->HasTangentsAndBitangents();
-
+    
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-        auto position = mesh->mVertices[i];
-        sceneNode.Positions.push_back({ position.x, position.y, position.z });
+        auto aiPosition = mesh->mVertices[i];
+        auto enginePosition = Utils::Maths::Vector3( aiPosition.x, aiPosition.y, aiPosition.z );
+        // Update the SceneNode axis aligned bounding box to contain the new position
+        sceneNode.Bounds.AddPosition(enginePosition);
+        sceneNode.Positions.push_back(enginePosition);
 
         if (sceneNode.HasNormals)
         {

@@ -1,4 +1,5 @@
 #include "Math.h"
+#include <Utils\DirectxHelpers\EngineHelpers.h>
 using namespace DirectX;
 
 
@@ -760,7 +761,7 @@ namespace Utils
             XMVECTOR Vector = XMLoadFloat3A(&V);
 
             float scale = 1.0f / S;
-            XMVECTOR result = XMVectorScale(Vector, S);
+            XMVECTOR result = XMVectorScale(Vector, scale);
 
             Vector3 returnVector;
             XMStoreFloat3A(&returnVector, result);
@@ -1054,6 +1055,58 @@ namespace Utils
             XMVECTOR rhsVector = XMLoadFloat4A(&rhs);
 
             return XMVector4NotEqual(thisVector, rhsVector);
+        }
+
+        /****************************************************************************
+        *
+        * BoundingBox operations
+        *
+        ****************************************************************************/
+
+        inline BoundingBox::BoundingBox(Vector3 centre, Vector3 size) : 
+            m_centre(centre), m_size(size)
+        {
+            // Size cannot be negative
+            size.x = abs(size.x);
+            size.y = abs(size.y);
+            size.z = abs(size.z);
+            m_maxPos = centre + size;
+            m_minPos = centre - size;
+        }
+
+        // Adds a new position to be encapsulated by the bounding box.
+        inline void BoundingBox::AddPosition(Vector3 position)
+        {
+            // First position so just set both values to this
+            if (m_minPos.x > m_maxPos.x && m_minPos.y > m_maxPos.y && m_minPos.z > m_maxPos.z)
+            {
+                m_minPos = m_maxPos = position;
+            }
+            else
+            {
+                // Max pos
+                if (position.x > m_maxPos.x) m_maxPos.x = position.x;
+                if (position.y > m_maxPos.y) m_maxPos.y = position.y;
+                if (position.z > m_maxPos.z) m_maxPos.z = position.z;
+
+                // Min pos
+                if (position.x < m_minPos.x) m_minPos.x = position.x;
+                if (position.y < m_minPos.y) m_minPos.y = position.y;
+                if (position.z < m_minPos.z) m_minPos.z = position.z;
+
+            }
+            // Now update centre and size
+            m_size = (m_maxPos - m_minPos) / 2.0f;
+            m_centre = m_maxPos - m_size;
+        }
+
+        inline BoundingBox BoundingBox::CreateFromVertices(std::vector<Vector3> positions)
+        {
+            BoundingBox bounds;
+            for (auto position : positions)
+            {
+                bounds.AddPosition(position);
+            }
         }
 
     } // end namespace Maths
