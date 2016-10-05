@@ -32,28 +32,54 @@ void Material::SetTexture(TextureType type, Texture::Ptr texture)
     if (type == TextureType::Count) return;
     size_t index = static_cast<size_t>(type);
     m_textures[index] = texture;
-    // Create a sampler for the texture
+    
+    switch (type)
+    {
+    case TextureType::Diffuse:
+        m_materialData.hasDiffuseTexture = static_cast<float>(texture != nullptr);
+        break;
+    case TextureType::Specular:
+        m_materialData.hasSpecularTexture = static_cast<float>(texture != nullptr);
+        break;
+    case TextureType::Emissive:
+        m_materialData.hasEmissiveTexture = static_cast<float>(texture != nullptr);
+        break;
+    case TextureType::Normal:
+        m_materialData.hasNormalTexture = static_cast<float>(texture != nullptr);
+        break;
+    case TextureType::Smoothness:
+        m_materialData.hasSmoothnessTexture = static_cast<float>(texture != nullptr);
+        break;
+    case TextureType::Opacity:
+        m_materialData.hasOpacityTexture = static_cast<float>(texture != nullptr);
+        break;
+    case TextureType::BakedAO:
+        m_materialData.hasAOTexture = static_cast<float>(texture != nullptr);
+        break;
+    default:
+        break;
+    }
 }
 
 void Material::SetDiffuseColor(const Utils::Maths::Color& color)
 {
-    m_diffuseAndOpacity.x = color.x;
-    m_diffuseAndOpacity.y = color.y;
-    m_diffuseAndOpacity.z = color.z;
+    m_materialData.diffuseColorAndOpacity.x = color.x;
+    m_materialData.diffuseColorAndOpacity.y = color.y;
+    m_materialData.diffuseColorAndOpacity.z = color.z;
 }
 
 void Material::SetSpecularColor(const Utils::Maths::Color& color)
 {
-    m_specularAndSmoothness.x = color.x;
-    m_specularAndSmoothness.y = color.y;
-    m_specularAndSmoothness.z = color.z;
+    m_materialData.specularColorAndSmoothness.x = color.x;
+    m_materialData.specularColorAndSmoothness.y = color.y;
+    m_materialData.specularColorAndSmoothness.z = color.z;
 }
 
 void Material::Render(ID3D11DeviceContext* deviceContext)
 {
     m_shaderPipeline->UploadData(deviceContext);
     m_pipelineState->UploadData(deviceContext);
-    m_materialConstants->SetData({ m_diffuseAndOpacity, m_specularAndSmoothness, m_emissiveColor });
+    m_materialConstants->SetData(m_materialData);
     m_materialConstants->UploadData(deviceContext);
 
     for (uint32_t i = 0; i < static_cast<uint32_t>(TextureType::Count); i++)

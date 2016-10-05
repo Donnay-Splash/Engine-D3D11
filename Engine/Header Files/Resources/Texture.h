@@ -1,5 +1,6 @@
 #pragma once
 #include <Utils\Loader\Data.h>
+#include <Engine\Build\pch.h>
 namespace TextureCreationFlags
 {
     static const uint32_t BindRenderTarget = 0x0001;

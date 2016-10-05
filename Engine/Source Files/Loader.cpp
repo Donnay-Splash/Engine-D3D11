@@ -107,50 +107,71 @@ void Loader::LoadMaterials(const std::vector<Utils::Loader::MaterialData>& impor
         // Diffuse
         if (importedMaterial.DiffuseTextureID != Utils::Loader::kInvalidID)
         {
-            auto texture = m_textureMap[importedMaterial.DiffuseTextureID];
-            engineMaterial->SetTexture(Material::TextureType::Diffuse, texture);
+            auto it = m_textureMap.find(importedMaterial.DiffuseTextureID);
+            if (it != m_textureMap.end())
+            {
+                engineMaterial->SetTexture(Material::TextureType::Diffuse, it->second);
+            }
         }
 
         // Specular
         if (importedMaterial.SpecularTextureID != Utils::Loader::kInvalidID)
         {
-            auto texture = m_textureMap[importedMaterial.SpecularTextureID];
-            engineMaterial->SetTexture(Material::TextureType::Specular, texture);
+            auto it = m_textureMap.find(importedMaterial.SpecularTextureID);
+            if (it != m_textureMap.end())
+            {
+                engineMaterial->SetTexture(Material::TextureType::Specular, it->second);
+            }
         }
 
         // Emissive
         if (importedMaterial.EmissiveTextureID != Utils::Loader::kInvalidID)
         {
-            auto texture = m_textureMap[importedMaterial.EmissiveTextureID];
-            engineMaterial->SetTexture(Material::TextureType::Emissive, texture);
+            auto it = m_textureMap.find(importedMaterial.EmissiveTextureID);
+            if (it != m_textureMap.end())
+            {
+                engineMaterial->SetTexture(Material::TextureType::Emissive, it->second);
+            }
         }
 
         // Normal
         if (importedMaterial.NormalTextureID != Utils::Loader::kInvalidID)
         {
-            auto texture = m_textureMap[importedMaterial.NormalTextureID];
-            engineMaterial->SetTexture(Material::TextureType::Normal, texture);
+            auto it = m_textureMap.find(importedMaterial.NormalTextureID);
+            if (it != m_textureMap.end())
+            {
+                engineMaterial->SetTexture(Material::TextureType::Normal, it->second);
+            }
         }
 
         // Smoothness
         if (importedMaterial.SmoothnessTextureID != Utils::Loader::kInvalidID)
         {
-            auto texture = m_textureMap[importedMaterial.SmoothnessTextureID];
-            engineMaterial->SetTexture(Material::TextureType::Smoothness, texture);
+            auto it = m_textureMap.find(importedMaterial.SmoothnessTextureID);
+            if (it != m_textureMap.end())
+            {
+                engineMaterial->SetTexture(Material::TextureType::Smoothness, it->second);
+            }
         }
 
         // Opacity
         if (importedMaterial.OpacityTextureID != Utils::Loader::kInvalidID)
         {
-            auto texture = m_textureMap[importedMaterial.OpacityTextureID];
-            engineMaterial->SetTexture(Material::TextureType::Opacity, texture);
+            auto it = m_textureMap.find(importedMaterial.OpacityTextureID);
+            if (it != m_textureMap.end())
+            {
+                engineMaterial->SetTexture(Material::TextureType::Opacity, it->second);
+            }
         }
 
         // Ambient Oclussion
         if (importedMaterial.AOTextureID != Utils::Loader::kInvalidID)
         {
-            auto texture = m_textureMap[importedMaterial.AOTextureID];
-            engineMaterial->SetTexture(Material::TextureType::BakedAO, texture);
+            auto it = m_textureMap.find(importedMaterial.AOTextureID);
+            if (it != m_textureMap.end())
+            {
+                engineMaterial->SetTexture(Material::TextureType::BakedAO, it->second);
+            }
         }
         // This material ID must not exist in the map already
         EngineAssert(m_materialMap.find(importedMaterial.ID) == m_materialMap.end());

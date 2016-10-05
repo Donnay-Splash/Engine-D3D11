@@ -48,47 +48,62 @@ void Importer::LoadScene(const aiScene* importedScene)
 
 void Importer::LoadNode(const aiNode* importedNode, uint32_t parentNodeID, const aiScene* importedScene)
 {
-    //TODO: Need to add bounds component.
     // Add a new node to the scene to represent the imported node
-    SceneNodeData sceneNode;
-    sceneNode.NodeID = m_currentNodeID;
-    sceneNode.ParentID = parentNodeID;
+    std::vector<SceneNodeData> sceneNodes;
+
+    // To handle that case of multiple nodes needing to be created
+    // we only want the child nodes to be parented to one so we save that
+    // ID here
+    auto firstNodeID = m_currentNodeID;
+
+    // Get the transform for the node
+    auto t = importedNode->mTransformation;
+    Utils::Maths::Matrix engineTransform = { t.a1, t.a2, t.a3, t.a4,
+        t.b1, t.b2, t.b3, t.b4,
+        t.c1, t.c2, t.c3, t.c4,
+        t.d1, t.d2, t.d3, t.d4 };
+
+    // If there is more that one mesh for this node we want to separate it
+    // into multiple nodes
     if (importedNode->mNumMeshes > 0)
     {
         for (unsigned int i = 0; i < importedNode->mNumMeshes; i++)
         {
+            SceneNodeData sceneNode;
+            sceneNode.NodeID = m_currentNodeID++;
+            sceneNode.ParentID = parentNodeID;
+
             // Load the mesh information.
             auto meshIndex = importedNode->mMeshes[i];
             auto mesh = importedScene->mMeshes[meshIndex];
             LoadMeshData(sceneNode, mesh);
+            sceneNodes.push_back(sceneNode);
     
             // Load the material for the mesh
             auto materialIndex = mesh->mMaterialIndex;
             auto material = importedScene->mMaterials[materialIndex];
             MaterialData materialData;
-            LoadMaterialData(materialData, material);
+            LoadMaterialData(materialData, material, sceneNode.NodeID);
             m_sceneData.Materials.push_back(materialData);
         }
     }
+    else
+    {
+        SceneNodeData sceneNode;
+        sceneNode.NodeID = m_currentNodeID++;
+        sceneNode.ParentID = parentNodeID;
+        sceneNodes.push_back(sceneNode);
+    }
     
-    // Set the transformation on the SceneNode
-    auto t = importedNode->mTransformation;
-    Utils::Maths::Matrix engineTransform = { t.a1, t.a2, t.a3, t.a4,
-                                            t.b1, t.b2, t.b3, t.b4,
-                                            t.c1, t.c2, t.c3, t.c4,
-                                            t.d1, t.d2, t.d3, t.d4 };
-    sceneNode.Transform = engineTransform;
-    
-    // Finally add the scene node to the scene data
-    m_sceneData.SceneNodes.push_back(sceneNode);
-
-    // After loading all data increment the ID of the current node.
-    m_currentNodeID++;
-
+    for (auto sceneNode : sceneNodes)
+    {
+        sceneNode.Transform = engineTransform;
+        m_sceneData.SceneNodes.push_back(sceneNode);
+    }
     // Load the sceneNodes children
     for (unsigned int i = 0; i < importedNode->mNumChildren; i++)
     {
-        LoadNode(importedNode->mChildren[i], sceneNode.NodeID, importedScene);
+        LoadNode(importedNode->mChildren[i], firstNodeID, importedScene);
     }
 }
 
@@ -148,7 +163,7 @@ void Importer::LoadMeshData(Utils::Loader::SceneNodeData& sceneNode, const aiMes
     sceneNode.VertexCount = static_cast<uint32_t>(sceneNode.Positions.size());
 }
 
-void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* material)
+void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* material, uint32_t materialID)
 {
     aiColor3D diffuse;
     material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
@@ -193,7 +208,7 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     // we may need to check what range shininess fits in.
     float smoothness = ConvertShininessToSmoothness(shininess);
 
-    materialData.ID = m_currentNodeID;
+    materialData.ID = materialID;
     materialData.DiffuseColor = { diffuse.r, diffuse.g, diffuse.b, opacity };
     materialData.SpecularColor = { specular.r, specular.g, specular.b, smoothness };
     materialData.EmissiveColor = { emissive.r, emissive.g, emissive.b };

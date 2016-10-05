@@ -87,18 +87,39 @@ struct MaterialConstants
     Utils::Maths::Color diffuseColorAndOpacity;
     Utils::Maths::Color specularColorAndSmoothness;
     Utils::Maths::Color emissiveColor;
+    float hasDiffuseTexture = 0.0f;
+    float hasSpecularTexture = 0.0f;
+    float hasEmissiveTexture = 0.0f;
+    float hasNormalTexture = 0.0f;
+    float hasSmoothnessTexture = 0.0f;
+    float hasOpacityTexture = 0.0f;
+    float hasAOTexture = 0.0f;
 
     bool operator!=(const MaterialConstants& rhs)
     {
-        return (diffuseColorAndOpacity != rhs.diffuseColorAndOpacity) || 
-               (specularColorAndSmoothness != rhs.specularColorAndSmoothness) ||
-               (emissiveColor != rhs.emissiveColor);
+        return (diffuseColorAndOpacity != rhs.diffuseColorAndOpacity) ||
+            (specularColorAndSmoothness != rhs.specularColorAndSmoothness) ||
+            (emissiveColor != rhs.emissiveColor) ||
+            (hasDiffuseTexture != rhs.hasDiffuseTexture) ||
+            (hasSpecularTexture != rhs.hasSpecularTexture) ||
+            (hasEmissiveTexture != rhs.hasEmissiveTexture) ||
+            (hasNormalTexture != rhs.hasNormalTexture) ||
+            (hasSmoothnessTexture != rhs.hasSmoothnessTexture) ||
+            (hasOpacityTexture != rhs.hasOpacityTexture) ||
+            (hasAOTexture != rhs.hasAOTexture);
     }
 
     bool operator==(const MaterialConstants& rhs)
     {
         return (diffuseColorAndOpacity == rhs.diffuseColorAndOpacity) &&
             (specularColorAndSmoothness == rhs.specularColorAndSmoothness) &&
-            (emissiveColor == rhs.emissiveColor);
+            (emissiveColor == rhs.emissiveColor) &&
+            (hasDiffuseTexture == rhs.hasDiffuseTexture) &&
+            (hasSpecularTexture == rhs.hasSpecularTexture) &&
+            (hasEmissiveTexture == rhs.hasEmissiveTexture) &&
+            (hasNormalTexture == rhs.hasNormalTexture) &&
+            (hasSmoothnessTexture == rhs.hasSmoothnessTexture) &&
+            (hasOpacityTexture == rhs.hasOpacityTexture) &&
+            (hasAOTexture == rhs.hasAOTexture);
     }
 };

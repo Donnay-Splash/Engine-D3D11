@@ -41,6 +41,14 @@ cbuffer LightBuffer : register(b0)
 
 cbuffer MaterialProperties : register(b1)
 {
-    float4 diffuseColorAndOpacity;
-    float4 specularColorAndSmoothness;
+    float4 material_diffuseColorAndOpacity;
+    float4 material_specularColorAndSmoothness;
+    float4 material_emissiveColor;
+    bool material_hasDiffuseTexture;
+    bool material_hasSpecularTexture;
+    bool material_hasEmissiveTexture;
+    bool material_hasNormalTexture;
+    bool material_hasSmoothnessTexture;
+    bool material_hasOpacityTexture;
+    bool material_hasAOTexture;
 }

@@ -32,26 +32,24 @@ public:
     Texture::Ptr GetTexture(TextureType type) const;
     void SetTexture(TextureType type, Texture::Ptr texture);
 
-    Utils::Maths::Color GetDiffuseColor() const { return m_diffuseAndOpacity; }
-    Utils::Maths::Color GetSpecularColor() const { return m_specularAndSmoothness; }
-    Utils::Maths::Color GetEmissiveColor() const { return m_emissiveColor; }
-    float GetOpacity() const { return m_diffuseAndOpacity.w; }
-    float GetSmoothness() const { return m_specularAndSmoothness.w; }
+    Utils::Maths::Color GetDiffuseColor() const { return m_materialData.diffuseColorAndOpacity; }
+    Utils::Maths::Color GetSpecularColor() const { return m_materialData.specularColorAndSmoothness; }
+    Utils::Maths::Color GetEmissiveColor() const { return m_materialData.emissiveColor; }
+    float GetOpacity() const { return m_materialData.diffuseColorAndOpacity.w; }
+    float GetSmoothness() const { return m_materialData.specularColorAndSmoothness.w; }
 
     void SetDiffuseColor(const Utils::Maths::Color& color);
     void SetSpecularColor(const Utils::Maths::Color& color);
-    void SetEmissiveColor(const Utils::Maths::Color& color) { m_emissiveColor = color; };
-    void SetOpacity(float opacity) { m_diffuseAndOpacity.w = opacity; }
-    void SetSmoothness(float smoothness) { m_specularAndSmoothness.w = smoothness; }
+    void SetEmissiveColor(const Utils::Maths::Color& color) { m_materialData.emissiveColor = color; };
+    void SetOpacity(float opacity) { m_materialData.diffuseColorAndOpacity.w = opacity; }
+    void SetSmoothness(float smoothness) { m_materialData.specularColorAndSmoothness.w = smoothness; }
 
 private:
     ShaderPipeline::Ptr m_shaderPipeline;
     PipelineState::Ptr m_pipelineState;
     ConstantBuffer<MaterialConstants>::Ptr m_materialConstants;
 
-    Utils::Maths::Color m_diffuseAndOpacity;
-    Utils::Maths::Color m_specularAndSmoothness;
-    Utils::Maths::Color m_emissiveColor;
+    MaterialConstants m_materialData;
     std::array<Texture::Ptr, static_cast<size_t>(TextureType::Count)> m_textures;
     std::array<Sampler::Ptr, static_cast<size_t>(TextureType::Count)> m_samplers;
 };

@@ -79,7 +79,8 @@ void TextureManager::LoadTextureFromFile(const std::wstring& path, const Importe
         {
             // Now depending on the type of texture e.g. Diffuse, Specular, Normal, etc..
             // We may need to do some additional processing.
-            
+            // For now we are skipping Opacity, Shininess and AO textures. Till I find resources
+            // to test with. 
             switch (textureInfo.Type)
             {
                 case aiTextureType_DIFFUSE:
@@ -96,16 +97,22 @@ void TextureManager::LoadTextureFromFile(const std::wstring& path, const Importe
                     break;
                 }
                 case aiTextureType_SPECULAR:
+                case aiTextureType_EMISSIVE:
                 {
                     DWORD flags = 0;
                     // Generate MipMaps
+                    DirectX::ScratchImage mipMapImage;
+                    DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, 0, mipMapImage);
                     // Compress BC3
-                    DirectX::Compress(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
+                    DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
                     break;
                 }
                 case aiTextureType_NORMALS:
                 {
+                    DWORD flags = 0;
                     // Generate MipMaps
+                    DirectX::ScratchImage mipMapImage;
+                    DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, 0, mipMapImage);
                     // Compress Bc3
                     DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
                     DirectX::Compress(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
@@ -117,13 +124,20 @@ void TextureManager::LoadTextureFromFile(const std::wstring& path, const Importe
             DWORD flags = 0;
             DirectX::Blob fileData;
             DirectX::SaveToDDSMemory(compressedImage.GetImages(), compressedImage.GetImageCount(), compressedImage.GetMetadata(), flags, fileData);
-            Utils::Loader::TextureData textureData;
-            textureData.ID = textureInfo.ID;
-            textureData.dataSize = fileData.GetBufferSize();
-            // Copy data to vector
-            uint8_t* pixels = reinterpret_cast<uint8_t*>(fileData.GetBufferPointer());
-            textureData.data = std::vector<uint8_t>(pixels, pixels + textureData.dataSize);
-            m_loadedTextures.push_back(textureData);
+            if (fileData.GetBufferSize() > 0)
+            {
+                Utils::Loader::TextureData textureData;
+                textureData.ID = textureInfo.ID;
+                textureData.dataSize = fileData.GetBufferSize();
+                // Copy data to vector
+                uint8_t* pixels = reinterpret_cast<uint8_t*>(fileData.GetBufferPointer());
+                textureData.data = std::vector<uint8_t>(pixels, pixels + textureData.dataSize);
+                m_loadedTextures.push_back(textureData);
+            }
+            else
+            {
+                std::wcout << "Failed to create DDS Texture for file: " << path << std::endl;
+            }
         }
     }
     else
