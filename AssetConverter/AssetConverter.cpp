@@ -60,9 +60,11 @@ int main(int argc, char* argv[])
         {
             auto sceneData = importer->GetSceneData();
             Exporter exporter(outputFilePath, sceneData);
-            MikeLoader loader;
+
+            // Test by loading data back in
+            /*MikeLoader loader;
             loader.LoadFile(outputFilePath);
-            auto loadedSceneData = loader.GetSceneData();
+            auto loadedSceneData = loader.GetSceneData();*/
         }
         else
         {
