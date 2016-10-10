@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <Scene\Scene.h>
+#include <Scene\Components\BoundingBox.h>
 
 Scene::Scene()
 {
@@ -38,4 +39,24 @@ void Scene::Update(float frameTime)
 void Scene::Render(ID3D11DeviceContext* deviceContext)
 {
     m_rootNode->Render(deviceContext);
+}
+
+Utils::Maths::BoundingBox Scene::CalculateBoundingBoxForSceneNode(SceneNode::Ptr sceneNode)
+{
+    Utils::Maths::BoundingBox result;
+    for (auto child : sceneNode->GetChildNodes())
+    {
+        auto childBounds = Scene::CalculateBoundingBoxForSceneNode(child);
+        result = Utils::Maths::BoundingBox::Combine(result, childBounds);
+    }
+
+    auto boundsComponent = sceneNode->GetComponentOfType<BoundingBox>();
+    if (boundsComponent)
+    {
+        auto bounds = boundsComponent->GetBounds();
+        bounds = bounds.Transform(sceneNode->GetWorldTransform());
+        result = Utils::Maths::BoundingBox::Combine(result, bounds);
+    }
+
+    return result;
 }

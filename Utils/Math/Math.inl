@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #include "Math.h"
 #include <Utils\DirectxHelpers\EngineHelpers.h>
 using namespace DirectX;
@@ -32,6 +34,26 @@ namespace Utils
         ****************************************************************************/
         inline Matrix::Matrix(Vector4 r1, Vector4 r2, Vector4 r3, Vector4 r4)
             : XMFLOAT4X4A(r1.x, r1.y, r1.z, r1.w, r2.x, r2.y, r2.z, r2.w, r3.x, r3.y, r3.z, r3.w, r4.x, r4.y, r4.z, r4.w) {}
+
+        inline Vector3 Matrix::Forward()
+        {
+            return { _13, _23, _33 };
+        }
+
+        inline Vector3 Matrix::Up()
+        {
+            return { _12, _22, _23 };
+        }
+
+        inline Vector3 Matrix::Right()
+        {
+            return { _11, _21, _31 };
+        }
+
+        inline Vector3 Matrix::Translation()
+        {
+            return { _14, _24, _34 };
+        }
 
         inline Matrix Matrix::CreateFromTranslation(Vector3 translation)
         {
@@ -446,6 +468,26 @@ namespace Utils
         *
         ****************************************************************************/
 
+        inline Vector4 Vector4::Min(const Vector4& lhs, const Vector4& rhs)
+        {
+            auto minX = std::min(rhs.x, lhs.x);
+            auto minY = std::min(rhs.y, lhs.y);
+            auto minZ = std::min(rhs.z, lhs.z);
+            auto minW = std::min(rhs.w, lhs.w);
+
+            return { minX, minY, minZ, minW };
+        }
+
+        inline Vector4 Vector4::Max(const Vector4& lhs, const Vector4& rhs)
+        {
+            auto maxX = std::max(rhs.x, lhs.x);
+            auto maxY = std::max(rhs.y, lhs.y);
+            auto maxZ = std::max(rhs.z, lhs.z);
+            auto maxW = std::max(rhs.w, lhs.w);
+
+            return{ maxX, maxY, maxZ, maxW };
+        }
+
         inline bool Vector4::operator == (const Vector4& rhs) const
         {
             XMVECTOR thisVector = XMLoadFloat4A(this);
@@ -616,6 +658,24 @@ namespace Utils
         *
         ****************************************************************************/
 
+        inline Vector3 Vector3::Min(const Vector3& lhs, const Vector3& rhs)
+        {
+            auto minX = std::min(rhs.x, lhs.x);
+            auto minY = std::min(rhs.y, lhs.y);
+            auto minZ = std::min(rhs.z, lhs.z);
+
+            return{ minX, minY, minZ };
+        }
+
+        inline Vector3 Vector3::Max(const Vector3& lhs, const Vector3& rhs)
+        {
+            auto maxX = std::max(rhs.x, lhs.x);
+            auto maxY = std::max(rhs.y, lhs.y);
+            auto maxZ = std::max(rhs.z, lhs.z);
+
+            return{ maxX, maxY, maxZ };
+        }
+
         inline bool Vector3::operator == (const Vector3& rhs) const
         {
             XMVECTOR thisVector = XMLoadFloat3(this);
@@ -785,6 +845,22 @@ namespace Utils
         * Vector2 operations
         *
         ****************************************************************************/
+
+        inline Vector2 Vector2::Min(const Vector2& lhs, const Vector2& rhs)
+        {
+            auto minX = std::min(rhs.x, lhs.x);
+            auto minY = std::min(rhs.y, lhs.y);
+
+            return{ minX, minY };
+        }
+
+        inline Vector2 Vector2::Max(const Vector2& lhs, const Vector2& rhs)
+        {
+            auto maxX = std::max(rhs.x, lhs.x);
+            auto maxY = std::max(rhs.y, lhs.y);
+
+            return{ maxX, maxY };
+        }
 
         inline bool Vector2::operator == (const Vector2& rhs) const
         {
@@ -1100,6 +1176,25 @@ namespace Utils
             m_centre = m_maxPos - m_size;
         }
 
+        inline BoundingBox BoundingBox::Transform(Matrix transform)
+        {
+            auto xa = transform.Right() * m_minPos.x;
+            auto xb = transform.Right() * m_maxPos.x;
+
+            auto ya = transform.Up() * m_minPos.y;
+            auto yb = transform.Up() * m_maxPos.y;
+
+            auto za = transform.Forward() * m_minPos.z;
+            auto zb = transform.Forward() * m_maxPos.z;
+
+            auto minPos = Vector3::Min(xa, xb) + Vector3::Min(ya, yb) + Vector3::Min(za, zb) + transform.Translation();
+            auto maxPos = Vector3::Max(xa, xb) + Vector3::Max(ya, yb) + Vector3::Max(za, zb) + transform.Translation();
+            BoundingBox transformedBounds;
+            transformedBounds.AddPosition(minPos);
+            transformedBounds.AddPosition(maxPos);
+            return transformedBounds;
+        }
+
         inline BoundingBox BoundingBox::CreateFromVertices(std::vector<Vector3> positions)
         {
             BoundingBox bounds;
@@ -1107,6 +1202,16 @@ namespace Utils
             {
                 bounds.AddPosition(position);
             }
+        }
+
+        inline BoundingBox BoundingBox::Combine(const BoundingBox& lhs, const BoundingBox& rhs)
+        {
+            BoundingBox combinedBoundingBox;
+            auto minPos = Vector3::Min(lhs.m_minPos, rhs.m_minPos);
+            auto maxPos = Vector3::Max(lhs.m_maxPos, rhs.m_maxPos);
+            combinedBoundingBox.AddPosition(minPos);
+            combinedBoundingBox.AddPosition(maxPos);
+            return combinedBoundingBox;
         }
 
     } // end namespace Maths

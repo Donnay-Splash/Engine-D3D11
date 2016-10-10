@@ -23,7 +23,7 @@ float4 PSMain(PixelInputType input) : SV_TARGET
         fragmentColor += emissiveColor;
     }
 
-    return float4(fragmentColor, 1.0f);
+    return float4(materialDiffuse, 1.0f);
 }
 
 

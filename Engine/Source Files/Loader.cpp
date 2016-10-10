@@ -3,6 +3,7 @@
 #include <Resources\Material.h>
 #include <Resources\Mesh.h>
 #include <Scene\Components\MeshInstance.h>
+#include <Scene\Components\BoundingBox.h>
 
 using namespace Utils::Loader;
 
@@ -50,6 +51,18 @@ void Loader::LoadSceneNodes(const std::vector<Utils::Loader::SceneNodeData>& imp
     {
         LoadNode(importedNode);
     }
+    // Get the root node of the model
+    // The root node of the model should always have the ID 1
+    EngineAssert(m_nodeMap.find(1) != m_nodeMap.end());
+    auto rootNode = m_nodeMap[1];
+    // Calculate the bounding box for the root of the model
+    auto rootBounds = Scene::CalculateBoundingBoxForSceneNode(rootNode);
+    auto boundsComponent = rootNode->AddComponent<BoundingBox>(m_d3dClass->GetDevice());
+    boundsComponent->SetBounds(rootBounds);
+    auto size = rootBounds.GetSize();
+    auto maxAxis = std::max(size.x, std::max(size.y, size.z));
+    auto scale = 1.0f / maxAxis > 0.0f ? maxAxis : 1.0f;
+    rootNode->SetScale(scale);
 }
 
 void Loader::LoadNode(const SceneNodeData& importedNode)

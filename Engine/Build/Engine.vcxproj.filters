@@ -150,6 +150,9 @@
     <ClCompile Include="..\Header Files\MeshMaker\MeshMaker.cpp">
       <Filter>Header Files\Resources\MeshMaker</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Components\BoundingBox.cpp">
+      <Filter>Source Files\Scene\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\colorshaderclass.h">
@@ -274,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="..\Header Files\MeshMaker\MeshMaker.h">
       <Filter>Header Files\Resources\MeshMaker</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Components\BoundingBox.h">
+      <Filter>Header Files\Scene\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,12 +1,26 @@
+#include "stdafx.h"
 #include "Importer.h"
-#define NOMINMAX
-
 #include <Utils\Math\Math.h>
 #include <Utils\DirectxHelpers\EngineHelpers.h>
 #include <DirectXTex.h>
 
 #include <algorithm>
 using namespace Utils::Loader;
+
+// To get data prepared for d3d
+uint32_t postProcessSteps = aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible
+                            aiProcess_JoinIdenticalVertices | // join identical vertices/ optimize indexing
+                            aiProcess_ValidateDataStructure | // perform a full validation of the loader's output
+                            aiProcess_ImproveCacheLocality | // improve the cache locality of the output vertices
+                            aiProcess_RemoveRedundantMaterials | // remove redundant materials
+                            aiProcess_FindDegenerates | // remove degenerated polygons from the import
+                            aiProcess_FindInvalidData | // detect invalid model data, such as invalid normal vectors
+                            aiProcess_GenUVCoords | // convert spherical, cylindrical, box and planar mapping to proper UVs
+                            aiProcess_TransformUVCoords | // preprocess UV transformations (scaling, translation ...)
+                            aiProcess_OptimizeMeshes | // join small meshes, if possible
+                            aiProcess_Triangulate | // Converts all polygons to triangles
+                            aiProcess_GenSmoothNormals |
+                            aiProcess_ConvertToLeftHanded; // Generates smooth normals if none exist 
 
 float ConvertShininessToSmoothness(float shininess)
 {
@@ -23,8 +37,7 @@ std::string Importer::ReadFile(const std::string& directory, std::string& fileNa
 {
     m_textureManager->SetAssetPath(directory);
     auto filePath = directory.empty() ? fileNameAndExtension : directory + "\\" + fileNameAndExtension;
-    auto loaderFlags = aiProcess_Triangulate | aiProcess_GenSmoothNormals;
-    auto importedScene = m_aiImporter->ReadFile(filePath, loaderFlags);
+    auto importedScene = m_aiImporter->ReadFile(filePath, postProcessSteps);
     std::string error;
     if (importedScene != nullptr)
     {
@@ -119,6 +132,8 @@ void Importer::LoadMeshData(Utils::Loader::SceneNodeData& sceneNode, const aiMes
     sceneNode.HasPositions = true;
     sceneNode.HasNormals = mesh->HasNormals();
     sceneNode.HasUVs = mesh->HasTextureCoords(0);
+    bool hasUV2 = mesh->HasTextureCoords(1);
+    bool hasUV3 = mesh->HasTextureCoords(2);
     sceneNode.HasTangents = mesh->HasTangentsAndBitangents();
     
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)

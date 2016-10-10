@@ -1,4 +1,4 @@
-#define NOMINMAX
+#include "stdafx.h"
 #include <iostream>
 #include "Importer.h"
 #include <Utils\Loader\Exporter.h>

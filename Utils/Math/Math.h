@@ -58,6 +58,12 @@ namespace Utils
             Matrix GetTranspose();
             Matrix GetInverse();
 
+            // Extract orientation vectors from matrix.
+            Vector3 Forward();
+            Vector3 Up();
+            Vector3 Right();
+            Vector3 Translation();
+
             // Returns a tuple containing Translation, Rotation and Scale in that order.
             std::tuple<Vector3, Quaternion, Vector3> Decompose() const;
 
@@ -100,9 +106,12 @@ namespace Utils
             Vector4(float x, float y, float z, float w)
                 :XMFLOAT4A(x, y, z, w) {}
 
+            static Vector4 Min(const Vector4& lhs, const Vector4& rhs);
+            static Vector4 Max(const Vector4& lhs, const Vector4& rhs);
+
             bool operator==(const Vector4& rhs) const;
             bool operator!=(const Vector4& rhs) const;
-
+            
             Vector4& operator+= (const Vector4& V);
             Vector4& operator-= (const Vector4& V);
             Vector4& operator*= (const Vector4& V);
@@ -135,6 +144,9 @@ namespace Utils
             Vector3() : XMFLOAT3A(Zero) {}
             Vector3(float x, float y, float z)
                 : XMFLOAT3A(x, y, z) {}
+
+            static Vector3 Min(const Vector3& lhs, const Vector3& rhs);
+            static Vector3 Max(const Vector3& lhs, const Vector3& rhs);
 
             bool operator==(const Vector3& rhs) const;
             bool operator!=(const Vector3& rhs) const;
@@ -171,6 +183,9 @@ namespace Utils
             Vector2() : XMFLOAT2A(Zero) {}
             Vector2(float x, float y)
                 : XMFLOAT2A(x, y) {}
+
+            static Vector2 Min(const Vector2& lhs, const Vector2& rhs);
+            static Vector2 Max(const Vector2& lhs, const Vector2& rhs);
 
             bool operator==(const Vector2& rhs) const;
             bool operator!=(const Vector2& rhs) const;
@@ -253,7 +268,11 @@ namespace Utils
             inline Vector3 GetSize() const { return m_size; }
             inline Vector3 GetCentre() const { return m_centre; }
 
+            // Returns the result of this bounding box transformed by the matrix
+            BoundingBox Transform(Matrix transform);
+
             static BoundingBox CreateFromVertices(std::vector<Vector3> positions);
+            static BoundingBox Combine(const BoundingBox& lhs, const BoundingBox& rhs);
 
         private:
             Vector3 m_maxPos = {-1.0f, -1.0f, -1.0f};

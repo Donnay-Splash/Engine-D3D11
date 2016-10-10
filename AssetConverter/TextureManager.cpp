@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "TextureManager.h"
 #include <cctype>
 #include <codecvt>

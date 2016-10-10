@@ -195,6 +195,7 @@
     <ClCompile Include="..\Source Files\Resources\ShaderPipeline.cpp" />
     <ClCompile Include="..\Source Files\Resources\Texture.cpp" />
     <ClCompile Include="..\Source Files\Resources\VertexBuffer.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Components\BoundingBox.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\Camera.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\Component.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\Light.cpp" />
@@ -248,6 +249,7 @@
     <ClInclude Include="..\Header Files\Resources\ShaderPipeline.h" />
     <ClInclude Include="..\Header Files\Resources\Texture.h" />
     <ClInclude Include="..\Header Files\Resources\VertexBuffer.h" />
+    <ClInclude Include="..\Header Files\Scene\Components\BoundingBox.h" />
     <ClInclude Include="..\Header Files\Scene\Components\Camera.h" />
     <ClInclude Include="..\Header Files\Scene\Components\Component.h" />
     <ClInclude Include="..\Header Files\Scene\Components\Light.h" />
