@@ -11,17 +11,20 @@ struct ViewConstants
     static const UINT kRegister = 0;
     Utils::Maths::Matrix view;
     Utils::Maths::Matrix projection;
+    Utils::Maths::Vector3 cameraPosition;
 
     bool operator!=(const ViewConstants& rhs)
     {
-        return  (this->view != rhs.view) ||
-                (this->projection != rhs.projection);
+        return  (view != rhs.view) ||
+                (projection != rhs.projection) ||
+                (cameraPosition != rhs.cameraPosition);
     }
 
     bool operator==(const ViewConstants& rhs)
     {
-        return  (this->view == rhs.view) &&
-                (this->projection == rhs.projection);
+        return  (view == rhs.view) &&
+                (projection == rhs.projection) &&
+                (cameraPosition == rhs.cameraPosition);
     }
 };
 

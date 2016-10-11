@@ -8,6 +8,7 @@ cbuffer ViewBuffer : register(b0)
     // Matrices are set to row_major to match DirectXMath
     row_major matrix viewMatrix;
     row_major matrix projectionMatrix;
+    float3 cameraPos;
 };
 
 // Stores object information. e.g. object local to world transform.

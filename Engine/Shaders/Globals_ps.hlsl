@@ -1,6 +1,7 @@
 // Helper class to store all pixel shader global constants for use in the uber shader
 #include "InputStructs.hlsl"
 #define MAX_LIGHT_COUNT 4
+static const float PI = 3.14159265358979323846;
 
 // Textures and samplers
 Texture2D DiffuseTexture : register(t0);

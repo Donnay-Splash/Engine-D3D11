@@ -47,6 +47,7 @@ void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene)
     ViewConstants viewConstants;
     viewConstants.view = viewMatrix;
     viewConstants.projection = m_projectionMatrix;
+    viewConstants.cameraPosition = sceneNode->GetWorldSpacePosition();
 
     m_viewConstants->SetData(viewConstants);
     m_viewConstants->UploadData(d3dClass->GetDeviceContext());
