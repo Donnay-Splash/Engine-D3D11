@@ -29,8 +29,8 @@ float D_Beckmann(float NoH, float a)
 float D_GGXTrowbridgeReitz(float NoH, float a)
 {
     float a2 = square(a);
-    float D = a2 / (PI * square(square(NoH) * (a2 - 1.0f) + 1.0f));
-    return D;
+    float t = 1.0f + (a2 - 1.0f) * square(NoH);
+    return a2 / (PI * square(t));
 }
 
 // Geometry shadowing functions
@@ -64,12 +64,12 @@ float G_Smith_ShlickBeckman(float NoV, float NoL, float a)
 
 float G_Smith_GGX(float NoV, float NoL, float a)
 {
-    // Optimised version taken from Frostbite Siggraph course notes
+    // Optimised version taken from http://graphicrants.blogspot.co.uk/2013/08/specular-brdf-reference.html
     float a2 = square(a);
-    float GGXV = NoL * sqrt((-NoV * a2 + NoV) * NoV + a2);
-    float GGXL = NoV * sqrt((-NoL * a2 + NoL) * NoL + a2);
+    float GGXV = NoV + sqrt( (NoV - NoV * a2) * NoV + a2);
+    float GGXL = NoL + sqrt( (NoL - NoL * a2) * NoL + a2);
 
-    return 0.5f / (GGXV + GGXL);
+    return rcp(GGXV * GGXL);
 }
 
 // Fresnel approximations
@@ -96,9 +96,9 @@ float4 PSMain(PixelInputType input) : SV_TARGET
     float3 viewDir = normalize(input.cameraPosition - input.worldSpacePosition.xyz);
     float3 halfVector = normalize(normal + viewDir);
 
-    float NoV = dot(normal, viewDir);
-    float NoH = dot(halfVector, normal);
-    float HoV = dot(halfVector, viewDir);
+    float NoV = abs(dot(normal, viewDir));
+    float NoH = saturate(dot(halfVector, normal));
+    float HoV = saturate(dot(halfVector, viewDir));
 
     float intensity = 1.0f;
     float3 materialDiffuse = material_diffuseColorAndOpacity.rgb;
@@ -115,20 +115,16 @@ float4 PSMain(PixelInputType input) : SV_TARGET
     if(material_hasEmissiveTexture == true)
         emissiveColor = EmissiveTexture.Sample(EmissiveSampler, input.tex).rgb;
 
-    [unroll]
-    for (float i = 0; i < activeLights; i++)
-    {
-        Light light = lights[i];
-        float3 lightDir = normalize(light.position);
-        float NoL = dot(normal, lightDir);
-        float HoL = dot(halfVector, lightDir);
-        float G = G_Smith_GGX(NoV, NoL, perceptualRoughness);
-        float3 F = F_Schlick(float3(0.14f, 0.14f, 0.14f), float3(1.0f, 1.0f, 1.0f), HoL);
-        float attenuation = 1.0f; /// pow(length(lightDir), 2);
-        float3 RDiffuse = (materialDiffuse * NoL) / PI;
-        float3 RSpec = D * G * F;
-        fragmentColor += RDiffuse + RSpec + emissiveColor;
-    }
+    
+    float3 lightDir = -normalize(float3(0.0f, 0.0f, -1.0f));
+    float NoL = saturate(dot(normal, lightDir));
+    float HoL = saturate(dot(halfVector, lightDir));
+    float G = G_Smith_GGX(NoV, NoL, perceptualRoughness);
+    float3 F = F_Schlick(float3(0.14f, 0.14f, 0.14f), float3(1.0f, 1.0f, 1.0f), HoL);
+    float attenuation = 1.0f; /// pow(length(lightDir), 2);
+    float3 RDiffuse = (materialDiffuse * NoL) / PI;
+    float3 RSpec = D * G * F;
+    fragmentColor += (RDiffuse + RSpec);
 
     return float4(fragmentColor, 1.0f);
 }
