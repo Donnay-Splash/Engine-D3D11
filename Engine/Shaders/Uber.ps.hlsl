@@ -139,9 +139,9 @@ float4 PSMain(PixelInputType input) : SV_TARGET
     float3 specularColor = material_specularColorAndSmoothness.rgb;
     float roughness = square(0.6f); //square(1.0f - material_specularColorAndSmoothness.a);
 
-    // Convert to linear space
+    // Since we are using SRGB formats for the textures the conversion to linear is done when reading
     if(material_hasDiffuseTexture == true)
-        materialDiffuse = GammaDecode(DiffuseTexture.Sample(DiffuseSampler, input.tex).rgb);
+        materialDiffuse = DiffuseTexture.Sample(DiffuseSampler, input.tex).rgb;
     if(material_hasEmissiveTexture == true)
         emissiveColor = EmissiveTexture.Sample(EmissiveSampler, input.tex).rgb;
 
@@ -161,7 +161,8 @@ float4 PSMain(PixelInputType input) : SV_TARGET
 
     
     // Gamma encode
-    return float4(GammaEncode(radiance), 1.0f);
+    return float4(0.5f, 0.5f, 0.5f, 1.0f);
+    return float4(radiance, 1.0f);
 }
 
 

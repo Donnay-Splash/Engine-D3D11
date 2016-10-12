@@ -6,6 +6,8 @@ namespace TextureCreationFlags
     static const uint32_t BindRenderTarget = 0x0001;
     static const uint32_t BindShaderResource = 0x0002;
     static const uint32_t BindDepthStencil = 0x0004;
+    static const uint32_t SRGB = 0x0008;
+    static const uint32_t Multisampled = 0x0010;
 }
 
 class Texture
@@ -25,6 +27,8 @@ public:
 
     void UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister);
 
+    DXGI_FORMAT GetFormat() const { return m_format; }
+
     Microsoft::WRL::ComPtr<ID3D11Texture2D> GetTexture() { return m_texture; }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV() { return m_srv; }
 
@@ -34,6 +38,7 @@ public:
 private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_srv;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> m_texture;
+    DXGI_FORMAT m_format;
 
     uint32_t m_height;
     uint32_t m_width;

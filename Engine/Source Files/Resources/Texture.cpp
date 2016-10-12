@@ -4,7 +4,7 @@
 #include <Resources\ConstantBuffer.h>
 
 Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device) :
-    m_height(height), m_width(width)
+    m_height(height), m_width(width), m_format(format)
 {
     bool bindToShader = (flags & TextureCreationFlags::BindShaderResource) != 0;
     bool bindToRenderTarget = (flags & TextureCreationFlags::BindShaderResource) != 0;
@@ -15,7 +15,7 @@ Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t flags, DX
     desc.Height = height;
     desc.Width = width;
     desc.MipLevels = desc.ArraySize = 1;
-    desc.Format = format;
+    desc.Format = m_format;
     desc.SampleDesc.Count = 1;
     desc.SampleDesc.Quality = 0;
     desc.Usage = D3D11_USAGE_DEFAULT;
@@ -65,6 +65,7 @@ Texture::Texture(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device)
 
     m_height = textureDesc.Height;
     m_width = textureDesc.Width;
+    m_format = textureDesc.Format;
     bool bindToShader = (textureDesc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0;
 
     if (bindToShader)
@@ -79,6 +80,27 @@ Texture::Texture(ID3D11Device* device, const wchar_t* filename)
     // Add support for additional file types.
     ID3D11Resource* subresource;
     Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, filename, &subresource, m_srv.GetAddressOf()));
+    D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+    m_srv->GetDesc(&desc);
+    m_format = desc.Format;
+    
+    switch (desc.ViewDimension)
+    {
+    case D3D11_SRV_DIMENSION_TEXTURE2D:
+    {
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+        Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+        D3D11_TEXTURE2D_DESC desc;
+        tex2D->GetDesc(&desc);
+        m_height = desc.Height;
+        m_width = desc.Width;
+        break;
+    }
+    default:
+        // Unexpected view dimension received
+        EngineAssert(false);
+        break;
+    }
 }
 
 // Create a texture from imported texture data
@@ -86,6 +108,27 @@ Texture::Texture(ID3D11Device* device, const Utils::Loader::TextureData& importe
 {
     ID3D11Resource* subresource;
     Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, importedTextureData.data.data(), importedTextureData.dataSize, &subresource, m_srv.GetAddressOf()));
+    D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+    m_srv->GetDesc(&desc);
+    m_format = desc.Format;
+
+    switch (desc.ViewDimension)
+    {
+    case D3D11_SRV_DIMENSION_TEXTURE2D:
+    {
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+        Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+        D3D11_TEXTURE2D_DESC desc;
+        tex2D->GetDesc(&desc);
+        m_height = desc.Height;
+        m_width = desc.Width;
+        break;
+    }
+    default:
+        // Unexpected view dimension received
+        EngineAssert(false);
+        break;
+    }
 }
 
 void Texture::UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister)
