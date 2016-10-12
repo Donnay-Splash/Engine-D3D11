@@ -2,6 +2,8 @@
 #include "InputStructs.hlsl"
 #define MAX_LIGHT_COUNT 4
 static const float PI = 3.14159265358979323846;
+static const float kGammaEncodePower = 1.0f / 2.2f;
+static const float kGammaDecodePower = 2.2f;
 
 // Textures and samplers
 Texture2D DiffuseTexture : register(t0);

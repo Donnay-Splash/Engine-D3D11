@@ -9,6 +9,16 @@ float square(float a)
     return a * a;
 }
 
+float3 GammaEncode(float3 linearColor)
+{
+    return pow(linearColor, kGammaEncodePower);
+}
+
+float3 GammaDecode(float3 gammaColor)
+{
+    return pow(gammaColor, kGammaDecodePower);
+}
+
 float D_BlinnPhong(float NoH, float a)
 {
     float a2 = square(a);
@@ -29,8 +39,10 @@ float D_Beckmann(float NoH, float a)
 float D_GGXTrowbridgeReitz(float NoH, float a)
 {
     float a2 = square(a);
+    // Note: At roughness of 0 t can be 0
+    // Thus resulting in a divide by zero at the final step.
     float t = 1.0f + (a2 - 1.0f) * square(NoH);
-    return a2 / (PI * square(t));
+    return a2 / (PI * square(t) + 1e-5f);
 }
 
 // Geometry shadowing functions
@@ -89,44 +101,67 @@ float F_SchlickGaussian(float F0, float F90, float HoL)
     return F0 + (F90 - F0) * exp2((-5.55473f * HoL - 6.98316f) * HoL);
 }
 
+float3 EvaluateBRDF(float3 normal, float3 viewDirection, float3 lightDirection, float roughness, float3 baseColor)
+{
+    float NoL = dot(normal, lightDirection);
+    float NoV = abs(dot(normal, viewDirection)) + 1e-5f; // Avoid artifacts
+    // No contribution if the fragment isn't visible
+    // from the camera or from the light
+    if (NoV < 0.0f || NoL < 0.0f)
+        return float3(0.0f, 0.0f, 0.0f);
+
+    float3 halfVector = normalize(normal + lightDirection);
+    float NoH = dot(halfVector, normal);
+    float HoL = dot(halfVector, lightDirection);
+
+    float D = D_GGXTrowbridgeReitz(NoH, roughness);
+    float G = G_Smith_GGX(NoV, NoL, roughness);
+    float3 F = F_Schlick(float3(0.14f, 0.14f, 0.14f), float3(1.0f, 1.0f, 1.0f), HoL);
+
+    float attenuation = 1.0f; /// pow(length(lightDir), 2);
+    float3 RDiffuse = (baseColor * NoL) / PI;
+    float3 RSpec = D * G * F; // Divide by Pi in NDF
+
+    return (RDiffuse + RSpec);
+}
+
 float4 PSMain(PixelInputType input) : SV_TARGET
 {
-    float3 fragmentColor = 0.0f;
+    // Get normalised vectors
     float3 normal = normalize(input.normal);
     float3 viewDir = normalize(input.cameraPosition - input.worldSpacePosition.xyz);
-    float3 halfVector = normalize(normal + viewDir);
 
-    float NoV = abs(dot(normal, viewDir));
-    float NoH = saturate(dot(halfVector, normal));
-    float HoV = saturate(dot(halfVector, viewDir));
-
+    float NoV = abs(dot(normal, viewDir)) + 1e-5f; // Avoid artifact
+    
     float intensity = 1.0f;
     float3 materialDiffuse = material_diffuseColorAndOpacity.rgb;
     float3 emissiveColor = material_emissiveColor.rgb;
     float3 specularColor = material_specularColorAndSmoothness.rgb;
-    // Rename these. 1 - smoothness is linear roughness.
-    // linear roughness squared is the GGX alpha term.
-    float roughness = saturate(1.0f - material_specularColorAndSmoothness.a);
-    float perceptualRoughness = pow(roughness, 2);
-    float D = D_GGXTrowbridgeReitz(NoH, perceptualRoughness);
+    float roughness = square(0.6f); //square(1.0f - material_specularColorAndSmoothness.a);
 
+    // Convert to linear space
     if(material_hasDiffuseTexture == true)
-        materialDiffuse = DiffuseTexture.Sample(DiffuseSampler, input.tex).rgb;
+        materialDiffuse = GammaDecode(DiffuseTexture.Sample(DiffuseSampler, input.tex).rgb);
     if(material_hasEmissiveTexture == true)
         emissiveColor = EmissiveTexture.Sample(EmissiveSampler, input.tex).rgb;
 
-    
-    float3 lightDir = -normalize(float3(0.0f, 0.0f, -1.0f));
-    float NoL = saturate(dot(normal, lightDir));
-    float HoL = saturate(dot(halfVector, lightDir));
-    float G = G_Smith_GGX(NoV, NoL, perceptualRoughness);
-    float3 F = F_Schlick(float3(0.14f, 0.14f, 0.14f), float3(1.0f, 1.0f, 1.0f), HoL);
-    float attenuation = 1.0f; /// pow(length(lightDir), 2);
-    float3 RDiffuse = (materialDiffuse * NoL) / PI;
-    float3 RSpec = D * G * F;
-    fragmentColor += (RDiffuse + RSpec);
+    float3 radiance = 0.0f;
+    //[unroll]
+    //for (int i = 0; i < activeLights; i++)
+    //{
+    //    Light light = lights[i];
+    //    float3 lightDir = -normalize(light.position);
+        
+    //    radiance += EvaluateBRDF(normal, viewDir, lightDir, roughness, materialDiffuse);
+    //}
 
-    return float4(fragmentColor, 1.0f);
+    float3 lightDir = -normalize(float3(-1.0f, -1.0f, 1.0f));
+    float3 lightRadiance = float3(1.0f, 0.96f, 0.84f);
+    radiance += EvaluateBRDF(normal, viewDir, lightDir, roughness, materialDiffuse) * lightRadiance;
+
+    
+    // Gamma encode
+    return float4(GammaEncode(radiance), 1.0f);
 }
 
 

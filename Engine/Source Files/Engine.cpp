@@ -42,24 +42,24 @@ bool Engine::Initialize(EngineCreateOptions createOptions)
 
     // Add lights to the scene
     auto lightNode = m_scene->AddNode();
-    lightNode->SetPosition({ -1.0f, -1.0f, -1.0f });
+    lightNode->SetPosition({ -1.0f, 1.0f, 1.0f });
     auto light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
-    light->SetColor({ DirectX::Colors::Yellow });
+    light->SetColor({ DirectX::Colors::Wheat });
 
     lightNode = m_scene->AddNode();
-    lightNode->SetPosition({ -1.0f, 1.0f, -1.0f });
+    lightNode->SetPosition({ 1.0f, -1.0f, -1.0f});
     light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
-    light->SetColor({ DirectX::Colors::Blue });
+    light->SetColor({ DirectX::Colors::Wheat });
 
     lightNode = m_scene->AddNode();
-    lightNode->SetPosition({ 1.0f, 1.0f, 1.0f });
+    lightNode->SetPosition({ 0.0f, 0.0f, 1.0f });
     light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
-    light->SetColor({ DirectX::Colors::Green });
+    light->SetColor({ DirectX::Colors::Wheat });
 
     lightNode = m_scene->AddNode();
-    lightNode->SetPosition({ 1.0f, -1.0f, 1.0f });
+    lightNode->SetPosition({ 0.0f, 0.0f, -1.0f });
     light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
-    light->SetColor({ DirectX::Colors::Red });
+    light->SetColor({ DirectX::Colors::Wheat });
 
     // Create the camera object
     auto cameraNode = m_scene->AddNode();
