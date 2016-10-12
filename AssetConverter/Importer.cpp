@@ -3,7 +3,7 @@
 #include <Utils\Math\Math.h>
 #include <Utils\DirectxHelpers\EngineHelpers.h>
 #include <DirectXTex.h>
-
+#include <iostream>
 #include <algorithm>
 using namespace Utils::Loader;
 
@@ -180,6 +180,10 @@ void Importer::LoadMeshData(Utils::Loader::SceneNodeData& sceneNode, const aiMes
 
 void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* material, uint32_t materialID)
 {
+    aiString materialName;
+    material->Get(AI_MATKEY_NAME, materialName);
+    std::cout << "Loading material with name: " << materialName.C_Str() << std::endl;
+
     aiColor3D diffuse;
     material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
 
@@ -189,13 +193,13 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     aiColor3D emissive;
     material->Get(AI_MATKEY_COLOR_EMISSIVE, emissive);
 
-    float opacity;
+    float opacity = 1.0f;
     material->Get(AI_MATKEY_OPACITY, opacity);
 
-    float reflectivity;
+    float reflectivity = 0.0f;
     material->Get(AI_MATKEY_REFLECTIVITY, reflectivity);
 
-    float shininess;
+    float shininess = 0.5f;
     material->Get(AI_MATKEY_SHININESS, shininess);
 
     aiString diffuseTexture;
@@ -206,6 +210,9 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
 
     aiString emissiveTexture;
     material->Get(AI_MATKEY_TEXTURE(aiTextureType_EMISSIVE, 0), emissiveTexture);
+
+    aiString ambientTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_AMBIENT, 0), ambientTexture);
 
     aiString normalTexture;
     material->Get(AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0), normalTexture);
@@ -221,7 +228,11 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
 
     // TODO: some formats may save shininess as PBR roughness so
     // we may need to check what range shininess fits in.
-    float smoothness = ConvertShininessToSmoothness(shininess);
+    float smoothness = shininess;
+    if (shininess > 1)
+    {
+        float smoothness = ConvertShininessToSmoothness(shininess);
+    }
 
     materialData.ID = materialID;
     materialData.DiffuseColor = { diffuse.r, diffuse.g, diffuse.b, opacity };

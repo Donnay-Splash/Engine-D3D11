@@ -205,7 +205,7 @@ bool Engine::HandleInput(float frameTime)
 bool Engine::RenderGraphics()
 {
     // Clear the scene.
-    m_direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
+    m_direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
 
     m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext());
     // Generate the view matrix based on the camera's position.

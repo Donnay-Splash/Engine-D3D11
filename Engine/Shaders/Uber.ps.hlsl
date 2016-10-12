@@ -116,7 +116,7 @@ float3 EvaluateBRDF(float3 normal, float3 viewDirection, float3 lightDirection, 
 
     float D = D_GGXTrowbridgeReitz(NoH, roughness);
     float G = G_Smith_GGX(NoV, NoL, roughness);
-    float3 F = F_Schlick(float3(0.14f, 0.14f, 0.14f), float3(1.0f, 1.0f, 1.0f), HoL);
+    float3 F = F_Schlick(float3(0.04f, 0.04f, 0.04f), float3(1.0f, 1.0f, 1.0f), HoL);
 
     float attenuation = 1.0f; /// pow(length(lightDir), 2);
     float3 RDiffuse = (baseColor * NoL) / PI;
@@ -146,7 +146,7 @@ float4 PSMain(PixelInputType input) : SV_TARGET
         emissiveColor = EmissiveTexture.Sample(EmissiveSampler, input.tex).rgb;
 
     float3 radiance = 0.0f;
-    //[unroll]
+    [unroll]
     for (int i = 0; i < activeLights; i++)
     {
         Light light = lights[i];
@@ -155,9 +155,9 @@ float4 PSMain(PixelInputType input) : SV_TARGET
         radiance += EvaluateBRDF(normal, viewDir, lightDir, roughness, materialDiffuse) * light.color.rgb;
     }
 
+
     // Gamma encode
-    return float4(0.5f, 0.5f, 0.5f, 1.0f);
-    return float4(radiance, 1.0f);
+    return float4(GammaEncode(saturate(radiance)), 1.0f);
 }
 
 
