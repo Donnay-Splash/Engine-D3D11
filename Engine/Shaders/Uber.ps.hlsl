@@ -137,7 +137,7 @@ float4 PSMain(PixelInputType input) : SV_TARGET
     float3 materialDiffuse = material_diffuseColorAndOpacity.rgb;
     float3 emissiveColor = material_emissiveColor.rgb;
     float3 specularColor = material_specularColorAndSmoothness.rgb;
-    float roughness = square(0.6f); //square(1.0f - material_specularColorAndSmoothness.a);
+    float roughness = square(1.0f - material_specularColorAndSmoothness.a);
 
     // Since we are using SRGB formats for the textures the conversion to linear is done when reading
     if(material_hasDiffuseTexture == true)
@@ -147,19 +147,14 @@ float4 PSMain(PixelInputType input) : SV_TARGET
 
     float3 radiance = 0.0f;
     //[unroll]
-    //for (int i = 0; i < activeLights; i++)
-    //{
-    //    Light light = lights[i];
-    //    float3 lightDir = -normalize(light.position);
-        
-    //    radiance += EvaluateBRDF(normal, viewDir, lightDir, roughness, materialDiffuse);
-    //}
+    for (int i = 0; i < activeLights; i++)
+    {
+        Light light = lights[i];
+        float3 lightDir = -normalize(light.position);
+      
+        radiance += EvaluateBRDF(normal, viewDir, lightDir, roughness, materialDiffuse) * light.color.rgb;
+    }
 
-    float3 lightDir = -normalize(float3(-1.0f, -1.0f, 1.0f));
-    float3 lightRadiance = float3(1.0f, 0.96f, 0.84f);
-    radiance += EvaluateBRDF(normal, viewDir, lightDir, roughness, materialDiffuse) * lightRadiance;
-
-    
     // Gamma encode
     return float4(0.5f, 0.5f, 0.5f, 1.0f);
     return float4(radiance, 1.0f);
