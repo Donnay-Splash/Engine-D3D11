@@ -41,47 +41,39 @@ EngineComponent::EngineComponent()
     double logicalWidth = swapChainPanel->ActualWidth;
     double logicalHeight = swapChainPanel->ActualHeight;
 
-    //WeakReference weakRef(this);
-    //auto UIDispatcher = Window::Current->CoreWindow->Dispatcher;
-    // Test Dispatcher
-    //UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([this]()
-    //{
-    //    /*float x = 5;
-    //    x += 4;
-    //    float b = x;*/
-    //   //SceneElementAdded(nullptr);
-    //}));
-    //auto SceneNodeAddedCallback = [weakRef, UIDispatcher](SceneNode::Ptr sceneNodeAdded)
-    //{
-    //    auto strongRef = weakRef.Resolve<EngineComponent>();
-    //    EngineAssert(strongRef != nullptr);
-    //    
-    //    // We want to know when scene node has added a component
-    //    // so we now create a lambda to call when a component is added
-    //    auto componentAddedCallback = [weakRef, UIDispatcher](Component::Ptr componentAdded)
-    //    {
-    //        auto strongRef = weakRef.Resolve<EngineComponent>();
-    //        EngineAssert(strongRef != nullptr);
-    //        // Extract properties from component
-    //        auto sceneElement = ref new SceneElementCX(componentAdded);
-    //        // Fire off event to add component to UI in app.
-    //        UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([strongRef, sceneElement]()
-    //        {
-    //            strongRef->SceneElementAdded(sceneElement);
-    //        }));
-    //    };
+    WeakReference weakRef(this);
+    auto UIDispatcher = Window::Current->CoreWindow->Dispatcher;
+    auto SceneNodeAddedCallback = [weakRef, UIDispatcher](SceneNode::Ptr sceneNodeAdded)
+    {
+        auto strongRef = weakRef.Resolve<EngineComponent>();
+        EngineAssert(strongRef != nullptr);
+        
+        // We want to know when scene node has added a component
+        // so we now create a lambda to call when a component is added
+        auto componentAddedCallback = [weakRef, UIDispatcher](Component::Ptr componentAdded)
+        {
+            auto strongRef = weakRef.Resolve<EngineComponent>();
+            EngineAssert(strongRef != nullptr);
+            // Extract properties from component
+            auto sceneElement = ref new SceneElementCX(componentAdded);
+            // Fire off event to add component to UI in app.
+            UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([strongRef, sceneElement]()
+            {
+                strongRef->SceneElementAdded(sceneElement);
+            }));
+        };
 
-    //    sceneNodeAdded->RegisterComponentAddedCallback(componentAddedCallback);
+        sceneNodeAdded->RegisterComponentAddedCallback(componentAddedCallback);
 
-    //    // extract data from scene node and then fire off task to send it to app
-    //    // on UI thread. As this will be received on the rendering thread.
-    //    auto sceneElement = ref new SceneElementCX(sceneNodeAdded);
+        // extract data from scene node and then fire off task to send it to app
+        // on UI thread. As this will be received on the rendering thread.
+        auto sceneElement = ref new SceneElementCX(sceneNodeAdded);
 
-    //    UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([strongRef, sceneElement]() 
-    //    {
-    //        strongRef->SceneElementAdded(sceneElement);
-    //    }));
-    //};
+        UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([strongRef, sceneElement]() 
+        {
+            strongRef->SceneElementAdded(sceneElement);
+        }));
+    };
 
     m_engine = std::make_shared<Engine>();
     EngineCreateOptions createOptions;
@@ -89,7 +81,7 @@ EngineComponent::EngineComponent()
     createOptions.RendererMode = EngineRendererMode::XAML;
     createOptions.UserData = (void*)this;
     createOptions.SwapChainCreatedCallback = &EngineComponent::InitializeSwapChain;
-    //createOptions.SceneNodeAddedCallback = SceneNodeAddedCallback;
+    createOptions.SceneNodeAddedCallback = SceneNodeAddedCallback;
     createOptions.ScreenWidth = static_cast<int>(std::max(logicalWidth, 1.0));
     createOptions.ScreenHeight = static_cast<int>(std::max(logicalHeight, 1.0));
     m_engine->Initialize(createOptions);
