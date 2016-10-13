@@ -255,6 +255,9 @@
     <Page Include="DirectXPage.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Generic.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine_WinRT\Engine_WinRT.vcxproj">

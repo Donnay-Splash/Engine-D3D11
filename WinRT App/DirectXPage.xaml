@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <SplitView x:Name="NavigationPane" DisplayMode="CompactInline">
+    <SplitView x:Name="NavigationPane" DisplayMode="CompactOverlay">
         <SplitView.Pane>
             <Grid>
 
@@ -17,16 +17,31 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Button x:Name="HamburgerButton" Grid.Row="0" Style="{StaticResource EllipsisButton}" Click="AppBarButton_Click"/>
+                <Button x:Name="HamburgerButton" Grid.Row="0" Style="{StaticResource MenuItemButtonStyle}" Tag="&#xE700;" Click="AppBarButton_Click"/>
+                <StackPanel x:Name="NavigationMenu" Orientation="Vertical" Grid.Row="1">
+                    <!--SceneData goes here-->
+                </StackPanel>
                 
             </Grid>
         </SplitView.Pane>
+        
         <SplitView.Content>
+            <Frame x:Name="Content">
             <dc:EngineComponent x:Name="engineComponent"/>
+                <Frame.ContentTransitions>
+                    <TransitionCollection>
+                        <NavigationThemeTransition>
+                            <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                <EntranceNavigationTransitionInfo/>
+                            </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                        </NavigationThemeTransition>
+                    </TransitionCollection>
+                </Frame.ContentTransitions>
+            </Frame>
         </SplitView.Content>
     </SplitView>
 
-  <Page.BottomAppBar>
+  <!--<Page.BottomAppBar>
     <AppBar x:Name="bottomAppBar" Padding="10,0,10,0">
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
         <AppBarButton AutomationProperties.Name="Sample Button"
@@ -34,5 +49,5 @@
                       Click="AppBarButton_Click"/>
       </StackPanel>
     </AppBar>
-  </Page.BottomAppBar>
+  </Page.BottomAppBar>-->
 </Page>

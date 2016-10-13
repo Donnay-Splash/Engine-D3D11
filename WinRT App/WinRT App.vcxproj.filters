@@ -92,5 +92,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="DirectXPage.xaml" />
+    <Page Include="Generic.xaml" />
   </ItemGroup>
 </Project>

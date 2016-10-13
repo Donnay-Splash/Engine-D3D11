@@ -162,7 +162,10 @@ void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
 {
     // Use the app bar if it is appropriate for your app. Design the app bar, 
     // then fill in event handlers (like this one).
-    OpenFile();
+    //OpenFile();
+
+    // Temp test UI stuff
+    NavigationPane->IsPaneOpen = !NavigationPane->IsPaneOpen;
 }
 
 Concurrency::task<void> DirectXPage::OpenFile()
@@ -173,7 +176,7 @@ Concurrency::task<void> DirectXPage::OpenFile()
     auto file = co_await picker->PickSingleFileAsync();
     if (file != nullptr)
     {
-        engineComponent->LoadFile(file);
+        //engineComponent->LoadFile(file);
     }
     // Best Idea is to pass the data to EngineComponent. do this and then lock and pass to engine to load.
 }
