@@ -9,10 +9,14 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="EngineComponent.xaml.cpp" />
+    <ClCompile Include="PropertyCX.cpp" />
+    <ClCompile Include="SceneElementCX.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="EngineComponent.xaml.h" />
+    <ClInclude Include="PropertyCX.h" />
+    <ClInclude Include="SceneElementCX.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

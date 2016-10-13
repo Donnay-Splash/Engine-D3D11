@@ -2,7 +2,7 @@
 #include <Scene\Components\MeshInstance.h>
 #include <Scene\SceneNode.h>
 
-MeshInstance::MeshInstance(Component::SceneNodePtr sceneNode) : Component(sceneNode)
+MeshInstance::MeshInstance(Component::SceneNodePtr sceneNode) : Component(sceneNode, "Mesh Instance")
 {
 
 }

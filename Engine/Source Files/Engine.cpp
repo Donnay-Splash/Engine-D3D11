@@ -37,6 +37,11 @@ bool Engine::Initialize(EngineCreateOptions createOptions)
     m_scene = std::make_shared<Scene>();
     m_scene->Initialize();
 
+    if (createOptions.SceneNodeAddedCallback != nullptr)
+    {
+        m_scene->RegisterSceneNodeAddedCallback(createOptions.SceneNodeAddedCallback);
+    }
+
     // Initialize light manager
     m_lightManager.Initialize(m_direct3D->GetDevice());
 
@@ -215,4 +220,9 @@ bool Engine::RenderGraphics()
     m_direct3D->EndScene();
 
     return true;
+}
+
+void Engine::RegisterSceneNodeAddedCallback(Scene::SceneNodeAddedDelegate callback)
+{
+    m_scene->RegisterSceneNodeAddedCallback(callback);
 }

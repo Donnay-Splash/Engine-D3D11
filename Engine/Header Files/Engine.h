@@ -34,6 +34,8 @@ public:
     bool Initialize(EngineCreateOptions createOptions);
     bool Frame();
 
+    void RegisterSceneNodeAddedCallback(Scene::SceneNodeAddedDelegate callback);
+
     void ResizeBuffers(uint32_t newWidth, uint32_t newHeight);
 
     void SetFrameInput(InputState newInputState);
@@ -59,5 +61,6 @@ private:
     Scene::Ptr m_scene;
     LightManager m_lightManager;
     EngineCreateOptions m_createOptions;
+
 };
 

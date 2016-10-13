@@ -32,6 +32,8 @@ DirectXPage::DirectXPage()
 {
     InitializeComponent();
 
+    //engineComponent->SceneElementAdded += ref new Engine_WinRT::SceneElementAddedEventHandler(this, &DirectXPage::OnSceneElementAdded);
+
     //// Register event handlers for page lifecycle.
     //CoreWindow^ window = Window::Current->CoreWindow;
 
@@ -174,4 +176,9 @@ Concurrency::task<void> DirectXPage::OpenFile()
         engineComponent->LoadFile(file);
     }
     // Best Idea is to pass the data to EngineComponent. do this and then lock and pass to engine to load.
+}
+
+void DirectXPage::OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement)
+{
+
 }

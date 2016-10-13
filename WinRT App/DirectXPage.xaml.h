@@ -37,6 +37,8 @@ namespace WinRT_App
         void OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
         void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 
+        void OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement);
+
         // Other event handlers.
         void AppBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 

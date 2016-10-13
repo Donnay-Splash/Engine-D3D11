@@ -2,9 +2,8 @@
 #include <Scene\Components\Light.h>
 #include <Scene\SceneNode.h>
 
-Light::Light(Component::SceneNodePtr sceneNode) : Component(sceneNode)
+Light::Light(Component::SceneNodePtr sceneNode) : Component(sceneNode, "Light")
 {
-
 }
 
 void Light::Initialize(ID3D11Device* device)

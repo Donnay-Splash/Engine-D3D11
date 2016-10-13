@@ -37,6 +37,12 @@
     <Filter Include="Header Files\Resources\MeshMaker">
       <UniqueIdentifier>{1bb1000d-cf1c-40ee-904d-e49966aa3563}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Scene\Public Properties">
+      <UniqueIdentifier>{3e0433ab-30d0-44fd-beea-fc926980a56a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene\Public Properties">
+      <UniqueIdentifier>{661d54b2-c5a3-4578-a201-3377093f91e7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source Files\d3dclass.cpp">
@@ -152,6 +158,12 @@
     </ClCompile>
     <ClCompile Include="..\Source Files\Scene\Components\BoundingBox.cpp">
       <Filter>Source Files\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Public Properties\Property.cpp">
+      <Filter>Source Files\Scene\Public Properties</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Public Properties\SceneElement.cpp">
+      <Filter>Source Files\Scene\Public Properties</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -281,6 +293,12 @@
     <ClInclude Include="..\Header Files\Scene\Components\BoundingBox.h">
       <Filter>Header Files\Scene\Components</Filter>
     </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Public Properties\Property.h">
+      <Filter>Header Files\Scene\Public Properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Public Properties\SceneElement.h">
+      <Filter>Header Files\Scene\Public Properties</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Header Files\Scene\Scene.inl">
@@ -322,6 +340,9 @@
     </None>
     <None Include="..\Shaders\InputStructs.hlsl">
       <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Header Files\Scene\Public Properties\Property.inl">
+      <Filter>Header Files\Scene\Public Properties</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

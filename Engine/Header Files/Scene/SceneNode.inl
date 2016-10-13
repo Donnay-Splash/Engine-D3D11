@@ -11,9 +11,10 @@ inline std::shared_ptr<ComponentType> SceneNode::AddComponent(ID3D11Device* devi
     auto testComponent = GetComponentOfType<ComponentType>();
     EngineAssert(testComponent == nullptr);
 
-    auto newComponent = std::shared_ptr<ComponentType>(new ComponentType(shared_from_this()));
+    auto newComponent = std::shared_ptr<ComponentType>(new ComponentType(GetSharedThis()));
     newComponent->Initialize(device);
     m_components.push_back(newComponent);
+    FireComponentAddedCallback(newComponent);
     return newComponent;
 }
 

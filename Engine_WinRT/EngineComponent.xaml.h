@@ -6,6 +6,7 @@
 #pragma once
 
 #include "EngineComponent.g.h"
+#include "SceneElementCX.h"
 #include <Engine.h>
 #include <InputManager.h>
 #include <concrt.h>
@@ -13,6 +14,8 @@
 
 namespace Engine_WinRT
 {
+    public delegate void SceneElementAddedEventHandler(SceneElementCX^ newElement);
+
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class EngineComponent sealed
     {
@@ -21,6 +24,8 @@ namespace Engine_WinRT
         virtual ~EngineComponent();
 
         void LoadFile(Windows::Storage::StorageFile^ fileToLoad);
+
+        event SceneElementAddedEventHandler^ SceneElementAdded;
 
     private:
         // SwapChainPanel events

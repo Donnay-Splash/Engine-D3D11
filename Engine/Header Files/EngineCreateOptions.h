@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <Scene\Scene.h>
 
 enum class EngineRendererMode
 {
@@ -16,5 +17,6 @@ struct EngineCreateOptions
     uint32_t ScreenWidth;
     uint32_t ScreenHeight;
     void* UserData = nullptr;
-    std::function<void(IUnknown* swapChain, void* userData)> Callback = nullptr;
+    std::function<void(IUnknown* swapChain, void* userData)> SwapChainCreatedCallback = nullptr;
+    Scene::SceneNodeAddedDelegate SceneNodeAddedCallback = nullptr;
 };

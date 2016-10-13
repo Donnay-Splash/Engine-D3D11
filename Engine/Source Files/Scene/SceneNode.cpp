@@ -1,11 +1,13 @@
 #include "pch.h"
 #include <Scene\SceneNode.h>
 
-SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) :
+SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) : SceneElement("Scene Node"),
     m_scene(scene), m_isRootNode(isRoot)
 {
     // Initialise scale to 1
     SetScale(1.0f);
+
+    AddPublicProperties();
 }
 
 SceneNode::~SceneNode()
@@ -37,6 +39,20 @@ void SceneNode::Render(ID3D11DeviceContext* deviceContext)
     for (auto component : m_components)
     {
         component->Render(deviceContext);
+    }
+}
+
+void SceneNode::RegisterComponentAddedCallback(ComponentAddedDelegate callback)
+{
+    EngineAssert(callback != nullptr);
+    m_componentAddedCallbacks.push_back(callback);
+}
+
+void SceneNode::FireComponentAddedCallback(Component::Ptr componentAdded)
+{
+    for (auto callback : m_componentAddedCallbacks)
+    {
+        callback(componentAdded);
     }
 }
 
@@ -86,6 +102,16 @@ void SceneNode::CalculateTransform()
     }
 }
 
+void SceneNode::AddPublicProperties()
+{
+    //// TODO: Add helpers to try and cut this down to 1 line in most cases
+    //auto positionSetter = [this](Utils::Maths::Vector4 v) {m_position = { v.x, v.y, v.z }; };
+    //auto positionGetter = [this]() { return Utils::Maths::Vector4(m_position.x, m_position.y, m_position.z, 0.0f); };
+    //auto positionProperty = std::make_shared<Property>("Position", PropertyType::Vector, positionSetter, positionGetter);
+    //AddProperty(positionProperty);
+    
+}
+
 
 Utils::Maths::Matrix SceneNode::GetWorldTransform() const
 {
@@ -111,4 +137,9 @@ Utils::Maths::Vector3 SceneNode::GetWorldSpacePosition() const
         return m_position * m_parentNode->GetWorldTransform();
     }
     return m_position;
+}
+
+SceneNode::Ptr SceneNode::GetSharedThis()
+{
+    return std::static_pointer_cast<SceneNode>(shared_from_this());
 }

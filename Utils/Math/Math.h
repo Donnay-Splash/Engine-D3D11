@@ -21,6 +21,7 @@ namespace Utils
         class Matrix;
         class Vector4;
         class Vector3;
+        class Vector2;
         class Quaternion;
         class Color;
 

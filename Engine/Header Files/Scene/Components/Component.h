@@ -1,10 +1,11 @@
 #pragma once
 
+#include <Scene\Public Properties\SceneElement.h>
 // Forward declarations
 class SceneNode;
 
 
-class Component
+class Component : public SceneElement
 {
 protected:
     using SceneNodePtr = std::shared_ptr<SceneNode>;
@@ -18,7 +19,7 @@ public:
     virtual void Render(ID3D11DeviceContext* deviceContext) const = 0;
 
 protected:
-    Component(SceneNodePtr sceneNode);
+    Component(SceneNodePtr sceneNode, std::string elementName);
     Component(const Component&) = delete;
     virtual void Initialize(ID3D11Device* device) = 0;
 

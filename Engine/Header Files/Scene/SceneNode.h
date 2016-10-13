@@ -1,14 +1,17 @@
 #pragma once
 #include <Scene\Components\Component.h>
+#include <Scene\Public Properties\SceneElement.h>
 
 // Forward declaration
 class Scene;
 
-class SceneNode : public std::enable_shared_from_this<SceneNode>
+class SceneNode : public SceneElement
 {
 private:
     using ScenePtr = std::shared_ptr<Scene>;
-
+    // Fired from the component added event
+    // TODO: Move to weak pointers
+    using ComponentAddedDelegate = std::function<void(Component::Ptr component)>;
 public:
     using Ptr = std::shared_ptr<SceneNode>;
     using SceneNodeContainer = std::vector<SceneNode::Ptr>;
@@ -17,6 +20,9 @@ public:
 
     void Update(float frameTime);
     void Render(ID3D11DeviceContext* deviceContext);
+
+    void RegisterComponentAddedCallback(ComponentAddedDelegate callback);
+    void FireComponentAddedCallback(Component::Ptr componentAdded);
 
     inline ComponentContainer GetComponents() const { return m_components; }
     inline SceneNodeContainer GetChildNodes() const { return m_childNodes; }
@@ -49,7 +55,10 @@ private:
     SceneNode(ScenePtr scene, bool isRoot = false);
     static Ptr Create(ScenePtr scene, bool isRoot = false) { return std::shared_ptr<SceneNode>(new SceneNode(scene, isRoot)); }
 
+    Ptr GetSharedThis();
+
     void CalculateTransform();
+    void AddPublicProperties();
 
     friend class Scene;
 private:
@@ -65,6 +74,7 @@ private:
     Utils::Maths::Quaternion m_rotation;
     Utils::Maths::Matrix m_transform;
     bool m_transformDirty = false;
+    std::vector<ComponentAddedDelegate> m_componentAddedCallbacks;
 
     // Flag to signal if this SceneNode is the root of a scene.
     bool m_isRootNode;

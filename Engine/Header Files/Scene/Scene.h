@@ -7,7 +7,12 @@
 class Scene : public std::enable_shared_from_this<Scene>
 {
 public:
+    // Fired from the SceneNodeAddedEvent
+    using SceneNodeAddedDelegate = std::function<void(SceneNode::Ptr nodeAdded)>;
+    // Fired from the SceneNodeRemovedEvent
+    using SceneNodeRemovedDelegate = std::function<void(SceneNode::Ptr nodeRemoved)>;
     using Ptr = std::shared_ptr<Scene>;
+
     Scene();
     Scene(const Scene&) = delete;
     ~Scene() {}
@@ -19,6 +24,11 @@ public:
 
     void Update(float frameTime);
     void Render(ID3D11DeviceContext* deviceContext);
+
+    void RegisterSceneNodeAddedCallback(SceneNodeAddedDelegate callback);
+    void RegisterSceneNodeRemovedCallback(SceneNodeRemovedDelegate callback);
+    void FireSceneNodeAddedEvent(SceneNode::Ptr sceneNodeAdded);
+    void FireSceneNodeRemovedEvent(SceneNode::Ptr sceneNodeRemoved);
 
     // Returns a vector containing all instances of ComponentType in the scene.
     template <class ComponentType>
@@ -40,6 +50,8 @@ public:
 private:
     // TODO: Need to ensure that no components are added to the root node.
     SceneNode::Ptr m_rootNode;
+    std::vector<SceneNodeAddedDelegate> m_sceneNodeAddedCallbacks;
+    std::vector<SceneNodeRemovedDelegate> m_sceneNodeRemovedCallbacks;
 };
 
 #include "Scene.inl"

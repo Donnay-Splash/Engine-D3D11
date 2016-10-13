@@ -100,9 +100,9 @@ void D3DClass::CreateDeviceAndSwapChain()
     }
 
     // Now call swapchain created callback.
-    if (m_createOptions.Callback != nullptr)
+    if (m_createOptions.SwapChainCreatedCallback != nullptr)
     {
-        m_createOptions.Callback(m_swapChain.Get(), m_createOptions.UserData);
+        m_createOptions.SwapChainCreatedCallback(m_swapChain.Get(), m_createOptions.UserData);
     }
 }
 

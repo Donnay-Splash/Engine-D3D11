@@ -254,3 +254,4 @@ void Importer::LoadTextures(aiTexture** embeddedTextures, uint32_t embeddedTextu
     m_textureManager->ProcessTextures(embeddedTextures, embeddedTextureCount);
     m_sceneData.Textures = m_textureManager->GetLoadedTextures();
 }
+

@@ -200,6 +200,8 @@
     <ClCompile Include="..\Source Files\Scene\Components\Component.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\Light.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\MeshInstance.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Public Properties\Property.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Public Properties\SceneElement.cpp" />
     <ClCompile Include="..\Source Files\Scene\Scene.cpp" />
     <ClCompile Include="..\Source Files\Scene\SceneNode.cpp" />
     <ClCompile Include="..\Source Files\ShaderManager.cpp" />
@@ -254,6 +256,8 @@
     <ClInclude Include="..\Header Files\Scene\Components\Component.h" />
     <ClInclude Include="..\Header Files\Scene\Components\Light.h" />
     <ClInclude Include="..\Header Files\Scene\Components\MeshInstance.h" />
+    <ClInclude Include="..\Header Files\Scene\Public Properties\Property.h" />
+    <ClInclude Include="..\Header Files\Scene\Public Properties\SceneElement.h" />
     <ClInclude Include="..\Header Files\Scene\Scene.h" />
     <ClInclude Include="..\Header Files\Scene\SceneNode.h" />
     <ClInclude Include="..\Header Files\ShaderManager.h" />
@@ -262,6 +266,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Header Files\Scene\Public Properties\Property.inl" />
     <None Include="..\Header Files\Scene\Scene.inl" />
     <None Include="..\Header Files\Scene\SceneNode.inl" />
     <None Include="..\Shaders\color.ps">

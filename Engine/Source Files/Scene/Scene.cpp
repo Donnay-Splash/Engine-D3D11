@@ -28,6 +28,8 @@ SceneNode::Ptr Scene::AddNode(SceneNode::Ptr parentNode /*= nullptr*/)
     newNode->m_parentNode = parentNode;
     parentNode->m_childNodes.push_back(newNode);
 
+    FireSceneNodeAddedEvent(newNode);
+
     return newNode;
 }
 
@@ -59,4 +61,32 @@ Utils::Maths::BoundingBox Scene::CalculateBoundingBoxForSceneNode(SceneNode::Ptr
     }
 
     return result;
+}
+
+void Scene::RegisterSceneNodeAddedCallback(SceneNodeAddedDelegate callback)
+{
+    EngineAssert(callback != nullptr);
+    m_sceneNodeAddedCallbacks.push_back(callback);
+}
+
+void Scene::FireSceneNodeAddedEvent(SceneNode::Ptr sceneNodeAdded)
+{
+    for (auto callback : m_sceneNodeAddedCallbacks)
+    {
+        callback(sceneNodeAdded);
+    }
+}
+
+void Scene::RegisterSceneNodeRemovedCallback(SceneNodeRemovedDelegate callback)
+{
+    EngineAssert(callback != nullptr);
+    m_sceneNodeRemovedCallbacks.push_back(callback);
+}
+
+void Scene::FireSceneNodeRemovedEvent(SceneNode::Ptr sceneNodeRemoved)
+{
+    for (auto callback : m_sceneNodeRemovedCallbacks)
+    {
+        callback(sceneNodeRemoved);
+    }
 }
