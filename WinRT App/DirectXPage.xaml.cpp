@@ -180,5 +180,6 @@ Concurrency::task<void> DirectXPage::OpenFile()
 
 void DirectXPage::OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement)
 {
+    // Now we have the scene element we need to build UI out of it.
 
 }

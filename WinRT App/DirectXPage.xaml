@@ -8,7 +8,23 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-   <dc:EngineComponent x:Name="engineComponent"/>
+    <SplitView x:Name="NavigationPane" DisplayMode="CompactInline">
+        <SplitView.Pane>
+            <Grid>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="44"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Button x:Name="HamburgerButton" Grid.Row="0" Style="{StaticResource EllipsisButton}" Click="AppBarButton_Click"/>
+                
+            </Grid>
+        </SplitView.Pane>
+        <SplitView.Content>
+            <dc:EngineComponent x:Name="engineComponent"/>
+        </SplitView.Content>
+    </SplitView>
 
   <Page.BottomAppBar>
     <AppBar x:Name="bottomAppBar" Padding="10,0,10,0">
