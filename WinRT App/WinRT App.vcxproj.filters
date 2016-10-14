@@ -71,12 +71,16 @@
     <ClCompile Include="WinRT_AppMain.cpp" />
     <ClCompile Include="DirectXPage.xaml.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="CustomTitleBar.xaml.cpp" />
+    <ClCompile Include="ExpandPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />
     <ClInclude Include="WinRT_AppMain.h" />
     <ClInclude Include="DirectXPage.xaml.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="CustomTitleBar.xaml.h" />
+    <ClInclude Include="ExpandPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

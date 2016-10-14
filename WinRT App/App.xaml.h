@@ -7,6 +7,7 @@
 
 #include "App.g.h"
 #include "DirectXPage.xaml.h"
+#include "ExpandPanel.h"
 
 namespace WinRT_App
 {

@@ -34,12 +34,24 @@
         <Grid Grid.Row="1">
         <SplitView x:Name="NavigationPane" DisplayMode="Overlay">
         <SplitView.Pane>
-            <Grid>
-
-                <Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
                     <RowDefinition Height="44"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
+
+                        <Grid Width="300" Height="300">
+                            <local:ExpandPanel HeaderConent="Expander">
+                                <local:ExpandPanel.Content>
+                                    <StackPanel>
+                                        <Button Margin="4" Padding="4" Content="Button One"/>
+                                        <Button Margin="4" Padding="4" Content="Button Two"/>
+                                        <Button Margin="4" Padding="4" Content="Button Three"/>
+                                        <Button Margin="4" Padding="4" Content="Button Four"/>
+                                    </StackPanel>
+                                </local:ExpandPanel.Content>
+                            </local:ExpandPanel>
+                        </Grid>
 
                 <StackPanel x:Name="NavigationMenu" Orientation="Vertical" Grid.Row="1">
                     <!--SceneData goes here-->

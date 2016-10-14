@@ -21,7 +21,6 @@ namespace WinRT_App
     public:
         DirectXPage();
         virtual ~DirectXPage();
-
         void SaveInternalState(Windows::Foundation::Collections::IPropertySet^ state);
         void LoadInternalState(Windows::Foundation::Collections::IPropertySet^ state);
 
