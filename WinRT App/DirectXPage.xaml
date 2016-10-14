@@ -47,10 +47,16 @@
                     <local:ExpandPanel HeaderConent="Expander">
                         <local:ExpandPanel.Content>
                             <StackPanel>
-                                <Button Margin="4" Padding="4" Content="Button One"/>
-                                <Button Margin="4" Padding="4" Content="Button Two"/>
-                                <Button Margin="4" Padding="4" Content="Button Three"/>
-                                <Button Margin="4" Padding="4" Content="Button Four"/>
+                                        <local:ExpandPanel HeaderConent="Expander2">
+                                            <local:ExpandPanel.Content>
+                                                <StackPanel>
+                                                    <Button Margin="4" Padding="4" Content="Button One"/>
+                                                    <Button Margin="4" Padding="4" Content="Button Two"/>
+                                                    <Button Margin="4" Padding="4" Content="Button Three"/>
+                                                    <Button Margin="4" Padding="4" Content="Button Four"/>
+                                                </StackPanel>
+                                            </local:ExpandPanel.Content>
+                                        </local:ExpandPanel>
                             </StackPanel>
                         </local:ExpandPanel.Content>
                     </local:ExpandPanel>
