@@ -37,12 +37,22 @@ namespace WinRT_App
         void OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
         void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 
+        // Engine specific event handler
         void OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement);
 
-        // Other event handlers.
-        void AppBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+        // Window event handler
+        void OnWindowActivated(Platform::Object^ sender, Windows::UI::Core::WindowActivatedEventArgs^ e);
+        void OnTitleBarVisibilityChanged(Windows::ApplicationModel::Core::CoreApplicationViewTitleBar^ titleBar, Platform::Object^ args);
+        void OnLayoutMetricsChanged(Windows::ApplicationModel::Core::CoreApplicationViewTitleBar^ titleBar, Platform::Object^ args);
 
         Concurrency::task<void> OpenFile();
+
+        
+
+    private:
+        Windows::ApplicationModel::Core::CoreApplicationViewTitleBar^ coreTitleBar = Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->TitleBar;
+
+        void TitleBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
     };
 }
 

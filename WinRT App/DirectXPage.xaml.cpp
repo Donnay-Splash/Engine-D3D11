@@ -12,6 +12,7 @@
 using namespace WinRT_App;
 
 using namespace Platform;
+using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Graphics::Display;
@@ -32,6 +33,10 @@ DirectXPage::DirectXPage()
 {
     InitializeComponent();
 
+    /*Window::Current->Activated += ref new WindowActivatedEventHandler(this, &DirectXPage::OnWindowActivated);
+    auto coreTitleBar = CoreApplication::GetCurrentView()->TitleBar;
+    coreTitleBar->IsVisibleChanged += ref new TypedEventHandler<CoreApplicationViewTitleBar^, Platform::Object^>(this, &DirectXPage::OnTitleBarVisibilityChanged);
+    coreTitleBar->LayoutMetricsChanged += ref new TypedEventHandler<CoreApplicationViewTitleBar^, Platform::Object^>(this, &DirectXPage::OnLayoutMetricsChanged);*/
     //engineComponent->SceneElementAdded += ref new Engine_WinRT::SceneElementAddedEventHandler(this, &DirectXPage::OnSceneElementAdded);
 
     //// Register event handlers for page lifecycle.
@@ -157,15 +162,27 @@ void DirectXPage::OnDisplayContentsInvalidated(DisplayInformation^ sender, Objec
     //m_deviceResources->ValidateDevice();
 }
 
-// Called when the app bar button is clicked.
-void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
+void WinRT_App::DirectXPage::OnWindowActivated(Platform::Object ^ sender, WindowActivatedEventArgs ^ e)
 {
-    // Use the app bar if it is appropriate for your app. Design the app bar, 
-    // then fill in event handlers (like this one).
-    //OpenFile();
+    if (e->WindowActivationState == CoreWindowActivationState::Deactivated)
+    {
+        TitleBar->Opacity = 0.5;
+    }
+    else
+    {
+        TitleBar->Opacity = 1.0;
 
-    // Temp test UI stuff
-    NavigationPane->IsPaneOpen = !NavigationPane->IsPaneOpen;
+    }
+}
+
+void WinRT_App::DirectXPage::OnTitleBarVisibilityChanged(Windows::ApplicationModel::Core::CoreApplicationViewTitleBar ^ titleBar, Platform::Object ^ args)
+{
+    TitleBar->Visibility = titleBar->IsVisible ? Windows::UI::Xaml::Visibility::Visible : Windows::UI::Xaml::Visibility::Collapsed;
+}
+
+void WinRT_App::DirectXPage::OnLayoutMetricsChanged(Windows::ApplicationModel::Core::CoreApplicationViewTitleBar ^ titleBar, Platform::Object ^ args)
+{
+    TitleBar->Height = titleBar->Height;
 }
 
 Concurrency::task<void> DirectXPage::OpenFile()
@@ -185,4 +202,10 @@ void DirectXPage::OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement
 {
     // Now we have the scene element we need to build UI out of it.
 
+}
+
+
+void WinRT_App::DirectXPage::TitleBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+    NavigationPane->IsPaneOpen = !NavigationPane->IsPaneOpen;
 }

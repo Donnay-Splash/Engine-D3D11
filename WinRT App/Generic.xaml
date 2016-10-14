@@ -16,7 +16,7 @@
                             <ColumnDefinition Width="48"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <!-- use extra left margin to align the icon to the NavigationButtonStyle'd controls-->
                         <FontIcon Grid.Column="0"
                                   VerticalAlignment="Center"
@@ -34,4 +34,5 @@
             </Setter.Value>
         </Setter>
     </Style>
+
 </ResourceDictionary>

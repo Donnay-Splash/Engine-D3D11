@@ -6,9 +6,33 @@
     xmlns:dc="using:Engine_WinRT"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d">
 
-    <SplitView x:Name="NavigationPane" DisplayMode="CompactOverlay">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="TitleBar" VerticalAlignment="Top" Height="32" Canvas.ZIndex="0" Background="White">
+            <Rectangle x:Name="BackgroudElement">
+            </Rectangle>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Width="Auto">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph=""
+                          Foreground="{ThemeResource SystemControlHighlightAccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="My awesome app title" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <i:Interaction.Behaviors>
+                    <local:CustomTitleBar IsChromeless="True"/>
+                </i:Interaction.Behaviors>
+            </Grid>
+        
+            <Button x:Name="TitleBarControl" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Visible" Background="Black" Style="{StaticResource MenuItemButtonStyle}" Tag="&#xE700;" Click="TitleBarButton_Click"></Button>
+
+        <Grid Grid.Row="1">
+        <SplitView x:Name="NavigationPane" DisplayMode="Overlay">
         <SplitView.Pane>
             <Grid>
 
@@ -17,7 +41,6 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Button x:Name="HamburgerButton" Grid.Row="0" Style="{StaticResource MenuItemButtonStyle}" Tag="&#xE700;" Click="AppBarButton_Click"/>
                 <StackPanel x:Name="NavigationMenu" Orientation="Vertical" Grid.Row="1">
                     <!--SceneData goes here-->
                 </StackPanel>
@@ -40,8 +63,11 @@
             </Frame>
         </SplitView.Content>
     </SplitView>
+        </Grid>
+    </Grid>
 
-  <!--<Page.BottomAppBar>
+
+    <!--<Page.BottomAppBar>
     <AppBar x:Name="bottomAppBar" Padding="10,0,10,0">
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
         <AppBarButton AutomationProperties.Name="Sample Button"

@@ -93,5 +93,6 @@
   <ItemGroup>
     <Page Include="DirectXPage.xaml" />
     <Page Include="Generic.xaml" />
+    <Page Include="CustomTitleBar.xaml" />
   </ItemGroup>
 </Project>
