@@ -33,11 +33,11 @@ DirectXPage::DirectXPage()
 {
     InitializeComponent();
 
-    /*Window::Current->Activated += ref new WindowActivatedEventHandler(this, &DirectXPage::OnWindowActivated);
+    Window::Current->Activated += ref new WindowActivatedEventHandler(this, &DirectXPage::OnWindowActivated);
     auto coreTitleBar = CoreApplication::GetCurrentView()->TitleBar;
     coreTitleBar->IsVisibleChanged += ref new TypedEventHandler<CoreApplicationViewTitleBar^, Platform::Object^>(this, &DirectXPage::OnTitleBarVisibilityChanged);
-    coreTitleBar->LayoutMetricsChanged += ref new TypedEventHandler<CoreApplicationViewTitleBar^, Platform::Object^>(this, &DirectXPage::OnLayoutMetricsChanged);*/
-    //engineComponent->SceneElementAdded += ref new Engine_WinRT::SceneElementAddedEventHandler(this, &DirectXPage::OnSceneElementAdded);
+    coreTitleBar->LayoutMetricsChanged += ref new TypedEventHandler<CoreApplicationViewTitleBar^, Platform::Object^>(this, &DirectXPage::OnLayoutMetricsChanged);
+    engineComponent->SceneElementAdded += ref new Engine_WinRT::SceneElementAddedEventHandler(this, &DirectXPage::OnSceneElementAdded);
 
     //// Register event handlers for page lifecycle.
     //CoreWindow^ window = Window::Current->CoreWindow;
@@ -201,6 +201,9 @@ Concurrency::task<void> DirectXPage::OpenFile()
 void DirectXPage::OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement)
 {
     // Now we have the scene element we need to build UI out of it.
+    auto expandPanel = ref new ExpandPanel();
+    expandPanel->HeaderContent = sceneElement->Name;
+    NavigationMenu->Children->Append(expandPanel);
 
 }
 

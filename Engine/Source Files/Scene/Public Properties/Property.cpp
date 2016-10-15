@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <Scene\Public Properties\Property.h>
 
-Property::Property(const std::string& name,
+Property::Property(const std::wstring& name,
     PropertyType type,
     PropertySetter setter,
     PropertyGetter getter,

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <Scene\SceneNode.h>
 
-SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) : SceneElement("Scene Node"),
+SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) : SceneElement(L"Scene Node"),
     m_scene(scene), m_isRootNode(isRoot)
 {
     // Initialise scale to 1

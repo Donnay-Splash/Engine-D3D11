@@ -2,7 +2,7 @@
 #include <Scene\Components\Light.h>
 #include <Scene\SceneNode.h>
 
-Light::Light(Component::SceneNodePtr sceneNode) : Component(sceneNode, "Light")
+Light::Light(Component::SceneNodePtr sceneNode) : Component(sceneNode, L"Light")
 {
 }
 

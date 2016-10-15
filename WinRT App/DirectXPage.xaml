@@ -44,10 +44,10 @@
 
                 <StackPanel x:Name="NavigationMenu" Orientation="Vertical" Grid.Row="1">
                     <!--SceneData goes here-->
-                    <local:ExpandPanel HeaderConent="Expander" Background="WhiteSmoke" BorderBrush="DarkGray" BorderThickness="0.4">
+                    <!--<local:ExpandPanel HeaderContent="Expander" Background="WhiteSmoke" BorderBrush="DarkGray" BorderThickness="0.4">
                         <local:ExpandPanel.Content>
                             <StackPanel>
-                                        <local:ExpandPanel HeaderConent="Expander2">
+                                        <local:ExpandPanel HeaderContent="Expander2">
                                             <local:ExpandPanel.Content>
                                                 <StackPanel>
                                                     <Button Margin="4" Padding="4" Content="Button One"/>
@@ -59,7 +59,7 @@
                                         </local:ExpandPanel>
                             </StackPanel>
                         </local:ExpandPanel.Content>
-                    </local:ExpandPanel>
+                    </local:ExpandPanel>-->
                 </StackPanel>
             </Grid>
         </SplitView.Pane>

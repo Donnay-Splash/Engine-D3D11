@@ -94,7 +94,8 @@
                                 Background="{TemplateBinding Background}"
                                 VerticalAlignment="Stretch"
                                 HorizontalAlignment="Stretch"
-                                RenderTransformOrigin="0.5, 0.5">
+                                RenderTransformOrigin="0.5, 0.5"
+                                x:Name="Container">
                         <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -105,7 +106,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <ContentPresenter Grid.Column="0" VerticalAlignment="Center" Padding="5, 0, 0, 0" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
+                                    <ContentPresenter x:Name="Header" Grid.Column="0" VerticalAlignment="Center" Padding="5, 0, 0, 0" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
                                     <ToggleButton Grid.Column="1" RenderTransformOrigin="0.5, 0.5" x:Name="ExpandCollapseButton">
                                         <ToggleButton.Template>
                                             <ControlTemplate>

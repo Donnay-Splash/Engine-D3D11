@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <Scene\Components\BoundingBox.h>
 
-BoundingBox::BoundingBox(SceneNodePtr sceneNode) : Component(sceneNode, "Bounding Box")
+BoundingBox::BoundingBox(SceneNodePtr sceneNode) : Component(sceneNode, L"Bounding Box")
 {
 
 }

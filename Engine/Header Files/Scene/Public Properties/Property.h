@@ -2,42 +2,43 @@
 #include <functional>
 #include <memory>
 
-enum class PropertyType
+namespace Engine
 {
-    Bool,
-    Scalar,
-    Vector
-};
+    enum class PropertyType
+    {
+        Bool,
+        Scalar,
+        Vector
+    };
 
-class Property
-{
-    using PropertySetter = std::function<void(Utils::Maths::Vector4)>;
-    using PropertyGetter = std::function<Utils::Maths::Vector4()>;
-public:
-    using Ptr = std::shared_ptr<Property>;
+    class Property
+    {
+        using PropertySetter = std::function<void(Utils::Maths::Vector4)>;
+        using PropertyGetter = std::function<Utils::Maths::Vector4()>;
+    public:
+        using Ptr = std::shared_ptr<Property>;
 
-    Property(const std::string& name,
+        Property(const std::wstring& name,
             PropertyType type,
             PropertySetter setter,
             PropertyGetter getter,
-            const Utils::Maths::Vector4& minimum = { },
-            const Utils::Maths::Vector4& maximum = { });
+            const Utils::Maths::Vector4& minimum = {},
+            const Utils::Maths::Vector4& maximum = {});
 
-    const PropertySetter SetValue;
-    const PropertyGetter GetValue;
-    std::string GetName() const { return m_name; }
-    Utils::Maths::Vector4 GetMaximum() const { return m_maximum; }
-    Utils::Maths::Vector4 GetMinimum() const { return m_minimum; }
-    PropertyType GetType() const { return m_type; }
+        const PropertySetter SetValue;
+        const PropertyGetter GetValue;
+        std::wstring GetName() const { return m_name; }
+        Utils::Maths::Vector4 GetMaximum() const { return m_maximum; }
+        Utils::Maths::Vector4 GetMinimum() const { return m_minimum; }
+        PropertyType GetType() const { return m_type; }
 
-private:
-    std::string m_name;
-    Utils::Maths::Vector4 m_maximum;
-    Utils::Maths::Vector4 m_minimum;
-    PropertyType m_type;
-};
-
-
+    private:
+        std::wstring m_name;
+        Utils::Maths::Vector4 m_maximum;
+        Utils::Maths::Vector4 m_minimum;
+        PropertyType m_type;
+    };
+}
 
 
     // Old implementation kept for reference

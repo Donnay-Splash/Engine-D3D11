@@ -1,11 +1,11 @@
 #include "pch.h"
 #include <Scene\Public Properties\SceneElement.h>
 
-SceneElement::SceneElement(std::string elementName) : m_name(elementName)
+SceneElement::SceneElement(std::wstring elementName) : m_name(elementName)
 {
 }
 
-Property::Ptr SceneElement::GetProperty(std::string name)
+Property::Ptr SceneElement::GetProperty(std::wstring name)
 {
     auto it = m_publicProperties.find(name);
     if (it == m_publicProperties.end())

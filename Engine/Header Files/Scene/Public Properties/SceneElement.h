@@ -9,17 +9,17 @@
 class SceneElement : public std::enable_shared_from_this<SceneElement>
 {
 public:
-    SceneElement(std::string elementName);
+    SceneElement(std::wstring elementName);
 
-    Property::Ptr GetProperty(std::string name);
+    Property::Ptr GetProperty(std::wstring name);
     void AddProperty(Property::Ptr property);
 
     // TODO: add functions to set and get values to avoid returning pointers.
 
     // Used when constructing UI. Not advisable to use otherwise
     std::vector<Property::Ptr> GetProperties();
-    std::string GetElementName()const { return m_name; }
+    std::wstring GetElementName()const { return m_name; }
 private:
-    std::map<std::string, Property::Ptr> m_publicProperties;
-    std::string m_name;
+    std::map<std::wstring, Property::Ptr> m_publicProperties;
+    std::wstring m_name;
 };

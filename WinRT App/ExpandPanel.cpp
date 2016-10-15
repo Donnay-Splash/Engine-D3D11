@@ -31,7 +31,7 @@ using namespace Windows::UI::Xaml::Media;
     DependencyProperty::Register("IsExpanded",
     bool::typeid,
     ExpandPanel::typeid,
-    ref new PropertyMetadata(true));
+    ref new PropertyMetadata(false));
 
     DependencyProperty^ ExpandPanel::m_cornerRadiusProperty =
     DependencyProperty::Register("CornerRadius",
@@ -44,14 +44,27 @@ ExpandPanel::ExpandPanel()
     DefaultStyleKey = "WinRT_App.ExpandPanel";
 }
 
-void WinRT_App::ExpandPanel::OnToggleClick(Platform::Object ^ sender, WUX::RoutedEventArgs ^ args)
+ExpandPanel::ExpandPanel(Engine_WinRT::SceneElementCX ^ sceneElement) : ExpandPanel()
+{
+    HeaderContent = sceneElement->Name;
+    auto propertyPanel = ref new StackPanel();
+    propertyPanel->Orientation = WUX::Controls::Orientation::Vertical;
+    for (auto property : sceneElement->Properties)
+    {
+        auto propertyBox = ref new TextBlock();
+        propertyBox->Text = property->Name;
+        propertyPanel->Children->Append(propertyBox);
+    }
+}
+
+void ExpandPanel::OnToggleClick(Platform::Object ^ sender, WUX::RoutedEventArgs ^ args)
 {
     IsExpanded = !IsExpanded;
     m_toggleButton->IsChecked = IsExpanded;
     ChangeVisualState(true);
 }
 
-void WinRT_App::ExpandPanel::OnCollapseCompleted(Platform::Object ^ sender, Platform::Object ^ args)
+void ExpandPanel::OnCollapseCompleted(Platform::Object ^ sender, Platform::Object ^ args)
 {
     m_contentElement->Visibility = WUX::Visibility::Collapsed;
 }

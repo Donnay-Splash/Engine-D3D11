@@ -13,8 +13,9 @@ namespace WinRT_App
     {
     public:
         ExpandPanel();
+        ExpandPanel(Engine_WinRT::SceneElementCX^ sceneElement);
 
-        property Platform::Object^ HeaderConent
+        property Platform::Object^ HeaderContent
         {
             Platform::Object^ get() { return GetValue(m_headerContentProperty); }
             void set(Platform::Object^ object) { SetValue(m_headerContentProperty, object); }
@@ -44,14 +45,19 @@ namespace WinRT_App
                 m_toggleButton->Click += ref new Windows::UI::Xaml::RoutedEventHandler(this, &WinRT_App::ExpandPanel::OnToggleClick);
             }
 
-            m_contentElement = (WUX::FrameworkElement^)GetTemplateChild("Content");
-            if (m_contentElement != nullptr)
+            m_containerElement = (WUX::FrameworkElement^)GetTemplateChild("Container");
+            if (m_containerElement != nullptr)
             {
-                m_collapsedState = (WUX::VisualState^)GetTemplateChild("Collapsed");
-                if ((m_collapsedState != nullptr) && (m_collapsedState->Storyboard != nullptr))
+                m_contentElement = (WUX::FrameworkElement^)GetTemplateChild("Content");
+                if (m_contentElement != nullptr)
                 {
-                    m_collapsedState->Storyboard->Completed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &WinRT_App::ExpandPanel::OnCollapseCompleted);
+                    m_collapsedState = (WUX::VisualState^)GetTemplateChild("Collapsed");
+                    if ((m_collapsedState != nullptr) && (m_collapsedState->Storyboard != nullptr))
+                    {
+                        m_collapsedState->Storyboard->Completed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &WinRT_App::ExpandPanel::OnCollapseCompleted);
+                    }
                 }
+                m_headerElement = (WUX::FrameworkElement^)GetTemplateChild("Header");
             }
             ChangeVisualState(false);
         }
@@ -79,6 +85,7 @@ namespace WinRT_App
                     }
                 }
             }
+
         }
 
         void OnToggleClick(Platform::Object^ sender, WUX::RoutedEventArgs^ args);
@@ -92,5 +99,7 @@ namespace WinRT_App
         Windows::UI::Xaml::VisualState^ m_collapsedState;
         Windows::UI::Xaml::Controls::Primitives::ToggleButton^ m_toggleButton;
         WUX::FrameworkElement^ m_contentElement;
+        WUX::FrameworkElement^ m_containerElement;
+        WUX::FrameworkElement^ m_headerElement;
     };
 }

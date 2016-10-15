@@ -2,7 +2,7 @@
 #include <Scene\Components\Camera.h>
 #include <Scene\SceneNode.h>
 
-Camera::Camera(Component::SceneNodePtr sceneNode) : Component(sceneNode, "Camera")
+Camera::Camera(Component::SceneNodePtr sceneNode) : Component(sceneNode, L"Camera")
 {
     // Set default camera properties.
     m_fov = Utils::Maths::DegreesToRadians(45.0f);

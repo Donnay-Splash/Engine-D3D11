@@ -19,7 +19,7 @@ public:
     virtual void Render(ID3D11DeviceContext* deviceContext) const = 0;
 
 protected:
-    Component(SceneNodePtr sceneNode, std::string elementName);
+    Component(SceneNodePtr sceneNode, std::wstring elementName);
     Component(const Component&) = delete;
     virtual void Initialize(ID3D11Device* device) = 0;
 
