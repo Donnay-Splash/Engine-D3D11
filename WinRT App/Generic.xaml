@@ -68,7 +68,7 @@
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="ViewState">
                                 <VisualStateGroup.Transitions>
-                                    <VisualTransition GeneratedDuration="0:0:0.5"/>
+                                    <VisualTransition GeneratedDuration="0:0:0.1"/>
                                 </VisualStateGroup.Transitions>
                                 <VisualState x:Name="Expanded">
                                     <Storyboard>
@@ -78,13 +78,24 @@
                                                          Storyboard.TargetProperty="Angle" To="0" Duration="0"/>
                                     </Storyboard>
                                 </VisualState>
+                                <VisualState x:Name="Collapsed">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ContentScaleTransform"
+                                                         Storyboard.TargetProperty="ScaleY" To="0" Duration="0"/>
+                                        <DoubleAnimation Storyboard.TargetName="RotateButtonTransform"
+                                                         Storyboard.TargetProperty="Angle" To="180" Duration="0"/>
+                                    </Storyboard>
+                                </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
                         <Border BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="{TemplateBinding CornerRadius}"
-                                Background="{TemplateBinding Background}">
-                            <Grid>
+                                Background="{TemplateBinding Background}"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
+                                RenderTransformOrigin="0.5, 0.5">
+                        <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
@@ -94,14 +105,14 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <ContentPresenter Grid.Column="0" VerticalAlignment="Center" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
+                                    <ContentPresenter Grid.Column="0" VerticalAlignment="Center" Padding="5, 0, 0, 0" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
                                     <ToggleButton Grid.Column="1" RenderTransformOrigin="0.5, 0.5" x:Name="ExpandCollapseButton">
                                         <ToggleButton.Template>
                                             <ControlTemplate>
                                                 <Grid>
-                                                    <Ellipse Width="50" Height="50" Fill="{ThemeResource ToggleSwitchCurtainBackgroundThemeBrush}"/>
+                                                    <Ellipse Width="25" Height="25" Fill="Transparent"/>
                                                     <Path RenderTransformOrigin="0.5, 0.5" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                          Data="M2, 3L9, 10 16, 3" Stroke="{ThemeResource ToggleButtonCheckedForegroundThemeBrush}" StrokeThickness="4"/>
+                                                          Data="M2, 3L9, 10 16, 3" Stroke="DarkGray" StrokeThickness="4"/>
                                                 </Grid>
                                             </ControlTemplate>
                                         </ToggleButton.Template>

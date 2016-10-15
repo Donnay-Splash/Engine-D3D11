@@ -44,7 +44,7 @@
 
                 <StackPanel x:Name="NavigationMenu" Orientation="Vertical" Grid.Row="1">
                     <!--SceneData goes here-->
-                    <local:ExpandPanel HeaderConent="Expander">
+                    <local:ExpandPanel HeaderConent="Expander" Background="WhiteSmoke" BorderBrush="DarkGray" BorderThickness="0.4">
                         <local:ExpandPanel.Content>
                             <StackPanel>
                                         <local:ExpandPanel HeaderConent="Expander2">
