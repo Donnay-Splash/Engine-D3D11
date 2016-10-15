@@ -167,9 +167,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Header Files\colorshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Header Files\d3dclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>

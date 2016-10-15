@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MeshMaker.h"
 
+using namespace Engine;
 namespace Utils
 {
         Mesh::Ptr MeshMaker::CreateTriangle(ID3D11Device* device)

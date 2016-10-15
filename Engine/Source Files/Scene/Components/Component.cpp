@@ -2,7 +2,10 @@
 #include <Scene\Components\Component.h>
 #include <Scene\SceneNode.h>
 
-Component::Component(SceneNodePtr sceneNode, std::wstring elementName) : SceneElement(elementName)
+namespace Engine
 {
-    m_sceneNode = sceneNode;
+    Component::Component(SceneNodePtr sceneNode, std::wstring elementName) : SceneElement(elementName)
+    {
+        m_sceneNode = sceneNode;
+    }
 }

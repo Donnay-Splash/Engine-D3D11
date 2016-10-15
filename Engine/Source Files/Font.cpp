@@ -2,155 +2,158 @@
 #include "Font.h"
 
 using namespace std;
-Font::Font()
+namespace Engine
 {
-}
+    Font::Font()
+    {
+    }
 
 
-Font::~Font()
-{
-}
+    Font::~Font()
+    {
+    }
 
 
-bool Font::Initialize(ID3D11Device* device, char* fontFilename, WCHAR* textureFilename)
-{
-	bool result;
+    bool Font::Initialize(ID3D11Device* device, char* fontFilename, WCHAR* textureFilename)
+    {
+        bool result;
 
 
-	// Load in the text file containing the font data.
-	result = LoadFontData(fontFilename);
-	if(!result)
-	{
-		return false;
-	}
+        // Load in the text file containing the font data.
+        result = LoadFontData(fontFilename);
+        if (!result)
+        {
+            return false;
+        }
 
-	// Load the texture that has the font characters on it.
-	result = LoadTexture(device, textureFilename);
-	if(!result)
-	{
-		return false;
-	}
+        // Load the texture that has the font characters on it.
+        result = LoadTexture(device, textureFilename);
+        if (!result)
+        {
+            return false;
+        }
 
-	return true;
-}
-
-
-bool Font::LoadFontData(char* filename)
-{
-	ifstream fin;
-	int i;
-	char temp;
+        return true;
+    }
 
 
-	// Read in the font size and spacing between chars.
-	fin.open(filename);
-	if(fin.fail())
-	{
-		return false;
-	}
-
-	// Read in the 95 used ascii characters for text.
-	for(i = 0; i < kCharacterCount; i++)
-	{
-		fin.get(temp);
-		while(temp != ' ')
-		{
-			fin.get(temp);
-		}
-		fin.get(temp);
-		while(temp != ' ')
-		{
-			fin.get(temp);
-		}
-
-		fin >> m_Font[i].left;
-		fin >> m_Font[i].right;
-		fin >> m_Font[i].size;
-	}
-
-	// Close the file.
-	fin.close();
-
-	return true;
-}
+    bool Font::LoadFontData(char* filename)
+    {
+        ifstream fin;
+        int i;
+        char temp;
 
 
-void Font::ReleaseFontData()
-{
-}
+        // Read in the font size and spacing between chars.
+        fin.open(filename);
+        if (fin.fail())
+        {
+            return false;
+        }
+
+        // Read in the 95 used ascii characters for text.
+        for (i = 0; i < kCharacterCount; i++)
+        {
+            fin.get(temp);
+            while (temp != ' ')
+            {
+                fin.get(temp);
+            }
+            fin.get(temp);
+            while (temp != ' ')
+            {
+                fin.get(temp);
+            }
+
+            fin >> m_Font[i].left;
+            fin >> m_Font[i].right;
+            fin >> m_Font[i].size;
+        }
+
+        // Close the file.
+        fin.close();
+
+        return true;
+    }
 
 
-bool Font::LoadTexture(ID3D11Device* device, WCHAR* filename)
-{
-	// Create the texture object.
-	m_Texture = std::make_shared<Texture>(device, filename);
-
-	return true;
-}
-
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Font::GetTexture()
-{
-	return m_Texture->GetSRV();
-}
+    void Font::ReleaseFontData()
+    {
+    }
 
 
-void Font::BuildVertexArray(void* vertices, char* sentence, float drawX, float drawY)
-{
-	VertexType* vertexPtr;
-	int numLetters, index, i, letter;
+    bool Font::LoadTexture(ID3D11Device* device, WCHAR* filename)
+    {
+        // Create the texture object.
+        m_Texture = std::make_shared<Texture>(device, filename);
+
+        return true;
+    }
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Font::GetTexture()
+    {
+        return m_Texture->GetSRV();
+    }
 
 
-	// Coerce the input vertices into a VertexType structure.
-	vertexPtr = (VertexType*)vertices;
+    void Font::BuildVertexArray(void* vertices, char* sentence, float drawX, float drawY)
+    {
+        VertexType* vertexPtr;
+        int numLetters, index, i, letter;
 
-	// Get the number of letters in the sentence.
-	numLetters = (int)strlen(sentence);
 
-	// Initialize the index to the vertex array.
-	index = 0;
+        // Coerce the input vertices into a VertexType structure.
+        vertexPtr = (VertexType*)vertices;
 
-	// Draw each letter onto a quad.
-	for(i=0; i<numLetters; i++)
-	{
-		letter = ((int)sentence[i]) - 32;
+        // Get the number of letters in the sentence.
+        numLetters = (int)strlen(sentence);
 
-		// If the letter is a space then just move over three pixels.
-		if(letter == 0)
-		{
-			drawX = drawX + 3.0f;
-		}
-		else
-		{
-			// First triangle in quad.
-			vertexPtr[index].position = Utils::Maths::Vector3(drawX, drawY, 0.0f);  // Top left.
-			vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].left, 0.0f);
-			index++;
+        // Initialize the index to the vertex array.
+        index = 0;
 
-			vertexPtr[index].position = Utils::Maths::Vector3((drawX + m_Font[letter].size), (drawY - 16), 0.0f);  // Bottom right.
-			vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].right, 1.0f);
-			index++;
+        // Draw each letter onto a quad.
+        for (i = 0; i < numLetters; i++)
+        {
+            letter = ((int)sentence[i]) - 32;
 
-			vertexPtr[index].position = Utils::Maths::Vector3(drawX, (drawY - 16), 0.0f);  // Bottom left.
-			vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].left, 1.0f);
-			index++;
+            // If the letter is a space then just move over three pixels.
+            if (letter == 0)
+            {
+                drawX = drawX + 3.0f;
+            }
+            else
+            {
+                // First triangle in quad.
+                vertexPtr[index].position = Utils::Maths::Vector3(drawX, drawY, 0.0f);  // Top left.
+                vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].left, 0.0f);
+                index++;
 
-			// Second triangle in quad.
-			vertexPtr[index].position = Utils::Maths::Vector3(drawX, drawY, 0.0f);  // Top left.
-			vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].left, 0.0f);
-			index++;
+                vertexPtr[index].position = Utils::Maths::Vector3((drawX + m_Font[letter].size), (drawY - 16), 0.0f);  // Bottom right.
+                vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].right, 1.0f);
+                index++;
 
-			vertexPtr[index].position = Utils::Maths::Vector3(drawX + m_Font[letter].size, drawY, 0.0f);  // Top right.
-			vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].right, 0.0f);
-			index++;
+                vertexPtr[index].position = Utils::Maths::Vector3(drawX, (drawY - 16), 0.0f);  // Bottom left.
+                vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].left, 1.0f);
+                index++;
 
-			vertexPtr[index].position = Utils::Maths::Vector3((drawX + m_Font[letter].size), (drawY - 16), 0.0f);  // Bottom right.
-			vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].right, 1.0f);
-			index++;
+                // Second triangle in quad.
+                vertexPtr[index].position = Utils::Maths::Vector3(drawX, drawY, 0.0f);  // Top left.
+                vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].left, 0.0f);
+                index++;
 
-			// Update the x location for drawing by the size of the letter and one pixel.
-			drawX = drawX + m_Font[letter].size + 1.0f;
-		}
-	}
+                vertexPtr[index].position = Utils::Maths::Vector3(drawX + m_Font[letter].size, drawY, 0.0f);  // Top right.
+                vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].right, 0.0f);
+                index++;
 
-	return;
+                vertexPtr[index].position = Utils::Maths::Vector3((drawX + m_Font[letter].size), (drawY - 16), 0.0f);  // Bottom right.
+                vertexPtr[index].texture = Utils::Maths::Vector2(m_Font[letter].right, 1.0f);
+                index++;
+
+                // Update the x location for drawing by the size of the letter and one pixel.
+                drawX = drawX + m_Font[letter].size + 1.0f;
+            }
+        }
+
+        return;
+    }
 }

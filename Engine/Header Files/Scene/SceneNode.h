@@ -2,82 +2,85 @@
 #include <Scene\Components\Component.h>
 #include <Scene\Public Properties\SceneElement.h>
 
-// Forward declaration
-class Scene;
-
-class SceneNode : public SceneElement
+namespace Engine
 {
-private:
-    using ScenePtr = std::shared_ptr<Scene>;
-    // Fired from the component added event
-    // TODO: Move to weak pointers
-    using ComponentAddedDelegate = std::function<void(Component::Ptr component)>;
-public:
-    using Ptr = std::shared_ptr<SceneNode>;
-    using SceneNodeContainer = std::vector<SceneNode::Ptr>;
-    SceneNode(const SceneNode&) = delete;
-    ~SceneNode();
+    // Forward declaration
+    class Scene;
 
-    void Update(float frameTime);
-    void Render(ID3D11DeviceContext* deviceContext);
+    class SceneNode : public SceneElement
+    {
+    private:
+        using ScenePtr = std::shared_ptr<Scene>;
+        // Fired from the component added event
+        // TODO: Move to weak pointers
+        using ComponentAddedDelegate = std::function<void(Component::Ptr component)>;
+    public:
+        using Ptr = std::shared_ptr<SceneNode>;
+        using SceneNodeContainer = std::vector<SceneNode::Ptr>;
+        SceneNode(const SceneNode&) = delete;
+        ~SceneNode();
 
-    void RegisterComponentAddedCallback(ComponentAddedDelegate callback);
-    void FireComponentAddedCallback(Component::Ptr componentAdded);
+        void Update(float frameTime);
+        void Render(ID3D11DeviceContext* deviceContext);
 
-    inline ComponentContainer GetComponents() const { return m_components; }
-    inline SceneNodeContainer GetChildNodes() const { return m_childNodes; }
+        void RegisterComponentAddedCallback(ComponentAddedDelegate callback);
+        void FireComponentAddedCallback(Component::Ptr componentAdded);
 
-    template <class ComponentType>
-    inline std::shared_ptr<ComponentType> GetComponentOfType();
+        inline ComponentContainer GetComponents() const { return m_components; }
+        inline SceneNodeContainer GetChildNodes() const { return m_childNodes; }
 
-    // Temporary change. Move device somewhere else
-    template <class ComponentType>
-    std::shared_ptr<ComponentType> AddComponent(ID3D11Device* device);
+        template <class ComponentType>
+        inline std::shared_ptr<ComponentType> GetComponentOfType();
 
-    void SetPosition(Utils::Maths::Vector3 position, bool forceTransformUpdate = false);
-    // For now only support uniform scale
-    void SetScale(float scale, bool forceTransformUpdate = false);
-    void SetRotation(Utils::Maths::Quaternion rotation, bool forceTransformUpdate = false);
+        // Temporary change. Move device somewhere else
+        template <class ComponentType>
+        std::shared_ptr<ComponentType> AddComponent(ID3D11Device* device);
 
-    void SetTransform(Utils::Maths::Matrix transform);
+        void SetPosition(Utils::Maths::Vector3 position, bool forceTransformUpdate = false);
+        // For now only support uniform scale
+        void SetScale(float scale, bool forceTransformUpdate = false);
+        void SetRotation(Utils::Maths::Quaternion rotation, bool forceTransformUpdate = false);
 
-    Utils::Maths::Matrix GetTransform() const { return m_transform; }
-    Utils::Maths::Matrix GetWorldTransform() const;
+        void SetTransform(Utils::Maths::Matrix transform);
 
-    Utils::Maths::Vector3 GetPosition() const;
-    Utils::Maths::Vector3 GetWorldSpacePosition() const;
+        Utils::Maths::Matrix GetTransform() const { return m_transform; }
+        Utils::Maths::Matrix GetWorldTransform() const;
 
-    std::shared_ptr<Scene> GetScene() const { return m_scene; }
+        Utils::Maths::Vector3 GetPosition() const;
+        Utils::Maths::Vector3 GetWorldSpacePosition() const;
 
-    bool IsRootNode() const { return m_isRootNode; }
+        std::shared_ptr<Scene> GetScene() const { return m_scene; }
 
-private:
-    SceneNode(ScenePtr scene, bool isRoot = false);
-    static Ptr Create(ScenePtr scene, bool isRoot = false) { return std::shared_ptr<SceneNode>(new SceneNode(scene, isRoot)); }
+        bool IsRootNode() const { return m_isRootNode; }
 
-    Ptr GetSharedThis();
+    private:
+        SceneNode(ScenePtr scene, bool isRoot = false);
+        static Ptr Create(ScenePtr scene, bool isRoot = false) { return std::shared_ptr<SceneNode>(new SceneNode(scene, isRoot)); }
 
-    void CalculateTransform();
-    void AddPublicProperties();
+        Ptr GetSharedThis();
 
-    friend class Scene;
-private:
-    // The scene this node is attached to.
-    ScenePtr m_scene;
+        void CalculateTransform();
+        void AddPublicProperties();
 
-    ComponentContainer m_components;
-    SceneNodeContainer m_childNodes;
-    SceneNode::Ptr m_parentNode;
+        friend class Scene;
+    private:
+        // The scene this node is attached to.
+        ScenePtr m_scene;
 
-    Utils::Maths::Vector3 m_position;
-    Utils::Maths::Vector3 m_scale;
-    Utils::Maths::Quaternion m_rotation;
-    Utils::Maths::Matrix m_transform;
-    bool m_transformDirty = false;
-    std::vector<ComponentAddedDelegate> m_componentAddedCallbacks;
+        ComponentContainer m_components;
+        SceneNodeContainer m_childNodes;
+        SceneNode::Ptr m_parentNode;
 
-    // Flag to signal if this SceneNode is the root of a scene.
-    bool m_isRootNode;
-};
+        Utils::Maths::Vector3 m_position;
+        Utils::Maths::Vector3 m_scale;
+        Utils::Maths::Quaternion m_rotation;
+        Utils::Maths::Matrix m_transform;
+        bool m_transformDirty = false;
+        std::vector<ComponentAddedDelegate> m_componentAddedCallbacks;
 
-#include "SceneNode.inl"
+        // Flag to signal if this SceneNode is the root of a scene.
+        bool m_isRootNode;
+    };
+
+#include "SceneNode.inl" 
+}

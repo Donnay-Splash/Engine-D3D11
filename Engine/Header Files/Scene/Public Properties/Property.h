@@ -38,7 +38,7 @@ namespace Engine
         Utils::Maths::Vector4 m_minimum;
         PropertyType m_type;
     };
-}
+} // end namespace Engine
 
 
     // Old implementation kept for reference
