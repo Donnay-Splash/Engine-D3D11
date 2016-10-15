@@ -9,6 +9,7 @@
 
 #include "Common\DeviceResources.h"
 #include "WinRT_AppMain.h"
+#include "ExpandPanel.h"
 #include <ppltasks.h>
 
 namespace WinRT_App
@@ -52,6 +53,7 @@ namespace WinRT_App
         Windows::ApplicationModel::Core::CoreApplicationViewTitleBar^ coreTitleBar = Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->TitleBar;
 
         void TitleBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+        std::map <Platform::String^, ExpandPanel^> m_uiMap;
     };
 }
 

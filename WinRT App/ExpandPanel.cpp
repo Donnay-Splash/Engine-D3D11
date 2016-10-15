@@ -41,20 +41,43 @@ using namespace Windows::UI::Xaml::Media;
 
 ExpandPanel::ExpandPanel()
 {
-    DefaultStyleKey = "WinRT_App.ExpandPanel";
+    InitializeResources();
 }
 
-ExpandPanel::ExpandPanel(Engine_WinRT::SceneElementCX ^ sceneElement) : ExpandPanel()
+ExpandPanel::ExpandPanel(Engine_WinRT::SceneElementCX ^ sceneElement)
 {
-    HeaderContent = sceneElement->Name;
-    auto propertyPanel = ref new StackPanel();
-    propertyPanel->Orientation = WUX::Controls::Orientation::Vertical;
+    InitializeResources();
+
+    bool addID = sceneElement->Name == "Scene Node";
+
+    HeaderContent = sceneElement->Name + ref new Platform::String();
     for (auto property : sceneElement->Properties)
     {
-        auto propertyBox = ref new TextBlock();
-        propertyBox->Text = property->Name;
-        propertyPanel->Children->Append(propertyBox);
+        auto propertyBox = ref new PropertyPanel(property);
+        propertyBox->Content = property->Name;
+        propertyBox->Margin = WUX::Thickness(5.0, 0.0, 0.0, 0.0);
+        AddContent(propertyBox);
     }
+}
+
+void ExpandPanel::AddContent(WUX::UIElement^ content)
+{
+    // Good idea but looks ugly
+
+    //auto border = ref new Border();
+    //border->HorizontalAlignment = WUX::HorizontalAlignment::Center;
+    //border->VerticalAlignment = WUX::VerticalAlignment::Center;
+    //border->BorderThickness = WUX::Thickness(4.0);
+    //border->BorderBrush = ref new WUX::Media::SolidColorBrush(Windows::UI::Colors::DarkGray);
+    //border->Margin = WUX::Thickness(10, 2, 10, 2);
+    //border->Width = 40.0;
+    //border->Height = 0.5;
+    //// Add border to separate properties
+    //if (m_contentPanel->Children->Size != 0)
+    //{
+    //    m_contentPanel->Children->Append(border);
+    //}
+    m_contentPanel->Children->Append(content);
 }
 
 void ExpandPanel::OnToggleClick(Platform::Object ^ sender, WUX::RoutedEventArgs ^ args)
@@ -67,5 +90,13 @@ void ExpandPanel::OnToggleClick(Platform::Object ^ sender, WUX::RoutedEventArgs 
 void ExpandPanel::OnCollapseCompleted(Platform::Object ^ sender, Platform::Object ^ args)
 {
     m_contentElement->Visibility = WUX::Visibility::Collapsed;
+}
+
+void WinRT_App::ExpandPanel::InitializeResources()
+{
+    DefaultStyleKey = "WinRT_App.ExpandPanel";
+    m_contentPanel = ref new StackPanel();
+    m_contentPanel->Orientation = WUX::Controls::Orientation::Vertical;
+    Content = m_contentPanel;
 }
 

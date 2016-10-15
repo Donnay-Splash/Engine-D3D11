@@ -4,6 +4,13 @@
 #include<collection.h>
 namespace Engine_WinRT
 {
+    public enum class ElementType
+    {
+        SceneNode,
+        Component,
+        Resource
+    };
+
     public ref class SceneElementCX sealed
     {
     public:
@@ -23,21 +30,36 @@ namespace Engine_WinRT
             }
         }
 
-        property Platform::Collections::Vector<PropertyCX^>^ Properties
+
+        property Windows::Foundation::Collections::IVector<PropertyCX^>^ Properties
         {
-            Platform::Collections::Vector<PropertyCX^>^ get()
+            Windows::Foundation::Collections::IVector<PropertyCX^>^ get()
             {
                 return m_properties;
             }
         }
 
+        property Platform::String^ ParentName
+        {
+            Platform::String^ get() { return m_parentName; }
+        }
+
+        property ElementType Type
+        {
+            ElementType get() { return m_type; }
+        }
+
     internal:
-        SceneElementCX(std::weak_ptr<SceneElement> sceneElement);
+        SceneElementCX(std::weak_ptr<Engine::SceneElement> sceneElement, std::wstring parentName, ElementType type);
 
     private:
         Platform::Collections::Vector<PropertyCX^>^ m_properties;
-        std::weak_ptr<SceneElement> m_nativeSceneElement;
+        std::weak_ptr<Engine::SceneElement> m_nativeSceneElement;
         Platform::String^ m_name;
+        Platform::String^ m_parentName;
+
+        ElementType m_type;
+        
     };
 
 }// end namespace Engine_WinRT

@@ -48,7 +48,7 @@ namespace Engine_WinRT
         Concurrency::task<void> LoadFileInternal(Windows::Storage::StorageFile^ fileToLoad);
 
     private:
-        Engine::Ptr m_engine;
+        Engine::Engine::Ptr m_engine;
 
         // Input management
         Windows::Foundation::IAsyncAction^ m_inputLoopWorker;
@@ -61,6 +61,6 @@ namespace Engine_WinRT
 
         Windows::Foundation::Size m_swapChainSize;
 
-        InputState m_inputState;
+        Engine::InputState m_inputState;
     };
 }

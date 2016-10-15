@@ -1,9 +1,11 @@
 #include "pch.h"
 #include <Scene\SceneNode.h>
 
+static uint32_t s_sceneNodeID = 1;
+
 namespace Engine
 {
-    SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) : SceneElement(L"Scene Node"),
+    SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) : SceneElement(L"Scene Node " + std::to_wstring(s_sceneNodeID++)),
         m_scene(scene), m_isRootNode(isRoot)
     {
         // Initialise scale to 1
@@ -107,10 +109,10 @@ namespace Engine
     void SceneNode::AddPublicProperties()
     {
         //// TODO: Add helpers to try and cut this down to 1 line in most cases
-        //auto positionSetter = [this](Utils::Maths::Vector4 v) {m_position = { v.x, v.y, v.z }; };
-        //auto positionGetter = [this]() { return Utils::Maths::Vector4(m_position.x, m_position.y, m_position.z, 0.0f); };
-        //auto positionProperty = std::make_shared<Property>("Position", PropertyType::Vector, positionSetter, positionGetter);
-        //AddProperty(positionProperty);
+        auto positionSetter = [this](Utils::Maths::Vector4 v) {m_position = { v.x, v.y, v.z }; };
+        auto positionGetter = [this]() { return Utils::Maths::Vector4(m_position.x, m_position.y, m_position.z, 0.0f); };
+        auto positionProperty = std::make_shared<Property>(L"Position", PropertyType::Vector, positionSetter, positionGetter);
+        AddProperty(positionProperty);
 
     }
 

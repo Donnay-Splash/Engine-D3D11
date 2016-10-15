@@ -206,6 +206,7 @@
       <DependentUpon>CustomTitleBar.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="ExpandPanel.h" />
+    <ClInclude Include="PropertyPanel.h" />
     <ClInclude Include="WinRT_AppMain.h" />
     <ClInclude Include="DirectXPage.xaml.h">
       <DependentUpon>DirectXPage.xaml</DependentUpon>
@@ -226,6 +227,7 @@
       <DependentUpon>CustomTitleBar.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="ExpandPanel.cpp" />
+    <ClCompile Include="PropertyPanel.cpp" />
     <ClCompile Include="WinRT_AppMain.cpp" />
     <ClCompile Include="DirectXPage.xaml.cpp">
       <DependentUpon>DirectXPage.xaml</DependentUpon>

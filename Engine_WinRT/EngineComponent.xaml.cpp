@@ -43,19 +43,29 @@ EngineComponent::EngineComponent()
 
     WeakReference weakRef(this);
     auto UIDispatcher = Window::Current->CoreWindow->Dispatcher;
-    auto SceneNodeAddedCallback = [weakRef, UIDispatcher](SceneNode::Ptr sceneNodeAdded)
+    auto SceneNodeAddedCallback = [weakRef, UIDispatcher](Engine::SceneNode::Ptr sceneNodeAdded)
     {
         auto strongRef = weakRef.Resolve<EngineComponent>();
         EngineAssert(strongRef != nullptr);
+
+        // extract data from scene node 
+        auto parentNode = sceneNodeAdded->GetParentNode();
+        std::wstring parentName = L"";
+        if (!parentNode->IsRootNode())
+        {
+            parentName = parentNode->GetElementName();
+        }
+        auto sceneElement = ref new SceneElementCX(sceneNodeAdded, parentName, ElementType::SceneNode);
+        auto sceneNodeName = sceneNodeAdded->GetElementName();
         
         // We want to know when scene node has added a component
         // so we now create a lambda to call when a component is added
-        auto componentAddedCallback = [weakRef, UIDispatcher](Component::Ptr componentAdded)
+        auto componentAddedCallback = [weakRef, UIDispatcher, sceneNodeName](Engine::Component::Ptr componentAdded)
         {
             auto strongRef = weakRef.Resolve<EngineComponent>();
             EngineAssert(strongRef != nullptr);
             // Extract properties from component
-            auto sceneElement = ref new SceneElementCX(componentAdded);
+            auto sceneElement = ref new SceneElementCX(componentAdded, sceneNodeName, ElementType::Component);
             // Fire off event to add component to UI in app.
             UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([strongRef, sceneElement]()
             {
@@ -65,20 +75,18 @@ EngineComponent::EngineComponent()
 
         sceneNodeAdded->RegisterComponentAddedCallback(componentAddedCallback);
 
-        // extract data from scene node and then fire off task to send it to app
-        // on UI thread. As this will be received on the rendering thread.
-        auto sceneElement = ref new SceneElementCX(sceneNodeAdded);
-
+        
+        // Fire off event on UI thread for the app to receive
         UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([strongRef, sceneElement]() 
         {
             strongRef->SceneElementAdded(sceneElement);
         }));
     };
 
-    m_engine = std::make_shared<Engine>();
-    EngineCreateOptions createOptions;
+    m_engine = std::make_shared<Engine::Engine>();
+    Engine::EngineCreateOptions createOptions;
     createOptions.FullScreen = false;
-    createOptions.RendererMode = EngineRendererMode::XAML;
+    createOptions.RendererMode = Engine::EngineRendererMode::XAML;
     createOptions.UserData = (void*)this;
     createOptions.SwapChainCreatedCallback = &EngineComponent::InitializeSwapChain;
     createOptions.SceneNodeAddedCallback = SceneNodeAddedCallback;
@@ -227,15 +235,15 @@ void Engine_WinRT::EngineComponent::OnPointerPressed(Platform::Object ^ sender, 
     Concurrency::critical_section::scoped_lock lock(m_inputMutex);
     if(pointerProperties->IsLeftButtonPressed)
     {
-        m_inputState.MouseButtonPressed |= MouseButtons::Left;
+        m_inputState.MouseButtonPressed |= Engine::MouseButtons::Left;
     }
     if (pointerProperties->IsMiddleButtonPressed)
     {
-        m_inputState.MouseButtonPressed |= MouseButtons::Middle;
+        m_inputState.MouseButtonPressed |= Engine::MouseButtons::Middle;
     }
     if (pointerProperties->IsRightButtonPressed)
     {
-        m_inputState.MouseButtonPressed |= MouseButtons::Right;
+        m_inputState.MouseButtonPressed |= Engine::MouseButtons::Right;
     }
 
     e->Handled = true;

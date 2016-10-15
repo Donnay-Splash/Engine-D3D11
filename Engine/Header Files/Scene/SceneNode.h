@@ -29,6 +29,8 @@ namespace Engine
         inline ComponentContainer GetComponents() const { return m_components; }
         inline SceneNodeContainer GetChildNodes() const { return m_childNodes; }
 
+        SceneNode::Ptr GetParentNode() { return m_parentNode; }
+
         template <class ComponentType>
         inline std::shared_ptr<ComponentType> GetComponentOfType();
 

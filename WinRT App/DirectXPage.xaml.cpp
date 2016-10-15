@@ -201,10 +201,21 @@ Concurrency::task<void> DirectXPage::OpenFile()
 void DirectXPage::OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement)
 {
     // Now we have the scene element we need to build UI out of it.
-    auto expandPanel = ref new ExpandPanel();
-    expandPanel->HeaderContent = sceneElement->Name;
-    NavigationMenu->Children->Append(expandPanel);
+    auto expandPanel = ref new ExpandPanel(sceneElement);
+    if (sceneElement->ParentName->IsEmpty())
+    {
+        NavigationMenu->Children->Append(expandPanel);
+    }
+    else
+    {
+        auto parentPanel = m_uiMap[sceneElement->ParentName];
+        parentPanel->AddContent(expandPanel);
+    }
 
+    if (sceneElement->Type == Engine_WinRT::ElementType::SceneNode)
+    {
+        m_uiMap[sceneElement->Name] = expandPanel;
+    }
 }
 
 

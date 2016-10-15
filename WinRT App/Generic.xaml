@@ -88,10 +88,10 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Border BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
+                        <Border BorderBrush="DarkGray"
+                                BorderThickness="0.4"
                                 CornerRadius="{TemplateBinding CornerRadius}"
-                                Background="{TemplateBinding Background}"
+                                Background="WhiteSmoke"
                                 VerticalAlignment="Stretch"
                                 HorizontalAlignment="Stretch"
                                 RenderTransformOrigin="0.5, 0.5"
@@ -134,4 +134,99 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="local:PropertyPanel" >
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:PropertyPanel">
+                        <Grid Height="Auto" Width="Auto">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Height="Auto" Width="Auto" Grid.Row="0" x:Name="Header" VerticalAlignment="Center" Padding="5, 0, 0, 0" Text="{TemplateBinding Content}" FontSize="16"/>
+                            <!--<StackPanel Orientation="Horizontal" Width="Auto" Height="Auto">
+                                <TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">X</TextBlock>
+                                <TextBox TextAlignment="Center" MinWidth="50" MaxWidth="50" MinHeight="30" MaxHeight="30" x:Name="Component_X" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
+                                <TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" >Y</TextBlock>
+                                <TextBox TextAlignment="Center" MinWidth="40" MaxWidth="40" FontSize="10" x:Name="Component_Y" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
+                                <TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">Z</TextBlock>
+                                <TextBox TextAlignment="Center" MinWidth="40" MaxWidth="40" FontSize="10" x:Name="Component_Z" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
+                                <TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">W</TextBlock>
+                                <TextBox TextAlignment="Center" MinWidth="40" MaxWidth="40" FontSize="10" x:Name="Component_W" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
+                            </StackPanel>-->
+                            <Grid Grid.Row="1" Width="Auto" Height="Auto">
+                                <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">X</TextBlock>
+                            <TextBox Grid.Column="1" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_X" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                            <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" >Y</TextBlock>
+                            <TextBox Grid.Column="3" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_Y" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                            <TextBlock Grid.Column="4" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">Z</TextBlock>
+                            <TextBox Grid.Column="5" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_Z" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                            <TextBlock Grid.Column="6" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">W</TextBlock>
+                            <TextBox Grid.Column="7" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_W" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                            </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--<Style TargetType="local:PropertyPanel" >
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:PropertyPanel">
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>-->
+
+    <!--<Style TargetType="local:PropertyPanel" x:Key="VectorPropertyStyle">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:PropertyPanel">
+                    <Grid>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid Margin="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter x:Name="Header" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Padding="5, 0, 0, 0" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
+                                --><!--<TextBox x:Name="Component_X" Grid.Row="1" Grid.Column="0" AcceptsReturn="False" Header="X" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap"/>
+                                <TextBox x:Name="Component_Y" Grid.Row="1" Grid.Column="1" AcceptsReturn="False" Header="Y" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap"/>
+                                <TextBox x:Name="Component_Z" Grid.Row="1" Grid.Column="2" AcceptsReturn="False" Header="Z" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap"/>
+                                <TextBox x:Name="Component_W" Grid.Row="1" Grid.Column="3" AcceptsReturn="False" Header="W" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap"/>--><!--
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>-->
 </ResourceDictionary>

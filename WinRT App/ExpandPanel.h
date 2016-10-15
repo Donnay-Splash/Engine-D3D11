@@ -15,6 +15,9 @@ namespace WinRT_App
         ExpandPanel();
         ExpandPanel(Engine_WinRT::SceneElementCX^ sceneElement);
 
+        // Adds an item to the conent list.
+        void AddContent(WUX::UIElement^ content);
+
         property Platform::Object^ HeaderContent
         {
             Platform::Object^ get() { return GetValue(m_headerContentProperty); }
@@ -32,6 +35,8 @@ namespace WinRT_App
             WUX::CornerRadius get() { return (WUX::CornerRadius)GetValue(m_cornerRadiusProperty); }
             void set(WUX::CornerRadius radius) { SetValue(m_cornerRadiusProperty, radius); }
         }
+
+
 
     protected:
         virtual void OnApplyTemplate() override
@@ -91,6 +96,8 @@ namespace WinRT_App
         void OnToggleClick(Platform::Object^ sender, WUX::RoutedEventArgs^ args);
         void OnCollapseCompleted(Platform::Object^ sender, Platform::Object^ args);
 
+        void InitializeResources();
+
     private:
         static WUX::DependencyProperty^ m_headerContentProperty;
         static WUX::DependencyProperty^ m_isExpandedProperty;
@@ -101,5 +108,7 @@ namespace WinRT_App
         WUX::FrameworkElement^ m_contentElement;
         WUX::FrameworkElement^ m_containerElement;
         WUX::FrameworkElement^ m_headerElement;
+
+        WUX::Controls::StackPanel^ m_contentPanel;
     };
 }
