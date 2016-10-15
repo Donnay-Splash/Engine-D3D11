@@ -15,53 +15,31 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid x:Name="TitleBar" VerticalAlignment="Top" Height="32" Canvas.ZIndex="0" Background="White">
+        <Grid x:Name="TitleBar" Grid.Row="0" VerticalAlignment="Top" Height="32" Canvas.ZIndex="0" Background="White">
             <Rectangle x:Name="BackgroudElement">
             </Rectangle>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Width="Auto">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph=""
-                          Foreground="{ThemeResource SystemControlHighlightAccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            Foreground="{ThemeResource SystemControlHighlightAccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBlock Text="My awesome app title" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"
-                           VerticalAlignment="Center"/>
+                            VerticalAlignment="Center"/>
             </StackPanel>
             <i:Interaction.Behaviors>
-                    <local:CustomTitleBar IsChromeless="True"/>
-                </i:Interaction.Behaviors>
-            </Grid>
-        
-            <Button x:Name="TitleBarControl" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Visible" Background="Black" Style="{StaticResource MenuItemButtonStyle}" Tag="&#xE700;" Click="TitleBarButton_Click"></Button>
+                <local:CustomTitleBar IsChromeless="True"/>
+            </i:Interaction.Behaviors>
+        </Grid>
 
+        <!--Buttons and interactable title content goes here-->
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <Button x:Name="TitleBarControl" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Visible" Background="Black" Style="{StaticResource MenuItemButtonStyle}" Tag="&#xE700;" Click="TitleBarButton_Click"></Button>
+            <Button x:Name="OpenFileButton" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Visible" Background="Black" Style="{StaticResource MenuItemButtonStyle}" Tag="&#xE1A5;" Click="OpenFileButton_Click"/>
+        </StackPanel>
         <Grid Grid.Row="1">
         <SplitView x:Name="NavigationPane" DisplayMode="Overlay">
         <SplitView.Pane>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                    <RowDefinition Height="44"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-
-
-                <StackPanel x:Name="NavigationMenu" Orientation="Vertical" Grid.Row="1">
-                    <!--SceneData goes here-->
-                    <!--<local:ExpandPanel HeaderContent="Expander" Background="WhiteSmoke" BorderBrush="DarkGray" BorderThickness="0.4">
-                        <local:ExpandPanel.Content>
-                            <StackPanel>
-                                        <local:ExpandPanel HeaderContent="Expander2">
-                                            <local:ExpandPanel.Content>
-                                                <StackPanel>
-                                                    <Button Margin="4" Padding="4" Content="Button One"/>
-                                                    <Button Margin="4" Padding="4" Content="Button Two"/>
-                                                    <Button Margin="4" Padding="4" Content="Button Three"/>
-                                                    <Button Margin="4" Padding="4" Content="Button Four"/>
-                                                </StackPanel>
-                                            </local:ExpandPanel.Content>
-                                        </local:ExpandPanel>
-                            </StackPanel>
-                        </local:ExpandPanel.Content>
-                    </local:ExpandPanel>-->
-                </StackPanel>
-            </Grid>
+            <StackPanel x:Name="NavigationMenu" Orientation="Vertical">
+                <!--SceneData goes here-->
+            </StackPanel>
         </SplitView.Pane>
         
         <SplitView.Content>

@@ -98,4 +98,50 @@ namespace Engine_WinRT
         }
     }
 
+    WFN::float4 PropertyCX::VectorMinimum::get()
+    {
+        if (auto strongProperty = m_nativeProperty.lock())
+        {
+            // TODO: Make sure we have the render lock at this point
+            auto v = strongProperty->GetMinimum();
+            return WFN::float4(v.x, v.y, v.z, v.w);
+        }
+
+        return WFN::float4(0.0f);
+    }
+
+    WFN::float4 PropertyCX::VectorMaximum::get()
+    {
+        if (auto strongProperty = m_nativeProperty.lock())
+        {
+            // TODO: Make sure we have the render lock at this point
+            auto v = strongProperty->GetMaximum();
+            return WFN::float4(v.x, v.y, v.z, v.w);
+        }
+
+        return WFN::float4(0.0f);
+    }
+
+    double PropertyCX::ScalarMinimum::get()
+    {
+        if (auto strongProperty = m_nativeProperty.lock())
+        {
+            // TODO: Make sure we have the render lock at this point
+            auto v = strongProperty->GetMinimum();
+            return v.x;
+        }
+        return 0.0f;
+    }
+
+    double PropertyCX::ScalarMaximum::get()
+    {
+        if (auto strongProperty = m_nativeProperty.lock())
+        {
+            // TODO: Make sure we have the render lock at this point
+            auto v = strongProperty->GetMaximum();
+            return v.x;
+        }
+        return 0.0f;
+    }
+
 } // end namespace Engine_WinRT

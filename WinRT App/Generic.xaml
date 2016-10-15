@@ -21,29 +21,32 @@
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="CommonStates">
                                 <VisualState x:Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.(UIElement.Background)" Value="Transparent"/>
+                                    </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="PointerOver">
-                                    <!--<VisualState.Setters>
-                                        <Setter Target="RootGrid.(UIElement.Background)" Value="{ThemeResource SystemControlHighlightAccentBrush}"/>
-                                    </VisualState.Setters>-->
-                                    <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Background" Duration="0:0:1" RepeatBehavior="Forever">
-                                            <ObjectAnimationUsingKeyFrames.KeyFrames>
-                                                <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="Red"/>
-                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.5" Value="Blue"/>
-                                            </ObjectAnimationUsingKeyFrames.KeyFrames>
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.(UIElement.Background)" Value="{ThemeResource SystemControlHighlightAltListAccentMediumBrush}"/>
+                                    </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.(UIElement.Background)" Value="{ThemeResource SystemControlHighlightAccentBrush}"/>
+                                    </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="RootGrid.(UIElement.Background)" Value="{ThemeResource SystemControlDisabledBaseLowBrush}"/>
+                                    </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
 
                         <!-- use extra left margin to align the icon to the NavigationButtonStyle'd controls-->
                         <FontIcon Grid.Column="0"
+                                  Height="Auto"
+                                  Width="Auto"
                                   VerticalAlignment="Center"
                                   HorizontalAlignment="Center"
                                   Margin="8, 8, 8, 8"
@@ -51,7 +54,7 @@
                                   Glyph="{TemplateBinding Tag}"/>
                         <!--<TextBlock Grid.Column="1"
                                    VerticalAlignment="Center"
-                                   HorizontalAlignment="Left"
+                                   HorizontalAlignment="Center"
                                    Margin="8, 8, 8, 8"
                                    Text="{TemplateBinding Content}"/>-->
                     </Grid>
@@ -135,7 +138,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="local:PropertyPanel" >
+    <Style TargetType="local:PropertyPanel" x:Name="VectorPropertyPanelStyle" x:Key="VectorPropertyPanelStyle" >
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:PropertyPanel">
@@ -151,16 +154,6 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <TextBlock Height="Auto" Width="Auto" Grid.Row="0" x:Name="Header" VerticalAlignment="Center" Padding="5, 0, 0, 0" Text="{TemplateBinding Content}" FontSize="16"/>
-                            <!--<StackPanel Orientation="Horizontal" Width="Auto" Height="Auto">
-                                <TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">X</TextBlock>
-                                <TextBox TextAlignment="Center" MinWidth="50" MaxWidth="50" MinHeight="30" MaxHeight="30" x:Name="Component_X" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
-                                <TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" >Y</TextBlock>
-                                <TextBox TextAlignment="Center" MinWidth="40" MaxWidth="40" FontSize="10" x:Name="Component_Y" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
-                                <TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">Z</TextBlock>
-                                <TextBox TextAlignment="Center" MinWidth="40" MaxWidth="40" FontSize="10" x:Name="Component_Z" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
-                                <TextBlock FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">W</TextBlock>
-                                <TextBox TextAlignment="Center" MinWidth="40" MaxWidth="40" FontSize="10" x:Name="Component_W" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
-                            </StackPanel>-->
                             <Grid Grid.Row="1" Width="Auto" Height="Auto">
                                 <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
@@ -188,45 +181,29 @@
         </Setter>
     </Style>
 
-    <!--<Style TargetType="local:PropertyPanel" >
+    <Style TargetType="local:PropertyPanel" x:Name="ScalarPropertyPanelStyle" x:Key="ScalarPropertyPanelStyle" >
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:PropertyPanel">
-                    <Border
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>-->
-
-    <!--<Style TargetType="local:PropertyPanel" x:Key="VectorPropertyStyle">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="local:PropertyPanel">
-                    <Grid>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid Margin="3">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <ContentPresenter x:Name="Header" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Padding="5, 0, 0, 0" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
-                                --><!--<TextBox x:Name="Component_X" Grid.Row="1" Grid.Column="0" AcceptsReturn="False" Header="X" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap"/>
-                                <TextBox x:Name="Component_Y" Grid.Row="1" Grid.Column="1" AcceptsReturn="False" Header="Y" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap"/>
-                                <TextBox x:Name="Component_Z" Grid.Row="1" Grid.Column="2" AcceptsReturn="False" Header="Z" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap"/>
-                                <TextBox x:Name="Component_W" Grid.Row="1" Grid.Column="3" AcceptsReturn="False" Header="W" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap"/>--><!--
-                            </Grid>
+                    <Grid Height="Auto" Width="Auto">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Height="Auto" Width="Auto" Grid.Row="0" x:Name="Header" VerticalAlignment="Center" Padding="5, 0, 0, 0" Text="{TemplateBinding Content}" FontSize="16"/>
+                        <Grid Grid.Row="1" Width="Auto" Height="Auto">
+                            <Slider x:Name="Slider" Minimum="{TemplateBinding SliderMinimum}" Maximum="{TemplateBinding SliderMaximum}" Orientation="Horizontal"/>
                         </Grid>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>-->
+    </Style>
+
 </ResourceDictionary>

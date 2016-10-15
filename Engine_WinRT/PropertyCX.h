@@ -49,6 +49,26 @@ namespace Engine_WinRT
             void set(double value);
         }
 
+        property WFN::float4 VectorMinimum
+        {
+            WFN::float4 get();
+        }
+
+        property WFN::float4 VectorMaximum
+        {
+            WFN::float4 get();
+        }
+
+        property double ScalarMinimum
+        {
+            double get();
+        }
+
+        property double ScalarMaximum
+        {
+            double get();
+        }
+
     internal:
         PropertyCX(std::weak_ptr<Engine::Property>);
     private:

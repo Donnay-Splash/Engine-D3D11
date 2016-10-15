@@ -193,7 +193,7 @@ Concurrency::task<void> DirectXPage::OpenFile()
     auto file = co_await picker->PickSingleFileAsync();
     if (file != nullptr)
     {
-        //engineComponent->LoadFile(file);
+        engineComponent->LoadFile(file);
     }
     // Best Idea is to pass the data to EngineComponent. do this and then lock and pass to engine to load.
 }
@@ -222,4 +222,10 @@ void DirectXPage::OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement
 void WinRT_App::DirectXPage::TitleBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
     NavigationPane->IsPaneOpen = !NavigationPane->IsPaneOpen;
+}
+
+
+void WinRT_App::DirectXPage::OpenFileButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+    OpenFile();
 }

@@ -13,6 +13,8 @@ namespace Engine
         m_farClip = 1000.0f;
         m_aspectRatio = 0.0f;
         m_orthographicSize = 20.0f;
+
+        RegisterPublicProperties();
     }
 
     Camera::~Camera()
@@ -94,5 +96,27 @@ namespace Engine
     void Camera::SetDepthBuffer(DepthBuffer::Ptr depthBuffer)
     {
         m_depthBuffer = depthBuffer;
+    }
+
+    void Camera::RegisterPublicProperties()
+    {
+        //// TODO: Add helpers to try and cut this down to 1 line in most cases
+        auto fovSetter = [this](Utils::Maths::Vector4 v) 
+        {
+            // Convert value from degrees to radians
+            auto radians = Utils::Maths::DegreesToRadians(v.x);
+            SetFieldOfView(radians);
+        };
+        auto fovGetter = [this]()
+        { 
+            // convert field of view to degrees
+            auto degrees = Utils::Maths::RadiansToDegrees(m_fov);
+            return Utils::Maths::Vector4(degrees, 0.0f, 0.0f, 0.0f);
+        };
+
+        auto minFoV = Utils::Maths::Vector4(5.0f, 0.0f, 0.0f, 0.0f);
+        auto maxFoV = Utils::Maths::Vector4(180.0f, 0.0f, 0.0f, 0.0f);
+        auto fovProperty = std::make_shared<Property>(L"Field of View", PropertyType::Scalar, fovSetter, fovGetter, minFoV, maxFoV);
+        AddProperty(fovProperty);
     }
 }
