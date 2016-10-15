@@ -24,6 +24,9 @@ uint32_t postProcessSteps = aiProcess_CalcTangentSpace | // calculate tangents a
 
 float ConvertShininessToSmoothness(float shininess)
 {
+    float logshin = log(shininess);
+    float x = logshin - log(2);
+    float y = x / (10.0 * log(2));
     return Utils::Maths::Clamp((log(shininess) - log(2)) / (10.0 * log(2)), 0.0, 1.0);
 }
 
@@ -229,9 +232,9 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     // TODO: some formats may save shininess as PBR roughness so
     // we may need to check what range shininess fits in.
     float smoothness = shininess;
-    if (shininess > 1)
+    if (shininess > 1.0f)
     {
-        float smoothness = ConvertShininessToSmoothness(shininess);
+        smoothness = ConvertShininessToSmoothness(shininess);
     }
 
     materialData.ID = materialID;
