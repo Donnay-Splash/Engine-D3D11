@@ -9,6 +9,9 @@ namespace WFN = Windows::Foundation::Numerics;
 
 namespace WinRT_App
 {
+    // TODO: Probably want to look at changing Vector to 3 components
+    // I cannot think of a time when we would need 4. We are not using
+    // Quaternions directly and a Color picker would be used for colors.
     public ref class PropertyPanel sealed : public WUX::Controls::ContentControl
     {
     public:
