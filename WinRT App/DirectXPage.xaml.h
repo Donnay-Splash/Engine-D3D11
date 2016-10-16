@@ -47,11 +47,7 @@ namespace WinRT_App
 
         Concurrency::task<void> OpenFile();
 
-        
-
     private:
-        Windows::ApplicationModel::Core::CoreApplicationViewTitleBar^ coreTitleBar = Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->TitleBar;
-
         void TitleBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
         std::map <Platform::String^, ExpandPanel^> m_uiMap;
         void OpenFileButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);

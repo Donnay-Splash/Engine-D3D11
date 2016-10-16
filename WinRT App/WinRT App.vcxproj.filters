@@ -75,6 +75,8 @@
     <ClCompile Include="ExpandPanel.cpp" />
     <ClCompile Include="PropertyPanel.cpp" />
     <ClCompile Include="VectorPropertyComponent.cpp" />
+    <ClCompile Include="ScalarProperty.cpp" />
+    <ClCompile Include="VectorProperty.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />
@@ -85,6 +87,8 @@
     <ClInclude Include="ExpandPanel.h" />
     <ClInclude Include="PropertyPanel.h" />
     <ClInclude Include="VectorPropertyComponent.h" />
+    <ClInclude Include="ScalarProperty.h" />
+    <ClInclude Include="VectorProperty.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

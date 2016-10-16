@@ -10,6 +10,8 @@
 #include "ExpandPanel.h"
 #include "PropertyPanel.h"
 #include "VectorPropertyComponent.h"
+#include "ScalarProperty.h"
+#include "VectorProperty.h"
 
 namespace WinRT_App
 {

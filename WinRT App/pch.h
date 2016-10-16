@@ -15,4 +15,5 @@
 #include <agile.h>
 #include <concrt.h>
 #include <collection.h>
+#include <WindowsNumerics.h>
 #include "App.xaml.h"

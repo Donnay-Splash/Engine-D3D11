@@ -25,8 +25,7 @@ using namespace Windows::UI::Xaml::Media;
 
 // The Templated Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234235
 
-VectorPropertyComponent::VectorPropertyComponent(double initialValue, double min/*= 0.0*/, double max/*= 0.0*/) :
-    m_value(initialValue), m_minimum(min), m_maximum(max)
+VectorPropertyComponent::VectorPropertyComponent()
 {
     DefaultStyleKey = "WinRT_App.VectorPropertyComponent";
 }
@@ -85,10 +84,18 @@ void VectorPropertyComponent::OnKeyDown(Platform::Object^ sender, WUX::Input::Ke
         auto textBox = (WUX::Controls::TextBox^)sender;
         auto componentName = textBox->Name;
 
+        // Remove focus from this element
+        Focus(WUX::FocusState::Programmatic);
+
         double newValue = GetValueFromTextBox(textBox->Text);
         if (newValue != Value)
         {
             Value = newValue;
+        }
+        else
+        {
+            // Avoid weird formatting
+            SetTextBoxValue();
         }
     }
 }
@@ -235,7 +242,7 @@ void VectorPropertyComponent::UpdateValueFromDrag(double delta)
         dragFactor = (m_maximum - m_minimum) * m_drageRangeControlFactor;
     }
 
-    double newValue = currentValue + (delta * m_defaultDragControlFactor);
+    double newValue = currentValue + (delta * dragFactor);
     if (rangeDefined)
     {
         newValue = Utils::Maths::Clamp(newValue, m_minimum, m_maximum);

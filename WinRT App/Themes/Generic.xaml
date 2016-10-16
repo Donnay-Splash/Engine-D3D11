@@ -44,4 +44,32 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="local:ScalarProperty" >
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:ScalarProperty">
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="local:VectorProperty" >
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:VectorProperty">
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

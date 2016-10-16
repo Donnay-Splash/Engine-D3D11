@@ -8,39 +8,42 @@ namespace WUX = Windows::UI::Xaml;
 
 namespace WinRT_App
 {
+    public delegate void VectorComponentValueChangedEventHandler(Platform::Object^ sender, double newValue);
+
     public ref class VectorPropertyComponent sealed : public WUX::Controls::ContentControl
     {
     public:
+        VectorPropertyComponent();
+
         property double Value
         {
             double get() { return m_value; }
-        private:
             void set(double value) 
             {
                 m_value = value; 
                 SetTextBoxValue();
+                ValueChanged((Platform::Object^)this, value);
             }
         }
 
         property double Minimum
         {
             double get() { return m_minimum; }
-        private:
             void set(double min) { m_minimum = min; };
         }
 
         property double Maximum
         {
             double get() { return m_maximum; }
-        private:
             void set(double max) { m_maximum = max; }
         }
+
+        event VectorComponentValueChangedEventHandler^ ValueChanged;
 
     protected:
         virtual void OnApplyTemplate() override;
 
     internal:
-        VectorPropertyComponent(double initialValue, double min = 0.0, double max = 0.0);
 
     private:
         Platform::String^ GetValueAsString();
@@ -64,7 +67,7 @@ namespace WinRT_App
         double m_maximum;
         
         const double m_defaultDragControlFactor = 0.05;
-        const double m_drageRangeControlFactor = 0.01;
+        const double m_drageRangeControlFactor = 0.005;
 
         WUX::Controls::TextBox^ m_textBox;
 

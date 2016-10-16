@@ -48,12 +48,10 @@ ExpandPanel::ExpandPanel(Engine_WinRT::SceneElementCX ^ sceneElement)
 {
     InitializeResources();
 
-    bool addID = sceneElement->Name == "Scene Node";
-
     HeaderContent = sceneElement->Name + ref new Platform::String();
     for (auto property : sceneElement->Properties)
     {
-        auto propertyBox = ref new VectorPropertyComponent(1.0f, 0.0f, 20.0f);
+        auto propertyBox = ref new VectorProperty(0.5, 0.0, 1.0);
         propertyBox->Content = property->Name;
         propertyBox->Margin = WUX::Thickness(5.0, 0.0, 0.0, 0.0);
         AddContent(propertyBox);
