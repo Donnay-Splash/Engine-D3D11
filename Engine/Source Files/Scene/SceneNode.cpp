@@ -5,6 +5,7 @@ static uint32_t s_sceneNodeID = 1;
 
 namespace Engine
 {
+    // TODO: Make name editable for scene nodes to make elements easier to recognise in visual tree.
     SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) : SceneElement(L"Scene Node " + std::to_wstring(s_sceneNodeID++)),
         m_scene(scene), m_isRootNode(isRoot)
     {
