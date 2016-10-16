@@ -33,6 +33,12 @@ namespace WinRT_App
 
                     m_sliderElement->ValueChanged += 
                         ref new WUX::Controls::Primitives::RangeBaseValueChangedEventHandler(this, &PropertyPanel::OnSliderValueChanged);
+
+                    m_textBox = (WUX::Controls::TextBox^)GetTemplateChild("TextBox");
+                    if (m_textBox != nullptr)
+                    {
+                        m_textBox->KeyDown += ref new Windows::UI::Xaml::Input::KeyEventHandler(this, &PropertyPanel::OnTextBoxKeyDown);
+                    }
                 }
                 break;
 
@@ -56,13 +62,21 @@ namespace WinRT_App
         }
 
     private:
+        // Scalar event handlers
         void OnSliderValueChanged(Platform::Object^ sender, WUX::Controls::Primitives::RangeBaseValueChangedEventArgs^ args);
+        void OnTextBoxKeyDown(Platform::Object^ sender, WUX::Input::KeyRoutedEventArgs^ args);
 
     private:
         static WUX::DependencyProperty^ m_sliderMinimum;
         static WUX::DependencyProperty^ m_sliderMaximum;
 
+        // Scalar Controls
         WUX::Controls::Slider^ m_sliderElement;
+        WUX::Controls::TextBox^ m_textBox;
+
+        // Vector Controls
+
+        // Boolean Controls
 
         Engine_WinRT::PropertyCX^ m_property;
     };

@@ -46,8 +46,14 @@ PropertyPanel::PropertyPanel(Engine_WinRT::PropertyCX^ property) :
         break;
     case Engine_WinRT::PropertyType::Scalar:
         styleKey = "ScalarPropertyPanelStyle";
-        SliderMinimum = m_property->ScalarMinimum;
-        SliderMaximum = m_property->ScalarMaximum;
+        // If there was no min or max defined 
+        // or if we have received invalid values
+        // we will use the defaults instead
+        if (m_property->ScalarMaximum != m_property->ScalarMinimum)
+        {
+            SliderMinimum = m_property->ScalarMinimum;
+            SliderMaximum = m_property->ScalarMaximum;
+        }
         break;
 
     case Engine_WinRT::PropertyType::Bool:
@@ -63,5 +69,44 @@ PropertyPanel::PropertyPanel(Engine_WinRT::PropertyCX^ property) :
 void WinRT_App::PropertyPanel::OnSliderValueChanged(Platform::Object ^ sender, WUX::Controls::Primitives::RangeBaseValueChangedEventArgs ^ args)
 {
     m_property->Scalar = (double)args->NewValue;
+
+    // Update text box
+    if (m_textBox != nullptr)
+    {
+        m_textBox->Text = ref new Platform::String(std::to_wstring(m_sliderElement->Value).c_str());
+    }
+}
+
+void WinRT_App::PropertyPanel::OnTextBoxKeyDown(Platform::Object ^ sender, WUX::Input::KeyRoutedEventArgs ^ args)
+{
+    // If enter is pressed while the text box is focussed
+    // then we will unfocus the text box and set the
+    // slider value to the textbox data if it is valid.
+    // If it isn't valid then we will do the opposite
+    // and set the textbox data to the slider val.
+    if (args->Key == Windows::System::VirtualKey::Enter)
+    {
+        if (m_textBox != nullptr)
+        {
+            auto value = m_textBox->Text;
+            bool succeeded = Focus(WUX::FocusState::Programmatic);
+            // Try and convert the text value
+            wchar_t* e;
+            double sliderValue = std::wcstod(value->Data(), &e);
+            
+            succeeded = (errno == 0) && (e == value->End());
+            if (m_sliderElement != nullptr)
+            {
+                if (succeeded)
+                {
+                    m_sliderElement->Value = sliderValue;
+                }
+                else
+                {
+                    m_textBox->Text = ref new Platform::String(std::to_wstring(m_sliderElement->Value).c_str());
+                }
+            }
+        }
+    }
 }
 

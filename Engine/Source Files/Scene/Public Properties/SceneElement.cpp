@@ -7,6 +7,75 @@ namespace Engine
     {
     }
 
+    void SceneElement::RegisterBooleanProperty(const std::wstring & name,
+        Property::BoolPropertyGetter boolGetter,
+        Property::BoolPropertySetter boolSetter)
+    {
+        Property::VectorPropertyGetter vectorGetter = [boolGetter]()
+        {
+            auto value = boolGetter();
+            return Utils::Maths::Vector4(value ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
+        };
+
+        Property::VectorPropertySetter vectorSetter = [boolSetter](Utils::Maths::Vector4 value)
+        {
+            boolSetter(value.x > 0.0);
+        };
+
+        auto property = std::shared_ptr<Property>(new Property(name,
+            PropertyType::Bool,
+            vectorGetter,
+            vectorSetter));
+
+        AddProperty(property);
+    }
+
+    void SceneElement::RegisterScalarProperty(const std::wstring & name,
+        Property::ScalarPropertyGetter scalarGetter,
+        Property::ScalarPropertySetter scalarSetter,
+        float min,
+        float max)
+    {
+        Property::VectorPropertyGetter vectorGetter = [scalarGetter]()
+        {
+            auto value = scalarGetter();
+            return Utils::Maths::Vector4(value, 0.0f, 0.0f, 0.0f);
+        };
+
+        Property::VectorPropertySetter vectorSetter = [scalarSetter](Utils::Maths::Vector4 value)
+        {
+            scalarSetter(value.x);
+        };
+
+        Utils::Maths::Vector4 vectorMin = { min, 0.0f, 0.0f, 0.0f };
+        Utils::Maths::Vector4 vectorMax = { max, 0.0f, 0.0f, 0.0f };
+
+        auto property = Property::Ptr(new Property(name,
+            PropertyType::Scalar,
+            vectorGetter,
+            vectorSetter,
+            vectorMin,
+            vectorMax));
+
+        AddProperty(property);
+    }
+
+    void SceneElement::RegisterVectorProperty(const std::wstring & name,
+        Property::VectorPropertyGetter vectorGetter,
+        Property::VectorPropertySetter vectorSetter,
+        const Utils::Maths::Vector4 & minimum,
+        const Utils::Maths::Vector4 & maximum)
+    {
+        auto property = Property::Ptr(new Property(name,
+            PropertyType::Vector,
+            vectorGetter,
+            vectorSetter,
+            minimum,
+            maximum));
+
+        AddProperty(property);
+    }
+
     Property::Ptr SceneElement::GetProperty(std::wstring name)
     {
         auto it = m_publicProperties.find(name);

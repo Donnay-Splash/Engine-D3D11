@@ -109,11 +109,18 @@ namespace Engine
     void SceneNode::AddPublicProperties()
     {
         //// TODO: Add helpers to try and cut this down to 1 line in most cases
-        auto positionSetter = [this](Utils::Maths::Vector4 v) {m_position = { v.x, v.y, v.z }; };
         auto positionGetter = [this]() { return Utils::Maths::Vector4(m_position.x, m_position.y, m_position.z, 0.0f); };
-        auto positionProperty = std::make_shared<Property>(L"Position", PropertyType::Vector, positionSetter, positionGetter);
-        AddProperty(positionProperty);
+        auto positionSetter = [this](Utils::Maths::Vector4 v) { SetPosition({v.x, v.y, v.z}); };
+        RegisterVectorProperty(L"Position", positionGetter, positionSetter);
 
+        auto scaleGetter = [this]() { return m_scale.x; };
+        auto scaleSetter = [this](float scale) { SetScale(scale); };
+        RegisterScalarProperty(L"Scale", scaleGetter, scaleSetter);
+
+        // TODO: Create Quaternion to Euler convertesion helper so we 
+        // can add rotation as a property.
+        // Suggestion: Store Euler angles locally so we are not doing a conversion each time we 
+        // the external value is updated.
     }
 
 

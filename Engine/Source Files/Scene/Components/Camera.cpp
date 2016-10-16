@@ -101,22 +101,17 @@ namespace Engine
     void Camera::RegisterPublicProperties()
     {
         //// TODO: Add helpers to try and cut this down to 1 line in most cases
-        auto fovSetter = [this](Utils::Maths::Vector4 v) 
+        auto fovSetter = [this](float v) 
         {
             // Convert value from degrees to radians
-            auto radians = Utils::Maths::DegreesToRadians(v.x);
+            auto radians = Utils::Maths::DegreesToRadians(v);
             SetFieldOfView(radians);
         };
         auto fovGetter = [this]()
         { 
             // convert field of view to degrees
-            auto degrees = Utils::Maths::RadiansToDegrees(m_fov);
-            return Utils::Maths::Vector4(degrees, 0.0f, 0.0f, 0.0f);
+            return Utils::Maths::RadiansToDegrees(m_fov);
         };
-
-        auto minFoV = Utils::Maths::Vector4(5.0f, 0.0f, 0.0f, 0.0f);
-        auto maxFoV = Utils::Maths::Vector4(180.0f, 0.0f, 0.0f, 0.0f);
-        auto fovProperty = std::make_shared<Property>(L"Field of View", PropertyType::Scalar, fovSetter, fovGetter, minFoV, maxFoV);
-        AddProperty(fovProperty);
+        RegisterScalarProperty(L"Field of View", fovGetter, fovSetter, 5.0, 180.0);
     }
 }

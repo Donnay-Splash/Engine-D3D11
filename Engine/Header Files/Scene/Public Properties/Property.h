@@ -4,6 +4,9 @@
 
 namespace Engine
 {
+    // forward declaration
+    class SceneElement;
+
     enum class PropertyType
     {
         Bool,
@@ -13,30 +16,40 @@ namespace Engine
 
     class Property
     {
-        using PropertySetter = std::function<void(Utils::Maths::Vector4)>;
-        using PropertyGetter = std::function<Utils::Maths::Vector4()>;
     public:
+        using BoolPropertySetter = std::function<void(bool)>;
+        using BoolPropertyGetter = std::function<bool()>;
+
+        using ScalarPropertySetter = std::function<void(float)>;
+        using ScalarPropertyGetter = std::function<float()>;
+
+        using VectorPropertySetter = std::function<void(Utils::Maths::Vector4)>;
+        using VectorPropertyGetter = std::function<Utils::Maths::Vector4()>;
+
         using Ptr = std::shared_ptr<Property>;
 
-        Property(const std::wstring& name,
-            PropertyType type,
-            PropertySetter setter,
-            PropertyGetter getter,
-            const Utils::Maths::Vector4& minimum = {},
-            const Utils::Maths::Vector4& maximum = {});
-
-        const PropertySetter SetValue;
-        const PropertyGetter GetValue;
+        const VectorPropertySetter SetValue;
+        const VectorPropertyGetter GetValue;
         std::wstring GetName() const { return m_name; }
         Utils::Maths::Vector4 GetMaximum() const { return m_maximum; }
         Utils::Maths::Vector4 GetMinimum() const { return m_minimum; }
         PropertyType GetType() const { return m_type; }
 
     private:
+        Property(const std::wstring& name,
+            PropertyType type,
+            VectorPropertyGetter getter,
+            VectorPropertySetter setter,
+            const Utils::Maths::Vector4& minimum = {},
+            const Utils::Maths::Vector4& maximum = {});
+
+    private:
         std::wstring m_name;
         Utils::Maths::Vector4 m_maximum;
         Utils::Maths::Vector4 m_minimum;
         PropertyType m_type;
+
+        friend class SceneElement;
     };
 } // end namespace Engine
 
