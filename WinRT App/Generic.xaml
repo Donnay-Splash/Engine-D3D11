@@ -222,7 +222,7 @@
                             <ColumnDefinition Width="3*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="TextBlock" Grid.Column="0" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{TemplateBinding Content}">X</TextBlock>
-                        <TextBox x:Name="TextBox" Grid.Column="1" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" HorizontalAlignment="Left" Text="{Binding Value}" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                        <TextBox x:Name="TextBox" Grid.Column="1" TextAlignment="Left" Width="50" MinWidth="50" MaxWidth="50" HorizontalAlignment="Left" Text="{Binding Value}" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

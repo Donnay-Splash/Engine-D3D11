@@ -31,6 +31,47 @@ VectorPropertyComponent::VectorPropertyComponent(double initialValue, double min
     DefaultStyleKey = "WinRT_App.VectorPropertyComponent";
 }
 
+void VectorPropertyComponent::OnApplyTemplate()
+{
+    WUX::Controls::ContentControl::OnApplyTemplate();
+
+    // Receive the text boxes and register callbacks and assign initial values
+    m_textBox = (WUX::Controls::TextBox^)GetTemplateChild("TextBox");
+
+    if (m_textBox == nullptr)
+    {
+        throw ref new Platform::FailureException("Failed to receive TextBox from template");
+    }
+    else
+    {
+        m_textBox->KeyDown += ref new WUX::Input::KeyEventHandler(this, &VectorPropertyComponent::OnKeyDown);
+
+        // Set initial value for text box
+        m_textBox->Text = GetValueAsString();
+    }
+
+    // Receive the TextBlocks and register event handlers
+    auto textBlock = (WUX::Controls::TextBlock^)GetTemplateChild("TextBlock");
+
+    if (textBlock == nullptr)
+    {
+        throw ref new Platform::FailureException("Failed to receive all component TextBox's from template");
+    }
+    else
+    {
+        textBlock->PointerEntered += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerEntered);
+        textBlock->PointerExited += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerExited);
+        textBlock->PointerMoved += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerMoved);
+        textBlock->PointerPressed += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerPressed);
+        textBlock->PointerReleased += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerReleased);
+        textBlock->PointerCaptureLost += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerCaptureLost);
+
+        // Use Release function as they do the same thing
+        // Will likely also need to handle capture loss.
+        textBlock->PointerCanceled += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerReleased);
+    }
+}
+
 
 /****************************************************************************
 *
@@ -93,9 +134,10 @@ void VectorPropertyComponent::OnPointerMoved(Platform::Object^ sender, WUX::Inpu
     {
         auto currentPoint = args->GetCurrentPoint(this);
         auto newPosition = currentPoint->Position;
-        double positionDelta = newPosition.X - m_prevPosition.X;
+        double delta = newPosition.X - m_prevPosition.X;
         // Do something with delta
 
+        UpdateValueFromDrag(delta);
 
         m_prevPosition = newPosition;
     }
@@ -174,11 +216,43 @@ double VectorPropertyComponent::GetValueFromTextBox(Platform::String^ text)
 
 Platform::String^ VectorPropertyComponent::GetValueAsString()
 {
-    auto wstringValue = Utils::StringHelpers::ToWideStringWithPrecision(Value, 2, true);
+    auto wstringValue = Utils::StringHelpers::ToWideStringWithPrecision(Value, 2, false);
     return ref new Platform::String(wstringValue.c_str());
 }
 
 void VectorPropertyComponent::SetCursor(CoreCursorType type)
 {
     Window::Current->CoreWindow->PointerCursor = ref new CoreCursor(type, 1);
+}
+
+void VectorPropertyComponent::UpdateValueFromDrag(double delta)
+{
+    auto currentValue = Value;
+    bool rangeDefined = m_maximum > m_minimum;
+    double dragFactor = m_defaultDragControlFactor;
+    if (rangeDefined)
+    {
+        dragFactor = (m_maximum - m_minimum) * m_drageRangeControlFactor;
+    }
+
+    double newValue = currentValue + (delta * m_defaultDragControlFactor);
+    if (rangeDefined)
+    {
+        newValue = Utils::Maths::Clamp(newValue, m_minimum, m_maximum);
+    }
+
+    if (newValue != currentValue)
+    {
+        Value = newValue;
+
+    }
+}
+
+void VectorPropertyComponent::SetTextBoxValue()
+{
+    if (m_textBox != nullptr)
+    {
+        auto valueAsString = GetValueAsString();
+        m_textBox->Text = valueAsString;
+    }
 }
