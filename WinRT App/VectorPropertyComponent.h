@@ -11,8 +11,6 @@ namespace WinRT_App
     public ref class VectorPropertyComponent sealed : public WUX::Controls::ContentControl
     {
     public:
-        VectorPropertyComponent(double initialValue, double min, double max);
-
         property double Value
         {
             double get() { return m_value; }
@@ -65,16 +63,24 @@ namespace WinRT_App
             {
                 textBlock->PointerEntered += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerEntered);
                 textBlock->PointerExited += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerExited);
-                textBlock->PointerPressed += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerPressed);
                 textBlock->PointerMoved += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerMoved);
+                textBlock->PointerPressed += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerPressed);
                 textBlock->PointerReleased += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerReleased);
+                textBlock->PointerCaptureLost += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerCaptureLost);
 
+                // Use Release function as they do the same thing
                 // Will likely also need to handle capture loss.
+                textBlock->PointerCanceled += ref new WUX::Input::PointerEventHandler(this, &VectorPropertyComponent::OnPointerReleased);
             }
         }
+
+    internal:
+        VectorPropertyComponent(double initialValue, double min = 0.0, double max = 0.0);
+
     private:
         Platform::String^ GetValueAsString();
         double GetValueFromTextBox(Platform::String^ text);
+        void SetCursor(Windows::UI::Core::CoreCursorType type);
 
         // Event handlers
         void OnKeyDown(Platform::Object^ sender, WUX::Input::KeyRoutedEventArgs^ args);
@@ -83,10 +89,16 @@ namespace WinRT_App
         void OnPointerPressed(Platform::Object^ sender, WUX::Input::PointerRoutedEventArgs^ args); // Capture pointer input
         void OnPointerMoved(Platform::Object^ sender, WUX::Input::PointerRoutedEventArgs^ args); // Update values based on movement
         void OnPointerReleased(Platform::Object^ sender, WUX::Input::PointerRoutedEventArgs^ args); // Release pointer
+        void OnPointerCaptureLost(Platform::Object^ sender, WUX::Input::PointerRoutedEventArgs^ args); // Release pointer
 
     private:
         double m_value;
         double m_minimum;
         double m_maximum;
+
+        // Mouse information
+        bool m_pressed = false;
+        bool m_captured = false;
+        Windows::Foundation::Point m_prevPosition;
     };
 }

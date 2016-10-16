@@ -220,11 +220,6 @@ void PropertyPanel::ApplyVectorTemplate()
         textBlock_Y->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerExited);
         textBlock_Z->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerExited);
         textBlock_W->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerExited);
-
-        textBlock_X->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerPressed);
-        textBlock_Y->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerPressed);
-        textBlock_Z->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerPressed);
-        textBlock_W->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerPressed);
     }
 }
 
