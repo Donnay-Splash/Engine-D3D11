@@ -14,40 +14,25 @@ namespace WinRT_App
     public:
         PropertyPanel(Engine_WinRT::PropertyCX^ property);
 
-    protected:
-        virtual void OnApplyTemplate() override
+        property Platform::Object^ Property
         {
-            WUX::Controls::ContentControl::OnApplyTemplate();
-
-            // When the template has been applied we can bind to events.
-            switch (m_property->Type)
-            {
-            case Engine_WinRT::PropertyType::Vector:
-                break;
-
-            case Engine_WinRT::PropertyType::Scalar:
-            case Engine_WinRT::PropertyType::Bool:
-            default:
-                throw ref new Platform::Exception(E_INVALIDARG, "Invalid property type received");
-                break;
-            }
+            Platform::Object^ get() { return GetValue(m_boundPropertyContent); }
+        private:
+            void set(Platform::Object^ object) { SetValue(m_boundPropertyContent, object); }
         }
 
-    private:
-        // Vector functions
-        void GetValuesForComponent(Platform::String^ componentName, const WFN::float4& vectorValue, double& current, double& min, double& max);
-        void SetValueForComponent(Platform::String^ componentName, WFN::float4 vectorValue, const double& newValue);
-        Platform::String^ GetComponentValueAsString(Platform::String^ componentName, const WFN::float4& vectorValue);
+    protected:
+        virtual void OnApplyTemplate() override;
 
     private:
-        // Vector constants
-        // Text boxes
-        static Platform::String^ m_vectorComponentName_X;
-        static Platform::String^ m_vectorComponentName_Y;
-        static Platform::String^ m_vectorComponentName_Z;
-        static Platform::String^ m_vectorComponentName_W;
+        void OnVectorPropertyChanged(Platform::Object^ sender, WFN::float4 newValue);
+        void OnScalarPropertyChanged(Platform::Object^ sender, double newValue);
+        void OnBooleanPropertyChanged(Platform::Object^ sender, bool newValue);
 
-        // Boolean Controls
+    private:
+        // Bound to a content presenter to display the given property
+        static WUX::DependencyProperty^ m_boundPropertyContent;
+        WUX::FrameworkElement^ m_propertyElement;
 
         // Pointer to the property that defines this panel
         Engine_WinRT::PropertyCX^ m_property;

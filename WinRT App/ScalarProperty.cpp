@@ -38,8 +38,11 @@ ScalarProperty::ScalarProperty(double initialValue, double min, double max) :
     m_value(initialValue)
 {
     DefaultStyleKey = "WinRT_App.ScalarProperty";
-    Minimum = min;
-    Maximum = max;
+    if (max > min)
+    {
+        Minimum = min;
+        Maximum = max;
+    }
 }
 
 void ScalarProperty::OnApplyTemplate()

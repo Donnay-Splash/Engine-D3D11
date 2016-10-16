@@ -14,17 +14,6 @@ namespace WinRT_App
     public ref class VectorProperty sealed : public WUX::Controls::ContentControl
     {
     public:
-        property WFN::float4 Value
-        {
-        private:
-            void set(WFN::float4 value)
-            {
-                m_value = value; 
-                ValueChanged((Platform::Object^)this, value);
-            }
-            WFN::float4 get() { return m_value; }
-        }
-
         event VectorPropertyChangedEventHandler^ ValueChanged;
 
     protected:
@@ -34,6 +23,16 @@ namespace WinRT_App
         VectorProperty(WFN::float4 initialValue, WFN::float4 min, WFN::float4 max);
 
     private:
+        property WFN::float4 Value
+        {
+            void set(WFN::float4 value)
+            {
+                m_value = value; 
+                ValueChanged((Platform::Object^)this, value);
+            }
+            WFN::float4 get() { return m_value; }
+        }
+
         void OnComponentValueChanged(Platform::Object^ sender, double newValue);
 
     private:

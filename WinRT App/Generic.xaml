@@ -138,74 +138,17 @@
         </Setter>
     </Style>
 
-    <Style TargetType="local:PropertyPanel" x:Name="VectorPropertyPanelStyle" x:Key="VectorPropertyPanelStyle" >
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="local:PropertyPanel">
-                        <Grid Height="Auto" Width="Auto">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Normal">
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Height="Auto" Width="Auto" Grid.Row="0" x:Name="Header" VerticalAlignment="Center" Padding="5, 0, 0, 0" Text="{TemplateBinding Content}" FontSize="16"/>
-                            <Grid Grid.Row="1" Width="Auto" Height="Auto">
-                                <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="3*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Text_X">X</TextBlock>
-                            <TextBox Grid.Column="1" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_X" HorizontalAlignment="Left" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
-                            <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Text_Y">Y</TextBlock>
-                            <TextBox Grid.Column="3" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_Y" HorizontalAlignment="Left" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
-                            <TextBlock Grid.Column="4" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Text_Z">Z</TextBlock>
-                            <TextBox Grid.Column="5" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_Z" HorizontalAlignment="Left" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
-                            <TextBlock Grid.Column="6" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Text_W">W</TextBlock>
-                            <TextBox Grid.Column="7" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_W" HorizontalAlignment="Left" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
-                            </Grid>
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style TargetType="local:PropertyPanel" x:Name="ScalarPropertyPanelStyle" x:Key="ScalarPropertyPanelStyle" >
+    <Style TargetType="local:PropertyPanel" >
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:PropertyPanel">
                     <Grid Height="Auto" Width="Auto">
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Normal">
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Height="Auto" Width="Auto" Grid.Row="0" x:Name="Header" VerticalAlignment="Center" Padding="5, 0, 0, 0" Text="{TemplateBinding Content}" FontSize="16"/>
-                        <Grid Grid.Row="1" Width="Auto" Height="Auto">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="4*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Slider x:Name="Slider" Grid.Column="0" Minimum="{TemplateBinding SliderMinimum}" Maximum="{TemplateBinding SliderMaximum}" VerticalAlignment="Center" Orientation="Horizontal" Margin="2, 0, 6, 0"/>
-                            <TextBox x:Name="TextBox" Text="{Binding Value, ElementName = Slider}" Grid.Column="1" TextAlignment="Center" MinWidth="50" MaxWidth="50" MinHeight="30" MaxHeight="50" VerticalAlignment="Center" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="5" TextWrapping="NoWrap" Margin="6, 0, 2, 7">
-                            </TextBox>
-                        </Grid>
+                        <ContentPresenter Grid.Row="1" Margin="5" Content="{TemplateBinding Property}" x:Name="Content"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

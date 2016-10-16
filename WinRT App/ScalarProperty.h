@@ -8,6 +8,8 @@ namespace WUX = Windows::UI::Xaml;
 
 namespace WinRT_App
 {
+    public delegate void ScalarPropertyChangedEventHandler(Platform::Object^ sender, double newValue);
+
     public ref class ScalarProperty sealed : public WUX::Controls::ContentControl
     {
     public:
@@ -15,7 +17,11 @@ namespace WinRT_App
         {
             double get() { return m_value; }
         private:
-            void set(double value) { m_value = value; }
+            void set(double value)
+            {
+                m_value = value; 
+                ValueChanged((Platform::Object^)this, value);
+            }
         }
 
         property double Minimum
@@ -29,6 +35,8 @@ namespace WinRT_App
             double get() { return (double)GetValue(m_sliderMaximum); }
             void set(double value) { SetValue(m_sliderMaximum, value); }
         }
+
+        event ScalarPropertyChangedEventHandler^ ValueChanged;
 
     protected:
         virtual void OnApplyTemplate() override;
