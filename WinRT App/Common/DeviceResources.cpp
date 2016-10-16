@@ -497,7 +497,7 @@ void DX::DeviceResources::UpdateRenderTargetSize()
 		// When the device is in portrait orientation, height > width. Compare the
 		// larger dimension against the width threshold and the smaller dimension
 		// against the height threshold.
-		if (max(width, height) > DisplayMetrics::WidthThreshold && min(width, height) > DisplayMetrics::HeightThreshold)
+		if (std::max(width, height) > DisplayMetrics::WidthThreshold && std::min(width, height) > DisplayMetrics::HeightThreshold)
 		{
 			// To scale the app we change the effective DPI. Logical size does not change.
 			m_effectiveDpi /= 2.0f;
@@ -511,8 +511,8 @@ void DX::DeviceResources::UpdateRenderTargetSize()
 	m_outputSize.Height = DX::ConvertDipsToPixels(m_logicalSize.Height, m_effectiveDpi);
 
 	// Prevent zero size DirectX content from being created.
-	m_outputSize.Width = max(m_outputSize.Width, 1);
-	m_outputSize.Height = max(m_outputSize.Height, 1);
+	m_outputSize.Width = std::max(m_outputSize.Width, 1.0f);
+	m_outputSize.Height = std::max(m_outputSize.Height, 1.0f);
 }
 
 // This method is called when the XAML control is created (or re-created).

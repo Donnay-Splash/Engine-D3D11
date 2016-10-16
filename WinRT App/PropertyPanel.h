@@ -5,6 +5,7 @@
 
 #pragma once
 namespace WUX = Windows::UI::Xaml;
+namespace WFN = Windows::Foundation::Numerics;
 
 namespace WinRT_App
 {
@@ -22,24 +23,11 @@ namespace WinRT_App
             switch (m_property->Type)
             {
             case Engine_WinRT::PropertyType::Vector:
+                ApplyVectorTemplate();
                 break;
 
             case Engine_WinRT::PropertyType::Scalar:
-                m_sliderElement = (WUX::Controls::Slider^)GetTemplateChild("Slider");
-                if (m_sliderElement != nullptr)
-                {
-                    // Set the current value
-                    m_sliderElement->Value = m_property->Scalar;
-
-                    m_sliderElement->ValueChanged += 
-                        ref new WUX::Controls::Primitives::RangeBaseValueChangedEventHandler(this, &PropertyPanel::OnSliderValueChanged);
-
-                    m_textBox = (WUX::Controls::TextBox^)GetTemplateChild("TextBox");
-                    if (m_textBox != nullptr)
-                    {
-                        m_textBox->KeyDown += ref new Windows::UI::Xaml::Input::KeyEventHandler(this, &PropertyPanel::OnTextBoxKeyDown);
-                    }
-                }
+                ApplyScalarTemplate();
                 break;
 
             case Engine_WinRT::PropertyType::Bool:
@@ -49,6 +37,7 @@ namespace WinRT_App
             }
         }
 
+        // Scalar properties
         property double SliderMinimum
         {
             double get() { return (double)GetValue(m_sliderMinimum); }
@@ -62,22 +51,41 @@ namespace WinRT_App
         }
 
     private:
-        // Scalar event handlers
+        // Scalar functions 
+        void ApplyScalarTemplate();
+        // Event handlers
         void OnSliderValueChanged(Platform::Object^ sender, WUX::Controls::Primitives::RangeBaseValueChangedEventArgs^ args);
-        void OnTextBoxKeyDown(Platform::Object^ sender, WUX::Input::KeyRoutedEventArgs^ args);
+        void OnScalarTextBoxKeyDown(Platform::Object^ sender, WUX::Input::KeyRoutedEventArgs^ args);
+
+        // Vector functions
+        void ApplyVectorTemplate();
+        void GetValuesForComponent(Platform::String^ componentName, const WFN::float4& vectorValue, double& current, double& min, double& max);
+        void SetValueForComponent(Platform::String^ componentName, WFN::float4 vectorValue, const double& newValue);
+        Platform::String^ GetComponentValueAsString(Platform::String^ componentName, const WFN::float4& vectorValue);
+        // Event handlers
+        void OnVectorKeyDown(Platform::Object^ sender, WUX::Input::KeyRoutedEventArgs^ args);
+
+        // General helper functions
+        double GetValueFromTextBox(Platform::String^ text, double currentValue, double min, double max);
 
     private:
+        // Scalar dependency properties
         static WUX::DependencyProperty^ m_sliderMinimum;
         static WUX::DependencyProperty^ m_sliderMaximum;
 
         // Scalar Controls
         WUX::Controls::Slider^ m_sliderElement;
-        WUX::Controls::TextBox^ m_textBox;
+        WUX::Controls::TextBox^ m_scalarTextBox;
 
-        // Vector Controls
+        // Vector constants
+        static Platform::String^ m_vectorComponentName_X;
+        static Platform::String^ m_vectorComponentName_Y;
+        static Platform::String^ m_vectorComponentName_Z;
+        static Platform::String^ m_vectorComponentName_W;
 
         // Boolean Controls
 
+        // Pointer to the property that defines this panel
         Engine_WinRT::PropertyCX^ m_property;
     };
 }
