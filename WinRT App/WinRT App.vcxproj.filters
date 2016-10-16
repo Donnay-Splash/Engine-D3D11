@@ -74,6 +74,7 @@
     <ClCompile Include="CustomTitleBar.xaml.cpp" />
     <ClCompile Include="ExpandPanel.cpp" />
     <ClCompile Include="PropertyPanel.cpp" />
+    <ClCompile Include="VectorPropertyComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />
@@ -83,6 +84,7 @@
     <ClInclude Include="CustomTitleBar.xaml.h" />
     <ClInclude Include="ExpandPanel.h" />
     <ClInclude Include="PropertyPanel.h" />
+    <ClInclude Include="VectorPropertyComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

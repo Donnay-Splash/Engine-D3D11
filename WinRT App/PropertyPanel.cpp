@@ -13,6 +13,7 @@ using namespace WinRT_App;
 using namespace Platform;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Data;
@@ -39,10 +40,17 @@ DependencyProperty::Register("SliderMaximum",
 // Vector constants
 // Since the values in xaml must be constant we have to ensure that these values
 // match as they cannot be bound using a property
+// Text boxes
 Platform::String^ PropertyPanel::m_vectorComponentName_X = "Component_X";
 Platform::String^ PropertyPanel::m_vectorComponentName_Y = "Component_Y";
 Platform::String^ PropertyPanel::m_vectorComponentName_Z = "Component_Z";
 Platform::String^ PropertyPanel::m_vectorComponentName_W = "Component_W";
+
+// Text blocks
+Platform::String^ PropertyPanel::m_componentIdentifierName_X = "Text_X";
+Platform::String^ PropertyPanel::m_componentIdentifierName_Y = "Text_Y";
+Platform::String^ PropertyPanel::m_componentIdentifierName_Z = "Text_Z";
+Platform::String^ PropertyPanel::m_componentIdentifierName_W = "Text_W";
 
 PropertyPanel::PropertyPanel(Engine_WinRT::PropertyCX^ property) :
     m_property(property)
@@ -164,6 +172,7 @@ void WinRT_App::PropertyPanel::OnScalarTextBoxKeyDown(Platform::Object ^ sender,
 // Vector functions
 void PropertyPanel::ApplyVectorTemplate()
 {
+    // Receive the text boxes and register callbacks and assign initial values
     auto textBox_X = (WUX::Controls::TextBox^)GetTemplateChild(m_vectorComponentName_X);
     auto textBox_Y = (WUX::Controls::TextBox^)GetTemplateChild(m_vectorComponentName_Y);
     auto textBox_Z = (WUX::Controls::TextBox^)GetTemplateChild(m_vectorComponentName_Z);
@@ -188,6 +197,34 @@ void PropertyPanel::ApplyVectorTemplate()
         textBox_Y->Text = GetComponentValueAsString(m_vectorComponentName_Y, vectorValue);
         textBox_Z->Text = GetComponentValueAsString(m_vectorComponentName_Z, vectorValue);
         textBox_W->Text = GetComponentValueAsString(m_vectorComponentName_W, vectorValue);
+    }
+
+    // Receive the TextBlocks and register event handlers
+    auto textBlock_X = (WUX::Controls::TextBlock^)GetTemplateChild(m_componentIdentifierName_X);
+    auto textBlock_Y = (WUX::Controls::TextBlock^)GetTemplateChild(m_componentIdentifierName_Y);
+    auto textBlock_Z = (WUX::Controls::TextBlock^)GetTemplateChild(m_componentIdentifierName_Z);
+    auto textBlock_W = (WUX::Controls::TextBlock^)GetTemplateChild(m_componentIdentifierName_W);
+
+    if (textBlock_X == nullptr || textBlock_Y == nullptr || textBlock_Z == nullptr || textBlock_W == nullptr)
+    {
+        throw ref new Platform::FailureException("Failed to receive all component TextBox's from template");
+    }
+    else
+    {
+        textBlock_X->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerEntered);
+        textBlock_Y->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerEntered);
+        textBlock_Z->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerEntered);
+        textBlock_W->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerEntered);
+
+        textBlock_X->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerExited);
+        textBlock_Y->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerExited);
+        textBlock_Z->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerExited);
+        textBlock_W->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerExited);
+
+        textBlock_X->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerPressed);
+        textBlock_Y->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerPressed);
+        textBlock_Z->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerPressed);
+        textBlock_W->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &PropertyPanel::OnVectorPointerPressed);
     }
 }
 
@@ -300,6 +337,16 @@ void PropertyPanel::OnVectorKeyDown(Platform::Object^ sender, WUX::Input::KeyRou
             SetValueForComponent(componentName, vectorValue, newValue);
         }
     }
+}
+
+void PropertyPanel::OnVectorPointerEntered(Platform::Object^ sender, WUX::Input::PointerRoutedEventArgs^ args)
+{
+    Window::Current->CoreWindow->PointerCursor = ref new CoreCursor(CoreCursorType::SizeWestEast, 1);
+}
+
+void PropertyPanel::OnVectorPointerExited(Platform::Object^ sender, WUX::Input::PointerRoutedEventArgs^ args)
+{
+    Window::Current->CoreWindow->PointerCursor = ref new CoreCursor(CoreCursorType::Arrow, 2);
 }
 
 /****************************************************************************

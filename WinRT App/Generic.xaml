@@ -166,14 +166,14 @@
                                 <ColumnDefinition Width="3*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">X</TextBlock>
-                            <TextBox Grid.Column="1" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_X" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
-                            <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" >Y</TextBlock>
-                            <TextBox Grid.Column="3" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_Y" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
-                            <TextBlock Grid.Column="4" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">Z</TextBlock>
-                            <TextBox Grid.Column="5" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_Z" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
-                            <TextBlock Grid.Column="6" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">W</TextBlock>
-                            <TextBox Grid.Column="7" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_W" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Text_X">X</TextBlock>
+                            <TextBox Grid.Column="1" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_X" HorizontalAlignment="Left" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                            <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Text_Y">Y</TextBlock>
+                            <TextBox Grid.Column="3" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_Y" HorizontalAlignment="Left" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                            <TextBlock Grid.Column="4" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Text_Z">Z</TextBlock>
+                            <TextBox Grid.Column="5" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_Z" HorizontalAlignment="Left" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                            <TextBlock Grid.Column="6" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Text_W">W</TextBlock>
+                            <TextBox Grid.Column="7" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" x:Name="Component_W" HorizontalAlignment="Left" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
                             </Grid>
                     </Grid>
                 </ControlTemplate>
@@ -206,6 +206,23 @@
                             <TextBox x:Name="TextBox" Text="{Binding Value, ElementName = Slider}" Grid.Column="1" TextAlignment="Center" MinWidth="50" MaxWidth="50" MinHeight="30" MaxHeight="50" VerticalAlignment="Center" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="5" TextWrapping="NoWrap" Margin="6, 0, 2, 7">
                             </TextBox>
                         </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="local:VectorPropertyComponent" >
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:VectorPropertyComponent">
+                    <Grid Width="Auto" Height="Auto">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="3*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="TextBlock" Grid.Column="0" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{TemplateBinding Content}">X</TextBlock>
+                        <TextBox x:Name="TextBox" Grid.Column="1" TextAlignment="Center" Width="50" MinWidth="50" MaxWidth="50" HorizontalAlignment="Left" Text="{Binding Value}" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

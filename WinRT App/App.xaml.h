@@ -9,6 +9,7 @@
 #include "DirectXPage.xaml.h"
 #include "ExpandPanel.h"
 #include "PropertyPanel.h"
+#include "VectorPropertyComponent.h"
 
 namespace WinRT_App
 {
