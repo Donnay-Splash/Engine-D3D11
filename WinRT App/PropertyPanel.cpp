@@ -6,6 +6,7 @@
 #include "pch.h"
 #include "PropertyPanel.h"
 #include <Utils\Math\Math.h>
+#include <Utils\Strings\StringHelpers.h>
 
 using namespace WinRT_App;
 
@@ -114,7 +115,8 @@ void WinRT_App::PropertyPanel::OnSliderValueChanged(Platform::Object ^ sender, W
     // Update text box
     if (m_scalarTextBox != nullptr)
     {
-        m_scalarTextBox->Text = ref new Platform::String(std::to_wstring(m_sliderElement->Value).c_str());
+        auto valueAsWstring = Utils::StringHelpers::ToWideStringWithPrecision(m_sliderElement->Value, 2, true);
+        m_scalarTextBox->Text = ref new Platform::String(valueAsWstring.c_str());
     }
 }
 
@@ -274,7 +276,7 @@ Platform::String^ PropertyPanel::GetComponentValueAsString(Platform::String^ com
         throw ref new Platform::InvalidArgumentException("Received invalid component name from TextBox");
     }
 
-    auto wstringValue = std::to_wstring(value);
+    auto wstringValue = Utils::StringHelpers::ToWideStringWithPrecision(value, 2, true);
     return ref new Platform::String(wstringValue.c_str());
 }
 

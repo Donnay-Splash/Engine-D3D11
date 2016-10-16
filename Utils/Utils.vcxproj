@@ -151,6 +151,7 @@
     <ClInclude Include="Loader\MikeLoader.h" />
     <ClInclude Include="Math\Math.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Strings\StringHelpers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Loader\Exporter.cpp" />
@@ -165,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\Math.inl" />
+    <None Include="Strings\StringHelpers.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

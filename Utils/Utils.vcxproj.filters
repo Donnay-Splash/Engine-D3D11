@@ -20,6 +20,9 @@
     <ClInclude Include="Loader\MikeLoader.h">
       <Filter>Loader</Filter>
     </ClInclude>
+    <ClInclude Include="Strings\StringHelpers.h">
+      <Filter>Strings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -43,10 +46,16 @@
     <Filter Include="Loader">
       <UniqueIdentifier>{43190a5f-c413-4045-9f9f-1f40eeeda2f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Strings">
+      <UniqueIdentifier>{1467f52a-a58e-435c-9af9-db2632f4ec6d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\Math.inl">
       <Filter>Maths</Filter>
+    </None>
+    <None Include="Strings\StringHelpers.inl">
+      <Filter>Strings</Filter>
     </None>
   </ItemGroup>
 </Project>
