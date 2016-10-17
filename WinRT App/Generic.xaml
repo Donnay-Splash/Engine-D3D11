@@ -143,12 +143,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="local:PropertyPanel">
                     <Grid Height="Auto" Width="Auto">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Height="Auto" Width="Auto" Grid.Row="0" x:Name="Header" VerticalAlignment="Center" Padding="5, 0, 0, 0" Text="{TemplateBinding Content}" FontSize="16"/>
-                        <ContentPresenter Grid.Row="1" Margin="5" Content="{TemplateBinding Property}" x:Name="Content"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Height="Auto" Width="Auto" Grid.Column="0" x:Name="Header" VerticalAlignment="Center" Padding="5, 0, 0, 0" Text="{TemplateBinding Content}" FontSize="16"/>
+                        <ContentPresenter Grid.Column="1" Margin="5" Content="{TemplateBinding Property}" x:Name="Content"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -159,13 +159,13 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:VectorPropertyComponent">
-                    <Grid Width="Auto" Height="Auto">
+                    <Grid Width="Auto" Height="Auto" Margin="0, 5, 0, 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="3*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="TextBlock" Grid.Column="0" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{TemplateBinding Content}">X</TextBlock>
-                        <TextBox x:Name="TextBox" Grid.Column="1" TextAlignment="Left" Width="50" MinWidth="50" MaxWidth="50" HorizontalAlignment="Left" Text="{Binding Value}" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
+                        <TextBox x:Name="TextBox" Grid.Column="1" TextAlignment="Left" Width="50" MinWidth="40" MaxWidth="40" MinHeight="25" MaxHeight="25" FontSize="11" HorizontalAlignment="Left" Text="{Binding Value}" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="2, 5, 2, 5"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -181,8 +181,8 @@
                             <ColumnDefinition Width="4*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Slider x:Name="Slider" Grid.Column="0" Minimum="{TemplateBinding SliderMinimum}" Maximum="{TemplateBinding SliderMaximum}" VerticalAlignment="Center" Orientation="Horizontal" Margin="2, 0, 6, 0"/>
-                        <TextBox x:Name="TextBox" Text="{Binding Value, ElementName = Slider}" Grid.Column="1" TextAlignment="Left" MinWidth="50" MaxWidth="50" MinHeight="30" MaxHeight="50" VerticalAlignment="Center" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="5" TextWrapping="NoWrap" Margin="6, 0, 2, 7"/>
+                        <Slider x:Name="Slider" Grid.Column="0" Minimum="{TemplateBinding SliderMinimum}" Maximum="{TemplateBinding SliderMaximum}" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="2, 8, 6, 0"/>
+                        <TextBox x:Name="TextBox" Text="{Binding Value, ElementName = Slider}" Grid.Column="1" TextAlignment="Left" Width="50" MinWidth="40" MaxWidth="40" MinHeight="25" MaxHeight="25" FontSize="11" VerticalAlignment="Center" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="5" TextWrapping="NoWrap" Margin="6, 0, 2, 0"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

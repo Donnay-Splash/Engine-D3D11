@@ -223,7 +223,7 @@ double VectorPropertyComponent::GetValueFromTextBox(Platform::String^ text)
 
 Platform::String^ VectorPropertyComponent::GetValueAsString()
 {
-    auto wstringValue = Utils::StringHelpers::ToWideStringWithPrecision(Value, 2, false);
+    auto wstringValue = Utils::StringHelpers::ToWideStringWithPrecision(Value, 2, true);
     return ref new Platform::String(wstringValue.c_str());
 }
 
