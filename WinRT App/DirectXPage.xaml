@@ -37,9 +37,11 @@
         <Grid Grid.Row="1">
         <SplitView x:Name="NavigationPane" DisplayMode="Overlay">
         <SplitView.Pane>
-            <StackPanel x:Name="NavigationMenu" Orientation="Vertical">
-                <!--SceneData goes here-->
-            </StackPanel>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel x:Name="NavigationMenu" Orientation="Vertical">
+                    <!--SceneData goes here-->
+                </StackPanel>
+            </ScrollViewer>
         </SplitView.Pane>
         
         <SplitView.Content>

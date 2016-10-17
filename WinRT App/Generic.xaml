@@ -110,7 +110,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <ContentPresenter x:Name="Header" Grid.Column="0" VerticalAlignment="Center" Padding="5, 0, 0, 0" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
-                                    <ToggleButton Grid.Column="1" RenderTransformOrigin="0.5, 0.5" x:Name="ExpandCollapseButton">
+                                    <ToggleButton Grid.Column="1" RenderTransformOrigin="0.5, 0.5" x:Name="ExpandCollapseButton" Margin="0, 0, 7, 0">
                                         <ToggleButton.Template>
                                             <ControlTemplate>
                                                 <Grid>
@@ -161,11 +161,11 @@
                 <ControlTemplate TargetType="local:VectorPropertyComponent">
                     <Grid Width="Auto" Height="Auto" Margin="0, 5, 0, 0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="TextBlock" Grid.Column="0" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{TemplateBinding Content}">X</TextBlock>
-                        <TextBox x:Name="TextBox" Grid.Column="1" TextAlignment="Left" Width="50" MinWidth="40" MaxWidth="40" MinHeight="25" MaxHeight="25" FontSize="11" HorizontalAlignment="Left" Text="{Binding Value}" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
+                        <TextBox x:Name="TextBox" Grid.Column="1" TextAlignment="Left" MinWidth="40" MaxWidth="40" MinHeight="25" MaxHeight="25" FontSize="11" HorizontalAlignment="Left" Text="{Binding Value}" AcceptsReturn="False" IsSpellCheckEnabled="False" MaxLength="9" TextWrapping="NoWrap" Margin="5, 5, 5, 5"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
