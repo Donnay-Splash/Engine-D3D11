@@ -44,7 +44,6 @@ namespace Engine
 
     private:
         LightData m_lightData;
-        float m_specularPower;
 
         friend class SceneNode;
     };

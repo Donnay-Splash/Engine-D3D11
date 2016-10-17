@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-    Material::Material(ID3D11Device* device, ShaderPipeline::Ptr shaderPipeline) :
+    Material::Material(ID3D11Device* device, ShaderPipeline::Ptr shaderPipeline) : SceneElement(L"Material"),
         m_shaderPipeline(shaderPipeline)
     {
         m_pipelineState = std::make_shared<PipelineState>(device, BlendMode::Opaque, D3D11_CULL_NONE, true);

@@ -11,7 +11,7 @@
 
 namespace Engine
 {
-    class Material
+    class Material : public SceneElement
     {
     public:
         enum class TextureType

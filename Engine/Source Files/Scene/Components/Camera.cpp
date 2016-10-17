@@ -113,5 +113,18 @@ namespace Engine
             return Utils::Maths::RadiansToDegrees(m_fov);
         };
         RegisterScalarProperty(L"Field of View", fovGetter, fovSetter, 5.0, 180.0);
+
+        auto nearPlaneGetter = [this]() { return m_nearClip; };
+        auto nearPlaneSetter = [this](float v) { m_nearClip = v; };
+        RegisterScalarProperty(L"Near Plane", nearPlaneGetter, nearPlaneSetter, 0.0f, 100.0f);
+
+        auto farPlaneGetter = [this]() { return m_farClip; };
+        auto farPlaneSetter = [this](float v) { m_farClip = v; };
+        RegisterScalarProperty(L"Far Plane", farPlaneGetter, farPlaneSetter, 50.0f, 1000.0f);
+
+        auto orthoSizeGetter = [this]() { return m_orthographicSize; };
+        auto orthoSizeSetter = [this](float v) { m_orthographicSize = v; };
+        RegisterScalarProperty(L"Orthographic Size", orthoSizeGetter, orthoSizeSetter, 1.0f, 1000.0f);
+
     }
 }

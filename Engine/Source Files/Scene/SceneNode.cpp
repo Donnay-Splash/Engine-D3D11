@@ -118,10 +118,6 @@ namespace Engine
         auto scaleSetter = [this](float scale) { SetScale(scale); };
         RegisterScalarProperty(L"Scale", scaleGetter, scaleSetter);
 
-        auto boolGetter = []() { return true; };
-        auto boolSetter = [](bool newValue) {};
-        RegisterBooleanProperty(L"Bool", boolGetter, boolSetter);
-
         // TODO: Create Quaternion to Euler convertesion helper so we 
         // can add rotation as a property.
         // Suggestion: Store Euler angles locally so we are not doing a conversion each time we 
