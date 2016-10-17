@@ -12,6 +12,7 @@
 #include "VectorPropertyComponent.h"
 #include "ScalarProperty.h"
 #include "VectorProperty.h"
+#include "BooleanProperty.h"
 
 namespace WinRT_App
 {

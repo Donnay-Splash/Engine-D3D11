@@ -19,8 +19,11 @@ namespace WinRT_App
         private:
             void set(double value)
             {
-                m_value = value; 
-                ValueChanged((Platform::Object^)this, value);
+                if (m_value != value)
+                {
+                    m_value = value;
+                    ValueChanged((Platform::Object^)this, value);
+                }
             }
         }
 

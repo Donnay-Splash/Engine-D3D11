@@ -62,11 +62,21 @@ void PropertyPanel::OnApplyTemplate()
             break;
         }
 
-    case Engine_WinRT::PropertyType::Bool:
+        case Engine_WinRT::PropertyType::Bool:
+        {
+            auto boolproperty = ref new BooleanProperty(false);
+            // Bind to events
+            boolproperty->ValueChanged += ref new BooleanPropertyChangedEventHandler(this, &PropertyPanel::OnBooleanPropertyChanged);
+            Property = boolproperty;
+            break;
+        }
+
     default:
         throw ref new Platform::Exception(E_INVALIDARG, "Invalid property type received");
         break;
     }
+
+    
 }
 
 void PropertyPanel::OnVectorPropertyChanged(Platform::Object ^ sender, WFN::float4 newValue)
@@ -77,4 +87,9 @@ void PropertyPanel::OnVectorPropertyChanged(Platform::Object ^ sender, WFN::floa
 void PropertyPanel::OnScalarPropertyChanged(Platform::Object ^ sender, double newValue)
 {
     m_property->Scalar = newValue;
+}
+
+void WinRT_App::PropertyPanel::OnBooleanPropertyChanged(Platform::Object ^ sender, bool newValue)
+{
+    m_property->Bool = newValue;
 }

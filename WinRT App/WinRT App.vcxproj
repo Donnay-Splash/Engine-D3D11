@@ -201,6 +201,7 @@
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="BooleanProperty.h" />
     <ClInclude Include="Common\DeviceResources.h" />
     <ClInclude Include="CustomTitleBar.xaml.h">
       <DependentUpon>CustomTitleBar.xaml</DependentUpon>
@@ -225,6 +226,7 @@
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="BooleanProperty.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
     <ClCompile Include="CustomTitleBar.xaml.cpp">
       <DependentUpon>CustomTitleBar.xaml</DependentUpon>

@@ -62,6 +62,9 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
+    <Filter Include="Debug UI">
+      <UniqueIdentifier>{641ea37d-e569-4324-ab74-b0797b86c66f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -72,11 +75,24 @@
     <ClCompile Include="DirectXPage.xaml.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="CustomTitleBar.xaml.cpp" />
-    <ClCompile Include="ExpandPanel.cpp" />
-    <ClCompile Include="PropertyPanel.cpp" />
-    <ClCompile Include="VectorPropertyComponent.cpp" />
-    <ClCompile Include="ScalarProperty.cpp" />
-    <ClCompile Include="VectorProperty.cpp" />
+    <ClCompile Include="PropertyPanel.cpp">
+      <Filter>Debug UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ScalarProperty.cpp">
+      <Filter>Debug UI</Filter>
+    </ClCompile>
+    <ClCompile Include="VectorProperty.cpp">
+      <Filter>Debug UI</Filter>
+    </ClCompile>
+    <ClCompile Include="VectorPropertyComponent.cpp">
+      <Filter>Debug UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ExpandPanel.cpp">
+      <Filter>Debug UI</Filter>
+    </ClCompile>
+    <ClCompile Include="BooleanProperty.cpp">
+      <Filter>Debug UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />
@@ -84,11 +100,24 @@
     <ClInclude Include="DirectXPage.xaml.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="CustomTitleBar.xaml.h" />
-    <ClInclude Include="ExpandPanel.h" />
-    <ClInclude Include="PropertyPanel.h" />
-    <ClInclude Include="VectorPropertyComponent.h" />
-    <ClInclude Include="ScalarProperty.h" />
-    <ClInclude Include="VectorProperty.h" />
+    <ClInclude Include="VectorPropertyComponent.h">
+      <Filter>Debug UI</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyPanel.h">
+      <Filter>Debug UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ScalarProperty.h">
+      <Filter>Debug UI</Filter>
+    </ClInclude>
+    <ClInclude Include="VectorProperty.h">
+      <Filter>Debug UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ExpandPanel.h">
+      <Filter>Debug UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BooleanProperty.h">
+      <Filter>Debug UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

@@ -210,4 +210,16 @@
         </Setter>
     </Style>
 
+    <Style TargetType="local:BooleanProperty" >
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:BooleanProperty">
+                    <Grid Width="Auto" Height="Auto">
+                        <CheckBox x:Name="CheckBox" HorizontalAlignment="left" Height="Auto" Width="Auto" MinWidth="25" MaxWidth="25" MinHeight="30" MaxHeight="30"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
