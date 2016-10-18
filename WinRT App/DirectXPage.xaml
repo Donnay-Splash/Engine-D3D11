@@ -19,9 +19,7 @@
             <Rectangle x:Name="BackgroudElement">
             </Rectangle>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Width="Auto">
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph=""
-                            Foreground="{ThemeResource SystemControlHighlightAccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBlock Text="My awesome app title" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"
+                <TextBlock Text="Engine" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"
                             VerticalAlignment="Center"/>
             </StackPanel>
             <i:Interaction.Behaviors>

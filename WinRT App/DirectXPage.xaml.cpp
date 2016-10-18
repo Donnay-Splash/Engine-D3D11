@@ -37,6 +37,7 @@ DirectXPage::DirectXPage()
     auto coreTitleBar = CoreApplication::GetCurrentView()->TitleBar;
     coreTitleBar->IsVisibleChanged += ref new TypedEventHandler<CoreApplicationViewTitleBar^, Platform::Object^>(this, &DirectXPage::OnTitleBarVisibilityChanged);
     coreTitleBar->LayoutMetricsChanged += ref new TypedEventHandler<CoreApplicationViewTitleBar^, Platform::Object^>(this, &DirectXPage::OnLayoutMetricsChanged);
+    auto height = coreTitleBar->Height;
     engineComponent->SceneElementAdded += ref new Engine_WinRT::SceneElementAddedEventHandler(this, &DirectXPage::OnSceneElementAdded);
 
     //// Register event handlers for page lifecycle.

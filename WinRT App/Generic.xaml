@@ -11,11 +11,11 @@
                     <Grid x:Name="RootGrid" Height="Auto" Width="Auto">
 
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="44"/>
+                            <RowDefinition Height="32"/>
                         </Grid.RowDefinitions>
 
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="48"/>
+                            <ColumnDefinition Width="36"/>
                         </Grid.ColumnDefinitions>
                         
                         <VisualStateManager.VisualStateGroups>
@@ -51,6 +51,7 @@
                                   HorizontalAlignment="Center"
                                   Margin="8, 8, 8, 8"
                                   FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                  FontSize="18"
                                   Glyph="{TemplateBinding Tag}"/>
                         <!--<TextBlock Grid.Column="1"
                                    VerticalAlignment="Center"
