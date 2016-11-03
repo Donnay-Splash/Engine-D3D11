@@ -185,7 +185,7 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
 {
     aiString materialName;
     material->Get(AI_MATKEY_NAME, materialName);
-    std::cout << "Loading material with name: " << materialName.C_Str() << std::endl;
+    std::cout << "Loading material with name: " << materialName.C_Str() << '\n';
 
     aiColor3D diffuse;
     material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);

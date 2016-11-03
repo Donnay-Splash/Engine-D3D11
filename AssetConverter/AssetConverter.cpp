@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
             else
             {
                 // Invalid argument print out usage.
-                std::cout << "Unrecognised value: " << argument << std::endl;
+                std::cout << "Unrecognised value: " << argument << '\n';
                 correctArguments = false;
             }
         }
@@ -68,12 +68,12 @@ int main(int argc, char* argv[])
         }
         else
         {
-            std::cout << "Failed to convert model with given error: " << error << std::endl;
+            std::cout << "Failed to convert model with given error: " << error << '\n';
         }
     }
     else
     {
-        std::cout << AssetConverterHelp << std::endl;
+        std::cout << AssetConverterHelp << '\n';
     }
 
     return 0;
@@ -85,7 +85,7 @@ bool CheckFilePath()
     std::ifstream test(filePath);
     if (!test)
     {
-        std::cout << "Cannot open given file. Either the file does not exist or the given path is invalid" << std::endl;
+        std::cout << "Cannot open given file. Either the file does not exist or the given path is invalid" << '\n';
         return false;
     }
     test.close();

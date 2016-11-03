@@ -108,7 +108,7 @@ void TextureManager::LoadTextureFromFile(const std::wstring& path, const Importe
     {
         // WARNINNG
         // COULD NOT FIND FILE
-        std::wcout << "Could not find Texture file with path: " << path << std::endl;
+        std::wcout << "Could not find Texture file with path: " << path << '\n';
     }
 }
 
@@ -188,7 +188,7 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
     }
     else
     {
-        std::wcout << "Failed to create DDS Texture for file" << std::endl;
+        std::wcout << "Failed to create DDS Texture for file" << '\n';
         return false;
     }
 }
@@ -257,7 +257,7 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
         auto hr = DirectX::LoadFromDDSFile(path.c_str(), flags, nullptr, image);
         if (hr != S_OK)
         {
-            std::wcout << "Failed to load image file: " << path << std::endl;
+            std::wcout << "Failed to load image file: " << path << '\n';
             return false;
         }
     }
@@ -267,7 +267,7 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
         auto hr = DirectX::LoadFromTGAFile(path.c_str(), nullptr, image);
         if (hr != S_OK)
         {
-            std::wcout << "Failed to load image file: " << path << std::endl;
+            std::wcout << "Failed to load image file: " << path << '\n';
             return false;
         }
     }
@@ -277,7 +277,7 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
         auto hr = DirectX::LoadFromWICFile(path.c_str(), flags, nullptr, image);
         if (hr != S_OK)
         {
-            std::wcout << "Failed to load image file: " << path << std::endl;
+            std::wcout << "Failed to load image file: " << path << '\n';
             return false;
         }
     }
@@ -296,7 +296,7 @@ bool TextureManager::GetImageFromMemory(const aiTexture* texture, DirectX::Scrat
     // For now don't support assimp format textures. Only raw embedded files.
     if (texture->mHeight > 0)
     {
-        std::cout << "Not loading Assimp format embedded texture" << std::endl;
+        std::cout << "Not loading Assimp format embedded texture" << '\n';
         return false;
     } 
 
@@ -306,7 +306,7 @@ bool TextureManager::GetImageFromMemory(const aiTexture* texture, DirectX::Scrat
         auto hr = DirectX::LoadFromDDSMemory(texture->pcData, texture->mWidth, flags, nullptr, image);
         if (hr != S_OK)
         {
-            std::cout << "Failed to load embedded DDS texture file" << std::endl;
+            std::cout << "Failed to load embedded DDS texture file" << '\n';
             return false;
         }
     }
@@ -315,7 +315,7 @@ bool TextureManager::GetImageFromMemory(const aiTexture* texture, DirectX::Scrat
         auto hr = DirectX::LoadFromTGAMemory(texture->pcData, texture->mWidth, nullptr, image);
         if (hr != S_OK)
         {
-            std::cout << "Failed to load embedded TGA texture file" << std::endl;
+            std::cout << "Failed to load embedded TGA texture file" << '\n';
             return false;
         }
     }
@@ -325,7 +325,7 @@ bool TextureManager::GetImageFromMemory(const aiTexture* texture, DirectX::Scrat
         auto hr = DirectX::LoadFromWICMemory(texture->pcData, texture->mWidth, flags, nullptr, image);
         if (hr != S_OK)
         {
-            std::cout << "Failed to load embedded " << extension << " texture file" << std::endl;
+            std::cout << "Failed to load embedded " << extension << " texture file" << '\n';
             return false;
         }
     }
@@ -345,15 +345,15 @@ uint32_t TextureManager::ExtractEmbeddedTextureID(std::wstring ID)
     }
     catch (std::invalid_argument& ia)
     {
-        std::cout << "Failed to extract ID for embedded texture : Invalid Argument exception : " << ia.what() << std::endl;
+        std::cout << "Failed to extract ID for embedded texture : Invalid Argument exception : " << ia.what() << '\n';
     }
     catch (std::out_of_range& oor)
     {
-        std::cout << "Failed to extract ID for embedded texture : Out of Range exception : " << oor.what() << std::endl;
+        std::cout << "Failed to extract ID for embedded texture : Out of Range exception : " << oor.what() << '\n';
     }
     catch (...)
     {
-        std::cout << "Failed to extract ID for embedded texture : Unknown reason" << std::endl;
+        std::cout << "Failed to extract ID for embedded texture : Unknown reason" << '\n';
     }
 
     return embeddedTextureIndex;
