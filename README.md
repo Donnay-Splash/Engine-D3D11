@@ -5,4 +5,4 @@ Deep G-Buffers is a 2-layer Layered Depth Image technique developed by Michael M
 
 Some GIFs below demonstrate some of the features included in the framework.
 
-![Scene hierarchy editor](Donnay-Splash.github.com/Donnay-Splash.github.io/Edit teapot.gif)
+![Scene hierarchy editor](https://github.com/Donnay-Splash/Donnay-Splash.github.io/blob/master/Edit%20teapot.gif)
