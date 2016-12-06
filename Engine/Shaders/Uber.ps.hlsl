@@ -121,10 +121,10 @@ float3 EvaluateBRDF(float3 normal, float3 viewDirection, float3 lightDirection, 
     float3 F = F_Schlick(float3(0.04f, 0.04f, 0.04f), float3(1.0f, 1.0f, 1.0f), HoL);
 
     float attenuation = 1.0f; /// pow(length(lightDir), 2);
-    float3 RDiffuse = (baseColor * NoL) / PI;
+    float3 RDiffuse = (baseColor) / PI;
     float3 RSpec = D * G * F; // Divide by Pi in NDF
 
-    return (RDiffuse + RSpec);
+    return (RDiffuse + RSpec) * NoL;
 }
 
 float4 PSMain(PixelInputType input) : SV_TARGET
