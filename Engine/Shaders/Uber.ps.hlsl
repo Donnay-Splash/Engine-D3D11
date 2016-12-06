@@ -42,7 +42,7 @@ float D_GGXTrowbridgeReitz(float NoH, float a)
     // Note: At roughness of 0 t can be 0
     // Thus resulting in a divide by zero at the final step.
     float t = 1.0f + (a2 - 1.0f) * square(NoH);
-    return a2 / (PI * square(t) + 1e-5f);
+    return a2 / (PI * square(t));
 }
 
 // Geometry shadowing functions
@@ -139,7 +139,8 @@ float4 PSMain(PixelInputType input) : SV_TARGET
     float3 materialDiffuse = material_diffuseColorAndOpacity.rgb;
     float3 emissiveColor = material_emissiveColor.rgb;
     float3 specularColor = material_specularColorAndSmoothness.rgb;
-    float roughness = square(1.0f - material_specularColorAndSmoothness.a);
+    float roughness = 1.0f - material_specularColorAndSmoothness.a;
+    float alpha = max(0.001, square(roughness));
 
     // Since we are using SRGB formats for the textures the conversion to linear is done when reading
     if(material_hasDiffuseTexture == true)
@@ -154,7 +155,7 @@ float4 PSMain(PixelInputType input) : SV_TARGET
         Light light = lights[i];
         float3 lightDir = -normalize(light.position);
       
-        radiance += EvaluateBRDF(normal, viewDir, lightDir, roughness, materialDiffuse) * light.color.rgb;
+        radiance += EvaluateBRDF(normal, viewDir, lightDir, alpha, materialDiffuse) * light.color.rgb;
     }
 
 
