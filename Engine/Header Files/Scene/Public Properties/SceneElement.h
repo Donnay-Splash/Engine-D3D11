@@ -2,6 +2,8 @@
 #include "Property.h"
 #include <vector>
 #include <map>
+#include <set>
+
 namespace Engine
 {
     // Any classes derived from this can be represented in the debug UI as part of a 
@@ -11,8 +13,22 @@ namespace Engine
     class SceneElement : public std::enable_shared_from_this<SceneElement>
     {
     public:
+        using ChildElementsChangedEventHandler = std::function<void(std::shared_ptr<SceneElement>, uint32_t)>;
+        using Ptr = std::shared_ptr<SceneElement>;
+
         SceneElement(std::wstring elementName);
 
+        void SetChildAddedCallback(ChildElementsChangedEventHandler childAddedEventHandler) { m_onChildElementAdded = childAddedEventHandler; }
+        void SetChildRemovedCallback(ChildElementsChangedEventHandler childRemovedEventHandler) { m_onChildElementRemoved = childRemovedEventHandler; }
+
+        Property::Ptr GetProperty(std::wstring name);
+        std::wstring GetElementName()const { return m_name; }
+        // Used when constructing UI. Not advisable to use otherwise
+        std::vector<Property::Ptr> GetProperties() const;
+        std::vector<SceneElement::Ptr> GetChildElements() const;
+        uint32_t GetID() const { return m_id; }
+
+    protected:
         void RegisterBooleanProperty(const std::wstring& name,
             Property::BoolPropertyGetter boolGetter,
             Property::BoolPropertySetter boolSetter);
@@ -29,13 +45,7 @@ namespace Engine
             const Utils::Maths::Vector4& minimum = {},
             const Utils::Maths::Vector4& maximum = {});
 
-        Property::Ptr GetProperty(std::wstring name);
-
-        // TODO: add functions to set and get values to avoid returning pointers.
-
-        // Used when constructing UI. Not advisable to use otherwise
-        std::vector<Property::Ptr> GetProperties();
-        std::wstring GetElementName()const { return m_name; }
+        void AddChildElement(SceneElement::Ptr childElement);
 
     private:
         void AddProperty(Property::Ptr property);
@@ -44,6 +54,12 @@ namespace Engine
         std::map<std::wstring, Property::Ptr> m_publicProperties;
         std::wstring m_name;
 
-        // Allows us the SceneElement class to create properties
+        ChildElementsChangedEventHandler m_onChildElementAdded;
+        ChildElementsChangedEventHandler m_onChildElementRemoved;
+
+        const uint32_t m_id;
+
+        // Set avoids adding duplicate elements
+        std::set<SceneElement::Ptr> m_childElements;
     };
 } // end namespace Engine

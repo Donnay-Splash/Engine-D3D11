@@ -1,12 +1,10 @@
 #include "pch.h"
 #include <Scene\SceneNode.h>
 
-static uint32_t s_sceneNodeID = 1;
-
 namespace Engine
 {
     // TODO: Make name editable for scene nodes to make elements easier to recognise in visual tree.
-    SceneNode::SceneNode(ScenePtr scene, bool isRoot /* = false*/) : SceneElement(L"Scene Node " + std::to_wstring(s_sceneNodeID++)),
+    SceneNode::SceneNode(ScenePtr scene, std::wstring name, bool isRoot /* = false*/) : SceneElement(name),
         m_scene(scene), m_isRootNode(isRoot)
     {
         // Initialise scale to 1
@@ -18,6 +16,16 @@ namespace Engine
     SceneNode::~SceneNode()
     {
 
+    }
+
+    void SceneNode::AddChildNode(SceneNode::Ptr childNode)
+    {
+        // Add the node to the SceneNode child container
+        m_childNodes.push_back(childNode);
+
+        // Add the node as a child Element of this node
+        // so it can appear in the UI.
+        AddChildElement(childNode);
     }
 
     void SceneNode::Update(float frameTime)

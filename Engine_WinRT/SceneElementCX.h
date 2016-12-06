@@ -22,6 +22,14 @@ namespace Engine_WinRT
             }
         }
 
+        property uint32_t ID
+        {
+            uint32_t get()
+            {
+                return m_nativeSceneElement.lock()->GetID();
+            }
+        }
+
         property bool Active
         {
             bool get()
@@ -29,7 +37,6 @@ namespace Engine_WinRT
                 return m_nativeSceneElement.lock() != nullptr;
             }
         }
-
 
         property Windows::Foundation::Collections::IVector<PropertyCX^>^ Properties
         {
@@ -39,9 +46,9 @@ namespace Engine_WinRT
             }
         }
 
-        property Platform::String^ ParentName
+        property uint32_t ParentID
         {
-            Platform::String^ get() { return m_parentName; }
+            uint32_t get() { return m_parentID; }
         }
 
         property ElementType Type
@@ -50,13 +57,13 @@ namespace Engine_WinRT
         }
 
     internal:
-        SceneElementCX(std::weak_ptr<Engine::SceneElement> sceneElement, std::wstring parentName, ElementType type);
+        SceneElementCX(std::weak_ptr<Engine::SceneElement> sceneElement, uint32_t parentID, ElementType type);
 
     private:
         Platform::Collections::Vector<PropertyCX^>^ m_properties;
         std::weak_ptr<Engine::SceneElement> m_nativeSceneElement;
         Platform::String^ m_name;
-        Platform::String^ m_parentName;
+        uint32_t m_parentID;
 
         ElementType m_type;
         

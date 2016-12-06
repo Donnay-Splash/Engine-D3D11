@@ -7,10 +7,6 @@ namespace Engine
     class Scene : public std::enable_shared_from_this<Scene>
     {
     public:
-        // Fired from the SceneNodeAddedEvent
-        using SceneNodeAddedDelegate = std::function<void(SceneNode::Ptr nodeAdded)>;
-        // Fired from the SceneNodeRemovedEvent
-        using SceneNodeRemovedDelegate = std::function<void(SceneNode::Ptr nodeRemoved)>;
         using Ptr = std::shared_ptr<Scene>;
 
         Scene();
@@ -19,16 +15,15 @@ namespace Engine
 
         void Initialize();
 
-        SceneNode::Ptr AddNode(SceneNode::Ptr parentNode = nullptr);
+        /*  Adds a new node to the scene. Specifying the parent node and the name for the node.
+            If the parent pointer is left null. The SceneNode will be parented to the rootNode
+            The name can be used to aid debugging. Making it easier to recognise the purpose of
+            a node. By default the name is set to "Scene Node" */
+        SceneNode::Ptr AddNode(SceneNode::Ptr parentNode = nullptr, std::wstring name = L"Scene Node");
         SceneNode::Ptr GetRootNode() const { return m_rootNode; }
 
         void Update(float frameTime);
         void Render(ID3D11DeviceContext* deviceContext);
-
-        void RegisterSceneNodeAddedCallback(SceneNodeAddedDelegate callback);
-        void RegisterSceneNodeRemovedCallback(SceneNodeRemovedDelegate callback);
-        void FireSceneNodeAddedEvent(SceneNode::Ptr sceneNodeAdded);
-        void FireSceneNodeRemovedEvent(SceneNode::Ptr sceneNodeRemoved);
 
         // Returns a vector containing all instances of ComponentType in the scene.
         template <class ComponentType>
@@ -50,8 +45,6 @@ namespace Engine
     private:
         // TODO: Need to ensure that no components are added to the root node.
         SceneNode::Ptr m_rootNode;
-        std::vector<SceneNodeAddedDelegate> m_sceneNodeAddedCallbacks;
-        std::vector<SceneNodeRemovedDelegate> m_sceneNodeRemovedCallbacks;
     };
 
 #include "Scene.inl" 

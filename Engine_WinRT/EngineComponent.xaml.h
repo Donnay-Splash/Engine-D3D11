@@ -28,6 +28,9 @@ namespace Engine_WinRT
         event SceneElementAddedEventHandler^ SceneElementAdded;
 
     private:
+        // Engine events
+        void OnSceneElementAdded(Engine::SceneElement::Ptr sceneElement, uint32_t parentID);
+
         // SwapChainPanel events
         void OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel^ sender, Object^ args);
         void OnSwapChainPanelSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
@@ -44,6 +47,7 @@ namespace Engine_WinRT
         static void InitializeSwapChain(IUnknown* swapChain, void* userData);
         
         void StartRendererThread();
+
 
         Concurrency::task<void> LoadFileInternal(Windows::Storage::StorageFile^ fileToLoad);
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <functional>
-#include <Scene\Scene.h>
+#include <Scene\Public Properties\SceneElement.h>
 
 namespace Engine
 {
@@ -20,6 +20,6 @@ namespace Engine
         uint32_t ScreenHeight;
         void* UserData = nullptr;
         std::function<void(IUnknown* swapChain, void* userData)> SwapChainCreatedCallback = nullptr;
-        Scene::SceneNodeAddedDelegate SceneNodeAddedCallback = nullptr;
+        SceneElement::ChildElementsChangedEventHandler RootSceneElementAddedCallback = nullptr;
     };
 }

@@ -110,7 +110,9 @@ float3 EvaluateBRDF(float3 normal, float3 viewDirection, float3 lightDirection, 
     if (NoV < 0.0f || NoL < 0.0f)
         return float3(0.0f, 0.0f, 0.0f);
 
-    float3 halfVector = normalize(normal + lightDirection);
+    // Half vector is the vector inbetween the light and view not light and normal.
+    // You fool!
+    float3 halfVector = normalize(viewDirection + lightDirection);
     float NoH = dot(halfVector, normal);
     float HoL = dot(halfVector, lightDirection);
 

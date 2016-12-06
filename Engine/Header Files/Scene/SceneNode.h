@@ -56,13 +56,15 @@ namespace Engine
         bool IsRootNode() const { return m_isRootNode; }
 
     private:
-        SceneNode(ScenePtr scene, bool isRoot = false);
-        static Ptr Create(ScenePtr scene, bool isRoot = false) { return std::shared_ptr<SceneNode>(new SceneNode(scene, isRoot)); }
+        SceneNode(ScenePtr scene, std::wstring name, bool isRoot = false);
+        static Ptr Create(ScenePtr scene, std::wstring name, bool isRoot = false) { return std::shared_ptr<SceneNode>(new SceneNode(scene, name, isRoot)); }
 
         Ptr GetSharedThis();
 
         void CalculateTransform();
         void AddPublicProperties();
+
+        void AddChildNode(SceneNode::Ptr child);
 
         friend class Scene;
     private:

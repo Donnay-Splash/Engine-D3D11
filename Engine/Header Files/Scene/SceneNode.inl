@@ -14,6 +14,8 @@ inline std::shared_ptr<ComponentType> SceneNode::AddComponent(ID3D11Device* devi
     auto newComponent = std::shared_ptr<ComponentType>(new ComponentType(GetSharedThis()));
     newComponent->Initialize(device);
     m_components.push_back(newComponent);
+    // Add the component as a child of this SceneElement so that it appears in the UI.
+    AddChildElement(newComponent);
     FireComponentAddedCallback(newComponent);
     return newComponent;
 }

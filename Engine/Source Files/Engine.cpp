@@ -39,9 +39,10 @@ namespace Engine
         m_scene = std::make_shared<Scene>();
         m_scene->Initialize();
 
-        if (createOptions.SceneNodeAddedCallback != nullptr)
+        // If defined attach the root scene element added callback.
+        if (createOptions.RootSceneElementAddedCallback != nullptr)
         {
-            m_scene->RegisterSceneNodeAddedCallback(createOptions.SceneNodeAddedCallback);
+            m_scene->GetRootNode()->SetChildAddedCallback(createOptions.RootSceneElementAddedCallback);
         }
 
         // Initialize light manager
@@ -224,8 +225,4 @@ namespace Engine
         return true;
     }
 
-    void Engine::RegisterSceneNodeAddedCallback(Scene::SceneNodeAddedDelegate callback)
-    {
-        m_scene->RegisterSceneNodeAddedCallback(callback);
-    }
 }

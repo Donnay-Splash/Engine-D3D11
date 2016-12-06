@@ -34,7 +34,14 @@ namespace Engine
 
     void MeshInstance::SetMaterial(Material::Ptr material)
     {
+        // TODO: Figure out how to remove elements
+        // to allow for new materials to be set 
+        // while removing the old one.
         m_material = material;
+        
+        // Add the child element to the
+        // MeshInstance so that it appears in the UI.
+        AddChildElement(m_material);
     }
 
     void MeshInstance::SetMesh(Mesh::Ptr mesh)

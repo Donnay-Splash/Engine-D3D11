@@ -17,6 +17,8 @@ namespace Engine
             auto sampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP);
             m_samplers[i] = sampler;
         }
+
+        RegisterPublicProperties();
     }
 
 
@@ -95,5 +97,18 @@ namespace Engine
                 sampler->UploadData(deviceContext, i);
             }
         }
+    }
+
+    void Material::RegisterPublicProperties()
+    {
+        auto smoothnessGetter = [this]() { return GetSmoothness(); };
+        auto smoothnessSetter = [this](float smoothness) { SetSmoothness(smoothness); };
+        RegisterScalarProperty(L"Smoothness", smoothnessGetter, smoothnessSetter, 0.0f, 1.0f);
+
+        auto opacityGetter = [this]() { return GetOpacity(); };
+        auto opacitySetter = [this](float opacity) { SetOpacity(opacity); };
+        RegisterScalarProperty(L"Opacity", opacityGetter, opacitySetter, 0.0f, 1.0f);
+
+        // TODO Add colour setter and getter
     }
 }

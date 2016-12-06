@@ -54,6 +54,13 @@ ExpandPanel::ExpandPanel(Engine_WinRT::SceneElementCX ^ sceneElement)
         auto propertyPanel = ref new PropertyPanel(property);
         AddContent(propertyPanel);
     }
+
+    // Get's internal elements. 
+    // Construct new expand panel for each element adding them to this panel.
+    // Get Internal Elements
+    // For each element
+        // Internal panel = ref new ExpandPanel(internal element)
+        // AddContent(Internal Panel)
 }
 
 void ExpandPanel::AddContent(WUX::UIElement^ content)

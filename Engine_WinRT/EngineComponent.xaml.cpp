@@ -6,9 +6,11 @@
 #include "pch.h"
 #include "EngineComponent.xaml.h"
 #include "SceneElementCX.h"
+#include <Utils\DirectXHelpers\EngineHelpers.h>
+#include <Engine\Header Files\Scene\Public Properties\SceneElement.h>
+
 #include <d3d11_3.h>
 #include <windows.ui.xaml.media.dxinterop.h>
-#include <Utils\DirectXHelpers\EngineHelpers.h>
 #include <experimental\resumable>
 #include <ppltasks.h>
 #include <pplawait.h>
@@ -37,50 +39,12 @@ EngineComponent::EngineComponent()
     InitializeComponent();
 
     // Now initialise Engine.
-    // Need to find a way to specify that we want to render with XAML flip mode swap chain and receive the swap chain from the engine.
     double logicalWidth = swapChainPanel->ActualWidth;
     double logicalHeight = swapChainPanel->ActualHeight;
 
-    WeakReference weakRef(this);
-    auto UIDispatcher = Window::Current->CoreWindow->Dispatcher;
-    auto SceneNodeAddedCallback = [weakRef, UIDispatcher](Engine::SceneNode::Ptr sceneNodeAdded)
+    auto SceneElementAddedCallback = [this](Engine::SceneElement::Ptr sceneElementAdded, uint32_t parentID)
     {
-        auto strongRef = weakRef.Resolve<EngineComponent>();
-        EngineAssert(strongRef != nullptr);
-
-        // extract data from scene node 
-        auto parentNode = sceneNodeAdded->GetParentNode();
-        std::wstring parentName = L"";
-        if (!parentNode->IsRootNode())
-        {
-            parentName = parentNode->GetElementName();
-        }
-        auto sceneElement = ref new SceneElementCX(sceneNodeAdded, parentName, ElementType::SceneNode);
-        auto sceneNodeName = sceneNodeAdded->GetElementName();
-        
-        // We want to know when scene node has added a component
-        // so we now create a lambda to call when a component is added
-        auto componentAddedCallback = [weakRef, UIDispatcher, sceneNodeName](Engine::Component::Ptr componentAdded)
-        {
-            auto strongRef = weakRef.Resolve<EngineComponent>();
-            EngineAssert(strongRef != nullptr);
-            // Extract properties from component
-            auto sceneElement = ref new SceneElementCX(componentAdded, sceneNodeName, ElementType::Component);
-            // Fire off event to add component to UI in app.
-            UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([strongRef, sceneElement]()
-            {
-                strongRef->SceneElementAdded(sceneElement);
-            }));
-        };
-
-        sceneNodeAdded->RegisterComponentAddedCallback(componentAddedCallback);
-
-        
-        // Fire off event on UI thread for the app to receive
-        UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([strongRef, sceneElement]() 
-        {
-            strongRef->SceneElementAdded(sceneElement);
-        }));
+        OnSceneElementAdded(sceneElementAdded, parentID);
     };
 
     m_engine = std::make_shared<Engine::Engine>();
@@ -89,7 +53,7 @@ EngineComponent::EngineComponent()
     createOptions.RendererMode = Engine::EngineRendererMode::XAML;
     createOptions.UserData = (void*)this;
     createOptions.SwapChainCreatedCallback = &EngineComponent::InitializeSwapChain;
-    createOptions.SceneNodeAddedCallback = SceneNodeAddedCallback;
+    createOptions.RootSceneElementAddedCallback = SceneElementAddedCallback;
     createOptions.ScreenWidth = static_cast<int>(std::max(logicalWidth, 1.0));
     createOptions.ScreenHeight = static_cast<int>(std::max(logicalHeight, 1.0));
     m_engine->Initialize(createOptions);
@@ -164,6 +128,24 @@ void Engine_WinRT::EngineComponent::StartRendererThread()
 
     // Run task on a dedicated high priority background thread.
     m_renderThreadWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
+}
+
+void EngineComponent::OnSceneElementAdded(Engine::SceneElement::Ptr sceneElementNative, uint32_t parentID)
+{
+    // extract data from scene node 
+    auto sceneElementCX = ref new SceneElementCX(sceneElementNative, parentID, ElementType::SceneNode);
+
+    sceneElementNative->SetChildAddedCallback([this](Engine::SceneElement::Ptr sceneElementNative, uint32_t parentID)
+    {
+        OnSceneElementAdded(sceneElementNative, parentID);
+    });
+
+    auto UIDispatcher = Window::Current->CoreWindow->Dispatcher;
+    // Fire off event on UI thread for the app to receive
+    UIDispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([this, sceneElementCX]()
+    {
+        SceneElementAdded(sceneElementCX);
+    }));
 }
 
 void EngineComponent::LoadFile(Windows::Storage::StorageFile^ file)

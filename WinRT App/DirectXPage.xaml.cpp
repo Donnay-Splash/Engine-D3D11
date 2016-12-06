@@ -203,20 +203,24 @@ void DirectXPage::OnSceneElementAdded(Engine_WinRT::SceneElementCX^ sceneElement
 {
     // Now we have the scene element we need to build UI out of it.
     auto expandPanel = ref new ExpandPanel(sceneElement);
-    if (sceneElement->ParentName->IsEmpty())
+
+    // Check to see if parent panel exists.
+    auto parentPanelIt = m_uiMap.find(sceneElement->ParentID);
+    // Since UI elements are added in order. We know that if the parent
+    // doesn't exist for the SceneElement it is an element of the root
+    // node for the scene.
+    if (parentPanelIt != m_uiMap.end())
     {
-        NavigationMenu->Children->Append(expandPanel);
+        auto parentPanel = parentPanelIt->second;
+        parentPanel->AddContent(expandPanel);
     }
     else
     {
-        auto parentPanel = m_uiMap[sceneElement->ParentName];
-        parentPanel->AddContent(expandPanel);
+        NavigationMenu->Children->Append(expandPanel);
     }
 
-    if (sceneElement->Type == Engine_WinRT::ElementType::SceneNode)
-    {
-        m_uiMap[sceneElement->Name] = expandPanel;
-    }
+    // Add new element to the map so that children can find it.
+    m_uiMap.emplace(sceneElement->ID, expandPanel);
 }
 
 

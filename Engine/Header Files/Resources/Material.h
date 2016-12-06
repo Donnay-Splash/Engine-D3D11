@@ -47,6 +47,9 @@ namespace Engine
         void SetSmoothness(float smoothness) { m_materialData.specularColorAndSmoothness.w = smoothness; }
 
     private:
+        void RegisterPublicProperties();
+
+    private:
         ShaderPipeline::Ptr m_shaderPipeline;
         PipelineState::Ptr m_pipelineState;
         ConstantBuffer<MaterialConstants>::Ptr m_materialConstants;

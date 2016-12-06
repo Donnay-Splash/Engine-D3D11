@@ -49,7 +49,7 @@ namespace WinRT_App
 
     private:
         void TitleBarButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
-        std::map <Platform::String^, ExpandPanel^> m_uiMap;
+        std::map <uint32_t, ExpandPanel^> m_uiMap;
         void OpenFileButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
     };
 }

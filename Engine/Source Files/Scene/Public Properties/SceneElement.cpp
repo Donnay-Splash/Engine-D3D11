@@ -1,9 +1,12 @@
 #include "pch.h"
 #include <Scene\Public Properties\SceneElement.h>
 
+static uint32_t s_elementID = 0;
+
 namespace Engine
 {
-    SceneElement::SceneElement(std::wstring elementName) : m_name(elementName)
+    SceneElement::SceneElement(std::wstring elementName) :
+        m_name(elementName), m_id(s_elementID++)
     {
     }
 
@@ -89,6 +92,15 @@ namespace Engine
         }
     }
 
+    void SceneElement::AddChildElement(SceneElement::Ptr child)
+    {
+        m_childElements.insert(child);
+        if (m_onChildElementAdded != nullptr)
+        {
+            m_onChildElementAdded(child, m_id);
+        }
+    }
+
     void SceneElement::AddProperty(Property::Ptr property)
     {
         if (property != nullptr)
@@ -99,7 +111,7 @@ namespace Engine
         }
     }
 
-    std::vector<Property::Ptr> SceneElement::GetProperties()
+    std::vector<Property::Ptr> SceneElement::GetProperties() const
     {
         std::vector<Property::Ptr> result;
         for (auto it : m_publicProperties)
@@ -107,5 +119,10 @@ namespace Engine
             result.push_back(it.second);
         }
         return result;
+    }
+
+    std::vector<SceneElement::Ptr> SceneElement::GetChildElements() const
+    {
+        return std::vector<SceneElement::Ptr>(m_childElements.begin(), m_childElements.end());
     }
 }
