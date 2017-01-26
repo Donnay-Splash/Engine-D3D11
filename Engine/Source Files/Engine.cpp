@@ -140,6 +140,15 @@ namespace Engine
         EngineAssert(newWidth > 0);
         EngineAssert(newHeight > 0);
         m_direct3D->ResizeBuffers(newWidth, newHeight);
+
+        // Re-create G-Buffer with new dimensions
+        RenderTargetBundle::Ptr bundle = std::make_shared<RenderTargetBundle>(newWidth, newHeight, m_direct3D->GetDevice());
+        bundle->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
+        bundle->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
+        bundle->Finalise();
+
+        // Set the G-Buffer for output from camera
+        m_camera->SetRenderTargetBundle(bundle);
     }
 
 

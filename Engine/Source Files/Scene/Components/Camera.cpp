@@ -47,6 +47,12 @@ namespace Engine
             auto screenSize = d3dClass->GetScreenSize();
             m_aspectRatio = screenSize.x / screenSize.y;
         }
+        else
+        {
+            // Clear render target bundle
+            m_renderTargetBundle->Clear(d3dClass->GetDeviceContext());
+        }
+
         CalculateProjectionMatrix();
         ViewConstants viewConstants;
         viewConstants.view = viewMatrix;

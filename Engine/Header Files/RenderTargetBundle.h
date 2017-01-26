@@ -25,6 +25,8 @@ namespace Engine
 
         void Finalise();
 
+        void Clear(ID3D11DeviceContext* deviceContext);
+
         // Uploads all render targets as SRV's. User must ensure that the 
         // render targets are not bound for output.
         void SetShaderResources(ID3D11DeviceContext* deviceContext);

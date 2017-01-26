@@ -57,13 +57,15 @@ namespace Engine
         // The root node of the model should always have the ID 1
         EngineAssert(m_nodeMap.find(1) != m_nodeMap.end());
         auto rootNode = m_nodeMap[1];
+
         // Calculate the bounding box for the root of the model
+        // TODO: Implement bounds calculation
         auto rootBounds = Scene::CalculateBoundingBoxForSceneNode(rootNode);
         auto boundsComponent = rootNode->AddComponent<BoundingBox>(m_d3dClass->GetDevice());
         boundsComponent->SetBounds(rootBounds);
         auto size = rootBounds.GetSize();
         auto maxAxis = std::max(size.x, std::max(size.y, size.z));
-        auto scale = 1.0f / maxAxis > 0.0f ? maxAxis : 1.0f;
+        auto scale = 1.0f / maxAxis;
         rootNode->SetScale(scale);
     }
 
@@ -104,7 +106,12 @@ namespace Engine
             EngineAssert(m_materialMap.find(importedNode.NodeID) != m_materialMap.end());
             Material::Ptr material = m_materialMap[importedNode.NodeID];
             meshInstance->SetMaterial(material);
+
+            // Add bounding box to node
+            auto bBox = sceneNode->AddComponent<BoundingBox>(m_d3dClass->GetDevice());
+            bBox->SetBounds(importedNode.Bounds);
         }
+
     }
 
     void Loader::LoadMaterials(const std::vector<Utils::Loader::MaterialData>& importedMaterials)

@@ -9,7 +9,7 @@ namespace Engine
         m_height(height), m_width(width), m_format(format)
     {
         bool bindToShader = (flags & TextureCreationFlags::BindShaderResource) != 0;
-        bool bindToRenderTarget = (flags & TextureCreationFlags::BindShaderResource) != 0;
+        bool bindToRenderTarget = (flags & TextureCreationFlags::BindRenderTarget) != 0;
         bool bindDepthStencil = (flags & TextureCreationFlags::BindDepthStencil) != 0;
 
         D3D11_TEXTURE2D_DESC desc;

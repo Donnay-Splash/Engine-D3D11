@@ -37,6 +37,21 @@ namespace Engine
         return mapIt->second;
     }
 
+    void RenderTargetBundle::Clear(ID3D11DeviceContext* deviceContext)
+    {
+        EngineAssert(m_finalised);
+
+        // Can add custom colour later
+        float color[4]{ 0.0f, 0.0f, 0.0f, 1.0f };
+
+        for (uint32_t i = 0; i < m_count; i++)
+        {
+            deviceContext->ClearRenderTargetView(m_renderTargetViews[i], color);
+        }
+
+        deviceContext->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+    }
+
     void RenderTargetBundle::Finalise()
     {
         // Not dangerous that it is already finalised.
