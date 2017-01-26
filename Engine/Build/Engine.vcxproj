@@ -179,6 +179,7 @@
     </ClCompile>
     <ClCompile Include="..\Source Files\PerformanceTracker.cpp" />
     <ClCompile Include="..\Source Files\positionclass.cpp" />
+    <ClCompile Include="..\Source Files\RenderTargetBundle.cpp" />
     <ClCompile Include="..\Source Files\Resources\BlendState.cpp" />
     <ClCompile Include="..\Source Files\Resources\ConstantBuffer.cpp" />
     <ClCompile Include="..\Source Files\Resources\DepthBuffer.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="..\Header Files\MeshMaker\MeshMaker.h" />
     <ClInclude Include="..\Header Files\PerformanceTracker.h" />
     <ClInclude Include="..\Header Files\positionclass.h" />
+    <ClInclude Include="..\Header Files\RenderTargetBundle.h" />
     <ClInclude Include="..\Header Files\Resources\BlendState.h" />
     <ClInclude Include="..\Header Files\Resources\ConstantBuffer.h" />
     <ClInclude Include="..\Header Files\Resources\ConstantBufferLayouts.h" />

@@ -337,18 +337,16 @@ namespace Engine
         return Utils::Maths::Vector2(static_cast<float>(m_backBufferRT->GetWidth()), static_cast<float>(m_backBufferRT->GetHeight()));
     }
 
-    void D3DClass::SetRenderTarget(RenderTarget::Ptr renderTarget, DepthBuffer::Ptr depthBuffer) const
+    void D3DClass::SetRenderTarget(RenderTargetBundle::Ptr bundle) const
     {
-        if (renderTarget == nullptr)
+        if (bundle == nullptr)
         {
-            renderTarget = m_backBufferRT;
+            m_deviceContext->OMSetRenderTargets(1, m_backBufferRT->GetRTV().GetAddressOf(), m_depthBuffer->GetDSV().Get());
         }
-        if (depthBuffer == nullptr)
+        else
         {
-            depthBuffer = m_depthBuffer;
+            m_deviceContext->OMSetRenderTargets(bundle->RenderTargetCount(), bundle->GetRenderTargetViews(), bundle->GetDepthBuffer()->GetDSV().Get());
         }
-
-        m_deviceContext->OMSetRenderTargets(1, renderTarget->GetRTV().GetAddressOf(), depthBuffer->GetDSV().Get());
     }
 
     void D3DClass::ClearResources()

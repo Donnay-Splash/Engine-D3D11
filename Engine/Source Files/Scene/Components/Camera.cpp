@@ -42,7 +42,7 @@ namespace Engine
         auto viewMatrix = transform.GetInverse();
 
         // TODO: Fix this temp hack
-        if (m_renderTarget == nullptr)
+        if (m_renderTargetBundle == nullptr)
         {
             auto screenSize = d3dClass->GetScreenSize();
             m_aspectRatio = screenSize.x / screenSize.y;
@@ -55,7 +55,7 @@ namespace Engine
 
         m_viewConstants->SetData(viewConstants);
         m_viewConstants->UploadData(d3dClass->GetDeviceContext());
-        d3dClass->SetRenderTarget(m_renderTarget, m_depthBuffer);
+        d3dClass->SetRenderTarget(m_renderTargetBundle);
 
         scene->Render(d3dClass->GetDeviceContext());
     }
@@ -78,24 +78,19 @@ namespace Engine
 
     }
 
-    void Camera::SetRenderTarget(RenderTarget::Ptr renderTarget)
+    void Camera::SetRenderTargetBundle(RenderTargetBundle::Ptr renderTargetBundle)
     {
-        m_renderTarget = renderTarget;
-        if (m_renderTarget == nullptr)
+        m_renderTargetBundle = renderTargetBundle;
+        if (m_renderTargetBundle == nullptr)
         {
             m_aspectRatio = 0.0f;
         }
         else
         {
-            auto height = static_cast<float>(m_renderTarget->GetHeight());
-            auto width = static_cast<float>(m_renderTarget->GetWidth());
+            auto height = static_cast<float>(m_renderTargetBundle->GetHeight());
+            auto width = static_cast<float>(m_renderTargetBundle->GetWidth());
             m_aspectRatio = width / height;
         }
-    }
-
-    void Camera::SetDepthBuffer(DepthBuffer::Ptr depthBuffer)
-    {
-        m_depthBuffer = depthBuffer;
     }
 
     void Camera::RegisterPublicProperties()

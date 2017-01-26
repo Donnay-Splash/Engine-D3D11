@@ -165,6 +165,9 @@
     <ClCompile Include="..\Source Files\Scene\Public Properties\SceneElement.cpp">
       <Filter>Source Files\Scene\Public Properties</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source Files\RenderTargetBundle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\d3dclass.h">
@@ -295,6 +298,9 @@
     </ClInclude>
     <ClInclude Include="..\Header Files\Scene\Public Properties\SceneElement.h">
       <Filter>Header Files\Scene\Public Properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\RenderTargetBundle.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

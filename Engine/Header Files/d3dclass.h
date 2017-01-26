@@ -4,8 +4,7 @@
 // INCLUDES //
 //////////////
 #include "EngineCreateOptions.h"
-#include <Resources\RenderTarget.h>
-#include <Resources\DepthBuffer.h>
+#include <RenderTargetBundle.h>
 
 namespace Engine
 {
@@ -28,7 +27,8 @@ namespace Engine
         void BeginScene(float, float, float, float);
         void EndScene();
 
-        void SetRenderTarget(RenderTarget::Ptr renderTarget, DepthBuffer::Ptr depthBuffer) const;
+        // Potentially rename FrameBuffer?
+        void SetRenderTarget(RenderTargetBundle::Ptr) const;
 
         ID3D11Device* GetDevice();
         ID3D11DeviceContext* GetDeviceContext();

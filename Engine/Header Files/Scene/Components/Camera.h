@@ -33,16 +33,14 @@ namespace Engine
         void SetOrthographicSize(float othographicSize) { m_orthographicSize = othographicSize; }
         void SetAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
 
-        void SetRenderTarget(RenderTarget::Ptr renderTarget);
-        void SetDepthBuffer(DepthBuffer::Ptr renderTarget);
+        void SetRenderTargetBundle(RenderTargetBundle::Ptr renderTargetBundle);
 
         float GetFieldOfView() const { return m_fov; }
         ProjectionMode GetProjectionMode() const { return m_projectionMode; }
         float GetOrthographicSize() const { return m_orthographicSize; }
         float GetAspectRatio() const { return m_aspectRatio; }
 
-        RenderTarget::Ptr GetRenderTarget() const { return m_renderTarget; }
-        DepthBuffer::Ptr GetDepthBuffer() const { return m_depthBuffer; }
+        RenderTargetBundle::Ptr GetRenderTargetBundle() const { return m_renderTargetBundle; }
 
     protected:
         Camera(Component::SceneNodePtr sceneNode);
@@ -54,8 +52,7 @@ namespace Engine
 
     private:
         ConstantBuffer<ViewConstants>::Ptr m_viewConstants;
-        RenderTarget::Ptr m_renderTarget;
-        DepthBuffer::Ptr m_depthBuffer;
+        RenderTargetBundle::Ptr m_renderTargetBundle;
 
         float m_fov;
         float m_nearClip;

@@ -7,7 +7,7 @@
 namespace Engine
 {
     // Class for managing lights in the scene. e.g. Sorting and picking most relevant lights
-// Managing light properties, Light probes, etc...
+    // Managing light properties, Light probes, etc...
     class LightManager
     {
     public:
