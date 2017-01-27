@@ -3,11 +3,21 @@
 #include <DDSTextureLoader.h>
 #include <Resources\ConstantBuffer.h>
 
+// TODO: Tidy
 namespace Engine
 {
-    Texture::Texture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device) :
-        m_height(height), m_width(width), m_format(format)
+
+    Texture::Ptr Texture::CreateTexture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device)
     {
+        return CreateTextureArray(data, width, height, 1, flags, format, device);
+    }
+
+    Texture::Ptr Texture::CreateTextureArray(void* data, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device)
+    {
+        EngineAssert(width > 0);
+        EngineAssert(height > 0);
+        EngineAssert(arraySize > 0 && arraySize < D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION);
+
         bool bindToShader = (flags & TextureCreationFlags::BindShaderResource) != 0;
         bool bindToRenderTarget = (flags & TextureCreationFlags::BindRenderTarget) != 0;
         bool bindDepthStencil = (flags & TextureCreationFlags::BindDepthStencil) != 0;
@@ -16,8 +26,9 @@ namespace Engine
         SecureZeroMemory(&desc, sizeof(desc));
         desc.Height = height;
         desc.Width = width;
-        desc.MipLevels = desc.ArraySize = 1;
-        desc.Format = m_format;
+        desc.MipLevels = 1;
+        desc.ArraySize = arraySize;
+        desc.Format = format;
         desc.SampleDesc.Count = 1;
         desc.SampleDesc.Quality = 0;
         desc.Usage = D3D11_USAGE_DEFAULT;
@@ -37,25 +48,36 @@ namespace Engine
             desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
         }
 
+        // Required to use new since constructor is not accessible to std::make_shared
+        return std::shared_ptr<Texture>(new Texture(data, desc, device));
+    }
+
+    Texture::Texture(void* data, D3D11_TEXTURE2D_DESC desc, ID3D11Device* device) :
+        m_height(desc.Height), m_width(desc.Width), m_format(desc.Format), m_arraySize(desc.ArraySize)
+    {
         D3D11_SUBRESOURCE_DATA* initData = nullptr;
         // Initialization data passed in
         if (data != nullptr)
         {
-            // Presumes texture data coming in is 32 bits per pixel.
-            uint32_t bytesPerPixel = static_cast<uint32_t>(Utils::DirectXHelpers::BitsPerPixel(format)) / 8;
+            uint32_t bytesPerPixel = static_cast<uint32_t>(Utils::DirectXHelpers::BitsPerPixel(m_format)) / 8;
             D3D11_SUBRESOURCE_DATA subresourceData;
             subresourceData.pSysMem = data;
-            subresourceData.SysMemPitch = width * bytesPerPixel;
-            subresourceData.SysMemSlicePitch = width * height * bytesPerPixel;
+            subresourceData.SysMemPitch = m_width * bytesPerPixel;
+            subresourceData.SysMemSlicePitch = m_width * m_height * bytesPerPixel;
             initData = &subresourceData;
         }
 
         Utils::DirectXHelpers::ThrowIfFailed(device->CreateTexture2D(&desc, initData, m_texture.GetAddressOf()));
 
-        if (bindToShader)
+        if ((desc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0)
         {
             Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
         }
+    }
+
+    Texture::Ptr Texture::CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device)
+    {
+        return std::shared_ptr<Texture>(new Texture(texture, flags, device));
     }
 
     // Create texture from D3D11 resource.
@@ -68,12 +90,18 @@ namespace Engine
         m_height = textureDesc.Height;
         m_width = textureDesc.Width;
         m_format = textureDesc.Format;
+        m_arraySize = textureDesc.ArraySize;
         bool bindToShader = (textureDesc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0;
 
         if (bindToShader)
         {
             Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
         }
+    }
+
+    Texture::Ptr Texture::CreateTextureFromFile(std::wstring filename, ID3D11Device* device)
+    {
+        return std::shared_ptr<Texture>(new Texture(device, filename.c_str()));
     }
 
     // Create a texture from a file
@@ -96,6 +124,7 @@ namespace Engine
             tex2D->GetDesc(&desc);
             m_height = desc.Height;
             m_width = desc.Width;
+            m_arraySize = desc.ArraySize;
             break;
         }
         default:
@@ -103,6 +132,11 @@ namespace Engine
             EngineAssert(false);
             break;
         }
+    }
+
+    Texture::Ptr Texture::CreateImportedTexture(const Utils::Loader::TextureData& importedTextureData, ID3D11Device* device)
+    {
+        return std::shared_ptr<Texture>(new Texture(device, importedTextureData));
     }
 
     // Create a texture from imported texture data
@@ -124,6 +158,7 @@ namespace Engine
             tex2D->GetDesc(&desc);
             m_height = desc.Height;
             m_width = desc.Width;
+            m_arraySize = desc.ArraySize;
             break;
         }
         default:

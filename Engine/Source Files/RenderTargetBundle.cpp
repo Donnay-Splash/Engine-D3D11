@@ -8,7 +8,7 @@ namespace Engine
         : m_width(width), m_height(height), m_device(device)
     {
         // Create depth buffer
-        m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, 0, m_device);
+        m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, 1, 0, m_device);
     }
 
     void RenderTargetBundle::CreateRenderTarget(std::wstring name, DXGI_FORMAT format)
@@ -18,7 +18,7 @@ namespace Engine
         EngineAssert(!m_finalised);
 
         // Create render target resource
-        auto newRenderTarget = std::make_shared<RenderTarget>(m_width, m_height, 0, format, m_device);
+        auto newRenderTarget = std::make_shared<RenderTarget>(m_width, m_height, 1, 0, format, m_device);
 
         // Add render target view to array.
         m_renderTargetMap.emplace(name, newRenderTarget);

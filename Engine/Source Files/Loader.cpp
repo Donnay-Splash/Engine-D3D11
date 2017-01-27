@@ -206,7 +206,7 @@ namespace Engine
         for (auto importedTexture : importedTextures)
         {
             // Need to ensure texture loaded correctly
-            auto engineTexture = std::make_shared<Texture>(m_d3dClass->GetDevice(), importedTexture);
+            auto engineTexture = Texture::CreateImportedTexture(importedTexture, m_d3dClass->GetDevice());
             // This value must not exist in the map already
             EngineAssert(m_textureMap.find(importedTexture.ID) == m_textureMap.end());
             m_textureMap[importedTexture.ID] = engineTexture;

@@ -219,7 +219,7 @@ namespace Engine
         auto backBufferWidth = m_backBufferRT->GetWidth();
         auto backBufferHeight = m_backBufferRT->GetHeight();
 
-        m_depthBuffer = std::make_shared<DepthBuffer>(backBufferWidth, backBufferHeight, 0, m_device.Get());
+        m_depthBuffer = std::make_shared<DepthBuffer>(backBufferWidth, backBufferHeight, 1, 0, m_device.Get());
 
         // Setup the viewport for rendering.
         D3D11_VIEWPORT viewport;

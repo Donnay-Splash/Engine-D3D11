@@ -166,12 +166,12 @@ ShaderOut PSMain(PixelInputType input)
     }
 
 
-    // Gamma encode
     ShaderOut output;
     output.diffuse = float4(materialDiffuse, 1.0f);
     output.normal = float4((normal + 1.0f) * 0.5f, 1.0f);
     return output;
 
+    // Gamma encode
     // return float4(GammaEncode(saturate(radiance)), 1.0f);
 }
 

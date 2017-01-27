@@ -85,7 +85,7 @@ namespace Engine
     bool Font::LoadTexture(ID3D11Device* device, WCHAR* filename)
     {
         // Create the texture object.
-        m_Texture = std::make_shared<Texture>(device, filename);
+        m_Texture = Texture::CreateTextureFromFile(filename, device);
 
         return true;
     }
