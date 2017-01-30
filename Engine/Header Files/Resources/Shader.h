@@ -13,8 +13,8 @@ namespace Engine
         enum class Type
         {
             Vertex,
-            Pixel/*,
-            Geometry,
+            Pixel,
+            Geometry/*,
             Domain,
             Hull,
             Compute*/

@@ -22,6 +22,13 @@ namespace Engine
             pixelShader.As(&m_shader);
             break;
         }
+        case Type::Geometry:
+        {
+            Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
+            device->CreateGeometryShader(shaderCode, shaderLength, nullptr, geometryShader.GetAddressOf());
+            geometryShader.As(&m_shader);
+            break;
+        }
         }
     }
 
@@ -49,6 +56,13 @@ namespace Engine
             Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
             m_shader.As(&pixelShader);
             deviceContext->PSSetShader(pixelShader.Get(), nullptr, 0);
+            break;
+        }
+        case Type::Geometry:
+        {
+            Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
+            m_shader.As(&geometryShader);
+            deviceContext->GSSetShader(geometryShader.Get(), nullptr, 0);
             break;
         }
         }

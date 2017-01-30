@@ -8,6 +8,7 @@ namespace Engine
     namespace UberShader
     {
         #include "Shaders\Compiled shaders\Uber.ps.hlsl.h"
+        #include "Shaders\Compiled shaders\Uber.gs.hlsl.h"
         #include "Shaders\Compiled shaders\Uber.vs.hlsl.h"
     }
 
@@ -27,7 +28,8 @@ namespace Engine
             InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0);
             Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, UberShader::g_VSMain, sizeof(UberShader::g_VSMain), device);
             Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, UberShader::g_PSMain, sizeof(UberShader::g_PSMain), device);
-            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(vertexShader, pixelShader, layout, device);
+            Shader::Ptr geometryShader = std::make_shared<Shader>(Shader::Type::Geometry, UberShader::g_GSMain, sizeof(UberShader::g_GSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(vertexShader, pixelShader, geometryShader, layout, device);
 
             m_shaderMap.insert(ShaderMapObject(ShaderName::Uber, shaderPipeline));
         }

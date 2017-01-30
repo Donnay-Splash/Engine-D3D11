@@ -134,7 +134,7 @@ struct ShaderOut
     float4 normal : SV_Target1;
 };
 
-ShaderOut PSMain(PixelInputType input)
+ShaderOut PSMain(GeometryOut input)
 {
     // Get normalised vectors
     float3 normal = normalize(input.normal);

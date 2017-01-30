@@ -8,7 +8,7 @@ namespace Engine
         : m_width(width), m_height(height), m_device(device)
     {
         // Create depth buffer
-        m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, 1, 0, m_device);
+        m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, 2, 0, m_device);
     }
 
     void RenderTargetBundle::CreateRenderTarget(std::wstring name, DXGI_FORMAT format)
@@ -18,7 +18,7 @@ namespace Engine
         EngineAssert(!m_finalised);
 
         // Create render target resource
-        auto newRenderTarget = std::make_shared<RenderTarget>(m_width, m_height, 1, 0, format, m_device);
+        auto newRenderTarget = std::make_shared<RenderTarget>(m_width, m_height, 2, 0, format, m_device);
 
         // Add render target view to array.
         m_renderTargetMap.emplace(name, newRenderTarget);
@@ -42,14 +42,14 @@ namespace Engine
         EngineAssert(m_finalised);
 
         // Can add custom colour later
-        float color[4]{ 0.0f, 0.0f, 0.0f, 1.0f };
+        float color[4]{ 1.0f, 0.0f, 0.0f, 1.0f };
 
         for (uint32_t i = 0; i < m_count; i++)
         {
             deviceContext->ClearRenderTargetView(m_renderTargetViews[i], color);
         }
 
-        deviceContext->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        deviceContext->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
     void RenderTargetBundle::Finalise()

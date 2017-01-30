@@ -11,7 +11,7 @@ namespace Engine
         depthStencilDesc.DepthEnable = depthEnabled;
         depthStencilDesc.DepthWriteMask = depthEnabled ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
         depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-        depthStencilDesc.StencilEnable = true;
+        depthStencilDesc.StencilEnable = false;
         depthStencilDesc.StencilReadMask = 0xFF;
         depthStencilDesc.StencilWriteMask = 0xFF;
         // Stencil operations if pixel is front-facing.

@@ -287,7 +287,7 @@ namespace Engine
         m_deviceContext->ClearRenderTargetView(m_backBufferRT->GetRTV().Get(), color);
 
         // Clear the depth buffer.
-        m_deviceContext->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        m_deviceContext->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
         return;
     }

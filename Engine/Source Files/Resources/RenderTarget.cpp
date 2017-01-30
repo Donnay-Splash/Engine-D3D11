@@ -8,6 +8,8 @@ namespace Engine
         creationFlags |= TextureCreationFlags::BindRenderTarget;
         m_texture = Texture::CreateTextureArray(nullptr, width, height, arraySize, creationFlags, format, device);
         Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), NULL, m_renderTargetView.GetAddressOf()));
+        D3D11_RENDER_TARGET_VIEW_DESC desc;
+        m_renderTargetView->GetDesc(&desc);
     }
 
     RenderTarget::RenderTarget(ID3D11Texture2D* texture, uint32_t creationFlags, ID3D11Device* device)
