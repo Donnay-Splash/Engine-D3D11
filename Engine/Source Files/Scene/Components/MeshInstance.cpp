@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <Scene\Components\MeshInstance.h>
 #include <Scene\SceneNode.h>
+#include <Scene\Scene.h>
 
 namespace Engine
 {
@@ -24,8 +25,10 @@ namespace Engine
     {
         auto sceneNode = GetSceneNode();
         auto transform = sceneNode->GetWorldTransform();
+        auto worldToCameraTransform = sceneNode->GetScene()->GetWorldToCameraTransform();
+        auto prevWorldToCameraTransform = sceneNode->GetScene()->GetPreviousWorldToCameraTransform();
 
-        m_objectConstants->SetData({ transform });
+        m_objectConstants->SetData({ transform * worldToCameraTransform, m_prevTransform * prevWorldToCameraTransform});
         m_objectConstants->UploadData(deviceContext);
         m_material->Render(deviceContext);
 

@@ -7,7 +7,8 @@ namespace Engine
     // TODO: Come up with a better sounding name
     enum class ShaderName
     {
-        Uber = 0
+        Uber = 0,
+        DeepGBuffer_Gen = 1
     };
 
     class ShaderManager

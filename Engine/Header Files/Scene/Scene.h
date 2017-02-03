@@ -42,9 +42,24 @@ namespace Engine
         // that can contain all of these bounding boxes transformed into world space.
         static Utils::Maths::BoundingBox CalculateBoundingBoxForSceneNode(SceneNode::Ptr sceneNode);
 
+        // HACK HACK HACK HACK HACK
+        // TODO: Find a better way to access constants like this.
+        Utils::Maths::Matrix GetCameraTransform() const { return m_cameraTransform; }
+        Utils::Maths::Matrix GetWorldToCameraTransform() const { return m_invCameraTransform; }
+        Utils::Maths::Matrix GetPreviousWorldToCameraTransform() const { return m_prevInvCameraTransform; }
+        // TODO: Find a better way to modify constants like this.
+        void SetCameraTransform(const Utils::Maths::Matrix& cameraTransform);
+
     private:
         // TODO: Need to ensure that no components are added to the root node.
         SceneNode::Ptr m_rootNode;
+
+        // HACK HACK HACK HACK HACK
+        // TODO: Find a better way of storing scene constants like this.
+        Utils::Maths::Matrix m_cameraTransform;
+        Utils::Maths::Matrix m_invCameraTransform;
+        Utils::Maths::Matrix m_prevCameraTransform;
+        Utils::Maths::Matrix m_prevInvCameraTransform;
     };
 
 #include "Scene.inl" 

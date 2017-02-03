@@ -63,4 +63,12 @@ namespace Engine
         return result;
     }
 
+    void Scene::SetCameraTransform(const Utils::Maths::Matrix& cameraTransform)
+    {
+        m_prevCameraTransform = m_cameraTransform;
+        m_prevInvCameraTransform = m_invCameraTransform;
+        m_cameraTransform = cameraTransform;
+        m_invCameraTransform = m_cameraTransform.GetInverse();
+    }
+
 } // End namespace Engine

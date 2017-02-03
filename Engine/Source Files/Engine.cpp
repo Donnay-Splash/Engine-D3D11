@@ -108,6 +108,7 @@ namespace Engine
         m_inputManager->Update(newInputState);
     }
 
+    // TODO: Remove all of these returned bools
     bool Engine::Frame()
     {
         bool result;
@@ -124,6 +125,7 @@ namespace Engine
 
         // Update the scene
         m_scene->Update(m_timer->GetTime());
+        m_scene->SetCameraTransform(m_camera->GetSceneNode()->GetWorldTransform());
 
         // Render the graphics.
         result = RenderGraphics();
@@ -154,7 +156,7 @@ namespace Engine
 
     void Engine::LoadFile(const uint8_t * data, uint64_t byteCount)
     {
-        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
+        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen);
         Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
 
         loader->LoadFile(data, byteCount);

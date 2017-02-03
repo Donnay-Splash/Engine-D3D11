@@ -26,6 +26,8 @@ namespace Engine
     private:
         void ValidateInputSignature(InputLayout::Ptr layout, ID3D11Device* device);
         void UploadData(ID3D11DeviceContext* deviceContext);
+        static Shader::Ptr CreateNullShader(Type type);
+        Shader(Type type);
 
     private:
         const Type m_type;

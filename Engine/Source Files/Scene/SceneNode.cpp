@@ -28,6 +28,7 @@ namespace Engine
         AddChildElement(childNode);
     }
 
+    // Should we store previous transform here?
     void SceneNode::Update(float frameTime)
     {
         CalculateTransform();
@@ -110,7 +111,12 @@ namespace Engine
     {
         if (m_transformDirty)
         {
-            m_transform = Utils::Maths::Matrix::CreateFromTranslationRotationScale(m_position, m_rotation, m_scale.x);
+            // Tell the components that the transform has changed.
+            for (auto component : m_components)
+            {
+                component->OnSceneNodeTransformChanged(GetWorldTransform());
+            }
+            m_transform = Utils::Maths::Matrix::CreateFromTranslationRotationScale(m_position, m_rotation, m_scale.x);;
             m_transformDirty = false;
         }
     }

@@ -32,6 +32,12 @@ namespace Engine
         }
     }
 
+    Shader::Shader(Shader::Type type) : 
+        m_type(type), m_shaderLength(0), m_shaderCode(nullptr)
+    {
+
+    }
+
     void Shader::ValidateInputSignature(InputLayout::Ptr inputLayout, ID3D11Device* device)
     {
         // Cannot create an input layout from anything but a vertex shader.
@@ -47,24 +53,44 @@ namespace Engine
         case Type::Vertex:
         {
             Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-            m_shader.As(&vertexShader);
+            if (m_shader != nullptr)
+            {
+                m_shader.As(&vertexShader);
+            }
             deviceContext->VSSetShader(vertexShader.Get(), nullptr, 0);
             break;
         }
         case Type::Pixel:
         {
             Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-            m_shader.As(&pixelShader);
+            if (m_shader != nullptr)
+            {
+                m_shader.As(&pixelShader);
+            }
             deviceContext->PSSetShader(pixelShader.Get(), nullptr, 0);
             break;
         }
         case Type::Geometry:
         {
             Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
-            m_shader.As(&geometryShader);
+            if (m_shader != nullptr)
+            {
+                m_shader.As(&geometryShader);
+            }
             deviceContext->GSSetShader(geometryShader.Get(), nullptr, 0);
             break;
         }
         }
+    }
+
+    Shader::Ptr Shader::CreateNullShader(Shader::Type type)
+    {
+        // Cannot create null vertex shader.
+        EngineAssert(type != Shader::Type::Vertex);
+
+        Shader::Ptr newShader = std::shared_ptr<Shader>(new Shader(type));
+        newShader->m_shader = nullptr;
+
+        return newShader;
     }
 }

@@ -23,11 +23,16 @@ namespace Engine
     protected:
         MeshInstance(Component::SceneNodePtr sceneNode);
         virtual void Initialize(ID3D11Device* device) override;
+        virtual void OnSceneNodeTransformChanged(const Utils::Maths::Matrix& prevWorldTransform) override
+        {
+            m_prevTransform = prevWorldTransform;
+        }
 
     private:
         Mesh::Ptr m_mesh;
         Material::Ptr m_material;
         ConstantBuffer<ObjectConstants>::Ptr m_objectConstants;
+        Utils::Maths::Matrix m_prevTransform;
 
         friend class SceneNode;
     };

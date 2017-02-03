@@ -127,14 +127,7 @@ float3 EvaluateBRDF(float3 normal, float3 viewDirection, float3 lightDirection, 
     return (RDiffuse + RSpec) * NoL;
 }
 
-// Temp hacks Bae
-struct ShaderOut
-{
-    float4 diffuse : SV_Target0;
-    float4 normal : SV_Target1;
-};
-
-ShaderOut PSMain(GeometryOut input)
+float4 PSMain(VertexOut input) : SV_Target
 {
     // Get normalised vectors
     float3 normal = normalize(input.normal);
@@ -165,14 +158,8 @@ ShaderOut PSMain(GeometryOut input)
         radiance += EvaluateBRDF(normal, viewDir, lightDir, alpha, materialDiffuse) * light.color.rgb;
     }
 
-
-    ShaderOut output;
-    output.diffuse = float4(materialDiffuse, 1.0f);
-    output.normal = float4((normal + 1.0f) * 0.5f, 1.0f);
-    return output;
-
     // Gamma encode
-    // return float4(GammaEncode(saturate(radiance)), 1.0f);
+    return float4(GammaEncode(saturate(radiance)), 1.0f);
 }
 
 

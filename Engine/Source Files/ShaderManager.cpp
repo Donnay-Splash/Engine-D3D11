@@ -5,11 +5,19 @@
 
 namespace Engine
 {
+    // Standard forward shader pipeline
     namespace UberShader
     {
         #include "Shaders\Compiled shaders\Uber.ps.hlsl.h"
-        #include "Shaders\Compiled shaders\Uber.gs.hlsl.h"
         #include "Shaders\Compiled shaders\Uber.vs.hlsl.h"
+    }
+
+    // Deep G-Buffer generation pipeline
+    namespace DeepGBuffer
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen.ps.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen.gs.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h"
     }
 
     ShaderManager::ShaderManager(ID3D11Device* device)
@@ -22,16 +30,26 @@ namespace Engine
         // Here we create the D3D11 shader objects to be placed into the bundle.
         // At this time we will also create the input layouts for each shader bundle.
 
-        // Load the VM shaders
+        // Load the Standard forward shaders
         {
 
             InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0);
             Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, UberShader::g_VSMain, sizeof(UberShader::g_VSMain), device);
             Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, UberShader::g_PSMain, sizeof(UberShader::g_PSMain), device);
-            Shader::Ptr geometryShader = std::make_shared<Shader>(Shader::Type::Geometry, UberShader::g_GSMain, sizeof(UberShader::g_GSMain), device);
-            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(vertexShader, pixelShader, geometryShader, layout, device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, pixelShader);
 
             m_shaderMap.insert(ShaderMapObject(ShaderName::Uber, shaderPipeline));
+        }
+
+        // Load deep G-Buffer generation shaders
+        {
+            InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0);
+            Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, DeepGBuffer::g_VSMain, sizeof(DeepGBuffer::g_VSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DeepGBuffer::g_PSMain, sizeof(DeepGBuffer::g_PSMain), device);
+            Shader::Ptr geometryShader = std::make_shared<Shader>(Shader::Type::Geometry, DeepGBuffer::g_GSMain, sizeof(DeepGBuffer::g_GSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, pixelShader, geometryShader);
+
+            m_shaderMap.insert(ShaderMapObject(ShaderName::DeepGBuffer_Gen, shaderPipeline));
         }
     }
 

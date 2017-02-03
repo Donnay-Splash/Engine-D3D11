@@ -34,16 +34,19 @@ namespace Engine
         struct ObjectConstants
     {
         static const UINT kRegister = 1;
-        Utils::Maths::Matrix objectTransform;
+        Utils::Maths::Matrix objectToCameraTransform;
+        Utils::Maths::Matrix prevObjectToCameraTransform;
 
         bool operator!=(const ObjectConstants& rhs)
         {
-            return  (this->objectTransform != rhs.objectTransform);
+            return  (this->objectToCameraTransform != rhs.objectToCameraTransform) ||
+                    (this->prevObjectToCameraTransform != rhs.prevObjectToCameraTransform);
         }
 
         bool operator==(const ObjectConstants& rhs)
         {
-            return  (this->objectTransform == rhs.objectTransform);
+            return  (this->objectToCameraTransform == rhs.objectToCameraTransform) &&
+                    (this->prevObjectToCameraTransform == rhs.prevObjectToCameraTransform);
         }
     };
 

@@ -8,11 +8,11 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<ShaderPipeline>;
-        ShaderPipeline(Shader::Ptr vertexShader,
-            Shader::Ptr pixelShader,
-            Shader::Ptr geometryShader,
+        ShaderPipeline(ID3D11Device* device,
             InputLayout::Ptr inputLayout,
-            ID3D11Device* device);
+            Shader::Ptr vertexShader,
+            Shader::Ptr pixelShader = nullptr,
+            Shader::Ptr geometryShader = nullptr);
 
         void UploadData(ID3D11DeviceContext* deviceContext);
 
