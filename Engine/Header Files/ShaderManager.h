@@ -16,7 +16,7 @@ namespace Engine
         using Ptr = std::shared_ptr<ShaderManager>;
 
         // TODO: eventually make shader manager a friend of the Renderer class
-        // so that it can set this up without having to pass too much shit around.
+        // so that it can set this up without having to pass too much stuff around.
         ShaderManager(ID3D11Device* device);
 
         ShaderPipeline::Ptr GetShaderPipeline(ShaderName);
