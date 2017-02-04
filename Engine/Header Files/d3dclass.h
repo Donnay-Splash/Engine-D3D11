@@ -37,6 +37,8 @@ namespace Engine
 
         Utils::Maths::Vector2 GetScreenSize() const;
 
+        Texture::Ptr CopyTexture(Texture::Ptr textureToCopy) const;
+
     private:
         void GetAdapterInformation();
         void CreateDeviceAndSwapChain();

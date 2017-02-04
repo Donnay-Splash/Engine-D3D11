@@ -347,6 +347,15 @@
     <None Include="..\Header Files\Scene\Public Properties\Property.inl">
       <Filter>Header Files\Scene\Public Properties</Filter>
     </None>
+    <None Include="..\Shaders\DeepGBuffer_Gen_Globals.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\DeepGBuffer_Gen_InputStructs.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\ReconstructFromDepth.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">
@@ -365,12 +374,6 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Gen.gs.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Shaders\DeepGBuffer_Gen_Globals.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Shaders\DeepGBuffer_Gen_InputStructs.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

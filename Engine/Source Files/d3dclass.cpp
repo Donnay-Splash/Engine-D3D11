@@ -356,4 +356,14 @@ namespace Engine
 
         m_deviceContext->Flush();
     }
+
+    Texture::Ptr D3DClass::CopyTexture(Texture::Ptr textureToCopy) const
+    {
+        EngineAssert(textureToCopy != nullptr);
+        auto newTexture = Texture::CreateIdenticalTexture(textureToCopy, m_device.Get());
+
+        m_deviceContext->CopyResource(newTexture->GetTexture().Get(), textureToCopy->GetTexture().Get());
+
+        return newTexture;
+    }
 }

@@ -14,19 +14,25 @@ namespace Engine
         Utils::Maths::Matrix view;
         Utils::Maths::Matrix projection;
         Utils::Maths::Vector3 cameraPosition;
+        Utils::Maths::Vector3 clipInfo;
+        Utils::Maths::Vector2 invViewSize;
 
         bool operator!=(const ViewConstants& rhs)
         {
             return  (view != rhs.view) ||
                 (projection != rhs.projection) ||
-                (cameraPosition != rhs.cameraPosition);
+                (cameraPosition != rhs.cameraPosition) ||
+                (clipInfo != rhs.clipInfo) ||
+                (invViewSize != rhs.invViewSize);
         }
 
         bool operator==(const ViewConstants& rhs)
         {
             return  (view == rhs.view) &&
                 (projection == rhs.projection) &&
-                (cameraPosition == rhs.cameraPosition);
+                (cameraPosition == rhs.cameraPosition) &&
+                (clipInfo == rhs.clipInfo) &&
+                (invViewSize == rhs.invViewSize);
         }
     };
 
@@ -54,7 +60,7 @@ namespace Engine
     ALIGN_16
         struct LightConstants
     {
-        static const UINT kRegister = 0;
+        static const UINT kRegister = 2;
         LightData lights[kMaxLightCount];
         float activeLights;
 
@@ -90,7 +96,7 @@ namespace Engine
     ALIGN_16
         struct MaterialConstants
     {
-        static const UINT kRegister = 1;
+        static const UINT kRegister = 3;
 
         Utils::Maths::Color diffuseColorAndOpacity;
         Utils::Maths::Color specularColorAndSmoothness;

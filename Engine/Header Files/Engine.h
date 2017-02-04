@@ -15,6 +15,7 @@
 #include <Scene\Components\Light.h>
 #include <Scene\Scene.h>
 #include <Resources\Mesh.h>
+#include <Resources\Sampler.h>
 
 namespace Engine
 {
@@ -53,6 +54,8 @@ namespace Engine
         Scene::Ptr m_scene;
         LightManager m_lightManager;
         EngineCreateOptions m_createOptions;
+        Texture::Ptr m_prevDepth;
+        Sampler::Ptr m_depthSampler;
 
     };
 }

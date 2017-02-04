@@ -46,6 +46,7 @@ namespace Engine
         Camera(Component::SceneNodePtr sceneNode);
         virtual void Initialize(ID3D11Device* device) override;
         virtual void CalculateProjectionMatrix();
+        Utils::Maths::Vector3 GetClipInfo() const;
         
     private:
         void RegisterPublicProperties();

@@ -95,6 +95,9 @@ namespace Engine
         // Set the initial position of the viewer to the same as the initial camera position.
         m_position->SetPosition(0.0f, 0.0f, -10.0f);
 
+        // Create depth sampler
+        m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
+
         InitializeScene();
         return true;
     }
@@ -225,10 +228,26 @@ namespace Engine
     {
         // Clear the scene.
         m_direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
-
         m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext());
+
+        // Upload previous depth to shader
+        if (m_prevDepth)
+        {
+            // Upload at register 7 as material takes registers 0 -> 6
+            // TODO: Formalise this
+            m_prevDepth->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 7);
+            m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
+        }
+
         // Generate the view matrix based on the camera's position.
         m_camera->Render(m_direct3D, m_scene);
+
+        // Now need to copy depth
+        auto bundle = m_camera->GetRenderTargetBundle();
+        if (bundle != nullptr)
+        {
+            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
+        }
 
         // Present the rendered scene to the screen.
         m_direct3D->EndScene();

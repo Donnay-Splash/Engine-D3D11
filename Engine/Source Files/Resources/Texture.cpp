@@ -22,6 +22,12 @@ namespace Engine
         bool bindToRenderTarget = (flags & TextureCreationFlags::BindRenderTarget) != 0;
         bool bindDepthStencil = (flags & TextureCreationFlags::BindDepthStencil) != 0;
 
+        if ((bindDepthStencil && bindToShader) || (format == DXGI_FORMAT_D24_UNORM_S8_UINT && bindToShader))
+        {
+            // If we are using it for depth and reading from a shader we need to be specific about format specification
+            format = DXGI_FORMAT_R24G8_TYPELESS;
+        }
+
         D3D11_TEXTURE2D_DESC desc;
         SecureZeroMemory(&desc, sizeof(desc));
         desc.Height = height;
@@ -71,7 +77,31 @@ namespace Engine
 
         if ((desc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0)
         {
-            Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
+            if (desc.Format == DXGI_FORMAT_R24G8_TYPELESS)
+            {
+                // Need to use separate format when binding depth for reading in shader
+                D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+                srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+                if (desc.ArraySize > 1)
+                {
+                    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+                    srvDesc.Texture2DArray.ArraySize = desc.ArraySize;
+                    srvDesc.Texture2DArray.FirstArraySlice = 0;
+                    srvDesc.Texture2DArray.MipLevels = desc.MipLevels;
+                    srvDesc.Texture2DArray.MostDetailedMip = 0;
+                }
+                else
+                {
+                    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+                    srvDesc.Texture2D.MipLevels = desc.MipLevels;
+                    srvDesc.Texture2D.MostDetailedMip = 0;
+                }
+                Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_srv.GetAddressOf()));
+            }
+            else
+            {
+                Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
+            }
         }
     }
 
@@ -166,6 +196,11 @@ namespace Engine
             EngineAssert(false);
             break;
         }
+    }
+
+    Texture::Ptr Texture::CreateIdenticalTexture(Texture::Ptr const texture, ID3D11Device* device)
+    {
+        return CreateTextureArray(nullptr, texture->m_width, texture->m_height, texture->m_arraySize, TextureCreationFlags::BindShaderResource, texture->m_format, device);
     }
 
     void Texture::UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister)

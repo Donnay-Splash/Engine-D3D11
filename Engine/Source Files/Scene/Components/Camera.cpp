@@ -23,7 +23,7 @@ namespace Engine
 
     void Camera::Initialize(ID3D11Device* device)
     {
-        m_viewConstants = std::make_shared<ConstantBuffer<ViewConstants>>(PipelineStage::Vertex, device);
+        m_viewConstants = std::make_shared<ConstantBuffer<ViewConstants>>(PipelineStage::Vertex | PipelineStage::Pixel, device);
     }
 
     void Camera::Update(float frameTime)
@@ -40,17 +40,19 @@ namespace Engine
         auto sceneNode = GetSceneNode();
         auto transform = sceneNode->GetWorldTransform();
         auto viewMatrix = transform.GetInverse();
+        Utils::Maths::Vector2 viewSize;
 
         // TODO: Fix this temp hack
         if (m_renderTargetBundle == nullptr)
         {
-            auto screenSize = d3dClass->GetScreenSize();
-            m_aspectRatio = screenSize.x / screenSize.y;
+            viewSize = d3dClass->GetScreenSize();
+            m_aspectRatio = viewSize.x / viewSize.y;
         }
         else
         {
             // Clear render target bundle
             m_renderTargetBundle->Clear(d3dClass->GetDeviceContext());
+            viewSize = { static_cast<float>(m_renderTargetBundle->GetWidth()), static_cast<float>(m_renderTargetBundle->GetHeight()) };
         }
 
         CalculateProjectionMatrix();
@@ -58,6 +60,8 @@ namespace Engine
         viewConstants.view = viewMatrix;
         viewConstants.projection = m_projectionMatrix;
         viewConstants.cameraPosition = sceneNode->GetWorldSpacePosition();
+        viewConstants.clipInfo = GetClipInfo();
+        viewConstants.invViewSize = Utils::Maths::Vector2(1.0f, 1.0f) / viewSize;
 
         m_viewConstants->SetData(viewConstants);
         m_viewConstants->UploadData(d3dClass->GetDeviceContext());
@@ -82,6 +86,11 @@ namespace Engine
             m_projectionMatrix = Utils::Maths::Matrix::CreateOrthographicProjectionMatrix(sizeX, sizeY, m_nearClip, m_farClip);
         }
 
+    }
+
+    Utils::Maths::Vector3 Camera::GetClipInfo() const
+    {
+        return{ m_nearClip * m_farClip, m_nearClip - m_farClip, m_farClip };
     }
 
     void Camera::SetRenderTargetBundle(RenderTargetBundle::Ptr renderTargetBundle)

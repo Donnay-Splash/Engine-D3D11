@@ -27,6 +27,9 @@ namespace Engine
         static Texture::Ptr CreateTextureFromFile(std::wstring filename, ID3D11Device* device);
         static Texture::Ptr CreateImportedTexture(const Utils::Loader::TextureData& importedData, ID3D11Device* device);
 
+        // Creates a new texture with exactly the same layout as the given texture
+        static Texture::Ptr CreateIdenticalTexture(Texture::Ptr const texture, ID3D11Device* device);
+
         void UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister);
 
         DXGI_FORMAT GetFormat() const { return m_format; }
