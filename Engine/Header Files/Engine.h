@@ -11,11 +11,14 @@
 #include "ShaderManager.h"
 #include "LightManager.h"
 #include "EngineCreateOptions.h"
-#include <Scene\Components\Camera.h>
+#include <Scene\Components\PostProcessingCamera.h>
 #include <Scene\Components\Light.h>
 #include <Scene\Scene.h>
 #include <Resources\Mesh.h>
 #include <Resources\Sampler.h>
+
+// Don't really want this sat here.
+#include <Resources\ConstantBufferLayouts.h>
 
 namespace Engine
 {
@@ -54,6 +57,10 @@ namespace Engine
         Scene::Ptr m_scene;
         LightManager m_lightManager;
         EngineCreateOptions m_createOptions;
+
+        // These can be moved to a more specific application class
+        PostProcessingCamera::Ptr m_postProcessCamera;
+        PostEffect<PostEffectConstants>::Ptr m_postEffect;
         Texture::Ptr m_prevDepth;
         Sampler::Ptr m_depthSampler;
 

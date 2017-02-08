@@ -307,6 +307,12 @@ namespace Engine
             m_swapChain->Present(0, 0);
         }
 
+        // Clear pixel and vertex shader texture slots
+        // TODO: Likely unnecessary to clear all slots. Look at estimating max texture count
+        ID3D11ShaderResourceView* nullViews[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
+        m_deviceContext->VSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullViews);
+        m_deviceContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullViews);
+
         return;
     }
 

@@ -2,6 +2,7 @@
 
 #include <Resources\RenderTarget.h>
 #include <Resources\DepthBuffer.h>
+#include <Resources\Sampler.h>
 
 namespace Engine
 {
@@ -15,7 +16,7 @@ namespace Engine
     public:
         using Ptr = std::shared_ptr<RenderTargetBundle>;
 
-        RenderTargetBundle(uint32_t width, uint32_t height, ID3D11Device* device);
+        RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize = 1);
 
         void CreateRenderTarget(std::wstring name, DXGI_FORMAT format);
 
@@ -39,15 +40,16 @@ namespace Engine
         uint32_t GetHeight() const { return m_height; }
 
     private:
-
         std::map<std::wstring, RenderTarget::Ptr> m_renderTargetMap;
         DepthBuffer::Ptr m_depthBuffer;
-        std::array<ID3D11RenderTargetView* , D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> m_renderTargetViews;
+        Sampler::Ptr m_bundleSampler;
+        std::array<ID3D11RenderTargetView*, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> m_renderTargetViews;
 
         // Number of render targets stored in this bundle
         uint32_t m_count = 0;
         uint32_t m_width = 0;
         uint32_t m_height = 0;
+        uint32_t m_arraySize = 0;
 
         bool m_finalised = false;
 

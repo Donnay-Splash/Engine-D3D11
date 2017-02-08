@@ -179,6 +179,7 @@
     </ClCompile>
     <ClCompile Include="..\Source Files\PerformanceTracker.cpp" />
     <ClCompile Include="..\Source Files\positionclass.cpp" />
+    <ClCompile Include="..\Source Files\PostEffect.cpp" />
     <ClCompile Include="..\Source Files\RenderTargetBundle.cpp" />
     <ClCompile Include="..\Source Files\Resources\BlendState.cpp" />
     <ClCompile Include="..\Source Files\Resources\ConstantBuffer.cpp" />
@@ -201,6 +202,7 @@
     <ClCompile Include="..\Source Files\Scene\Components\Component.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\Light.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\MeshInstance.cpp" />
+    <ClCompile Include="..\Source Files\Scene\Components\PostProcessingCamera.cpp" />
     <ClCompile Include="..\Source Files\Scene\Public Properties\Property.cpp" />
     <ClCompile Include="..\Source Files\Scene\Public Properties\SceneElement.cpp" />
     <ClCompile Include="..\Source Files\Scene\Scene.cpp" />
@@ -234,6 +236,7 @@
     <ClInclude Include="..\Header Files\MeshMaker\MeshMaker.h" />
     <ClInclude Include="..\Header Files\PerformanceTracker.h" />
     <ClInclude Include="..\Header Files\positionclass.h" />
+    <ClInclude Include="..\Header Files\PostEffect.h" />
     <ClInclude Include="..\Header Files\RenderTargetBundle.h" />
     <ClInclude Include="..\Header Files\Resources\BlendState.h" />
     <ClInclude Include="..\Header Files\Resources\ConstantBuffer.h" />
@@ -257,6 +260,7 @@
     <ClInclude Include="..\Header Files\Scene\Components\Component.h" />
     <ClInclude Include="..\Header Files\Scene\Components\Light.h" />
     <ClInclude Include="..\Header Files\Scene\Components\MeshInstance.h" />
+    <ClInclude Include="..\Header Files\Scene\Components\PostProcessingCamera.h" />
     <ClInclude Include="..\Header Files\Scene\Public Properties\Property.h" />
     <ClInclude Include="..\Header Files\Scene\Public Properties\SceneElement.h" />
     <ClInclude Include="..\Header Files\Scene\Scene.h" />
@@ -370,6 +374,32 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Shade.ps.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\FullscreenQuad.vs.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>VSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="..\Shaders\Uber.gs.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>GSMain</EntryPointName>

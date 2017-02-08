@@ -20,6 +20,13 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h"
     }
 
+    // Final fullscreen shader to resolve shader G-Buffer
+    namespace Deferred
+    {
+        #include "Shaders\Compiled shaders\FullscreenQuad.vs.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Shade.ps.hlsl.h"
+    }
+
     ShaderManager::ShaderManager(ID3D11Device* device)
     {
         LoadCoreShaders(device);
@@ -50,6 +57,16 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, pixelShader, geometryShader);
 
             m_shaderMap.insert(ShaderMapObject(ShaderName::DeepGBuffer_Gen, shaderPipeline));
+        }
+
+        // Load the post process deferred shaders
+        {
+            InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::TexCoord0);
+            Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, Deferred::g_VSMain, sizeof(Deferred::g_VSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Deferred::g_PSMain, sizeof(Deferred::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::GBuffer_Shade, shaderPipeline);
         }
     }
 

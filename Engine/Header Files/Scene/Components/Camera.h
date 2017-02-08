@@ -21,7 +21,7 @@ namespace Engine
     public:
         using Ptr = std::shared_ptr<Camera>;
         Camera(const Camera&) = delete;
-        ~Camera();
+        virtual ~Camera();
 
         void Render(ID3D11DeviceContext* deviceContext) const override;
         void Render(D3DClass::Ptr d3dClass, Scene::Ptr scene);
@@ -47,13 +47,15 @@ namespace Engine
         virtual void Initialize(ID3D11Device* device) override;
         virtual void CalculateProjectionMatrix();
         Utils::Maths::Vector3 GetClipInfo() const;
+
+    protected:
+        RenderTargetBundle::Ptr m_renderTargetBundle;
         
     private:
         void RegisterPublicProperties();
 
     private:
         ConstantBuffer<ViewConstants>::Ptr m_viewConstants;
-        RenderTargetBundle::Ptr m_renderTargetBundle;
 
         float m_fov;
         float m_nearClip;

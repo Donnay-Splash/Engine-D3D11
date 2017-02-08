@@ -320,8 +320,41 @@ namespace Utils
 
         Mesh::Ptr MeshMaker::CreateFullScreenQuad(ID3D11Device* device)
         {
-            // Not yet implemented.
-            EngineAssert(false);
-            return nullptr;
+            const uint32_t vertexCount = 4;
+            const uint32_t indexCount = 6;
+
+            Mesh::PositionContainer positions(vertexCount);
+            Mesh::UVContainer uvs(vertexCount);
+            Mesh::IndexContainer indices(indexCount);
+
+            // Positions for out unit quad centred at the origin
+            // aligned along the z axis
+            positions[0] = { -1.0f, 1.0f, 0.0f }; // Top left
+            positions[1] = { 1.0f, 1.0f, 0.0f }; // Top right
+            positions[2] = { 1.0f, -1.0f, 0.0f }; // Bottom right
+            positions[3] = { -1.0f, -1.0f, 0.0f }; // Bottom left
+
+            // Uv coordinates for the quad
+            uvs[0] = { 0.0f, 0.0f }; // Top left
+            uvs[1] = { 1.0f, 0.0f }; // Top right
+            uvs[2] = { 1.0f, 1.0f }; // Bottom right
+            uvs[3] = { 0.0f, 1.0f }; // Bottom left
+
+            // Indices drawn clockwise
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 2;
+
+            indices[3] = 2;
+            indices[4] = 3;
+            indices[5] = 0;
+
+            Mesh::Ptr mesh = std::make_shared<Mesh>();
+            mesh->SetPositions(positions);
+            mesh->SetUVs(uvs);
+            mesh->SetIndices(indices);
+            mesh->FinaliseMesh(device);
+
+            return mesh;
         }
 }

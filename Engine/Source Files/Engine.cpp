@@ -74,13 +74,13 @@ namespace Engine
         m_camera = cameraNode->AddComponent<Camera>(m_direct3D->GetDevice());
         cameraNode->SetPosition({ 0.0f, 0.0f, -10.0f });
 
-        // Create the mesh object and add it to the scene.
-        /*auto meshNode = m_scene->AddNode();
-        auto meshInstance = meshNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
-        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
-        auto material = std::make_shared<Material>(m_direct3D->GetDevice(), shaderPipeline);
-        meshInstance->SetMesh(m_mesh);
-        meshInstance->SetMaterial(material);*/
+        // Create post processing camera
+        auto postCameraNode = m_scene->AddNode();
+        m_postProcessCamera = postCameraNode->AddComponent<PostProcessingCamera>(m_direct3D->GetDevice());
+
+        // Create post effect
+        auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade);
+        m_postEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), postEffectPipeline);
 
         // Create the timer object.
         m_timer = std::make_shared<TimerClass>();
@@ -147,7 +147,8 @@ namespace Engine
         m_direct3D->ResizeBuffers(newWidth, newHeight);
 
         // Re-create G-Buffer with new dimensions
-        RenderTargetBundle::Ptr bundle = std::make_shared<RenderTargetBundle>(newWidth, newHeight, m_direct3D->GetDevice());
+        const uint32_t GBufferLayers = 2; // TODO: Formalise this
+        RenderTargetBundle::Ptr bundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, GBufferLayers);
         bundle->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
         bundle->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
         bundle->Finalise();
@@ -239,7 +240,8 @@ namespace Engine
             m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
         }
 
-        // Generate the view matrix based on the camera's position.
+        // Render the scene.
+        // This generates our deep G-Buffer
         m_camera->Render(m_direct3D, m_scene);
 
         // Now need to copy depth
@@ -247,6 +249,12 @@ namespace Engine
         if (bundle != nullptr)
         {
             m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
+
+            // Upload G-buffer data to device
+            bundle->SetShaderResources(m_direct3D->GetDeviceContext());
+
+            // Now need fullscreen pass to process G-Buffer
+            m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
         }
 
         // Present the rendered scene to the screen.

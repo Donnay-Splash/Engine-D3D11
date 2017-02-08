@@ -8,7 +8,8 @@ namespace Engine
     enum class ShaderName
     {
         Uber = 0,
-        DeepGBuffer_Gen = 1
+        DeepGBuffer_Gen = 1,
+        GBuffer_Shade = 2
     };
 
     class ShaderManager

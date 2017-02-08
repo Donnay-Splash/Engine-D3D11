@@ -137,4 +137,21 @@ namespace Engine
                 (hasAOTexture == rhs.hasAOTexture);
         }
     };
+
+    ALIGN_16
+        struct PostEffectConstants
+    {
+        static const UINT kRegister = 0;
+
+        // Currently empty but can add debug stuff or something later
+        bool operator!=(const PostEffectConstants& rhs)
+        {
+            return false;
+        }
+        bool operator==(const PostEffectConstants& rhs)
+        {
+            return true;
+        }
+
+    };
 }

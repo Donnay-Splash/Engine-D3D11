@@ -165,6 +165,12 @@
     <ClCompile Include="..\Source Files\Scene\Public Properties\SceneElement.cpp">
       <Filter>Source Files\Scene\Public Properties</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Components\PostProcessingCamera.cpp">
+      <Filter>Source Files\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\PostEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\Source Files\RenderTargetBundle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -302,6 +308,12 @@
     <ClInclude Include="..\Header Files\RenderTargetBundle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Components\PostProcessingCamera.h">
+      <Filter>Header Files\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\PostEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Header Files\Scene\Scene.inl">
@@ -374,6 +386,12 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Gen.gs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\FullscreenQuad.vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Shade.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

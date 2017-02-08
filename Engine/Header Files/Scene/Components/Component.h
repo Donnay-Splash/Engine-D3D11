@@ -21,6 +21,8 @@ namespace Engine
         virtual void Update(float frameTime) = 0;
         virtual void Render(ID3D11DeviceContext* deviceContext) const = 0;
 
+        virtual ~Component() {}
+
     protected:
         Component(SceneNodePtr sceneNode, std::wstring elementName);
         Component(const Component&) = delete;

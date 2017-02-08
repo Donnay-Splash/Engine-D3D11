@@ -4,11 +4,12 @@
 
 namespace Engine
 {
-    RenderTargetBundle::RenderTargetBundle(uint32_t width, uint32_t height, ID3D11Device* device)
-        : m_width(width), m_height(height), m_device(device)
+    RenderTargetBundle::RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize/*=1*/)
+        : m_width(width), m_height(height), m_device(device), m_arraySize(arraySize)
     {
         // Create depth buffer
-        m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, 2, 0, m_device);
+        m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, m_arraySize, TextureCreationFlags::BindShaderResource, m_device);
+        m_bundleSampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
     }
 
     void RenderTargetBundle::CreateRenderTarget(std::wstring name, DXGI_FORMAT format)
@@ -18,7 +19,7 @@ namespace Engine
         EngineAssert(!m_finalised);
 
         // Create render target resource
-        auto newRenderTarget = std::make_shared<RenderTarget>(m_width, m_height, 2, 0, format, m_device);
+        auto newRenderTarget = std::make_shared<RenderTarget>(m_width, m_height, m_arraySize, TextureCreationFlags::BindShaderResource, format, m_device);
 
         // Add render target view to array.
         m_renderTargetMap.emplace(name, newRenderTarget);
@@ -64,6 +65,10 @@ namespace Engine
 
     void RenderTargetBundle::SetShaderResources(ID3D11DeviceContext* deviceContext)
     {
+        // Clear render target state
+        ID3D11RenderTargetView* nullViews[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
+        deviceContext->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, nullViews, nullptr);
+
         int textureRegister = 0;
         for (auto pair : m_renderTargetMap)
         {
@@ -72,6 +77,9 @@ namespace Engine
             texture->UploadData(deviceContext, PipelineStage::Pixel, textureRegister);
             textureRegister++;
         }
+
+        m_depthBuffer->GetTexture()->UploadData(deviceContext, PipelineStage::Pixel, textureRegister);
+        m_bundleSampler->UploadData(deviceContext, 0);
     }
 
     ID3D11RenderTargetView* const* RenderTargetBundle::GetRenderTargetViews()
