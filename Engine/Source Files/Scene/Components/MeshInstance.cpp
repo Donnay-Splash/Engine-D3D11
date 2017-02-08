@@ -32,6 +32,8 @@ namespace Engine
         m_objectConstants->UploadData(deviceContext);
         m_material->Render(deviceContext);
 
+        m_prevTransform = transform;
+
         m_mesh->Render(deviceContext);
     }
 
