@@ -3,7 +3,7 @@
 // Isotropic Normal Distribution Functions (NDF) 
 // n = normal
 // h = half normal
-// a = perceptual roughness (roughnes ^ 2)
+// a = perceptual roughness (roughness ^ 2)
 float square(float a)
 {
     return a * a;
@@ -12,6 +12,20 @@ float square(float a)
 float3 GammaEncode(float3 linearColor)
 {
     return pow(linearColor, kGammaEncodePower);
+}
+
+
+// taken from http://www.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting
+float3 FilmicAndGamma(float3 linearColor)
+{
+	float3 x = max(0, linearColor-0.004);
+	return (x*(6.2*x+0.5))/(x*(6.2*x+1.7)+0.06);
+}
+
+// Remember final color = CustomFilmic(Linear color) / CustomFilmic(Linear white point value) : No gamma baked in
+float3 CustomFilmic(float3 linearColor, float shoulderStr, float linearStr, float linearAngle, float toeStr, float toeNumer, float toeDenom)
+{
+	return ((linearColor*(shoulderStr*linearColor + linearAngle*linearStr) + toeStr*toeNumer)/(linearColor*(shoulderStr*linearColor + linearStr) + toeStr*toeDenom)) - toeNumer/toeDenom;
 }
 
 float3 GammaDecode(float3 gammaColor)
