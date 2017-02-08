@@ -31,8 +31,8 @@ float4 PSMain(VertexOut input) : SV_Target
     }
     else if (target == 2.0f)
     {
-        float2 ssVel = ssVelocity.Sample(gBufferSampler, float3(input.uv, displaySecondLayer)).rg;
-        color = float4(ssVel*0.5f + 0.5f, 0.0f, 1.0f);
+        float2 ssVel = ssVelocity.Sample(gBufferSampler, float3(input.uv, displaySecondLayer));
+        color = float4((ssVel + 1.0f) * 0.5f, 0.5f, 1.0f);
     }
     else if(target == 3.0f)
     {
