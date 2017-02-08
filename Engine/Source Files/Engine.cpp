@@ -122,9 +122,15 @@ namespace Engine
         }
 
         {
+            auto getter = [&]()->float { return m_debugConstants.gBufferTargetIndex; };
+            auto setter = [&](float value) {m_debugConstants.gBufferTargetIndex = value; };
+            m_globalOptions->RegisterScalarProperty(L"RenderTarget index", getter, setter, 0.0f, 3.0f);
+        }
+
+        {
             auto getter = [&]()->float { return m_deepGBufferData.minimumSeparation; };
             auto setter = [&](float value) {m_deepGBufferData.minimumSeparation = value; };
-            m_globalOptions->RegisterScalarProperty(L"GBuffer Minimum Separation", getter, setter, 0.0f, 1.0f);
+            m_globalOptions->RegisterScalarProperty(L"Minimum Separation", getter, setter, 0.0f, 1.0f);
         }
     }
 
@@ -173,6 +179,7 @@ namespace Engine
         RenderTargetBundle::Ptr bundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, GBufferLayers);
         bundle->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
         bundle->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
+        bundle->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT);
         bundle->Finalise();
 
         // Set the G-Buffer for output from camera

@@ -9,7 +9,7 @@ struct PixelOutput
 {
     float4 diffuseColor : SV_Target0;
     float4 csNormal : SV_Target1;
-    float4 csVelocity : SV_Target2;
+    float2 ssVelocity : SV_Target2;
 };
 
 /*-------------------------------
@@ -78,5 +78,6 @@ PixelOutput PSMain(PixelInput input)
     output.diffuseColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
     float3 normalAsColor = (normalize(input.csNormal) + 1.0f.xxx) * 0.5f;
     output.csNormal = float4(normalAsColor, 1.0f);
+    output.ssVelocity = ssVelocity;
     return output;
 }

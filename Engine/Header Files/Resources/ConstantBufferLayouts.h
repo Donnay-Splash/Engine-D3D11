@@ -144,15 +144,18 @@ namespace Engine
         static const UINT kRegister = 0;
 
         float displaySecondLayer = 0.0f;
+        float gBufferTargetIndex = 0.0f;
 
         // Currently empty but can add debug stuff or something later
         bool operator!=(const PostEffectConstants& rhs)
         {
-            return displaySecondLayer != rhs.displaySecondLayer;
+            return (displaySecondLayer != rhs.displaySecondLayer) ||
+                   (gBufferTargetIndex != rhs.gBufferTargetIndex);
         }
         bool operator==(const PostEffectConstants& rhs)
         {
-            return displaySecondLayer == rhs.displaySecondLayer;
+            return (displaySecondLayer == rhs.displaySecondLayer) &&
+                   (gBufferTargetIndex == rhs.gBufferTargetIndex);
         }
 
     };
