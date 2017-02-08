@@ -6,6 +6,13 @@
 
 namespace Engine
 {
+
+    // TODO: Attempt to load complex models including Sponza and potentially san-miguel
+    // TODO: Implement deferred shading using same BRDF from forward shader
+    // TODO: Continue to maintain debug controls
+    // TODO: Re-read paper. Specifically double check sections about G-Buffer generation
+    // TODO: Map out tasks required for computing AO
+    // TODO: Begin work on AO
     Engine::Engine()
     {
     }
