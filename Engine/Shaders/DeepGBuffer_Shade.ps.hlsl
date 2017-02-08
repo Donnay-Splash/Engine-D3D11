@@ -6,6 +6,11 @@ Texture2DArray csNormals : register(t1);
 
 Texture2DArray depth : register(t2);
 
+cbuffer Constants : register(b0)
+{
+    float displaySecondLayer;
+}
+
 struct VertexOut
 {
     float4 position : SV_Position;
@@ -14,5 +19,5 @@ struct VertexOut
 
 float4 PSMain(VertexOut input) : SV_Target
 {
-    return csNormals.Sample(gBufferSampler, float3(input.uv, 0.0f));
+    return csNormals.Sample(gBufferSampler, float3(input.uv, displaySecondLayer));
 }

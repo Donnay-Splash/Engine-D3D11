@@ -65,7 +65,6 @@ PixelOutput PSMain(PixelInput input)
 {
     // Calculate screen space velocity
     float2 ssVelocity = GetSSVelocity(input.csPosition, input.csPrevPosition);
-    float minSeparation = 0.01f;
     float2 currentToPrevScale = 1.0f.xx;
 
     // Discard pixels for second layer

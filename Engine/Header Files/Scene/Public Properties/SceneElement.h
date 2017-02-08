@@ -28,7 +28,6 @@ namespace Engine
         std::vector<SceneElement::Ptr> GetChildElements() const;
         uint32_t GetID() const { return m_id; }
 
-    protected:
         void RegisterBooleanProperty(const std::wstring& name,
             Property::BoolPropertyGetter boolGetter,
             Property::BoolPropertySetter boolSetter);

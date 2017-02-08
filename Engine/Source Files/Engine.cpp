@@ -39,9 +39,11 @@ namespace Engine
         m_scene = std::make_shared<Scene>();
         m_scene->Initialize();
 
+        CreateGlobalOptions();
         // If defined attach the root scene element added callback.
         if (createOptions.RootSceneElementAddedCallback != nullptr)
         {
+            createOptions.RootSceneElementAddedCallback(m_globalOptions, 0);
             m_scene->GetRootNode()->SetChildAddedCallback(createOptions.RootSceneElementAddedCallback);
         }
 
@@ -82,6 +84,9 @@ namespace Engine
         auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade);
         m_postEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), postEffectPipeline);
 
+        // Create deep G-Buffer constant buffer
+        m_deepGBufferConstant = std::make_shared<ConstantBuffer<DeepGBufferConstants>>(PipelineStage::Pixel, m_direct3D->GetDevice());
+
         // Create the timer object.
         m_timer = std::make_shared<TimerClass>();
 
@@ -104,6 +109,23 @@ namespace Engine
 
     void Engine::InitializeScene()
     {
+    }
+
+    void Engine::CreateGlobalOptions()
+    {
+        m_globalOptions = std::make_shared<SceneElement>(L"Global Options");
+
+        {
+            auto getter = [&]()->bool { return m_debugConstants.displaySecondLayer == 1.0f; };
+            auto setter = [&](bool value) {m_debugConstants.displaySecondLayer = value ? 1.0f : 0.0f; };
+            m_globalOptions->RegisterBooleanProperty(L"Display Second Layer", getter, setter);
+        }
+
+        {
+            auto getter = [&]()->float { return m_deepGBufferData.minimumSeparation; };
+            auto setter = [&](float value) {m_deepGBufferData.minimumSeparation = value; };
+            m_globalOptions->RegisterScalarProperty(L"GBuffer Minimum Separation", getter, setter, 0.0f, 1.0f);
+        }
     }
 
     void Engine::SetFrameInput(InputState newInputState)
@@ -240,6 +262,9 @@ namespace Engine
             m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
         }
 
+        // Upload deep gbuffer constants
+        m_deepGBufferConstant->SetData(m_deepGBufferData);
+        m_deepGBufferConstant->UploadData(m_direct3D->GetDeviceContext());
         // Render the scene.
         // This generates our deep G-Buffer
         m_camera->Render(m_direct3D, m_scene);
@@ -252,6 +277,9 @@ namespace Engine
 
             // Upload G-buffer data to device
             bundle->SetShaderResources(m_direct3D->GetDeviceContext());
+
+            // Set post effect constants
+            m_postEffect->SetEffectData(m_debugConstants);
 
             // Now need fullscreen pass to process G-Buffer
             m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);

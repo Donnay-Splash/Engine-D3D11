@@ -143,14 +143,36 @@ namespace Engine
     {
         static const UINT kRegister = 0;
 
+        float displaySecondLayer = 0.0f;
+
         // Currently empty but can add debug stuff or something later
         bool operator!=(const PostEffectConstants& rhs)
         {
-            return false;
+            return displaySecondLayer != rhs.displaySecondLayer;
         }
         bool operator==(const PostEffectConstants& rhs)
         {
-            return true;
+            return displaySecondLayer == rhs.displaySecondLayer;
+        }
+
+    };
+
+    ALIGN_16
+        struct DeepGBufferConstants
+    {
+        static const UINT kRegister = 2;
+
+        // TODO: Decide on correct default value
+        float minimumSeparation = 0.0f;
+
+        // Currently empty but can add debug stuff or something later
+        bool operator!=(const DeepGBufferConstants& rhs)
+        {
+            return minimumSeparation != rhs.minimumSeparation;
+        }
+        bool operator==(const DeepGBufferConstants& rhs)
+        {
+            return minimumSeparation == rhs.minimumSeparation;
         }
 
     };

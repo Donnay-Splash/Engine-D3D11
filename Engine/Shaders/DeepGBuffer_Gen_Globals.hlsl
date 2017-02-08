@@ -27,7 +27,10 @@ cbuffer ObjectBuffer : register(b1)
     row_major matrix prevObjectToCameraTransform;
 }
 
-// Don't need lights here
+cbuffer DeepGBufferConstants : register(b2)
+{
+    float minSeparation;
+}
 
 cbuffer MaterialBuffer : register(b3)
 {

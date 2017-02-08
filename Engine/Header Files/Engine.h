@@ -40,6 +40,8 @@ namespace Engine
 
         void LoadFile(const uint8_t* data, uint64_t byteCount);
 
+        void CreateGlobalOptions();
+
     private:
         bool HandleInput(float);
         bool RenderGraphics();
@@ -61,6 +63,11 @@ namespace Engine
         // These can be moved to a more specific application class
         PostProcessingCamera::Ptr m_postProcessCamera;
         PostEffect<PostEffectConstants>::Ptr m_postEffect;
+        PostEffectConstants m_debugConstants;
+        SceneElement::Ptr m_globalOptions;
+        ConstantBuffer<DeepGBufferConstants>::Ptr m_deepGBufferConstant;
+        DeepGBufferConstants m_deepGBufferData;
+
         Texture::Ptr m_prevDepth;
         Sampler::Ptr m_depthSampler;
 
