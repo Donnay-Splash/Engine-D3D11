@@ -13,6 +13,8 @@ namespace Engine
     // TODO: Re-read paper. Specifically double check sections about G-Buffer generation
     // TODO: Map out tasks required for computing AO
     // TODO: Begin work on AO
+    // TODO: Make switching between different shading models easier. Need way of controlling what is expected as shader constants
+    // TODO: Add rotation control to SceneNode debug properties
     Engine::Engine()
     {
     }
