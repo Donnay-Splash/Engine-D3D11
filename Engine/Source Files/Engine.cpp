@@ -116,6 +116,14 @@ namespace Engine
 
     void Engine::InitializeScene()
     {
+        // Test
+        auto torus = Utils::MeshMaker::CreateTorus(m_direct3D->GetDevice(), 4.0f, 1.0f, 64);
+        auto torusNode = m_scene->AddNode();
+        auto meshInstance = torusNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
+        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen);
+        auto material = std::make_shared<Material>(m_direct3D->GetDevice(), shaderPipeline);
+        meshInstance->SetMaterial(material);
+        meshInstance->SetMesh(torus);
     }
 
     void Engine::CreateGlobalOptions()

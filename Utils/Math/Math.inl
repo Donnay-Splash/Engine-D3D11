@@ -488,6 +488,24 @@ namespace Utils
             return{ maxX, maxY, maxZ, maxW };
         }
 
+        inline Vector4 Vector4::Normalize(const Vector4& vec)
+        {
+            XMVECTOR xmVec = XMLoadFloat4A(&vec);
+            auto normalized = XMVector4Normalize(xmVec);
+
+            Vector4 result;
+            XMStoreFloat4A(&result, normalized);
+            return result;
+        }
+
+        inline void Vector4::Normalize()
+        {
+            XMVECTOR xmVec = XMLoadFloat4A(this);
+            auto normalized = XMVector4Normalize(xmVec);
+
+            XMStoreFloat4A(this, normalized);
+        }
+
         inline bool Vector4::operator == (const Vector4& rhs) const
         {
             XMVECTOR thisVector = XMLoadFloat4A(this);
@@ -676,6 +694,24 @@ namespace Utils
             return{ maxX, maxY, maxZ };
         }
 
+        inline Vector3 Vector3::Normalize(const Vector3& vec)
+        {
+            XMVECTOR xmVec = XMLoadFloat3A(&vec);
+            auto normalized = XMVector3Normalize(xmVec);
+
+            Vector3 result;
+            XMStoreFloat3A(&result, normalized);
+            return result;
+        }
+
+        inline void Vector3::Normalize()
+        {
+            XMVECTOR xmVec = XMLoadFloat3A(this);
+            auto normalized = XMVector3Normalize(xmVec);
+
+            XMStoreFloat3A(this, normalized);
+        }
+
         inline bool Vector3::operator == (const Vector3& rhs) const
         {
             XMVECTOR thisVector = XMLoadFloat3(this);
@@ -860,6 +896,24 @@ namespace Utils
             auto maxY = std::max(rhs.y, lhs.y);
 
             return{ maxX, maxY };
+        }
+
+        inline Vector2 Vector2::Normalize(const Vector2& vec)
+        {
+            XMVECTOR xmVec = XMLoadFloat2A(&vec);
+            auto normalized = XMVector2Normalize(xmVec);
+
+            Vector2 result;
+            XMStoreFloat2A(&result, normalized);
+            return result;
+        }
+
+        inline void Vector2::Normalize()
+        {
+            XMVECTOR xmVec = XMLoadFloat2A(this);
+            auto normalized = XMVector2Normalize(xmVec);
+
+            XMStoreFloat2A(this, normalized);
         }
 
         inline bool Vector2::operator == (const Vector2& rhs) const

@@ -109,6 +109,9 @@ namespace Utils
 
             static Vector4 Min(const Vector4& lhs, const Vector4& rhs);
             static Vector4 Max(const Vector4& lhs, const Vector4& rhs);
+            static Vector4 Normalize(const Vector4& vec);
+
+            void Normalize();
 
             bool operator==(const Vector4& rhs) const;
             bool operator!=(const Vector4& rhs) const;
@@ -148,6 +151,9 @@ namespace Utils
 
             static Vector3 Min(const Vector3& lhs, const Vector3& rhs);
             static Vector3 Max(const Vector3& lhs, const Vector3& rhs);
+            static Vector3 Normalize(const Vector3& vec);
+
+            void Normalize();
 
             bool operator==(const Vector3& rhs) const;
             bool operator!=(const Vector3& rhs) const;
@@ -187,6 +193,9 @@ namespace Utils
 
             static Vector2 Min(const Vector2& lhs, const Vector2& rhs);
             static Vector2 Max(const Vector2& lhs, const Vector2& rhs);
+            static Vector2 Normalize(const Vector2& vec);
+
+            void Normalize();
 
             bool operator==(const Vector2& rhs) const;
             bool operator!=(const Vector2& rhs) const;
