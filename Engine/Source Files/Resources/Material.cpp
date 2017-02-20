@@ -8,6 +8,9 @@ namespace Engine
         m_shaderPipeline(shaderPipeline)
     {
         m_pipelineState = std::make_shared<PipelineState>(device, BlendMode::Opaque, D3D11_CULL_NONE, true);
+        m_solidFillState = std::make_shared<RasterizerState>(device, D3D11_CULL_NONE, D3D11_FILL_SOLID);
+        m_wireFrameState = std::make_shared<RasterizerState>(device, D3D11_CULL_NONE, D3D11_FILL_WIREFRAME);
+
         m_materialConstants = std::make_shared<ConstantBuffer<MaterialConstants>>(PipelineStage::Pixel, device);
 
         // Create a basic sampler for all of the textures
@@ -96,6 +99,18 @@ namespace Engine
                 EngineAssert(sampler != nullptr);
                 sampler->UploadData(deviceContext, i);
             }
+        }
+    }
+
+    void Material::SetWireframeEnabled(bool enabled)
+    {
+        if (enabled)
+        {
+            m_pipelineState->SetRasterizerState(m_wireFrameState);
+        }
+        else
+        {
+            m_pipelineState->SetRasterizerState(m_solidFillState);
         }
     }
 

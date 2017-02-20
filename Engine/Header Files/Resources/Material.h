@@ -46,11 +46,15 @@ namespace Engine
         void SetOpacity(float opacity) { m_materialData.diffuseColorAndOpacity.w = opacity; }
         void SetSmoothness(float smoothness) { m_materialData.specularColorAndSmoothness.w = smoothness; }
 
+        void SetWireframeEnabled(bool enabled);
+
     private:
         void RegisterPublicProperties();
 
     private:
         ShaderPipeline::Ptr m_shaderPipeline;
+        RasterizerState::Ptr m_solidFillState;
+        RasterizerState::Ptr m_wireFrameState;
         PipelineState::Ptr m_pipelineState;
         ConstantBuffer<MaterialConstants>::Ptr m_materialConstants;
 

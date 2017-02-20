@@ -45,6 +45,10 @@ namespace Utils
                 float m30, float m31, float m32, float m33)
                 :XMFLOAT4X4A(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) {}
 
+            // Create a diagonal matrix
+            inline Matrix(float m00, float m11, float m22, float m33 = 1.0f) :
+                XMFLOAT4X4A(m00, 0.0f, 0.0f, 0.0f, 0.0f, m11, 0.0f, 0.0f, 0.0f, 0.0f, m22, 0.0f, 0.0f, 0.0f, 0.0f, m33) {}
+
             ~Matrix() {}
 
             static Matrix CreateFromTranslation(Vector3 translation);
@@ -57,7 +61,7 @@ namespace Utils
             static Matrix CreateOrthographicProjectionMatrix(float viewWidth, float viewHeight, float nearClip, float farClip);
             
             Matrix GetTranspose();
-            Matrix GetInverse();
+            Matrix GetInverse() const;
 
             // Extract orientation vectors from matrix.
             Vector3 Forward();
@@ -112,6 +116,7 @@ namespace Utils
             static Vector4 Normalize(const Vector4& vec);
 
             void Normalize();
+            float Length() const;
 
             bool operator==(const Vector4& rhs) const;
             bool operator!=(const Vector4& rhs) const;
@@ -152,8 +157,10 @@ namespace Utils
             static Vector3 Min(const Vector3& lhs, const Vector3& rhs);
             static Vector3 Max(const Vector3& lhs, const Vector3& rhs);
             static Vector3 Normalize(const Vector3& vec);
+            static Vector3 Cross(const Vector3& lhs, const Vector3& rhs);
 
             void Normalize();
+            float Length() const;
 
             bool operator==(const Vector3& rhs) const;
             bool operator!=(const Vector3& rhs) const;
@@ -196,6 +203,7 @@ namespace Utils
             static Vector2 Normalize(const Vector2& vec);
 
             void Normalize();
+            float Length() const;
 
             bool operator==(const Vector2& rhs) const;
             bool operator!=(const Vector2& rhs) const;

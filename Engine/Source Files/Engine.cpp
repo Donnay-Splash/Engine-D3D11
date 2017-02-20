@@ -4,6 +4,56 @@
 #include <Scene\Components\MeshInstance.h>
 #include <Loader.h>
 
+Utils::Maths::Matrix CalculateTorusInertiaTensor(float mass, float majorRadius, float minorRadius)
+{
+    float majorRadius2 = majorRadius*majorRadius;
+    float minorRadius2 = minorRadius*minorRadius;
+    // I1 and I2 are the same for a Torus
+    float I1 = mass * ((5.0f / 8.0f)*minorRadius2 + 0.5f*majorRadius2);
+    float I3 = mass * (0.75f*minorRadius2 + majorRadius2);
+
+    // Return diagonal matrix
+    return Utils::Maths::Matrix(I1, I1, I3);
+}
+
+// class constants for Torus rotation
+namespace
+{
+    const Utils::Maths::Vector3 initialAngularVelocity = { 1.0f, 1.0f, 1.0f };
+    const float kMass = 3.14f;
+    const float torusMajorRadius = 4.0f;
+    const float torusMajorSquared = torusMajorRadius*torusMajorRadius;
+    // Since torus minor radius is 1 we don't need to square it
+    const float torusMinorRadius = 1.0f;
+
+    const Utils::Maths::Matrix torusInertiaTensor = CalculateTorusInertiaTensor(kMass, torusMajorRadius, torusMinorRadius);
+    const Utils::Maths::Matrix inertialTensorInverse = torusInertiaTensor.GetInverse();
+
+    Utils::Maths::Vector3 currentAngularVelocity = initialAngularVelocity;
+    float elapsedTime = 0.0f;
+
+    Engine::SceneNode::Ptr torusNode;
+}
+
+Utils::Maths::Vector3 CalculateAngularAcceleration(const Utils::Maths::Vector3& w)
+{
+    auto l = w * torusInertiaTensor;
+    auto cross = Utils::Maths::Vector3::Cross(l, w);
+
+    return cross*inertialTensorInverse;
+}
+
+Utils::Maths::Vector3 RungeKutta(float dt, Utils::Maths::Vector3 angularVelocity)
+{
+    auto k1 = CalculateAngularAcceleration(angularVelocity) * dt;
+    auto k2 = CalculateAngularAcceleration(angularVelocity + (k1 * 0.5f)) * dt;
+    auto k3 = CalculateAngularAcceleration(angularVelocity + (k2 * 0.5f)) * dt;
+    auto k4 = CalculateAngularAcceleration(angularVelocity + k3) * dt;
+
+    return angularVelocity + ((k1 + k2*2.0f + k3*2.0f + k4) / 6.0f);
+}
+
+
 namespace Engine
 {
 
@@ -118,7 +168,9 @@ namespace Engine
     {
         // Test
         auto torus = Utils::MeshMaker::CreateTorus(m_direct3D->GetDevice(), 4.0f, 1.0f, 64);
-        auto torusNode = m_scene->AddNode();
+        auto parentNode = m_scene->AddNode();
+        parentNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(0.0f, -Utils::Maths::kPI / 2.0f, 0.0f));
+        torusNode = m_scene->AddNode(parentNode);
         auto meshInstance = torusNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
         auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
         auto material = std::make_shared<Material>(m_direct3D->GetDevice(), shaderPipeline);
@@ -163,16 +215,34 @@ namespace Engine
 
         // Update the system stats.
         m_timer->Frame();
+        float deltaTime = m_timer->GetTime();
 
         // Do the frame input processing.
-        result = HandleInput(m_timer->GetTime());
+        result = HandleInput(deltaTime);
         if (!result)
         {
             return false;
         }
 
+        // Here we want to modify rotation of Torus.
+        // Create function for 4th order Runge-Kuta to solve Eulers equations.
+        // Convert angular velocity into a Quaternion.
+        float deltaMS = deltaTime / 1000.0f;
+        currentAngularVelocity = RungeKutta(deltaMS, currentAngularVelocity);
+        elapsedTime += deltaMS;
+
+        // now convert angular velocity to quaternion via axis angle.
+        // angle can be calculated |w|*t
+        // axis can be calculated w/|w|
+        float angle = currentAngularVelocity.Length() * elapsedTime;
+        auto axis = Utils::Maths::Vector3::Normalize(currentAngularVelocity);
+        auto rotation = Utils::Maths::Quaternion::CreateFromAxisAngle(axis, angle);
+
+        // Set rotation on torus
+        torusNode->SetRotation(rotation);
+
         // Update the scene
-        m_scene->Update(m_timer->GetTime());
+        m_scene->Update(deltaTime);
         m_scene->SetCameraTransform(m_camera->GetSceneNode()->GetWorldTransform());
 
         // Render the graphics.
@@ -277,37 +347,18 @@ namespace Engine
         m_direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
         m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext());
 
-        // Upload previous depth to shader
-        //if (m_prevDepth)
-        //{
-        //    // Upload at register 7 as material takes registers 0 -> 6
-        //    // TODO: Formalise this
-        //    m_prevDepth->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 7);
-        //    m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
-        //}
+        auto meshInstance = torusNode->GetComponentOfType<MeshInstance>();
+        auto material = meshInstance->GetMaterial();
 
-        // Upload deep gbuffer constants
-        /*m_deepGBufferConstant->SetData(m_deepGBufferData);
-        m_deepGBufferConstant->UploadData(m_direct3D->GetDeviceContext());*/
+        material->SetDiffuseColor({DirectX::Colors::Black});
+        material->SetWireframeEnabled(true);
         // Render the scene.
-        // This generates our deep G-Buffer
         m_camera->Render(m_direct3D, m_scene);
 
-        // Now need to copy depth
-        //auto bundle = m_camera->GetRenderTargetBundle();
-        //if (bundle != nullptr)
-        //{
-        //    m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
-
-        //    // Upload G-buffer data to device
-        //    bundle->SetShaderResources(m_direct3D->GetDeviceContext());
-
-        //    // Set post effect constants
-        //    m_postEffect->SetEffectData(m_debugConstants);
-
-        //    // Now need fullscreen pass to process G-Buffer
-        //    m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
-        //}
+        material->SetDiffuseColor({ DirectX::Colors::White });
+        material->SetWireframeEnabled(false);
+        // Render the scene.
+        m_camera->Render(m_direct3D, m_scene);
 
         // Present the rendered scene to the screen.
         m_direct3D->EndScene();
