@@ -28,7 +28,7 @@ namespace Engine
         auto worldToCameraTransform = sceneNode->GetScene()->GetWorldToCameraTransform();
         auto prevWorldToCameraTransform = sceneNode->GetScene()->GetPreviousWorldToCameraTransform();
 
-        m_objectConstants->SetData({ transform * worldToCameraTransform, m_prevTransform * prevWorldToCameraTransform});
+        m_objectConstants->SetData({ transform });
         m_objectConstants->UploadData(deviceContext);
         m_material->Render(deviceContext);
 

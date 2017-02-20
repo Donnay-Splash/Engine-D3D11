@@ -40,19 +40,16 @@ namespace Engine
         struct ObjectConstants
     {
         static const UINT kRegister = 1;
-        Utils::Maths::Matrix objectToCameraTransform;
-        Utils::Maths::Matrix prevObjectToCameraTransform;
+        Utils::Maths::Matrix objectTransform;
 
         bool operator!=(const ObjectConstants& rhs)
         {
-            return  (this->objectToCameraTransform != rhs.objectToCameraTransform) ||
-                    (this->prevObjectToCameraTransform != rhs.prevObjectToCameraTransform);
+            return  (this->objectTransform != rhs.objectTransform);
         }
 
         bool operator==(const ObjectConstants& rhs)
         {
-            return  (this->objectToCameraTransform == rhs.objectToCameraTransform) &&
-                    (this->prevObjectToCameraTransform == rhs.prevObjectToCameraTransform);
+            return  (this->objectTransform == rhs.objectTransform);
         }
     };
 
@@ -60,7 +57,7 @@ namespace Engine
     ALIGN_16
         struct LightConstants
     {
-        static const UINT kRegister = 2;
+        static const UINT kRegister = 0;
         LightData lights[kMaxLightCount];
         float activeLights;
 
@@ -96,7 +93,7 @@ namespace Engine
     ALIGN_16
         struct MaterialConstants
     {
-        static const UINT kRegister = 3;
+        static const UINT kRegister = 1;
 
         Utils::Maths::Color diffuseColorAndOpacity;
         Utils::Maths::Color specularColorAndSmoothness;

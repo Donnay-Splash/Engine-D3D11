@@ -120,8 +120,10 @@ namespace Engine
         auto torus = Utils::MeshMaker::CreateTorus(m_direct3D->GetDevice(), 4.0f, 1.0f, 64);
         auto torusNode = m_scene->AddNode();
         auto meshInstance = torusNode->AddComponent<MeshInstance>(m_direct3D->GetDevice());
-        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen);
+        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
         auto material = std::make_shared<Material>(m_direct3D->GetDevice(), shaderPipeline);
+        material->SetDiffuseColor({DirectX::Colors::White});
+        material->SetSmoothness(0.5f);
         meshInstance->SetMaterial(material);
         meshInstance->SetMesh(torus);
     }
@@ -190,15 +192,15 @@ namespace Engine
         m_direct3D->ResizeBuffers(newWidth, newHeight);
 
         // Re-create G-Buffer with new dimensions
-        const uint32_t GBufferLayers = 2; // TODO: Formalise this
-        RenderTargetBundle::Ptr bundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, GBufferLayers);
-        bundle->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
-        bundle->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
-        bundle->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT);
-        bundle->Finalise();
+        //const uint32_t GBufferLayers = 2; // TODO: Formalise this
+        //RenderTargetBundle::Ptr bundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, GBufferLayers);
+        //bundle->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
+        //bundle->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
+        //bundle->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT);
+        //bundle->Finalise();
 
-        // Set the G-Buffer for output from camera
-        m_camera->SetRenderTargetBundle(bundle);
+        //// Set the G-Buffer for output from camera
+        //m_camera->SetRenderTargetBundle(bundle);
     }
 
 
@@ -276,36 +278,36 @@ namespace Engine
         m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext());
 
         // Upload previous depth to shader
-        if (m_prevDepth)
-        {
-            // Upload at register 7 as material takes registers 0 -> 6
-            // TODO: Formalise this
-            m_prevDepth->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 7);
-            m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
-        }
+        //if (m_prevDepth)
+        //{
+        //    // Upload at register 7 as material takes registers 0 -> 6
+        //    // TODO: Formalise this
+        //    m_prevDepth->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 7);
+        //    m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
+        //}
 
         // Upload deep gbuffer constants
-        m_deepGBufferConstant->SetData(m_deepGBufferData);
-        m_deepGBufferConstant->UploadData(m_direct3D->GetDeviceContext());
+        /*m_deepGBufferConstant->SetData(m_deepGBufferData);
+        m_deepGBufferConstant->UploadData(m_direct3D->GetDeviceContext());*/
         // Render the scene.
         // This generates our deep G-Buffer
         m_camera->Render(m_direct3D, m_scene);
 
         // Now need to copy depth
-        auto bundle = m_camera->GetRenderTargetBundle();
-        if (bundle != nullptr)
-        {
-            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
+        //auto bundle = m_camera->GetRenderTargetBundle();
+        //if (bundle != nullptr)
+        //{
+        //    m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
 
-            // Upload G-buffer data to device
-            bundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        //    // Upload G-buffer data to device
+        //    bundle->SetShaderResources(m_direct3D->GetDeviceContext());
 
-            // Set post effect constants
-            m_postEffect->SetEffectData(m_debugConstants);
+        //    // Set post effect constants
+        //    m_postEffect->SetEffectData(m_debugConstants);
 
-            // Now need fullscreen pass to process G-Buffer
-            m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
-        }
+        //    // Now need fullscreen pass to process G-Buffer
+        //    m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
+        //}
 
         // Present the rendered scene to the screen.
         m_direct3D->EndScene();
