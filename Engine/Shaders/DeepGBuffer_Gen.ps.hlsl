@@ -75,7 +75,13 @@ PixelOutput PSMain(PixelInput input)
 
     // Ouput values to g_buffer
     PixelOutput output;
-    output.diffuseColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+    output.diffuseColor = material_diffuseColorAndOpacity;
+    [branch]
+    if(material_hasDiffuseTexture)
+    {
+        output.diffuseColor = DiffuseTexture.Sample(DiffuseSampler, input.texCoord);
+    }
+
     float3 normalAsColor = (normalize(input.csNormal) + 1.0f.xxx) * 0.5f;
     output.csNormal = float4(normalAsColor, 1.0f);
     output.ssVelocity = ssVelocity;

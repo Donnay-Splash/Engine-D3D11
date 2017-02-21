@@ -126,7 +126,8 @@ namespace Engine
 
         auto nearPlaneGetter = [this]() { return m_nearClip; };
         auto nearPlaneSetter = [this](float v) { m_nearClip = v; };
-        RegisterScalarProperty(L"Near Plane", nearPlaneGetter, nearPlaneSetter, 0.0f, 100.0f);
+        // Min must be more than 0 otherwise projection matrix calculation fails due to DirectXMath assert.
+        RegisterScalarProperty(L"Near Plane", nearPlaneGetter, nearPlaneSetter, 0.001f, 100.0f);
 
         auto farPlaneGetter = [this]() { return m_farClip; };
         auto farPlaneSetter = [this](float v) { m_farClip = v; };

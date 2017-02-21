@@ -59,14 +59,13 @@ namespace Engine
         auto rootNode = m_nodeMap[1];
 
         // Calculate the bounding box for the root of the model
-        // TODO: Implement bounds calculation
         auto rootBounds = Scene::CalculateBoundingBoxForSceneNode(rootNode);
         auto boundsComponent = rootNode->AddComponent<BoundingBox>(m_d3dClass->GetDevice());
         boundsComponent->SetBounds(rootBounds);
         auto size = rootBounds.GetSize();
         auto maxAxis = std::max(size.x, std::max(size.y, size.z));
         auto scale = 1.0f / maxAxis;
-        rootNode->SetScale(scale);
+        //rootNode->SetScale(scale); // TODO: Allow for enabling or disabling mesh unit scaling
     }
 
     void Loader::LoadNode(const SceneNodeData& importedNode)
