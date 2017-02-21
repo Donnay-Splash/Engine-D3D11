@@ -14,21 +14,21 @@ namespace Engine
         Property::BoolPropertyGetter boolGetter,
         Property::BoolPropertySetter boolSetter)
     {
-        Property::VectorPropertyGetter vectorGetter = [boolGetter]()
+        Property::PropertyGetter propertyGetter = [boolGetter]()
         {
             auto value = boolGetter();
             return Utils::Maths::Vector4(value ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
         };
 
-        Property::VectorPropertySetter vectorSetter = [boolSetter](Utils::Maths::Vector4 value)
+        Property::PropertySetter propertySetter = [boolSetter](Utils::Maths::Vector4 value)
         {
             boolSetter(value.x > 0.0);
         };
 
         auto property = std::shared_ptr<Property>(new Property(name,
             PropertyType::Bool,
-            vectorGetter,
-            vectorSetter));
+            propertyGetter,
+            propertySetter));
 
         AddProperty(property);
     }
@@ -39,13 +39,13 @@ namespace Engine
         float min,
         float max)
     {
-        Property::VectorPropertyGetter vectorGetter = [scalarGetter]()
+        Property::PropertyGetter propertyGetter = [scalarGetter]()
         {
             auto value = scalarGetter();
             return Utils::Maths::Vector4(value, 0.0f, 0.0f, 0.0f);
         };
 
-        Property::VectorPropertySetter vectorSetter = [scalarSetter](Utils::Maths::Vector4 value)
+        Property::PropertySetter propertySetter = [scalarSetter](Utils::Maths::Vector4 value)
         {
             scalarSetter(value.x);
         };
@@ -55,8 +55,8 @@ namespace Engine
 
         auto property = Property::Ptr(new Property(name,
             PropertyType::Scalar,
-            vectorGetter,
-            vectorSetter,
+            propertyGetter,
+            propertySetter,
             vectorMin,
             vectorMax));
 
@@ -66,15 +66,28 @@ namespace Engine
     void SceneElement::RegisterVectorProperty(const std::wstring & name,
         Property::VectorPropertyGetter vectorGetter,
         Property::VectorPropertySetter vectorSetter,
-        const Utils::Maths::Vector4 & minimum,
-        const Utils::Maths::Vector4 & maximum)
+        const Utils::Maths::Vector3 & minimum,
+        const Utils::Maths::Vector3 & maximum)
     {
+        Property::PropertyGetter propertyGetter = [vectorGetter]()
+        {
+            auto value = vectorGetter();
+            return Utils::Maths::Vector4(value.x, value.y, value.z, 0.0f);
+        };
+
+        Property::PropertySetter propertySetter = [vectorSetter](Utils::Maths::Vector4 value)
+        {
+            vectorSetter({ value.x, value.y, value.z });
+        };
+
+        Utils::Maths::Vector4 propertyMin = { minimum.x, minimum.y, minimum.z, 0.0f };
+        Utils::Maths::Vector4 propertyMax = { maximum.x, maximum.y, maximum.z, 0.0f };
         auto property = Property::Ptr(new Property(name,
             PropertyType::Vector,
-            vectorGetter,
-            vectorSetter,
-            minimum,
-            maximum));
+            propertyGetter,
+            propertySetter,
+            propertyMin,
+            propertyMax));
 
         AddProperty(property);
     }

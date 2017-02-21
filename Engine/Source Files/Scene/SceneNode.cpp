@@ -124,8 +124,8 @@ namespace Engine
     void SceneNode::AddPublicProperties()
     {
         //// TODO: Add helpers to try and cut this down to 1 line in most cases
-        auto positionGetter = [this]() { return Utils::Maths::Vector4(m_position.x, m_position.y, m_position.z, 0.0f); };
-        auto positionSetter = [this](Utils::Maths::Vector4 v) { SetPosition({v.x, v.y, v.z}); };
+        auto positionGetter = [this]() { return m_position; };
+        auto positionSetter = [this](Utils::Maths::Vector3 v) { SetPosition(v); };
         RegisterVectorProperty(L"Position", positionGetter, positionSetter);
 
         auto scaleGetter = [this]() { return m_scale.x; };

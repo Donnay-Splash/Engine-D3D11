@@ -79,7 +79,7 @@ void PropertyPanel::OnApplyTemplate()
     
 }
 
-void PropertyPanel::OnVectorPropertyChanged(Platform::Object ^ sender, WFN::float4 newValue)
+void PropertyPanel::OnVectorPropertyChanged(Platform::Object ^ sender, WFN::float3 newValue)
 {
     m_property->Vector = newValue;
 }

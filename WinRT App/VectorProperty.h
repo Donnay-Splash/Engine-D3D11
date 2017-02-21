@@ -9,7 +9,7 @@ namespace WFN = Windows::Foundation::Numerics;
 
 namespace WinRT_App
 {
-    public delegate void VectorPropertyChangedEventHandler(Platform::Object^ sender, WFN::float4 newValue);
+    public delegate void VectorPropertyChangedEventHandler(Platform::Object^ sender, WFN::float3 newValue);
 
     public ref class VectorProperty sealed : public WUX::Controls::ContentControl
     {
@@ -20,17 +20,17 @@ namespace WinRT_App
         virtual void OnApplyTemplate() override;
 
     internal:
-        VectorProperty(WFN::float4 initialValue, WFN::float4 min, WFN::float4 max);
+        VectorProperty(WFN::float3 initialValue, WFN::float3 min, WFN::float3 max);
 
     private:
-        property WFN::float4 Value
+        property WFN::float3 Value
         {
-            void set(WFN::float4 value)
+            void set(WFN::float3 value)
             {
                 m_value = value; 
                 ValueChanged((Platform::Object^)this, value);
             }
-            WFN::float4 get() { return m_value; }
+            WFN::float3 get() { return m_value; }
         }
 
         void OnComponentValueChanged(Platform::Object^ sender, double newValue);
@@ -40,10 +40,9 @@ namespace WinRT_App
         static Platform::String^ m_vectorComponentName_X;
         static Platform::String^ m_vectorComponentName_Y;
         static Platform::String^ m_vectorComponentName_Z;
-        static Platform::String^ m_vectorComponentName_W;
 
-        WFN::float4 m_value;
-        WFN::float4 m_minimum;
-        WFN::float4 m_maximum;
+        WFN::float3 m_value;
+        WFN::float3 m_minimum;
+        WFN::float3 m_maximum;
     };
 }

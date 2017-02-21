@@ -41,8 +41,8 @@ namespace Engine
         void RegisterVectorProperty(const std::wstring& name,
             Property::VectorPropertyGetter vectorGetter,
             Property::VectorPropertySetter vectorSetter,
-            const Utils::Maths::Vector4& minimum = {},
-            const Utils::Maths::Vector4& maximum = {});
+            const Utils::Maths::Vector3& minimum = {},
+            const Utils::Maths::Vector3& maximum = {});
 
         void AddChildElement(SceneElement::Ptr childElement);
 

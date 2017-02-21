@@ -31,10 +31,10 @@ namespace Engine_WinRT
             }
         }
 
-        property WFN::float4 Vector
+        property WFN::float3 Vector
         {
-            WFN::float4 get();
-            void set(WFN::float4 value);
+            WFN::float3 get();
+            void set(WFN::float3 value);
         }
 
         property bool Bool
@@ -49,14 +49,14 @@ namespace Engine_WinRT
             void set(double value);
         }
 
-        property WFN::float4 VectorMinimum
+        property WFN::float3 VectorMinimum
         {
-            WFN::float4 get();
+            WFN::float3 get();
         }
 
-        property WFN::float4 VectorMaximum
+        property WFN::float3 VectorMaximum
         {
-            WFN::float4 get();
+            WFN::float3 get();
         }
 
         property double ScalarMinimum

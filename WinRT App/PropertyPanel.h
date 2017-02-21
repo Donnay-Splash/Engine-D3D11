@@ -25,7 +25,7 @@ namespace WinRT_App
         virtual void OnApplyTemplate() override;
 
     private:
-        void OnVectorPropertyChanged(Platform::Object^ sender, WFN::float4 newValue);
+        void OnVectorPropertyChanged(Platform::Object^ sender, WFN::float3 newValue);
         void OnScalarPropertyChanged(Platform::Object^ sender, double newValue);
         void OnBooleanPropertyChanged(Platform::Object^ sender, bool newValue);
 

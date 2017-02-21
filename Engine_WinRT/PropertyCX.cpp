@@ -33,23 +33,23 @@ namespace Engine_WinRT
         }
     }
 
-    WFN::float4 PropertyCX::Vector::get()
+    WFN::float3 PropertyCX::Vector::get()
     {
         if (auto strongProperty = m_nativeProperty.lock())
         {
             // Make sure that we have the render lock at this point
             auto value = strongProperty->GetValue();
-            return WFN::float4(value.x, value.y, value.z, value.w);
+            return WFN::float3(value.x, value.y, value.z);
         }
-        return WFN::float4();
+        return WFN::float3();
     }
 
-    void PropertyCX::Vector::set(WFN::float4 value)
+    void PropertyCX::Vector::set(WFN::float3 value)
     {
         if (auto strongProperty = m_nativeProperty.lock())
         {
             // TODO: Make sure we have the render lock at this point
-            Utils::Maths::Vector4 engineValue = { value.x, value.y, value.z, value.w };
+            Utils::Maths::Vector4 engineValue = { value.x, value.y, value.z, 0.0f };
             strongProperty->SetValue(engineValue);
         }
     }
@@ -98,28 +98,28 @@ namespace Engine_WinRT
         }
     }
 
-    WFN::float4 PropertyCX::VectorMinimum::get()
+    WFN::float3 PropertyCX::VectorMinimum::get()
     {
         if (auto strongProperty = m_nativeProperty.lock())
         {
             // TODO: Make sure we have the render lock at this point
             auto v = strongProperty->GetMinimum();
-            return WFN::float4(v.x, v.y, v.z, v.w);
+            return WFN::float3(v.x, v.y, v.z);
         }
 
-        return WFN::float4(0.0f);
+        return WFN::float3(0.0f);
     }
 
-    WFN::float4 PropertyCX::VectorMaximum::get()
+    WFN::float3 PropertyCX::VectorMaximum::get()
     {
         if (auto strongProperty = m_nativeProperty.lock())
         {
             // TODO: Make sure we have the render lock at this point
             auto v = strongProperty->GetMaximum();
-            return WFN::float4(v.x, v.y, v.z, v.w);
+            return WFN::float3(v.x, v.y, v.z);
         }
 
-        return WFN::float4(0.0f);
+        return WFN::float3(0.0f);
     }
 
     double PropertyCX::ScalarMinimum::get()

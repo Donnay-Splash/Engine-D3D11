@@ -199,12 +199,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <local:VectorPropertyComponent x:Name="Component_X" Grid.Column="0" Content="X"/>
                         <local:VectorPropertyComponent x:Name="Component_Y" Grid.Column="1" Content="Y"/>
                         <local:VectorPropertyComponent x:Name="Component_Z" Grid.Column="2" Content="Z"/>
-                        <local:VectorPropertyComponent x:Name="Component_W" Grid.Column="3" Content="W"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

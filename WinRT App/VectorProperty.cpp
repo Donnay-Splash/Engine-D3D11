@@ -22,9 +22,8 @@ using namespace Windows::UI::Xaml::Media;
 Platform::String^ VectorProperty::m_vectorComponentName_X = "Component_X";
 Platform::String^ VectorProperty::m_vectorComponentName_Y = "Component_Y";
 Platform::String^ VectorProperty::m_vectorComponentName_Z = "Component_Z";
-Platform::String^ VectorProperty::m_vectorComponentName_W = "Component_W";
 
-VectorProperty::VectorProperty(WFN::float4 initialValue, WFN::float4 min, WFN::float4 max) :
+VectorProperty::VectorProperty(WFN::float3 initialValue, WFN::float3 min, WFN::float3 max) :
     m_value(initialValue), m_minimum(min), m_maximum(max)
 {
     DefaultStyleKey = "WinRT_App.VectorProperty";
@@ -37,9 +36,8 @@ void VectorProperty::OnApplyTemplate()
     auto componentX = (VectorPropertyComponent^)GetTemplateChild(m_vectorComponentName_X);
     auto componentY = (VectorPropertyComponent^)GetTemplateChild(m_vectorComponentName_Y);
     auto componentZ = (VectorPropertyComponent^)GetTemplateChild(m_vectorComponentName_Z);
-    auto componentW = (VectorPropertyComponent^)GetTemplateChild(m_vectorComponentName_W);
 
-    if (componentX == nullptr || componentY == nullptr || componentZ == nullptr || componentW == nullptr)
+    if (componentX == nullptr || componentY == nullptr || componentZ == nullptr)
     {
         throw ref new Platform::FailureException("Failed to receive all components from template");
     }
@@ -59,17 +57,10 @@ void VectorProperty::OnApplyTemplate()
         componentZ->Minimum = m_minimum.z;
         componentZ->Value = currentValue.z;
 
-        componentW->Maximum = m_maximum.w;
-        componentW->Minimum = m_minimum.w;
-        componentW->Value = currentValue.w;
-        
-        
         // Bind to events
         componentX->ValueChanged += ref new VectorComponentValueChangedEventHandler(this, &VectorProperty::OnComponentValueChanged);
         componentY->ValueChanged += ref new VectorComponentValueChangedEventHandler(this, &VectorProperty::OnComponentValueChanged);
         componentZ->ValueChanged += ref new VectorComponentValueChangedEventHandler(this, &VectorProperty::OnComponentValueChanged);
-        componentW->ValueChanged += ref new VectorComponentValueChangedEventHandler(this, &VectorProperty::OnComponentValueChanged);
-
     }
 }
 
@@ -90,11 +81,6 @@ void VectorProperty::OnComponentValueChanged(Platform::Object^ sender, double ne
     else if (componentName == m_vectorComponentName_Z)
     {
         currentValue.z = newValue;
-
-    }
-    else if (componentName == m_vectorComponentName_W)
-    {
-        currentValue.w = newValue;
 
     }
 
