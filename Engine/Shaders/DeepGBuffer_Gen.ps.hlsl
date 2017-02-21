@@ -8,8 +8,10 @@
 struct PixelOutput
 {
     float4 diffuseColor : SV_Target0;
+    // Specular Color and smoothness
     float4 csNormal : SV_Target1;
     float2 ssVelocity : SV_Target2;
+    // csPosition
 };
 
 /*-------------------------------
@@ -81,6 +83,9 @@ PixelOutput PSMain(PixelInput input)
     {
         output.diffuseColor = DiffuseTexture.Sample(DiffuseSampler, input.texCoord);
     }
+
+    // Construct normal/tangent/bitangent matrix here.
+    // where normal = z, tangent = z, bitangent = y
 
     float3 normalAsColor = (normalize(input.csNormal) + 1.0f.xxx) * 0.5f;
     output.csNormal = float4(normalAsColor, 1.0f);

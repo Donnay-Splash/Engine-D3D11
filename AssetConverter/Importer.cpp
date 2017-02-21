@@ -220,6 +220,9 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     aiString normalTexture;
     material->Get(AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0), normalTexture);
 
+    aiString heightTexture;
+    material->Get(AI_MATKEY_TEXTURE(aiTextureType_HEIGHT, 0), heightTexture);
+
     aiString shininessTexture;
     material->Get(AI_MATKEY_TEXTURE(aiTextureType_SHININESS, 0), shininessTexture);
 
@@ -250,6 +253,12 @@ void Importer::LoadMaterialData(MaterialData& materialData, const aiMaterial* ma
     materialData.SmoothnessTextureID = m_textureManager->AddImportedTexture(shininessTexture, aiTextureType_SHININESS);
     materialData.OpacityTextureID = m_textureManager->AddImportedTexture(opacityTexture, aiTextureType_OPACITY);
     materialData.AOTextureID = m_textureManager->AddImportedTexture(ambientOcclusionTexture, aiTextureType_LIGHTMAP);
+
+    // If We have no normal map we can instead add a heightmap and convert it to a normal map if one exists
+    if (materialData.NormalTextureID == Utils::Loader::kInvalidID)
+    {
+        materialData.NormalTextureID = m_textureManager->AddImportedTexture(heightTexture, aiTextureType_HEIGHT);
+    }
 }
 
 void Importer::LoadTextures(aiTexture** embeddedTextures, uint32_t embeddedTextureCount)

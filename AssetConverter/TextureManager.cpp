@@ -166,7 +166,22 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
         DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, 0, mipMapImage);
         // Compress Bc3
         DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
-        DirectX::Compress(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
+        DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
+        break;
+    }
+    case aiTextureType_HEIGHT:
+    {
+        DWORD flags = 0;
+        // We want to first convert our height map to a tangent space normal map
+        DirectX::ScratchImage normalMapImage;
+        const float normalAmplitude = 2.0f;
+        DirectX::ComputeNormalMap(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, normalAmplitude, rawImage.GetMetadata().format, normalMapImage);
+        // Generate MipMaps
+        DirectX::ScratchImage mipMapImage;
+        DirectX::GenerateMipMaps(normalMapImage.GetImages(), normalMapImage.GetImageCount(), normalMapImage.GetMetadata(), flags, 0, mipMapImage);
+        // Compress Bc3
+        DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
+        DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
         break;
     }
     }

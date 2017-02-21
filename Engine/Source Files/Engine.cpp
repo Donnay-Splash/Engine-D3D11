@@ -14,8 +14,6 @@ namespace Engine
     // TODO: Map out tasks required for computing AO
     // TODO: Begin work on AO
     // TODO: Make switching between different shading models easier. Need way of controlling what is expected as shader constants
-    // TODO: Add rotation control to SceneNode debug properties
-    // TODO: For large scenes it takes a long time to load UI. And takes large ammounts of memory. Fix this.
     Engine::Engine()
     {
     }
