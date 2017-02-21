@@ -109,6 +109,7 @@ namespace WinRT_App
         WUX::FrameworkElement^ m_containerElement;
         WUX::FrameworkElement^ m_headerElement;
 
+        bool contentSet = false;
         WUX::Controls::StackPanel^ m_contentPanel;
     };
 }

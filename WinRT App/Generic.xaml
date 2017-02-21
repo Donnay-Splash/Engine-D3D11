@@ -110,7 +110,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <ContentPresenter x:Name="Header" Grid.Column="0" VerticalAlignment="Center" Padding="5, 0, 0, 0" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
+                                    <ContentPresenter x:Name="Header" x:DeferLoadStrategy="Lazy" Grid.Column="0" VerticalAlignment="Center" Padding="5, 0, 0, 0" Content="{TemplateBinding HeaderContent}" FontSize="16"/>
                                     <ToggleButton Grid.Column="1" RenderTransformOrigin="0.5, 0.5" x:Name="ExpandCollapseButton" Margin="0, 0, 7, 0">
                                         <ToggleButton.Template>
                                             <ControlTemplate>
@@ -126,7 +126,7 @@
                                         </ToggleButton.RenderTransform>
                                     </ToggleButton>
                                 </Grid>
-                                <ContentPresenter Grid.Row="1" Margin="5" Content="{TemplateBinding Content}" x:Name="Content">
+                                <ContentPresenter Grid.Row="1" Margin="5" Content="{TemplateBinding Content}" x:Name="Content" x:DeferLoadStrategy="Lazy">
                                     <ContentPresenter.RenderTransform>
                                         <ScaleTransform x:Name="ContentScaleTransform"/>
                                     </ContentPresenter.RenderTransform>

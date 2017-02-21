@@ -87,6 +87,11 @@ void ExpandPanel::OnToggleClick(Platform::Object ^ sender, WUX::RoutedEventArgs 
 {
     IsExpanded = !IsExpanded;
     m_toggleButton->IsChecked = IsExpanded;
+    if (!contentSet)
+    {
+        Content = m_contentPanel;
+        contentSet = true;
+    }
     ChangeVisualState(true);
 }
 
@@ -100,6 +105,5 @@ void WinRT_App::ExpandPanel::InitializeResources()
     DefaultStyleKey = "WinRT_App.ExpandPanel";
     m_contentPanel = ref new StackPanel();
     m_contentPanel->Orientation = WUX::Controls::Orientation::Vertical;
-    Content = m_contentPanel;
 }
 
