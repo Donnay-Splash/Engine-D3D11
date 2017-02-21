@@ -155,16 +155,17 @@ namespace Engine
 
         // Update the system stats.
         m_timer->Frame();
+        float deltaTime = m_timer->GetTime();
 
         // Do the frame input processing.
-        result = HandleInput(m_timer->GetTime());
+        result = HandleInput(deltaTime);
         if (!result)
         {
             return false;
         }
 
         // Update the scene
-        m_scene->Update(m_timer->GetTime());
+        m_scene->Update(deltaTime);
         m_scene->SetCameraTransform(m_camera->GetSceneNode()->GetWorldTransform());
 
         // Render the graphics.
