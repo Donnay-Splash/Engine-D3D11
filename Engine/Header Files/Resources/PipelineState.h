@@ -15,6 +15,14 @@ namespace Engine
 
         void UploadData(ID3D11DeviceContext* deviceContext);
 
+        void SetBlendState(BlendState::Ptr blendState) { m_blendState = blendState; }
+        void SetDepthState(DepthState::Ptr depthState) { m_depthState = depthState; }
+        void SetRasterizerState(RasterizerState::Ptr rasterizerState) { m_rasterizerState = rasterizerState; }
+
+        BlendState::Ptr GetBlendState() const { return m_blendState; }
+        DepthState::Ptr GetDepthState() const { return m_depthState; }
+        RasterizerState::Ptr GetRasterizerState() const { return m_rasterizerState; }
+
     private:
         BlendState::Ptr m_blendState;
         DepthState::Ptr m_depthState;

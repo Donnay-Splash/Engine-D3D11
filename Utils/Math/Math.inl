@@ -113,7 +113,7 @@ namespace Utils
             return ConvertFromXMMATRIX(transposeMatrix);
         }
 
-        inline Matrix Matrix::GetInverse()
+        inline Matrix Matrix::GetInverse() const
         {
             FXMMATRIX matrix = XMLoadFloat4x4A(this);
             XMVECTOR determinant = XMMatrixDeterminant(matrix);
@@ -506,6 +506,18 @@ namespace Utils
             XMStoreFloat4A(this, normalized);
         }
 
+        inline float Vector4::Length() const
+        {
+            XMVECTOR thisVec = XMLoadFloat4A(this);
+
+            auto length = XMVector4Length(thisVec);
+
+            float result;
+            XMStoreFloat(&result, length);
+
+            return result;
+        }
+
         inline bool Vector4::operator == (const Vector4& rhs) const
         {
             XMVECTOR thisVector = XMLoadFloat4A(this);
@@ -704,12 +716,37 @@ namespace Utils
             return result;
         }
 
+        inline Vector3 Vector3::Cross(const Vector3& lhs, const Vector3& rhs)
+        {
+            XMVECTOR left = XMLoadFloat3A(&lhs);
+            XMVECTOR right = XMLoadFloat3A(&rhs);
+
+            auto cross = XMVector3Cross(left, right);
+
+            Vector3 result;
+            XMStoreFloat3A(&result, cross);
+
+            return result;
+        }
+
         inline void Vector3::Normalize()
         {
             XMVECTOR xmVec = XMLoadFloat3A(this);
             auto normalized = XMVector3Normalize(xmVec);
 
             XMStoreFloat3A(this, normalized);
+        }
+
+        inline float Vector3::Length() const
+        {
+            XMVECTOR thisVec = XMLoadFloat3A(this);
+
+            auto length = XMVector3Length(thisVec);
+
+            float result;
+            XMStoreFloat(&result, length);
+
+            return result;
         }
 
         inline bool Vector3::operator == (const Vector3& rhs) const
@@ -916,6 +953,18 @@ namespace Utils
             XMStoreFloat2A(this, normalized);
         }
 
+        inline float Vector2::Length() const
+        {
+            XMVECTOR thisVec = XMLoadFloat2A(this);
+
+            auto length = XMVector2Length(thisVec);
+
+            float result;
+            XMStoreFloat(&result, length);
+
+            return result;
+        }
+
         inline bool Vector2::operator == (const Vector2& rhs) const
         {
             XMVECTOR thisVector = XMLoadFloat2(this);
@@ -1088,7 +1137,7 @@ namespace Utils
         {
             FXMVECTOR xmAxis = XMLoadFloat3A(&axis);
             XMVECTOR quaternionVector = XMQuaternionRotationAxis(xmAxis, angle);
-            
+
             return XMVECTORtoQuaternion(quaternionVector);
         }
 
@@ -1193,7 +1242,7 @@ namespace Utils
         *
         ****************************************************************************/
 
-        inline BoundingBox::BoundingBox(Vector3 centre, Vector3 size) : 
+        inline BoundingBox::BoundingBox(Vector3 centre, Vector3 size) :
             m_centre(centre), m_size(size)
         {
             // Size cannot be negative
