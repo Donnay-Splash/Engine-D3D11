@@ -248,6 +248,46 @@ namespace Utils
 
         /****************************************************************************
         *
+        * Rotation Angles
+        *
+        ****************************************************************************/
+
+        // Simple class. Doesn't require DirectX::Maths simd.
+        // Not indended to be used as shader constants. Ideally
+        // only used for more intuitive representation of quaternion.
+        // Even more so, It is designed as a human readable version
+        // of a rotation hence why it contains functions to convert
+        // to and from quaternions.
+        // Roll pitch and yaw are all stored in degress rather than radians.
+        class RotationAngles
+        {
+        public:
+            RotationAngles(float pitch, float yaw, float roll) :
+                m_pitch(pitch), m_yaw(yaw), m_roll(roll) {}
+
+            // Converts the given quaternion to euler/rotation angles
+            RotationAngles(const Quaternion& quat);
+            RotationAngles() {}
+
+            // Converts the angles to a quaternion
+            Quaternion AsQuaternion() const;
+
+            float GetPitch() const;
+            float GetYaw() const;
+            float GetRoll() const;
+
+            void SetPitch(float pitch);
+            void SetYaw(float yaw);
+            void SetRoll(float roll);
+
+        private:
+            float m_pitch = 0.0f;
+            float m_yaw = 0.0f;
+            float m_roll = 0.0f;
+        };
+
+        /****************************************************************************
+        *
         * Color
         *
         ****************************************************************************/

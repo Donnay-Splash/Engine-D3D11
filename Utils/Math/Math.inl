@@ -1167,6 +1167,56 @@ namespace Utils
 
         /****************************************************************************
         *
+        * Rotation Angles
+        *
+        ****************************************************************************/
+
+        // Taken from 3D math primer for graphics and game development
+        // Authors: Fletcher Dunn, Ian Parberry
+        inline RotationAngles::RotationAngles(const Quaternion& quat)
+        {
+            // extract sin(pitch)
+            float sp = -2.0f * (quat.y*quat.z - quat.w*quat.x);
+
+            // Check for gimbal lock, giving slight tolerance for numerical imprecision
+            if (abs(sp) > 0.9999f)
+            {
+                // looking straight up or down
+                m_pitch = RadiansToDegrees(kPI * 0.5f * sp);
+
+                // Compute Yaw and set roll to 0
+                m_yaw = RadiansToDegrees(atan2(-quat.x*quat.z + quat.w*quat.y, 0.5f - quat.y*quat.y - quat.z*quat.z));
+                m_roll = 0.0f;
+            }
+            else
+            {
+                // compute angles
+                m_pitch = RadiansToDegrees(asin(sp));
+                m_yaw = RadiansToDegrees(atan2(quat.x*quat.z + quat.w*quat.y, 0.5f - quat.x*quat.x - quat.y*quat.y));
+                m_roll = RadiansToDegrees(atan2(quat.x*quat.y + quat.w*quat.z, 0.5f - quat.x*quat.x - quat.z*quat.z));
+            }
+        }
+
+        // Converts the angles to a quaternion
+        inline Quaternion RotationAngles::AsQuaternion() const 
+        {
+            float pitchRads = DegreesToRadians(m_pitch);
+            float yawRads = DegreesToRadians(m_yaw);
+            float rollRads = DegreesToRadians(m_roll);
+
+            return Quaternion::CreateFromYawPitchRoll(yawRads, pitchRads, rollRads);
+        }
+
+        inline float RotationAngles::GetPitch() const { return m_pitch; }
+        inline float RotationAngles::GetYaw() const { return m_yaw; }
+        inline float RotationAngles::GetRoll() const { return m_roll; }
+
+        inline void RotationAngles::SetPitch(float pitch) { m_pitch = pitch; }
+        inline void RotationAngles::SetYaw(float yaw) { m_yaw = yaw; }
+        inline void RotationAngles::SetRoll(float roll) { m_roll = roll; }
+
+        /****************************************************************************
+        *
         * Color operations
         *
         ****************************************************************************/

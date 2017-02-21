@@ -128,14 +128,21 @@ namespace Engine
         auto positionSetter = [this](Utils::Maths::Vector3 v) { SetPosition(v); };
         RegisterVectorProperty(L"Position", positionGetter, positionSetter);
 
+        auto rotationGetter = [this]()->Utils::Maths::Vector3
+        {
+            Utils::Maths::RotationAngles angles(m_rotation); 
+            return { angles.GetPitch(), angles.GetYaw(), angles.GetRoll() };
+        };
+        auto rotationSetter = [this](Utils::Maths::Vector3 v)
+        {
+            Utils::Maths::RotationAngles angles(v.x, v.y, v.z);
+            SetRotation(angles.AsQuaternion());
+        };
+        RegisterVectorProperty(L"Rotation", rotationGetter, rotationSetter);
+
         auto scaleGetter = [this]() { return m_scale.x; };
         auto scaleSetter = [this](float scale) { SetScale(scale); };
         RegisterScalarProperty(L"Scale", scaleGetter, scaleSetter);
-
-        // TODO: Create Quaternion to Euler convertesion helper so we 
-        // can add rotation as a property.
-        // Suggestion: Store Euler angles locally so we are not doing a conversion each time we 
-        // the external value is updated.
     }
 
 
