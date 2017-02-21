@@ -22,7 +22,6 @@ namespace
     const Utils::Maths::Vector3 initialAngularVelocity = { 1.0f, 1.0f, 1.0f };
     const float kMass = 3.14f;
     const float torusMajorRadius = 4.0f;
-    const float torusMajorSquared = torusMajorRadius*torusMajorRadius;
     // Since torus minor radius is 1 we don't need to square it
     const float torusMinorRadius = 1.0f;
 
@@ -54,6 +53,7 @@ Utils::Maths::Vector3 RungeKutta(float dt, Utils::Maths::Vector3 angularVelocity
 }
 
 
+bool rotateTorus = false;
 namespace Engine
 {
 
@@ -167,7 +167,7 @@ namespace Engine
     void Engine::InitializeScene()
     {
         // Test
-        auto torus = Utils::MeshMaker::CreateTorus(m_direct3D->GetDevice(), 4.0f, 1.0f, 64);
+        auto torus = Utils::MeshMaker::CreateTorus(m_direct3D->GetDevice(), 4.0f, 1.0f, 32);
         auto parentNode = m_scene->AddNode();
         parentNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(0.0f, -Utils::Maths::kPI / 2.0f, 0.0f));
         torusNode = m_scene->AddNode(parentNode);
@@ -224,22 +224,25 @@ namespace Engine
             return false;
         }
 
-        // Here we want to modify rotation of Torus.
-        // Create function for 4th order Runge-Kuta to solve Eulers equations.
-        // Convert angular velocity into a Quaternion.
-        float deltaMS = deltaTime / 1000.0f;
-        currentAngularVelocity = RungeKutta(deltaMS, currentAngularVelocity);
-        elapsedTime += deltaMS;
+        if (rotateTorus)
+        {
+            // Here we want to modify rotation of Torus.
+            // Create function for 4th order Runge-Kuta to solve Eulers equations.
+            // Convert angular velocity into a Quaternion.
+            float deltaMS = deltaTime / 1000.0f;
+            currentAngularVelocity = RungeKutta(deltaMS, currentAngularVelocity);
+            elapsedTime += deltaMS;
 
-        // now convert angular velocity to quaternion via axis angle.
-        // angle can be calculated |w|*t
-        // axis can be calculated w/|w|
-        float angle = currentAngularVelocity.Length() * elapsedTime;
-        auto axis = Utils::Maths::Vector3::Normalize(currentAngularVelocity);
-        auto rotation = Utils::Maths::Quaternion::CreateFromAxisAngle(axis, angle);
+            // now convert angular velocity to quaternion via axis angle.
+            // angle can be calculated |w|*t
+            // axis can be calculated w/|w|
+            float angle = currentAngularVelocity.Length() * elapsedTime;
+            auto axis = Utils::Maths::Vector3::Normalize(currentAngularVelocity);
+            auto rotation = Utils::Maths::Quaternion::CreateFromAxisAngle(axis, angle);
 
-        // Set rotation on torus
-        torusNode->SetRotation(rotation);
+            // Set rotation on torus
+            torusNode->SetRotation(rotation);
+        }
 
         // Update the scene
         m_scene->Update(deltaTime);
@@ -314,6 +317,11 @@ namespace Engine
 
         keyDown = m_inputManager->IsKeyDown(KeyCodes::PAGE_DOWN);
         m_position->LookDownward(keyDown);
+
+        if (m_inputManager->IsKeyDown(KeyCodes::X))
+        {
+            rotateTorus = true;
+        }
 
         if (m_inputManager->IsKeyPressed(KeyCodes::H))
         {
