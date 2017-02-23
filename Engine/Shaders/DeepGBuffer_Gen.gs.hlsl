@@ -16,6 +16,8 @@ void GSMain(triangle GeometryInput In[3], inout TriangleStream<PixelInput> triSt
         {
             GeometryInput input = In[j];
             output.csNormal = input.csNormal;
+            output.csTangent = input.csTangent;
+            output.csBitangent = input.csBitangent;
             output.position = input.position;
             output.texCoord = input.texCoord;
             output.csPosition = input.csPosition;

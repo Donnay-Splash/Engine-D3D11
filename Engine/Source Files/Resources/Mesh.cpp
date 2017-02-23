@@ -74,6 +74,15 @@ namespace Engine
             m_uvBuffer->UploadData(deviceContext, index, 0);
             index++;
         }
+        if (HasTangents())
+        {
+            EngineAssert(m_tangentBuffer != nullptr);
+            EngineAssert(m_bitangentBuffer != nullptr);
+            m_tangentBuffer->UploadData(deviceContext, index, 0);
+            index++;
+            m_bitangentBuffer->UploadData(deviceContext, index, 0);
+            index++;
+        }
 
         m_indexBuffer->UploadData(deviceContext);
 
@@ -128,6 +137,23 @@ namespace Engine
             m_uvBuffer = std::make_shared<VertexBuffer>(m_uvData.data(), static_cast<uint32_t>(m_uvData.size()), sizeof(UVType), device);
             m_vertexCount = m_uvData.size();
         }
+        if (HasTangents())
+        {
+            // Ensure we have the same number of tangents and bitangents
+            EngineAssert(m_tangentData.size() == m_bitangentData.size());
+            if (m_vertexCount != 0)
+            {
+                // We should have a tangent and bitangent for each vertex
+                EngineAssert(m_tangentData.size() == m_vertexCount);
+                EngineAssert(m_bitangentData.size() == m_vertexCount);
+            }
+            // Tangent and bitangent buffers shouldn't have been created yet.
+            EngineAssert(m_tangentBuffer == nullptr && m_bitangentBuffer == nullptr);
+            // Generate tangent and bitangent vertex buffers
+            m_tangentBuffer = std::make_shared<VertexBuffer>(m_tangentData.data(), static_cast<uint32_t>(m_tangentData.size()), sizeof(TangentType), device);
+            m_bitangentBuffer = std::make_shared<VertexBuffer>(m_bitangentData.data(), static_cast<uint32_t>(m_bitangentData.size()), sizeof(TangentType), device);
+            m_vertexCount = m_tangentData.size();
+        }
 
         m_indexBuffer = std::make_shared<IndexBuffer>(m_indexData.data(), static_cast<uint32_t>(m_indexData.size()), device);
         m_meshFinalised = true;
@@ -173,6 +199,8 @@ namespace Engine
         EngineAssert(!tangents.empty());
         // Why are you passing an empty vector to the mesh?
         EngineAssert(!bitangents.empty());
+        // Must be the same number of tangents and bitangents
+        EngineAssert(tangents.size() == bitangents.size());
 
         // Tangent data is stored. Later when FinaliseMesh() is called
         // we will create the vertex buffers

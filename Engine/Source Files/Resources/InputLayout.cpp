@@ -56,6 +56,35 @@ namespace Engine
             inputSlot++;
         }
 
+        if (inputFlags & InputElement::Tangents)
+        {
+            D3D11_INPUT_ELEMENT_DESC tangentsDesc;
+            SecureZeroMemory(&tangentsDesc, sizeof(tangentsDesc));
+            tangentsDesc.SemanticName = "TANGENT";
+            tangentsDesc.SemanticIndex = 0;
+            tangentsDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            tangentsDesc.InputSlot = inputSlot;
+            tangentsDesc.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+            tangentsDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+            tangentsDesc.InstanceDataStepRate = 0;
+            
+            m_inputElements.push_back(tangentsDesc);
+            inputSlot++;
+
+            D3D11_INPUT_ELEMENT_DESC bitangentsDesc;
+            SecureZeroMemory(&bitangentsDesc, sizeof(bitangentsDesc));
+            bitangentsDesc.SemanticName = "BINORMAL";
+            bitangentsDesc.SemanticIndex = 0;
+            bitangentsDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            bitangentsDesc.InputSlot = inputSlot;
+            bitangentsDesc.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+            bitangentsDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+            bitangentsDesc.InstanceDataStepRate = 0;
+
+            m_inputElements.push_back(bitangentsDesc);
+            inputSlot++;
+        }
+
         // The input cannot be emptty.
         EngineAssert(!m_inputElements.empty());
     }

@@ -175,7 +175,7 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
         // We want to first convert our height map to a tangent space normal map
         DirectX::ScratchImage normalMapImage;
         const float normalAmplitude = 2.0f;
-        DirectX::ComputeNormalMap(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, normalAmplitude, rawImage.GetMetadata().format, normalMapImage);
+        Utils::DirectXHelpers::ThrowIfFailed(DirectX::ComputeNormalMap(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, normalAmplitude, DXGI_FORMAT_R8G8B8A8_UNORM, normalMapImage));
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
         DirectX::GenerateMipMaps(normalMapImage.GetImages(), normalMapImage.GetImageCount(), normalMapImage.GetMetadata(), flags, 0, mipMapImage);

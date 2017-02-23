@@ -7,6 +7,7 @@ namespace Engine
         static const uint32_t Position = 0x0001;
         static const uint32_t TexCoord0 = 0x0002;
         static const uint32_t Normal0 = 0x0004;
+        static const uint32_t Tangents = 0x0008;
     };
 
     // forward declaration

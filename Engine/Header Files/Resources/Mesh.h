@@ -42,11 +42,10 @@ namespace Engine
         void SetUVs(const UVContainer& uvCoords);
         void SetIndices(const IndexContainer& indices);
 
-        // TODO: Mesh should be a create once object.
-        // Need a finalize mesh function that can do additional final processing.
         bool HasPositions() const { return !m_positionData.empty(); }
         bool HasNormals() const { return !m_normalData.empty(); }
         bool HasUVs() const { return !m_uvData.empty(); }
+        bool HasTangents() const { return !m_tangentData.empty() && !m_bitangentData.empty(); }
 
         PositionContainer GetPositions() const { return m_positionData; };
         NormalContainer GetNormals() const { return m_normalData; };
@@ -74,8 +73,8 @@ namespace Engine
         VertexBuffer::Ptr m_normalBuffer;
         VertexBuffer::Ptr m_uvBuffer;
         // VertexBuffer::Ptr UV1;
-        // VertexBuffer::Ptr tangents;
-        // VertexBuffer::Ptr bitangents;
+        VertexBuffer::Ptr m_tangentBuffer;
+        VertexBuffer::Ptr m_bitangentBuffer;
         // VertexBuffer::Ptr colors;
         IndexBuffer::Ptr m_indexBuffer;
 

@@ -50,7 +50,7 @@ namespace Engine
 
         // Load deep G-Buffer generation shaders
         {
-            InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0);
+            InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0 | InputElement::Tangents);
             Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, DeepGBuffer::g_VSMain, sizeof(DeepGBuffer::g_VSMain), device);
             Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DeepGBuffer::g_PSMain, sizeof(DeepGBuffer::g_PSMain), device);
             Shader::Ptr geometryShader = std::make_shared<Shader>(Shader::Type::Geometry, DeepGBuffer::g_GSMain, sizeof(DeepGBuffer::g_GSMain), device);

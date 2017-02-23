@@ -63,6 +63,7 @@ bool IsInFrontOfSecondLayer(float2 ssVelocity, float minSeparation, float2 fragC
     return oldZ + minSeparation >= prevZ;
 }
 
+// TODO: need to uberise this to avoid invalid shader code.
 PixelOutput PSMain(PixelInput input)
 {
     // Calculate screen space velocity
@@ -84,10 +85,28 @@ PixelOutput PSMain(PixelInput input)
         output.diffuseColor = DiffuseTexture.Sample(DiffuseSampler, input.texCoord);
     }
 
-    // Construct normal/tangent/bitangent matrix here.
-    // where normal = z, tangent = z, bitangent = y
+    float3 normal = normalize(input.csNormal);
+    [branch]
+    if(material_hasNormalTexture)
+    {
+        float3 tangent = normalize(input.csTangent);
+        float3 bitangent = normalize(input.csBitangent);
+        // Construct normal/tangent/bitangent matrix here.
+        // where normal = z, tangent = x, bitangent = y
+        //float handedness = step(0.0f, dot(cross(normal, tangent), bitangent));
+        matrix<float, 3, 3> normalTransform ={  tangent,
+                                                bitangent,
+                                                normal };
 
-    float3 normalAsColor = (normalize(input.csNormal) + 1.0f.xxx) * 0.5f;
+        // Sample texture and multiply by matrix
+        float3 sampledNormal = NormalTexture.Sample(NormalSampler, input.texCoord);
+        // convert normal from [0, 1] to [-1, 1]
+        sampledNormal = normalize((sampledNormal * 2.0f) - 1.0f);
+        normal = mul(sampledNormal, normalTransform);
+        //normal = lerp(float3(0.0f, 0.0f, 1.0f), float3(0.0f, 1.0f, 0.0f), handedness);
+    }
+
+    float3 normalAsColor = (normalize(normal) + 1.0f.xxx) * 0.5f;
     output.csNormal = float4(normalAsColor, 1.0f);
     output.ssVelocity = ssVelocity;
     return output;

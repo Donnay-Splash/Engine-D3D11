@@ -18,6 +18,8 @@ GeometryInput VSMain(VertexInput input)
     // Since we don't allow non uniform scaling we are safe to use the modelView matrix
     // instead of having to use the transposed inverse of the modelView matrix.
     output.csNormal = mul(float4(input.normal, 0.0f), objectToCameraTransform).xyz;
+    output.csTangent = mul(float4(input.tangent, 0.0f), objectToCameraTransform).xyz;
+    output.csBitangent = mul(float4(input.bitangent, 0.0f), objectToCameraTransform).xyz;
     output.texCoord = input.tex;
 
     return output;

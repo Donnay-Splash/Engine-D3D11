@@ -161,6 +161,8 @@ void Importer::LoadMeshData(Utils::Loader::SceneNodeData& sceneNode, const aiMes
 
         if (sceneNode.HasTangents)
         {
+            // TODO: Calculate tangent handedness
+            // handedness = dot(cross(normal, tangent), bitangent) < 0.0f ? -1.0f, 1.0f;
             auto tangent = mesh->mTangents[i];
             auto bitangent = mesh->mBitangents[i];
 
