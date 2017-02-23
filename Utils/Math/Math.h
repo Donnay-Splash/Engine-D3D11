@@ -60,6 +60,8 @@ namespace Utils
             static Matrix CreatePerspectiveProjectionMatrix(float fovY, float aspectHByW, float nearClip, float farClip);
             static Matrix CreateOrthographicProjectionMatrix(float viewWidth, float viewHeight, float nearClip, float farClip);
 
+            Vector3 TransformNormal(const Vector3& normal) const;
+
             Matrix GetTranspose();
             Matrix GetInverse() const;
 

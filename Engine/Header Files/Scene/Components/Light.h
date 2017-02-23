@@ -12,6 +12,12 @@ namespace Engine
         Utils::Maths::Vector3 Direction;
         Utils::Maths::Color Color;
 
+        void Transform(const Utils::Maths::Matrix& transform)
+        {
+            Position = Position * transform;
+            Direction = transform.TransformNormal(Direction);
+        }
+
         bool operator!=(const LightData& rhs)
         {
             return  (this->Position != rhs.Position) ||
@@ -41,6 +47,9 @@ namespace Engine
     protected:
         Light(Component::SceneNodePtr sceneNode);
         virtual void Initialize(ID3D11Device* device) override;
+
+    private:
+        void AddPublicProperties();
 
     private:
         LightData m_lightData;

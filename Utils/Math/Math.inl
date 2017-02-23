@@ -105,6 +105,19 @@ namespace Utils
             return ConvertFromXMMATRIX(projectionMatrix);
         }
 
+        inline Vector3 Matrix::TransformNormal(const Vector3& normal) const
+        {
+            FXMMATRIX matrix = XMLoadFloat4x4A(this);
+            XMVECTOR normalVec = XMLoadFloat3A(&normal);
+
+            XMVECTOR transformedNormal = XMVector3TransformNormal(normalVec, matrix);
+
+            Vector3 result;
+            XMStoreFloat3A(&result, transformedNormal);
+
+            return result;
+        }
+
         inline Matrix Matrix::GetTranspose()
         {
             FXMMATRIX matrix = XMLoadFloat4x4A(this);

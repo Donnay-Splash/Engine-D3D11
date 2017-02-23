@@ -63,21 +63,25 @@ namespace Engine
         lightNode->SetPosition({ -1.0f, 1.0f, 1.0f });
         auto light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
         light->SetColor({ DirectX::Colors::Wheat });
+        light->SetDirection({ -1.0f, 1.0f, 1.0f });
 
         lightNode = m_scene->AddNode();
         lightNode->SetPosition({ 1.0f, -1.0f, -1.0f });
         light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
         light->SetColor({ DirectX::Colors::Wheat });
+        light->SetDirection({ 1.0f, -1.0f, -1.0f });
 
         lightNode = m_scene->AddNode();
         lightNode->SetPosition({ 0.0f, 0.0f, 1.0f });
         light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
         light->SetColor({ DirectX::Colors::Wheat });
+        light->SetDirection({ 0.0f, 0.0f, 1.0f });
 
         lightNode = m_scene->AddNode();
         lightNode->SetPosition({ 0.0f, 0.0f, -1.0f });
         light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
         light->SetColor({ DirectX::Colors::Wheat });
+        light->SetDirection({ 0.0f, 0.0f, -1.0f });
 
         // Create the camera object
         auto cameraNode = m_scene->AddNode();
@@ -268,7 +272,6 @@ namespace Engine
     {
         // Clear the scene.
         m_direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
-        m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext());
 
         // Upload previous depth to shader
         if (m_prevDepth)
@@ -297,6 +300,9 @@ namespace Engine
 
             // Set post effect constants
             m_postEffect->SetEffectData(m_debugConstants);
+
+            // Upload light data for deferred shading
+            m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
 
             // Now need fullscreen pass to process G-Buffer
             m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);

@@ -1,4 +1,6 @@
-#include "Globals_ps.hlsl"
+static const float PI = 3.14159265358979323846;
+static const float kGammaEncodePower = 1.0f / 2.2f;
+static const float kGammaDecodePower = 2.2f;
 
 float square(float a)
 {
@@ -14,14 +16,14 @@ float3 GammaEncode(float3 linearColor)
 // taken from http://www.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting
 float3 FilmicAndGamma(float3 linearColor)
 {
-	float3 x = max(0, linearColor-0.004);
-	return (x*(6.2*x+0.5))/(x*(6.2*x+1.7)+0.06);
+    float3 x = max(0, linearColor - 0.004);
+    return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
 }
 
 // Remember final color = CustomFilmic(Linear color) / CustomFilmic(Linear white point value) : No gamma baked in
 float3 CustomFilmic(float3 linearColor, float shoulderStr, float linearStr, float linearAngle, float toeStr, float toeNumer, float toeDenom)
 {
-	return ((linearColor*(shoulderStr*linearColor + linearAngle*linearStr) + toeStr*toeNumer)/(linearColor*(shoulderStr*linearColor + linearStr) + toeStr*toeDenom)) - toeNumer/toeDenom;
+    return ((linearColor * (shoulderStr * linearColor + linearAngle * linearStr) + toeStr * toeNumer) / (linearColor * (shoulderStr * linearColor + linearStr) + toeStr * toeDenom)) - toeNumer / toeDenom;
 }
 
 float3 GammaDecode(float3 gammaColor)
@@ -92,8 +94,8 @@ float G_Smith_GGX(float NoV, float NoL, float a)
 {
     // Optimised version taken from http://graphicrants.blogspot.co.uk/2013/08/specular-brdf-reference.html
     float a2 = square(a);
-    float GGXV = NoV + sqrt( (NoV - NoV * a2) * NoV + a2);
-    float GGXL = NoL + sqrt( (NoL - NoL * a2) * NoL + a2);
+    float GGXV = NoV + sqrt((NoV - NoV * a2) * NoV + a2);
+    float GGXL = NoL + sqrt((NoL - NoL * a2) * NoL + a2);
 
     return rcp(GGXV * GGXL);
 }
@@ -140,40 +142,3 @@ float3 EvaluateBRDF(float3 normal, float3 viewDirection, float3 lightDirection, 
 
     return (RDiffuse + RSpec) * NoL;
 }
-
-float4 PSMain(VertexOut input) : SV_Target
-{
-    // Get normalised vectors
-    float3 normal = normalize(input.normal);
-    float3 viewDir = normalize(input.cameraPosition - input.worldSpacePosition.xyz);
-
-    float NoV = abs(dot(normal, viewDir)) + 1e-5f; // Avoid artifact
-    
-    float intensity = 1.0f;
-    float3 materialDiffuse = material_diffuseColorAndOpacity.rgb;
-    float3 emissiveColor = material_emissiveColor.rgb;
-    float3 specularColor = material_specularColorAndSmoothness.rgb;
-    float roughness = 1.0f - material_specularColorAndSmoothness.a;
-    float alpha = max(0.001, square(roughness));
-
-    // Since we are using SRGB formats for the textures the conversion to linear is done when reading
-    if(material_hasDiffuseTexture == true)
-        materialDiffuse = DiffuseTexture.Sample(DiffuseSampler, input.tex).rgb;
-    if(material_hasEmissiveTexture == true)
-        emissiveColor = EmissiveTexture.Sample(EmissiveSampler, input.tex).rgb;
-
-    float3 radiance = 0.0f;
-    [unroll]
-    for (int i = 0; i < activeLights; i++)
-    {
-        Light light = lights[i];
-        float3 lightDir = -normalize(light.position);
-      
-        radiance += EvaluateBRDF(normal, viewDir, lightDir, alpha, materialDiffuse) * light.color.rgb;
-    }
-
-    // Gamma encode
-    return float4(GammaEncode(saturate(radiance)), 1.0f);
-}
-
-

@@ -79,10 +79,16 @@ PixelOutput PSMain(PixelInput input)
     // Ouput values to g_buffer
     PixelOutput output;
     output.diffuseColor = material_diffuseColorAndOpacity;
+    output.diffuseColor.a = material_specularColorAndSmoothness.a;
     [branch]
     if(material_hasDiffuseTexture)
     {
-        output.diffuseColor = DiffuseTexture.Sample(DiffuseSampler, input.texCoord);
+        output.diffuseColor.rgb = DiffuseTexture.Sample(DiffuseSampler, input.texCoord);
+    }
+    [branch]
+    if(material_hasSpecularTexture)
+    {
+        output.diffuseColor.a = SpecularTexture.Sample(SpecularSampler, input.texCoord).r;
     }
 
     float3 normal = normalize(input.csNormal);

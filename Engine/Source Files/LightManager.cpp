@@ -18,7 +18,7 @@ namespace Engine
         m_lightBuffer = std::make_shared<ConstantBuffer<LightConstants>>(PipelineStage::Pixel, device);
     }
 
-    void LightManager::GatherLights(Scene::Ptr scene, ID3D11DeviceContext* deviceContext)
+    void LightManager::GatherLights(Scene::Ptr scene, ID3D11DeviceContext* deviceContext, LightSpaceModifier space /*= LightSpaceModifier::World*/)
     {
         auto lights = scene->GetAllComponentsOfType<Light>();
         uint32_t lightCount = std::min(kMaxLightCount, static_cast<uint32_t>(lights.size()));
@@ -26,6 +26,12 @@ namespace Engine
         for (uint32_t i = 0; i < lightCount; i++)
         {
             lightBuffer.lights[i] = lights[i]->GetLightData();
+            if (space == LightSpaceModifier::Camera)
+            {
+                // Lighting is performed in camera space so we want to transform the directions and positions to camera space
+                auto cameraTransform = scene->GetWorldToCameraTransform();
+                lightBuffer.lights[i].Transform(cameraTransform);
+            }
         }
         lightBuffer.activeLights = static_cast<float>(lightCount);
 

@@ -6,6 +6,7 @@ namespace Engine
 {
     Light::Light(Component::SceneNodePtr sceneNode) : Component(sceneNode, L"Light")
     {
+        AddPublicProperties();
     }
 
     void Light::Initialize(ID3D11Device* device)
@@ -38,5 +39,13 @@ namespace Engine
     {
         m_lightData.Position = GetSceneNode()->GetWorldSpacePosition();
         return m_lightData;
+    }
+
+    void Light::AddPublicProperties()
+    {
+        /// TODO: Add helpers to try and cut this down to 1 line in most cases
+        auto positionGetter = [this]() { return m_lightData.Direction; };
+        auto positionSetter = [this](Utils::Maths::Vector3 v) { SetDirection(v); };
+        RegisterVectorProperty(L"Direction", positionGetter, positionSetter);
     }
 }
