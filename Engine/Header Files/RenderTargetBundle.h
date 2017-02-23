@@ -3,6 +3,7 @@
 #include <Resources\RenderTarget.h>
 #include <Resources\DepthBuffer.h>
 #include <Resources\Sampler.h>
+#include <unordered_map>
 
 namespace Engine
 {
@@ -40,7 +41,14 @@ namespace Engine
         uint32_t GetHeight() const { return m_height; }
 
     private:
-        std::map<std::wstring, RenderTarget::Ptr> m_renderTargetMap;
+        struct BundleElement
+        {
+            std::wstring Name;
+            RenderTarget::Ptr RenderTarget;
+        };
+
+    private:
+        std::vector<BundleElement> m_renderTargets;
         DepthBuffer::Ptr m_depthBuffer;
         Sampler::Ptr m_bundleSampler;
         std::array<ID3D11RenderTargetView*, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> m_renderTargetViews;

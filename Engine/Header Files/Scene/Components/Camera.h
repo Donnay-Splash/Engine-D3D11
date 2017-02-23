@@ -47,6 +47,7 @@ namespace Engine
         virtual void Initialize(ID3D11Device* device) override;
         virtual void CalculateProjectionMatrix();
         Utils::Maths::Vector3 GetClipInfo() const;
+        Utils::Maths::Vector4 GetProjInfo(const Utils::Maths::Vector2& viewSize) const;
 
     protected:
         RenderTargetBundle::Ptr m_renderTargetBundle;

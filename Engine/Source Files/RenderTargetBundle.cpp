@@ -22,7 +22,7 @@ namespace Engine
         auto newRenderTarget = std::make_shared<RenderTarget>(m_width, m_height, m_arraySize, TextureCreationFlags::BindShaderResource, format, m_device);
 
         // Add render target view to array.
-        m_renderTargetMap.emplace(name, newRenderTarget);
+        m_renderTargets.push_back({ name, newRenderTarget });
         m_renderTargetViews[m_count] = newRenderTarget->GetRTV().Get();
 
         // Increment count
@@ -31,11 +31,15 @@ namespace Engine
 
     RenderTarget::Ptr RenderTargetBundle::GetRenderTarget(std::wstring name)
     {
-        auto mapIt = m_renderTargetMap.find(name);
-        // Ensure that the render target exists in the bundle
-        EngineAssert(mapIt != m_renderTargetMap.end());
+        auto it = std::find_if(m_renderTargets.begin(), m_renderTargets.end(), [name](const BundleElement& element)
+        {
+            return name == element.Name;
+        });
 
-        return mapIt->second;
+        // Ensure that the render target exists in the bundle
+        EngineAssert(it != m_renderTargets.end());
+
+        return it->RenderTarget;
     }
 
     void RenderTargetBundle::Clear(ID3D11DeviceContext* deviceContext)
@@ -70,9 +74,9 @@ namespace Engine
         deviceContext->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, nullViews, nullptr);
 
         int textureRegister = 0;
-        for (auto pair : m_renderTargetMap)
+        for (auto pair : m_renderTargets)
         {
-            auto texture = pair.second->GetTexture();
+            auto texture = pair.RenderTarget->GetTexture();
 
             texture->UploadData(deviceContext, PipelineStage::Pixel, textureRegister);
             textureRegister++;

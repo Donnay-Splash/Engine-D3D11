@@ -61,6 +61,7 @@ namespace Engine
         viewConstants.projection = m_projectionMatrix;
         viewConstants.cameraPosition = sceneNode->GetWorldSpacePosition();
         viewConstants.clipInfo = GetClipInfo();
+        viewConstants.projectionInfo = GetProjInfo(viewSize);
         viewConstants.invViewSize = Utils::Maths::Vector2(1.0f, 1.0f) / viewSize;
 
         m_viewConstants->SetData(viewConstants);
@@ -88,9 +89,20 @@ namespace Engine
 
     }
 
+    // Camera info required for reconstructing camera space Z from Depth 
     Utils::Maths::Vector3 Camera::GetClipInfo() const
     {
         return{ m_nearClip * m_farClip, m_nearClip - m_farClip, m_farClip };
+    }
+
+    // Camera info required for reconstructing camera space position 
+    // from screen space coords and camera space z
+    Utils::Maths::Vector4 Camera::GetProjInfo(const Utils::Maths::Vector2& viewSize) const
+    {
+        return{ 2.0f / (viewSize.x * m_projectionMatrix._11),
+                -2.0f / (viewSize.y * m_projectionMatrix._22),
+                -(1.0f - m_projectionMatrix._13) / m_projectionMatrix._11,
+                (1.0f + m_projectionMatrix._23) / m_projectionMatrix._22};
     }
 
     void Camera::SetRenderTargetBundle(RenderTargetBundle::Ptr renderTargetBundle)

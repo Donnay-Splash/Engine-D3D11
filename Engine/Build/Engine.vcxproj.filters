@@ -394,5 +394,8 @@
     <FxCompile Include="..\Shaders\DeepGBuffer_Shade.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="..\Shaders\System_Globals.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

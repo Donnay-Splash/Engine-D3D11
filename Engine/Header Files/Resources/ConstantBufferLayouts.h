@@ -3,6 +3,9 @@
 #include <Scene\Components\Light.h>
 #define ALIGN_16 _declspec(align(16))
 
+// TODO: Formalise buffer registers
+// View constants are global so must not be overwritten
+// effectively making register 0 system reserved
 namespace Engine
 {
     static const uint32_t kMaxLightCount = 4;
@@ -13,6 +16,7 @@ namespace Engine
         static const UINT kRegister = 0;
         Utils::Maths::Matrix view;
         Utils::Maths::Matrix projection;
+        Utils::Maths::Vector4 projectionInfo;
         Utils::Maths::Vector3 cameraPosition;
         Utils::Maths::Vector3 clipInfo;
         Utils::Maths::Vector2 invViewSize;
@@ -21,6 +25,7 @@ namespace Engine
         {
             return  (view != rhs.view) ||
                 (projection != rhs.projection) ||
+                (projectionInfo != rhs.projectionInfo) ||
                 (cameraPosition != rhs.cameraPosition) ||
                 (clipInfo != rhs.clipInfo) ||
                 (invViewSize != rhs.invViewSize);
@@ -30,6 +35,7 @@ namespace Engine
         {
             return  (view == rhs.view) &&
                 (projection == rhs.projection) &&
+                (projectionInfo == rhs.projectionInfo) &&
                 (cameraPosition == rhs.cameraPosition) &&
                 (clipInfo == rhs.clipInfo) &&
                 (invViewSize == rhs.invViewSize);
@@ -141,7 +147,7 @@ namespace Engine
     ALIGN_16
         struct PostEffectConstants
     {
-        static const UINT kRegister = 0;
+        static const UINT kRegister = 1;
 
         float displaySecondLayer = 0.0f;
         float gBufferTargetIndex = 0.0f;

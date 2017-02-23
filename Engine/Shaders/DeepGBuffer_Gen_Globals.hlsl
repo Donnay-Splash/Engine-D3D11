@@ -1,4 +1,5 @@
 /*  Contains all global constants for each pipeline stage used in deep G-Buffer generation */
+#include "System_Globals.hlsl"
 
 // Textures and samplers
 Texture2D DiffuseTexture : register(t0);
@@ -26,21 +27,6 @@ SamplerState AOSampler : register(s6);
 // TODO: Select better registers as 1->n are for material textures
 Texture2DArray previousDepth : register(t7);
 SamplerState depthSampler : register(s7);
-
-// Stores the view and projection transform matrices.
-// TODO: These can be concatinated into a viewProjectionMatrix.
-// TODO: Require previous viewProjection to calculate velocity vectors
-cbuffer ViewBuffer : register(b0)
-{
-    // Matrices are set to row_major to match DirectXMath
-    row_major matrix viewMatrix;
-    row_major matrix projectionMatrix;
-    float3 cameraPos;
-    float padding;
-    float3 clipInfo;
-    float padding2;
-    float2 invViewSize;
-};
 
 // Stores object information. e.g. object local to world transform.
 cbuffer ObjectBuffer : register(b1)

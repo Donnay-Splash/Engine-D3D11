@@ -11,7 +11,7 @@ struct PixelOutput
     // Specular Color and smoothness
     float4 csNormal : SV_Target1;
     float2 ssVelocity : SV_Target2;
-    // csPosition
+    float csZ : SV_Target3;
 };
 
 /*-------------------------------
@@ -109,5 +109,6 @@ PixelOutput PSMain(PixelInput input)
     float3 normalAsColor = (normalize(normal) + 1.0f.xxx) * 0.5f;
     output.csNormal = float4(normalAsColor, 1.0f);
     output.ssVelocity = ssVelocity;
+    output.csZ = input.csPosition.z;
     return output;
 }
