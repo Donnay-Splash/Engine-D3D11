@@ -11,6 +11,7 @@ namespace Engine
         static const uint32_t BindDepthStencil = 0x0004;
         static const uint32_t SRGB = 0x0008;
         static const uint32_t Multisampled = 0x0010;
+        static const uint32_t GenerateMIPs = 0x0020;
     }
 
     // Texture class. Currently only supports 2D textures and arrays.

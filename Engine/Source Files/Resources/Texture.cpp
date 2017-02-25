@@ -21,6 +21,12 @@ namespace Engine
         bool bindToShader = (flags & TextureCreationFlags::BindShaderResource) != 0;
         bool bindToRenderTarget = (flags & TextureCreationFlags::BindRenderTarget) != 0;
         bool bindDepthStencil = (flags & TextureCreationFlags::BindDepthStencil) != 0;
+        bool generateMIPs = (flags & TextureCreationFlags::GenerateMIPs) != 0;
+        uint32_t mipLevels = 1;
+        if (generateMIPs)
+        {
+            mipLevels = 1 + static_cast<uint32_t>(log2(std::max(width, height)));
+        }
 
         if ((bindDepthStencil && bindToShader) || (format == DXGI_FORMAT_D24_UNORM_S8_UINT && bindToShader))
         {
@@ -32,7 +38,7 @@ namespace Engine
         SecureZeroMemory(&desc, sizeof(desc));
         desc.Height = height;
         desc.Width = width;
-        desc.MipLevels = 1;
+        desc.MipLevels = mipLevels;
         desc.ArraySize = arraySize;
         desc.Format = format;
         desc.SampleDesc.Count = 1;

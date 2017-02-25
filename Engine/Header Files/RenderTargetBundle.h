@@ -17,7 +17,18 @@ namespace Engine
     public:
         using Ptr = std::shared_ptr<RenderTargetBundle>;
 
-        RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize = 1);
+        /*
+            Params:
+            device - pointer to the D3D11Device
+            width - width of the render targets in pixels
+            height - height of the render targets in pixels
+            arraySize - When creating texture arrays and render target arrays this sets the size
+            mipLevels - Used when we want to manually render to different mip levels of the render target.
+                        A value less than one will perform as normal. A value larger than one will generate
+                        render targets to draw to each of the different levels of the mip chain. Which mip is
+                        being drawn to can be changed by calling SetTargetMip()
+        */
+        RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize = 1, uint32_t mipLevels = 1);
 
         void CreateRenderTarget(std::wstring name, DXGI_FORMAT format);
 
@@ -40,6 +51,8 @@ namespace Engine
         uint32_t GetWidth() const { return m_width; }
         uint32_t GetHeight() const { return m_height; }
 
+        void SetTargetMip(uint32_t targetMip);
+
     private:
         struct BundleElement
         {
@@ -51,13 +64,16 @@ namespace Engine
         std::vector<BundleElement> m_renderTargets;
         DepthBuffer::Ptr m_depthBuffer;
         Sampler::Ptr m_bundleSampler;
-        std::array<ID3D11RenderTargetView*, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> m_renderTargetViews;
+        // Stores a vector of render target arrays for rendering to each mip level of the texture resource
+        std::vector<std::array<ID3D11RenderTargetView*, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT>> m_renderTargetViews;
 
         // Number of render targets stored in this bundle
         uint32_t m_count = 0;
         uint32_t m_width = 0;
         uint32_t m_height = 0;
         uint32_t m_arraySize = 0;
+        uint32_t m_mipLevels = 0;
+        uint32_t m_targetMip = 0;
 
         bool m_finalised = false;
 

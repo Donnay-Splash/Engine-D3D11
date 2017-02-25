@@ -8,9 +8,7 @@ namespace Engine
 {
 
     // TODO: Attempt to load complex models including Sponza and potentially san-miguel
-    // TODO: Implement deferred shading using same BRDF from forward shader
     // TODO: Continue to maintain debug controls
-    // TODO: Re-read paper. Specifically double check sections about G-Buffer generation
     // TODO: Map out tasks required for computing AO
     // TODO: Begin work on AO
     // TODO: Make switching between different shading models easier. Need way of controlling what is expected as shader constants
@@ -188,16 +186,24 @@ namespace Engine
         m_direct3D->ResizeBuffers(newWidth, newHeight);
 
         // Re-create G-Buffer with new dimensions
+        // TODO: Find a way to create a frame buffer where we create multiple
+        // render targets to draw to each of the different mip levels of a texture.
+        // This is required for generating the hierarchical Z buffer required for AO and SSR.
         const uint32_t GBufferLayers = 2; // TODO: Formalise this
-        RenderTargetBundle::Ptr bundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, GBufferLayers);
-        bundle->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
-        bundle->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
-        bundle->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT);
-        bundle->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R16_FLOAT);
-        bundle->Finalise();
+        RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, GBufferLayers);
+        GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
+        GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
+        GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT);
+        GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R16_FLOAT);
+        GBuffer->Finalise();
 
         // Set the G-Buffer for output from camera
-        m_camera->SetRenderTargetBundle(bundle);
+        m_camera->SetRenderTargetBundle(GBuffer);
+
+        // Create bundle for hierarchical Z
+        RenderTargetBundle::Ptr HI_Z = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 5);
+        HI_Z->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R16G16_FLOAT);
+        HI_Z->Finalise();
     }
 
 
