@@ -30,10 +30,16 @@ float ConvertShininessToSmoothness(float shininess)
     return Utils::Maths::Clamp((log(shininess) - log(2)) / (10.0 * log(2)), 0.0, 1.0);
 }
 
-Importer::Importer()
+Importer::Importer(ImportOptions options) :
+    m_importOptions(options)
 {
     m_aiImporter = std::make_unique<Assimp::Importer>();
     m_textureManager = std::make_unique<TextureManager>();
+
+    if (m_importOptions.MergeMeshesByMaterial)
+    {
+        postProcessSteps |= aiProcess_PreTransformVertices;
+    }
 }
 
 std::string Importer::ReadFile(const std::string& directory, std::string& fileNameAndExtension)
@@ -94,7 +100,7 @@ void Importer::LoadNode(const aiNode* importedNode, uint32_t parentNodeID, const
             auto mesh = importedScene->mMeshes[meshIndex];
             LoadMeshData(sceneNode, mesh);
             sceneNodes.push_back(sceneNode);
-    
+
             // Load the material for the mesh
             auto materialIndex = mesh->mMaterialIndex;
             auto material = importedScene->mMaterials[materialIndex];

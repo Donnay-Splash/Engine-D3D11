@@ -16,14 +16,19 @@ std::string outputFilePath;
 std::string AssetConverterHelp =
 "AssetConverter.exe expects the following switches:\n"
 "-file <path to file to convert> - This is the only expected argument. If you do not specify an output file path "
-                                  "The generated .mike file will be saved alongside the given file\n"
-"-output <path to output directory> - If supplied this path will be where the generated .mike file is saved to.\n";
+"The generated .mike file will be saved alongside the given file\n"
+"-output <path to output directory> - If supplied this path will be where the generated .mike file is saved to.\n"
+"-option <Option to enable> - Will enable the given option if it exists. Possible values are: \n "
+"MergeMeshes - If found all meshes that share the same material will be merged together into a single mesh";
+
+static const std::string kMergeMeshes = "MergeMeshes";
 
 bool CheckFilePath();
 
 int main(int argc, char* argv[])
 {
     bool correctArguments = true;
+    bool mergeMeshes = false;
     
     // We expect at least two arguments. 1. The path of the executable 2. The -file identifier 3. The path of the file to convert.
     // The number of arguments should also be odd as we expect a switch followed by the value
@@ -41,6 +46,14 @@ int main(int argc, char* argv[])
             {
                 outputDirectory = std::string(argv[++i]);
             }
+            else if (argument == "-option")
+            {
+                auto value = std::string(argv[++i]);
+                if (value == kMergeMeshes)
+                {
+                    mergeMeshes = true;
+                }
+            }
             else
             {
                 // Invalid argument print out usage.
@@ -54,7 +67,9 @@ int main(int argc, char* argv[])
 
     if (correctArguments && !filePath.empty())
     {
-        auto importer = std::make_unique<Importer>();
+        Importer::ImportOptions options;
+        options.MergeMeshesByMaterial = mergeMeshes;
+        auto importer = std::make_unique<Importer>(options);
         auto error = importer->ReadFile(fileDirectory, fileName + '.' + fileExtension);
         if (error.empty())
         {
