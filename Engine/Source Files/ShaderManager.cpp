@@ -20,11 +20,28 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h"
     }
 
+    // Full screen quad vertex shader
+    namespace FullScreenQuad
+    {
+        #include "Shaders\Compiled shaders\FullscreenQuad.vs.hlsl.h"
+    }
+
     // Final fullscreen shader to resolve shader G-Buffer
     namespace Deferred
     {
-        #include "Shaders\Compiled shaders\FullscreenQuad.vs.hlsl.h"
         #include "Shaders\Compiled shaders\DeepGBuffer_Shade.ps.hlsl.h"
+    }
+
+    // Copy the two layer camera space Z into two channels of a single texture
+    namespace csZCopy
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_CameraZCopy.ps.hlsl.h"
+    }
+
+    // Generate the hierarchical Z buffer
+    namespace Hierarchical_Z
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_Minify.ps.hlsl.h"
     }
 
     ShaderManager::ShaderManager(ID3D11Device* device)
@@ -58,15 +75,35 @@ namespace Engine
 
             m_shaderMap.insert(ShaderMapObject(ShaderName::DeepGBuffer_Gen, shaderPipeline));
         }
+            
+
+
+        // Load post process shaders
+        InputLayout::Ptr fullscreenQuadLayout = std::make_shared<InputLayout>(InputElement::Position | InputElement::TexCoord0);
+        Shader::Ptr fullScreenQuadVS = std::make_shared<Shader>(Shader::Type::Vertex, FullScreenQuad::g_VSMain, sizeof(FullScreenQuad::g_VSMain), device);
 
         // Load the post process deferred shaders
         {
-            InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::TexCoord0);
-            Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, Deferred::g_VSMain, sizeof(Deferred::g_VSMain), device);
             Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Deferred::g_PSMain, sizeof(Deferred::g_PSMain), device);
-            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, pixelShader);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::GBuffer_Shade, shaderPipeline);
+        }
+
+        // Load the camera-space Z copy
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, csZCopy::g_PSMain, sizeof(csZCopy::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::DeepGBuffer_csZCopy, shaderPipeline);
+        }
+
+        // Load the Hi_Z generation
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Hierarchical_Z::g_PSMain, sizeof(Hierarchical_Z::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::Generate_HiZ, shaderPipeline);
         }
     }
 

@@ -101,7 +101,7 @@ PixelOutput PSMain(PixelInput input)
         // where normal = z, tangent = x, bitangent = y
         //float handedness = step(0.0f, dot(cross(normal, tangent), bitangent));
         matrix<float, 3, 3> normalTransform ={  tangent,
-                                                bitangent,
+                                                -bitangent,
                                                 normal };
 
         // Sample texture and multiply by matrix

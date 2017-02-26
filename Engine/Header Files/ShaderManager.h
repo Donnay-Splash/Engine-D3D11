@@ -9,7 +9,9 @@ namespace Engine
     {
         Uber = 0,
         DeepGBuffer_Gen = 1,
-        GBuffer_Shade = 2
+        GBuffer_Shade = 2,
+        DeepGBuffer_csZCopy = 3,
+        Generate_HiZ = 4
     };
 
     class ShaderManager

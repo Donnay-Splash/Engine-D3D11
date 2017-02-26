@@ -312,8 +312,16 @@ namespace Engine
         ID3D11ShaderResourceView* nullViews[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
         m_deviceContext->VSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullViews);
         m_deviceContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullViews);
+        UnbindAllRenderTargets();
 
         return;
+    }
+
+    void D3DClass::UnbindAllRenderTargets() const
+    {
+        // Clear render target state
+        ID3D11RenderTargetView* nullViews[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
+        m_deviceContext->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, nullViews, nullptr);
     }
 
 
@@ -351,7 +359,9 @@ namespace Engine
         }
         else
         {
-            m_deviceContext->OMSetRenderTargets(bundle->RenderTargetCount(), bundle->GetRenderTargetViews(), bundle->GetDepthBuffer()->GetDSV().Get());
+            ID3D11DepthStencilView* dsv = nullptr;
+            if (bundle->GetDepthBuffer() != nullptr) dsv = bundle->GetDepthBuffer()->GetDSV().Get();
+            m_deviceContext->OMSetRenderTargets(bundle->RenderTargetCount(), bundle->GetRenderTargetViews(), dsv);
         }
     }
 

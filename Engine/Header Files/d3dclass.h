@@ -39,6 +39,8 @@ namespace Engine
 
         Texture::Ptr CopyTexture(Texture::Ptr textureToCopy) const;
 
+        void UnbindAllRenderTargets() const;
+
     private:
         void GetAdapterInformation();
         void CreateDeviceAndSwapChain();

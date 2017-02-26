@@ -1,6 +1,7 @@
 #include "System_Globals.hlsl"
 #include "ReconstructFromDepth.hlsl"
 #include "Lighting.hlsl"
+#include "PostEffectConstants.hlsl"
 
 // GBuffer layout
 Texture2DArray diffuseColor : register(t0);
@@ -31,12 +32,6 @@ cbuffer LightBuffer : register(b2)
     Light lights[MAX_LIGHT_COUNT];
     float activeLights;
 }
-
-struct VertexOut
-{
-    float4 position : SV_Position;
-    float2 uv : TEXCOORD;
-};
 
 float4 PSMain(VertexOut input) : SV_Target
 {

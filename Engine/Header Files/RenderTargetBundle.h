@@ -28,7 +28,7 @@ namespace Engine
                         render targets to draw to each of the different levels of the mip chain. Which mip is
                         being drawn to can be changed by calling SetTargetMip()
         */
-        RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize = 1, uint32_t mipLevels = 1);
+        RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize = 1, uint32_t mipLevels = 1, bool depthEnabled = true);
 
         void CreateRenderTarget(std::wstring name, DXGI_FORMAT format);
 

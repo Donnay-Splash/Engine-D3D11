@@ -4,11 +4,15 @@
 
 namespace Engine
 {
-    RenderTargetBundle::RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize/*=1*/, uint32_t mipLevels/* = 1*/)
+    RenderTargetBundle::RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize/*=1*/, uint32_t mipLevels/* = 1*/, bool depthEnabled /*= true*/)
         : m_width(width), m_height(height), m_device(device), m_arraySize(arraySize), m_mipLevels(mipLevels)
     {
         // Create depth buffer
-        m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, m_arraySize, TextureCreationFlags::BindShaderResource, m_device);
+        if (depthEnabled)
+        {
+            m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, m_arraySize, TextureCreationFlags::BindShaderResource, m_device);
+        }
+
         m_bundleSampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
 
         if (m_mipLevels < 1) m_mipLevels = 1;
@@ -65,7 +69,10 @@ namespace Engine
             deviceContext->ClearRenderTargetView(m_renderTargetViews[0][i], color);
         }
 
-        deviceContext->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        if (m_depthBuffer != nullptr)
+        {
+            deviceContext->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        }
     }
 
     void RenderTargetBundle::Finalise()
@@ -93,7 +100,10 @@ namespace Engine
             textureRegister++;
         }
 
-        m_depthBuffer->GetTexture()->UploadData(deviceContext, PipelineStage::Pixel, textureRegister);
+        if (m_depthBuffer != nullptr)
+        {
+            m_depthBuffer->GetTexture()->UploadData(deviceContext, PipelineStage::Pixel, textureRegister);
+        }
         m_bundleSampler->UploadData(deviceContext, 0);
     }
 

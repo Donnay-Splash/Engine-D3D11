@@ -16,6 +16,7 @@
 #include <Scene\Scene.h>
 #include <Resources\Mesh.h>
 #include <Resources\Sampler.h>
+#include <Resources\TextureMipView.h>
 
 // Don't really want this sat here.
 #include <Resources\ConstantBufferLayouts.h>
@@ -42,10 +43,12 @@ namespace Engine
 
         void CreateGlobalOptions();
 
+
     private:
         bool HandleInput(float);
         bool RenderGraphics();
         void InitializeScene();
+        void GenerateHiZ(Texture::Ptr csZTexture);
 
     private:
         InputManager::Ptr m_inputManager;
@@ -67,6 +70,8 @@ namespace Engine
         SceneElement::Ptr m_globalOptions;
         ConstantBuffer<DeepGBufferConstants>::Ptr m_deepGBufferConstant;
         DeepGBufferConstants m_deepGBufferData;
+        RenderTargetBundle::Ptr m_hiZBundle;
+        TextureMipView::Ptr m_hiZMipView;
 
         Texture::Ptr m_prevDepth;
         Sampler::Ptr m_depthSampler;

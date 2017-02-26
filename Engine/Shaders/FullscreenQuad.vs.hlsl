@@ -1,15 +1,4 @@
-
-struct VertexIn
-{
-    float4 position : POSITION;
-    float2 uv : TEXCOORD;
-};
-
-struct VertexOut
-{
-    float4 position : SV_Position;
-    float2 uv : TEXCOORD;
-};
+#include "PostEffectConstants.hlsl"
 
 VertexOut VSMain(VertexIn input)
 {

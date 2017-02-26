@@ -201,9 +201,12 @@ namespace Engine
         m_camera->SetRenderTargetBundle(GBuffer);
 
         // Create bundle for hierarchical Z
-        RenderTargetBundle::Ptr HI_Z = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 5);
-        HI_Z->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R16G16_FLOAT);
-        HI_Z->Finalise();
+        m_hiZBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 5, false);
+        m_hiZBundle->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R16G16_FLOAT);
+        m_hiZBundle->Finalise();
+
+        auto Hi_ZTex = m_hiZBundle->GetRenderTarget(L"Hi-Z")->GetTexture();
+        m_hiZMipView = std::make_shared<TextureMipView>(m_direct3D->GetDevice(), Hi_ZTex, 5);
     }
 
 
@@ -295,10 +298,25 @@ namespace Engine
         // This generates our deep G-Buffer
         m_camera->Render(m_direct3D, m_scene);
 
+        // We are finished drawing to the G-Buffer and now want to send
+        // it as a shader resource so all RTVs must be cleared from the device
+        m_direct3D->UnbindAllRenderTargets();
+
+
         // Now need to copy depth
         auto bundle = m_camera->GetRenderTargetBundle();
         if (bundle != nullptr)
         {
+            // TODO: Take csZ buffer from GBuffer and generate hierarchical Z in mips
+            // We have render targets in HI_Z bundle that point to each of the mips
+            // of the texture. When creating the texture we want to create multiple
+            // SRVs to access only a single mip and then upload and render to them separately.
+            // This is going to make the texture class hella ugly.
+            auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
+            GenerateHiZ(HiZTexture);
+
+            // TODO: Pass Hierarchical Z to shader to generate AO
+
             m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
 
             // Upload G-buffer data to device
@@ -318,6 +336,42 @@ namespace Engine
         m_direct3D->EndScene();
 
         return true;
+    }
+
+    // Generates the hierachical Z buffer
+    void Engine::GenerateHiZ(Texture::Ptr csZTexture)
+    {
+        m_hiZBundle->Clear(m_direct3D->GetDeviceContext());
+        m_hiZBundle->SetTargetMip(0);
+        // Create post effect
+        auto csZCopyPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_csZCopy);
+        auto csZCopyEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), csZCopyPipeline);
+
+        auto HiZConstruction = m_shaderManager->GetShaderPipeline(ShaderName::Generate_HiZ);
+        auto HiZPost = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), HiZConstruction);
+
+        // From deep G to single texture
+        m_postProcessCamera->SetRenderTargetBundle(m_hiZBundle);
+        csZTexture->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
+        m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 0);
+        m_postProcessCamera->RenderPostEffect(m_direct3D, csZCopyEffect);
+
+        m_direct3D->UnbindAllRenderTargets();
+
+        // render to second mip
+        m_hiZBundle->SetTargetMip(1);
+        m_hiZMipView->SetCurrentMip(0);
+        m_hiZMipView->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
+        m_postProcessCamera->RenderPostEffect(m_direct3D, HiZPost);
+
+        //for (int i = 1; i < MAX_MIPS; i++)
+        //{
+        //    // Set current render to target mip i.
+        //    // Pass mip i-1 to shader
+        //    // Render
+        //}
+
+        m_postProcessCamera->SetRenderTargetBundle(nullptr);
     }
 
 }

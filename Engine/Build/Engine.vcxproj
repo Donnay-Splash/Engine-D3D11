@@ -196,6 +196,7 @@
     <ClCompile Include="..\Source Files\Resources\Shader.cpp" />
     <ClCompile Include="..\Source Files\Resources\ShaderPipeline.cpp" />
     <ClCompile Include="..\Source Files\Resources\Texture.cpp" />
+    <ClCompile Include="..\Source Files\Resources\TextureMipView.cpp" />
     <ClCompile Include="..\Source Files\Resources\VertexBuffer.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\BoundingBox.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\Camera.cpp" />
@@ -254,6 +255,7 @@
     <ClInclude Include="..\Header Files\Resources\Shader.h" />
     <ClInclude Include="..\Header Files\Resources\ShaderPipeline.h" />
     <ClInclude Include="..\Header Files\Resources\Texture.h" />
+    <ClInclude Include="..\Header Files\Resources\TextureMipView.h" />
     <ClInclude Include="..\Header Files\Resources\VertexBuffer.h" />
     <ClInclude Include="..\Header Files\Scene\Components\BoundingBox.h" />
     <ClInclude Include="..\Header Files\Scene\Components\Camera.h" />
@@ -314,6 +316,19 @@
       <FileType>Document</FileType>
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </None>
+    <FxCompile Include="..\Shaders\DeepGBuffer_CameraZCopy.ps.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Gen.gs.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>GSMain</EntryPointName>
@@ -374,6 +389,19 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Minify.ps.hlsl">
+        <FileType>Document</FileType>
+        <EntryPointName>PSMain</EntryPointName>
+        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+        <ShaderType>Pixel</ShaderType>
+        <ShaderModel>5.0</ShaderModel>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+        <ObjectFileOutput>
+        </ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Shade.ps.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>PSMain</EntryPointName>
@@ -408,6 +436,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="..\Shaders\Lighting.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\PostEffectConstants.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
