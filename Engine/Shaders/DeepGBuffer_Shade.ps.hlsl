@@ -11,12 +11,6 @@ Texture2DArray csZ : register(t3);
 Texture2DArray depth : register(t4);
 SamplerState gBufferSampler : register(s0);
 
-cbuffer Constants : register(b1)
-{
-    float displaySecondLayer;
-    float gBufferTarget;
-}
-
 #define MAX_LIGHT_COUNT 4
 // struct containing light information
 struct Light

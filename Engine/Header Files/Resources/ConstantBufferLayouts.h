@@ -151,6 +151,7 @@ namespace Engine
 
         float displaySecondLayer = 0.0f;
         float gBufferTargetIndex = 0.0f;
+        float currentMipLevel = 0.0f;
 
         // Currently empty but can add debug stuff or something later
         bool operator!=(const PostEffectConstants& rhs)

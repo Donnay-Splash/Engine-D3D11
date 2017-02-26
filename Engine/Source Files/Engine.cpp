@@ -6,7 +6,7 @@
 
 namespace Engine
 {
-
+    const uint32_t hiZ_mipCount = 5;
     // TODO: Attempt to load complex models including Sponza and potentially san-miguel
     // TODO: Continue to maintain debug controls
     // TODO: Map out tasks required for computing AO
@@ -201,12 +201,12 @@ namespace Engine
         m_camera->SetRenderTargetBundle(GBuffer);
 
         // Create bundle for hierarchical Z
-        m_hiZBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 5, false);
+        m_hiZBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, hiZ_mipCount, false);
         m_hiZBundle->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R16G16_FLOAT);
         m_hiZBundle->Finalise();
 
         auto Hi_ZTex = m_hiZBundle->GetRenderTarget(L"Hi-Z")->GetTexture();
-        m_hiZMipView = std::make_shared<TextureMipView>(m_direct3D->GetDevice(), Hi_ZTex, 5);
+        m_hiZMipView = std::make_shared<TextureMipView>(m_direct3D->GetDevice(), Hi_ZTex, hiZ_mipCount);
     }
 
 
@@ -356,20 +356,22 @@ namespace Engine
         m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 0);
         m_postProcessCamera->RenderPostEffect(m_direct3D, csZCopyEffect);
 
-        m_direct3D->UnbindAllRenderTargets();
 
-        // render to second mip
-        m_hiZBundle->SetTargetMip(1);
-        m_hiZMipView->SetCurrentMip(0);
-        m_hiZMipView->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
-        m_postProcessCamera->RenderPostEffect(m_direct3D, HiZPost);
-
-        //for (int i = 1; i < MAX_MIPS; i++)
-        //{
-        //    // Set current render to target mip i.
-        //    // Pass mip i-1 to shader
-        //    // Render
-        //}
+        PostEffectConstants constants;
+        for (int i = 1; i < hiZ_mipCount; i++)
+        {
+            // Set current render to target mip i.
+            // Pass mip i-1 to shader
+            // Render
+            m_direct3D->UnbindAllRenderTargets();
+            // render to second mip
+            constants.currentMipLevel = float(i);
+            HiZPost->SetEffectData(constants);
+            m_hiZBundle->SetTargetMip(i);
+            m_hiZMipView->SetCurrentMip(i - 1); // The mip level we are currently sampling from
+            m_hiZMipView->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
+            m_postProcessCamera->RenderPostEffect(m_direct3D, HiZPost);
+        }
 
         m_postProcessCamera->SetRenderTargetBundle(nullptr);
     }
