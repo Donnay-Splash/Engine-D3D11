@@ -7,12 +7,14 @@
 cbuffer ViewBuffer : register(b0)
 {
     // Matrices are set to row_major to match DirectXMath
-    row_major matrix viewMatrix;
-    row_major matrix projectionMatrix;
-    float4 projectionInfo;
-    float3 cameraPos;
+    row_major matrix viewMatrix; // world to camera-space
+    row_major matrix projectionMatrix; // camera to screen-space
+    float4 projectionInfo; // Projection matrix info for reconstructing camera-space positions
+    float3 cameraPos; // position of the camera in world space
     float padding;
-    float3 clipInfo;
-    float padding2;
-    float2 invViewSize;
+    float3 clipInfo; // clippling plane info for reconstructing camera-space z from depth buffer
+    float padding1;
+    float2 invViewSize; // 1/viewport size
+    float2 padding3;
+    float projectionScale; // size of a 1m tall object 1m away from the camera in pixels
 };

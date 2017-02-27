@@ -44,6 +44,11 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_Minify.ps.hlsl.h"
     }
 
+    namespace AO
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_ComputeAO.ps.hlsl.h"
+    }
+
     ShaderManager::ShaderManager(ID3D11Device* device)
     {
         LoadCoreShaders(device);
@@ -104,6 +109,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::Generate_HiZ, shaderPipeline);
+        }
+
+        // Load the AO shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, AO::g_PSMain, sizeof(AO::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::AO, shaderPipeline);
         }
     }
 

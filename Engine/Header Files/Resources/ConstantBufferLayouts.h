@@ -20,6 +20,7 @@ namespace Engine
         Utils::Maths::Vector3 cameraPosition;
         Utils::Maths::Vector3 clipInfo;
         Utils::Maths::Vector2 invViewSize;
+        float projectionScale;
 
         bool operator!=(const ViewConstants& rhs)
         {
@@ -27,6 +28,7 @@ namespace Engine
                 (projection != rhs.projection) ||
                 (projectionInfo != rhs.projectionInfo) ||
                 (cameraPosition != rhs.cameraPosition) ||
+                (projectionScale != rhs.projectionScale) ||
                 (clipInfo != rhs.clipInfo) ||
                 (invViewSize != rhs.invViewSize);
         }
@@ -37,6 +39,7 @@ namespace Engine
                 (projection == rhs.projection) &&
                 (projectionInfo == rhs.projectionInfo) &&
                 (cameraPosition == rhs.cameraPosition) &&
+                (projectionScale == rhs.projectionScale) &&
                 (clipInfo == rhs.clipInfo) &&
                 (invViewSize == rhs.invViewSize);
         }
@@ -152,17 +155,37 @@ namespace Engine
         float displaySecondLayer = 0.0f;
         float gBufferTargetIndex = 0.0f;
         float currentMipLevel = 0.0f;
+        float numAOSamples = 0.0f;
+        float numAOSpiralTurns = 0.0f; // Number of spirals to take when sampling. Best value of turns calculated in engine based on selected number of samples
+        float aoRadius = 0.0f; // Ambient occlusion sphere radius in world-space
+        float aoBias = 0.0f; // AO Bias to avoid darkening in smooth corners e.g. 0.01m
+        float aoIntensity = 0.0f; // Controls the sharpness of the calculated AO
+        float aoUseSecondLayer = 1.0f;
 
         // Currently empty but can add debug stuff or something later
         bool operator!=(const PostEffectConstants& rhs)
         {
             return (displaySecondLayer != rhs.displaySecondLayer) ||
-                   (gBufferTargetIndex != rhs.gBufferTargetIndex);
+                   (gBufferTargetIndex != rhs.gBufferTargetIndex) ||
+                   (currentMipLevel != rhs.currentMipLevel) ||
+                   (numAOSamples != rhs.numAOSamples) ||
+                   (numAOSpiralTurns != rhs.numAOSpiralTurns) ||
+                   (aoRadius != rhs.aoRadius) ||
+                   (aoBias != rhs.aoBias) ||
+                   (aoIntensity != rhs.aoIntensity) ||
+                   (aoUseSecondLayer != rhs.aoUseSecondLayer);
         }
         bool operator==(const PostEffectConstants& rhs)
         {
             return (displaySecondLayer == rhs.displaySecondLayer) &&
-                   (gBufferTargetIndex == rhs.gBufferTargetIndex);
+                   (gBufferTargetIndex == rhs.gBufferTargetIndex) &&
+                   (currentMipLevel == rhs.currentMipLevel) &&
+                   (numAOSamples == rhs.numAOSamples) &&
+                   (numAOSpiralTurns == rhs.numAOSpiralTurns) &&
+                   (aoRadius == rhs.aoRadius) &&
+                   (aoBias == rhs.aoBias) &&
+                   (aoIntensity == rhs.aoIntensity) &&
+                   (aoUseSecondLayer == rhs.aoUseSecondLayer);
         }
 
     };

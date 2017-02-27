@@ -6,7 +6,40 @@
 
 namespace Engine
 {
-    const uint32_t hiZ_mipCount = 5;
+    // Taken from DeepGBuffer paper : http://graphics.cs.williams.edu/papers/DeepGBuffer16/
+    // Precalculated number of spiral taps for calculating AO. Values calculated to minimise
+    // Only supports up to 99 AO samples. This is fine though as likely anything more that 100 taps is overkill
+    uint32_t CalcSpiralTurns(uint32_t numSamples)
+    {
+    #define NUM_PRECOMPUTED 100
+
+        static int minDiscrepancyArray[NUM_PRECOMPUTED] = {
+            //  0   1   2   3   4   5   6   7   8   9
+            1,  1,  1,  2,  3,  2,  5,  2,  3,  2,  // 0
+            3,  3,  5,  5,  3,  4,  7,  5,  5,  7,  // 1
+            9,  8,  5,  5,  7,  7,  7,  8,  5,  8,  // 2
+            11, 12,  7, 10, 13,  8, 11,  8,  7, 14,  // 3
+            11, 11, 13, 12, 13, 19, 17, 13, 11, 18,  // 4
+            19, 11, 11, 14, 17, 21, 15, 16, 17, 18,  // 5
+            13, 17, 11, 17, 19, 18, 25, 18, 19, 19,  // 6
+            29, 21, 19, 27, 31, 29, 21, 18, 17, 29,  // 7
+            31, 31, 23, 18, 25, 26, 25, 23, 19, 34,  // 8
+            19, 27, 21, 25, 39, 29, 17, 21, 27, 29 }; // 9
+
+        if (numSamples < NUM_PRECOMPUTED) {
+            return minDiscrepancyArray[numSamples];
+        }
+        else {
+            return 5779; // Some large prime. Hope it does alright. It'll at least never degenerate into a perfect line until we have 5779 samples...
+        }
+
+    #undef NUM_PRECOMPUTED
+    }
+
+    // class constants
+    const uint32_t kHiZ_MaxMip = 5;
+    const uint32_t kAO_numSamples = 6;
+    const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     // TODO: Attempt to load complex models including Sponza and potentially san-miguel
     // TODO: Continue to maintain debug controls
     // TODO: Map out tasks required for computing AO
@@ -123,6 +156,15 @@ namespace Engine
 
     void Engine::CreateGlobalOptions()
     {
+        // Set initialvalues for constants
+        m_debugConstants.aoRadius = 1.0f; // 1 metre
+        m_debugConstants.aoBias = 0.01f; // 1 cm
+        m_debugConstants.aoIntensity = 1.0f;
+        m_debugConstants.numAOSamples = kAO_numSamples;
+        m_debugConstants.numAOSpiralTurns = float(kAO_numSpiralTurns);
+
+        m_deepGBufferData.minimumSeparation = 0.3f;
+
         m_globalOptions = std::make_shared<SceneElement>(L"Global Options");
 
         {
@@ -134,7 +176,7 @@ namespace Engine
         {
             auto getter = [&]()->float { return m_debugConstants.gBufferTargetIndex; };
             auto setter = [&](float value) {m_debugConstants.gBufferTargetIndex = value; };
-            m_globalOptions->RegisterScalarProperty(L"RenderTarget index", getter, setter, 0.0f, 4.0f);
+            m_globalOptions->RegisterScalarProperty(L"RenderTarget index", getter, setter, 0.0f, 5.0f);
         }
 
         {
@@ -142,6 +184,31 @@ namespace Engine
             auto setter = [&](float value) {m_deepGBufferData.minimumSeparation = value; };
             m_globalOptions->RegisterScalarProperty(L"Minimum Separation", getter, setter, 0.0f, 1.0f);
         }
+
+        {
+            auto getter = [&]()->float { return m_debugConstants.aoRadius; };
+            auto setter = [&](float value) {m_debugConstants.aoRadius = value; };
+            m_globalOptions->RegisterScalarProperty(L"AO Radius", getter, setter, 0.0f, 4.0f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_debugConstants.aoBias; };
+            auto setter = [&](float value) {m_debugConstants.aoBias = value; };
+            m_globalOptions->RegisterScalarProperty(L"AO Bias", getter, setter, 0.0f, 0.1f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_debugConstants.aoIntensity; };
+            auto setter = [&](float value) {m_debugConstants.aoIntensity = value; };
+            m_globalOptions->RegisterScalarProperty(L"AO Intensity", getter, setter, 1.0f, 4.0f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_debugConstants.aoUseSecondLayer; };
+            auto setter = [&](float value) {m_debugConstants.aoUseSecondLayer = value; };
+            m_globalOptions->RegisterScalarProperty(L"AO Use second layer", getter, setter, 0.0f, 1.0f);
+        }
+
     }
 
     void Engine::SetFrameInput(InputState newInputState)
@@ -194,19 +261,23 @@ namespace Engine
         GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT);
-        GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R16_FLOAT);
+        GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT);
         GBuffer->Finalise();
 
         // Set the G-Buffer for output from camera
         m_camera->SetRenderTargetBundle(GBuffer);
 
         // Create bundle for hierarchical Z
-        m_hiZBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, hiZ_mipCount, false);
-        m_hiZBundle->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R16G16_FLOAT);
+        m_hiZBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, kHiZ_MaxMip + 1, false);
+        m_hiZBundle->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R32G32_FLOAT);
         m_hiZBundle->Finalise();
 
         auto Hi_ZTex = m_hiZBundle->GetRenderTarget(L"Hi-Z")->GetTexture();
-        m_hiZMipView = std::make_shared<TextureMipView>(m_direct3D->GetDevice(), Hi_ZTex, hiZ_mipCount);
+        m_hiZMipView = std::make_shared<TextureMipView>(m_direct3D->GetDevice(), Hi_ZTex, kHiZ_MaxMip + 1);
+
+        m_aoBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_aoBundle->CreateRenderTarget(L"AO", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_aoBundle->Finalise();
     }
 
 
@@ -307,6 +378,8 @@ namespace Engine
         auto bundle = m_camera->GetRenderTargetBundle();
         if (bundle != nullptr)
         {
+            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
+
             // TODO: Take csZ buffer from GBuffer and generate hierarchical Z in mips
             // We have render targets in HI_Z bundle that point to each of the mips
             // of the texture. When creating the texture we want to create multiple
@@ -316,11 +389,21 @@ namespace Engine
             GenerateHiZ(HiZTexture);
 
             // TODO: Pass Hierarchical Z to shader to generate AO
+            auto aoPipeline = m_shaderManager->GetShaderPipeline(ShaderName::AO);
+            auto aoEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), aoPipeline);
+            aoEffect->SetEffectData(m_debugConstants);
 
-            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
+            // Upload hierarchical Z
+            m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+            m_postProcessCamera->SetRenderTargetBundle(m_aoBundle);
+            m_postProcessCamera->RenderPostEffect(m_direct3D, aoEffect);
+            // Set render target to back buffer
+            m_postProcessCamera->SetRenderTargetBundle(nullptr);
+            auto aoTarget = m_aoBundle->GetRenderTarget(L"AO");
 
             // Upload G-buffer data to device
             bundle->SetShaderResources(m_direct3D->GetDeviceContext());
+            aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 5);
 
             // Set post effect constants
             m_postEffect->SetEffectData(m_debugConstants);
@@ -358,7 +441,7 @@ namespace Engine
 
 
         PostEffectConstants constants;
-        for (int i = 1; i < hiZ_mipCount; i++)
+        for (int i = 1; i <= kHiZ_MaxMip; i++)
         {
             // Set current render to target mip i.
             // Pass mip i-1 to shader

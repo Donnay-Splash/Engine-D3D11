@@ -9,6 +9,7 @@ Texture2DArray csNormals : register(t1);
 Texture2DArray ssVelocity : register(t2);
 Texture2DArray csZ : register(t3);
 Texture2DArray depth : register(t4);
+Texture2D AO : register(t5);
 SamplerState gBufferSampler : register(s0);
 
 #define MAX_LIGHT_COUNT 4
@@ -65,6 +66,10 @@ float4 PSMain(VertexOut input) : SV_Target
     else if(target == 4.0f)
     {
         color = csPosition.xyzz / 1000.0f;
+    }
+    else if(target == 5.0f)
+    {
+        color = AO.Sample(gBufferSampler, samplePoint.xy).xxxx;
     }
 
     return float4(GammaEncode(color.rgb), 1.0f);

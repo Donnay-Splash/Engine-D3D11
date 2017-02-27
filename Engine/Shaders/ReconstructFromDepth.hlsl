@@ -32,3 +32,15 @@ float3 ReconstructCSPosition(float2 ssPosition, float csZ, float4 projectionInfo
 {
     return float3((ssPosition.xy * projectionInfo.xy + projectionInfo.zw) * csZ, csZ);
 }
+
+/*--------------------------------------
+Reconstructs the camera-space normal for the face based on screen-space derivatives
+
+Args:
+csPosition: camera-space position for the fragment
+--------------------------------------*/
+float3 ReconstructNonUnitFaceNormal(float3 csPosition)
+{
+    return cross(ddx(csPosition), ddy(csPosition));
+}
+

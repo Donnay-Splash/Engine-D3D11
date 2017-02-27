@@ -11,7 +11,8 @@ namespace Engine
         DeepGBuffer_Gen = 1,
         GBuffer_Shade = 2,
         DeepGBuffer_csZCopy = 3,
-        Generate_HiZ = 4
+        Generate_HiZ = 4,
+        AO = 5
     };
 
     class ShaderManager

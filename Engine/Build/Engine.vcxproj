@@ -329,6 +329,19 @@
       <ObjectFileOutput>
       </ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_ComputeAO.ps.hlsl">
+        <FileType>Document</FileType>
+        <EntryPointName>PSMain</EntryPointName>
+        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+        <ShaderType>Pixel</ShaderType>
+        <ShaderModel>5.0</ShaderModel>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+        <ObjectFileOutput>
+        </ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Gen.gs.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>GSMain</EntryPointName>
@@ -390,17 +403,17 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <FxCompile Include="..\Shaders\DeepGBuffer_Minify.ps.hlsl">
-        <FileType>Document</FileType>
-        <EntryPointName>PSMain</EntryPointName>
-        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
-        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
-        <ShaderType>Pixel</ShaderType>
-        <ShaderModel>5.0</ShaderModel>
-        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
-        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
-        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
-        <ObjectFileOutput>
-        </ObjectFileOutput>
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Shade.ps.hlsl">
       <FileType>Document</FileType>

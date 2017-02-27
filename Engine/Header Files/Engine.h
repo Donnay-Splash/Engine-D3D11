@@ -72,6 +72,7 @@ namespace Engine
         DeepGBufferConstants m_deepGBufferData;
         RenderTargetBundle::Ptr m_hiZBundle;
         TextureMipView::Ptr m_hiZMipView;
+        RenderTargetBundle::Ptr m_aoBundle;
 
         Texture::Ptr m_prevDepth;
         Sampler::Ptr m_depthSampler;

@@ -46,8 +46,16 @@ namespace Engine
         Camera(Component::SceneNodePtr sceneNode);
         virtual void Initialize(ID3D11Device* device) override;
         virtual void CalculateProjectionMatrix();
+        // Camera info required for reconstructing camera space Z from Depth 
         Utils::Maths::Vector3 GetClipInfo() const;
+        // Camera info required for reconstructing camera space position 
+        // from screen space coords and camera space z
         Utils::Maths::Vector4 GetProjInfo(const Utils::Maths::Vector2& viewSize) const;
+
+        // Returns the number of pixels per metre at z = 1 for the given viewport.
+        // This can be used to perform projections from world space values to screen space.
+        // e.g. circle of confusion, AO sample radius
+        float GetProjectionScale(const Utils::Maths::Vector2& viewSize) const;
 
     protected:
         RenderTargetBundle::Ptr m_renderTargetBundle;
