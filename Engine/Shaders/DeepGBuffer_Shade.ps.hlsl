@@ -35,7 +35,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 samplePoint = float3(input.uv, displaySecondLayer);
     float z = csZ.Sample(gBufferSampler, samplePoint).r;
     float3 csPosition = ReconstructCSPosition(input.position.xy, z, projectionInfo);
-    float3 ao = AO.Sample(gBufferSampler, samplePoint.xy).xxxx;
+    float3 ao = AO.Sample(gBufferSampler, samplePoint.xy).xxx;
     
     float4 diffuseSample = diffuseColor.Sample(gBufferSampler, samplePoint);
     float3 baseColor = diffuseSample.rgb;
@@ -46,7 +46,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 radiance = 0.0f;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[0].direction), alpha, baseColor) * lights[0].color.rgb;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[1].direction), alpha, baseColor) * lights[1].color.rgb;
-    float aoContribution = lerp(1.0f, ao, aoUseSecondLayer);
+    float3 aoContribution = lerp(1.0f.xxx, ao, aoUseSecondLayer);
     radiance += 0.2f * aoContribution * baseColor;
 
     if(target == 0.0f)
@@ -59,7 +59,7 @@ float4 PSMain(VertexOut input) : SV_Target
     }
     else if (target == 2.0f)
     {
-        float2 ssVel = ssVelocity.Sample(gBufferSampler, samplePoint);
+        float2 ssVel = ssVelocity.Sample(gBufferSampler, samplePoint).rg;
         color = float4((ssVel + 1.0f) * 0.5f, 0.5f, 1.0f);
     }
     else if(target == 3.0f)

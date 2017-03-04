@@ -418,5 +418,8 @@
     <FxCompile Include="..\Shaders\DeepGBuffer_ComputeAO.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -156,11 +156,16 @@ namespace Engine
         float gBufferTargetIndex = 0.0f;
         float currentMipLevel = 0.0f;
         float numAOSamples = 0.0f;
+
         float numAOSpiralTurns = 0.0f; // Number of spirals to take when sampling. Best value of turns calculated in engine based on selected number of samples
         float aoRadius = 0.0f; // Ambient occlusion sphere radius in world-space
         float aoBias = 0.0f; // AO Bias to avoid darkening in smooth corners e.g. 0.01m
         float aoIntensity = 0.0f; // Controls the sharpness of the calculated AO
+
         float aoUseSecondLayer = 1.0f;
+        float blurEdgeSharpness = 1.0f; // Controls how sharp the edges are for the blur. A higher value increases sharpness but creates flickering at edges.
+        // Axis that we are blurring along. either [0, 1] for vertical or [1, 0] for horizontal
+        Utils::Maths::Vector2 blurAxis = { 0.0f, 0.0f };
 
         // Currently empty but can add debug stuff or something later
         bool operator!=(const PostEffectConstants& rhs)
@@ -173,7 +178,9 @@ namespace Engine
                    (aoRadius != rhs.aoRadius) ||
                    (aoBias != rhs.aoBias) ||
                    (aoIntensity != rhs.aoIntensity) ||
-                   (aoUseSecondLayer != rhs.aoUseSecondLayer);
+                   (aoUseSecondLayer != rhs.aoUseSecondLayer) ||
+                   (blurEdgeSharpness != rhs.blurEdgeSharpness) ||
+                   (blurAxis != rhs.blurAxis);
         }
         bool operator==(const PostEffectConstants& rhs)
         {
@@ -185,7 +192,9 @@ namespace Engine
                    (aoRadius == rhs.aoRadius) &&
                    (aoBias == rhs.aoBias) &&
                    (aoIntensity == rhs.aoIntensity) &&
-                   (aoUseSecondLayer == rhs.aoUseSecondLayer);
+                   (aoUseSecondLayer == rhs.aoUseSecondLayer) &&
+                   (blurEdgeSharpness == rhs.blurEdgeSharpness) &&
+                   (blurAxis == rhs.blurAxis);
         }
 
     };

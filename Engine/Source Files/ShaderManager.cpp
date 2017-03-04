@@ -44,9 +44,16 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_Minify.ps.hlsl.h"
     }
 
+    // Scalable Ambient Obscurance algorithm
     namespace AO
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_ComputeAO.ps.hlsl.h"
+    }
+
+    // Depth aware blur for reducing noise in AO
+    namespace BilateralBlur
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl.h"
     }
 
     ShaderManager::ShaderManager(ID3D11Device* device)
@@ -117,6 +124,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::AO, shaderPipeline);
+        }
+
+        // Load the Bilateral Blur shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, BilateralBlur::g_PSMain, sizeof(BilateralBlur::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::BilateralBlur, shaderPipeline);
         }
     }
 

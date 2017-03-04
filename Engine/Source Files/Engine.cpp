@@ -38,7 +38,7 @@ namespace Engine
 
     // class constants
     const uint32_t kHiZ_MaxMip = 5;
-    const uint32_t kAO_numSamples = 6;
+    const uint32_t kAO_numSamples = 20;
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     // TODO: Attempt to load complex models including Sponza and potentially san-miguel
     // TODO: Continue to maintain debug controls
@@ -278,6 +278,10 @@ namespace Engine
         m_aoBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
         m_aoBundle->CreateRenderTarget(L"AO", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_aoBundle->Finalise();
+
+        m_blurBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_blurBundle->CreateRenderTarget(L"Blurred Texture", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_blurBundle->Finalise();
     }
 
 
@@ -380,23 +384,13 @@ namespace Engine
         {
             m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
 
-            // TODO: Take csZ buffer from GBuffer and generate hierarchical Z in mips
-            // We have render targets in HI_Z bundle that point to each of the mips
-            // of the texture. When creating the texture we want to create multiple
-            // SRVs to access only a single mip and then upload and render to them separately.
-            // This is going to make the texture class hella ugly.
+            // Take the camera-space Z texture and downsample into the mips
             auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
             GenerateHiZ(HiZTexture);
 
-            // TODO: Pass Hierarchical Z to shader to generate AO
-            auto aoPipeline = m_shaderManager->GetShaderPipeline(ShaderName::AO);
-            auto aoEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), aoPipeline);
-            aoEffect->SetEffectData(m_debugConstants);
+            // Generate the ambient occlusion
+            GenerateAO();
 
-            // Upload hierarchical Z
-            m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext());
-            m_postProcessCamera->SetRenderTargetBundle(m_aoBundle);
-            m_postProcessCamera->RenderPostEffect(m_direct3D, aoEffect);
             // Set render target to back buffer
             m_postProcessCamera->SetRenderTargetBundle(nullptr);
             auto aoTarget = m_aoBundle->GetRenderTarget(L"AO");
@@ -457,6 +451,46 @@ namespace Engine
         }
 
         m_postProcessCamera->SetRenderTargetBundle(nullptr);
+    }
+
+    void Engine::GenerateAO()
+    {
+        // Pass Hierarchical Z to shader to generate AO
+        auto aoPipeline = m_shaderManager->GetShaderPipeline(ShaderName::AO);
+        auto aoEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), aoPipeline);
+        aoEffect->SetEffectData(m_debugConstants);
+
+        // Upload hierarchical Z
+        m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+
+        // Render AO effect
+        m_postProcessCamera->SetRenderTargetBundle(m_aoBundle);
+        m_postProcessCamera->RenderPostEffect(m_direct3D, aoEffect);
+
+        BlurAO();
+    }
+
+    void Engine::BlurAO()
+    {
+        m_postProcessCamera->SetRenderTargetBundle(m_blurBundle);
+        auto blurPipeline = m_shaderManager->GetShaderPipeline(ShaderName::BilateralBlur);
+        auto blurEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), blurPipeline);
+
+        // vertical blur
+        m_debugConstants.blurAxis = { 0.0f, 1.0f };
+        blurEffect->SetEffectData(m_debugConstants);
+        m_aoBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        m_postProcessCamera->RenderPostEffect(m_direct3D, blurEffect);
+
+        // Set camera to render back to the original AO texture
+        m_postProcessCamera->SetRenderTargetBundle(m_aoBundle);
+
+        // horizontal blur
+        // bind old ao render target
+        m_debugConstants.blurAxis = { 1.0f, 0.0f };
+        blurEffect->SetEffectData(m_debugConstants);
+        m_blurBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        m_postProcessCamera->RenderPostEffect(m_direct3D, blurEffect);
     }
 
 }

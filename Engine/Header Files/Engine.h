@@ -49,6 +49,8 @@ namespace Engine
         bool RenderGraphics();
         void InitializeScene();
         void GenerateHiZ(Texture::Ptr csZTexture);
+        void GenerateAO();
+        void BlurAO();
 
     private:
         InputManager::Ptr m_inputManager;
@@ -73,6 +75,7 @@ namespace Engine
         RenderTargetBundle::Ptr m_hiZBundle;
         TextureMipView::Ptr m_hiZMipView;
         RenderTargetBundle::Ptr m_aoBundle;
+        RenderTargetBundle::Ptr m_blurBundle;
 
         Texture::Ptr m_prevDepth;
         Sampler::Ptr m_depthSampler;
