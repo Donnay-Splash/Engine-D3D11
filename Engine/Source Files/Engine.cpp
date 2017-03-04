@@ -19,21 +19,29 @@ Utils::Maths::Matrix CalculateTorusInertiaTensor(float mass, float majorRadius, 
 // class constants for Torus rotation
 namespace
 {
+    // Constants describing our torus. The mesh is generated on intialisation
+    // and tied to our torus scene object.
     const Utils::Maths::Vector3 initialAngularVelocity = { 1.0f, 1.0f, 1.0f };
     const float kMass = 3.14f;
     const float torusMajorRadius = 4.0f;
-    // Since torus minor radius is 1 we don't need to square it
     const float torusMinorRadius = 1.0f;
 
+    // Pre-compute inertia tensor and its inverse
     const Utils::Maths::Matrix torusInertiaTensor = CalculateTorusInertiaTensor(kMass, torusMajorRadius, torusMinorRadius);
     const Utils::Maths::Matrix inertialTensorInverse = torusInertiaTensor.GetInverse();
 
+    // Set the current angular velocity to the initial angular velocity
     Utils::Maths::Vector3 currentAngularVelocity = initialAngularVelocity;
+    // Total elapsed time in milliseconds
     float elapsedTime = 0.0f;
 
+    // Scene object to represent our torus.
     Engine::SceneNode::Ptr torusNode;
 }
 
+// Angular acceleration calculated in vector form. Wdot = (L x W) * Iinv
+// where L = W * I, W is the current angular velocity and I is the inertia tensor
+// and Iinv is the inverse inertial tensor.
 Utils::Maths::Vector3 CalculateAngularAcceleration(const Utils::Maths::Vector3& w)
 {
     auto l = w * torusInertiaTensor;
@@ -50,6 +58,42 @@ Utils::Maths::Vector3 RungeKutta(float dt, Utils::Maths::Vector3 angularVelocity
     auto k4 = CalculateAngularAcceleration(angularVelocity + k3) * dt;
 
     return angularVelocity + ((k1 + k2*2.0f + k3*2.0f + k4) / 6.0f);
+}
+
+Utils::Maths::Matrix CalculateRotationMatrix(Utils::Maths::Vector3 angularVelocity, float time)
+{
+    // Angle theta is equal to the magnitude of angular velocity multiplied by total elapsed time
+    float angle = angularVelocity.Length() * time;
+    // Axis of rotation is given as the unit angular velocity vector
+    auto axis = Utils::Maths::Vector3::Normalize(angularVelocity);
+
+    // Pre-compute values for rotation matrix
+    // to simplify computation
+    float x = axis.x;
+    float x2 = x * x;
+    float y = axis.y;
+    float y2 = y*y;
+    float z = axis.z;
+    float z2 = z*z;
+
+    float sinAngle = sin(angle);
+    float cosAngle = cos(angle);
+    float oneMinusCos = 1.0f - cosAngle;
+
+    // Transpose of matrix given in lecture 8 as we store matrices in row-major layout
+    // Also is displayed as a 4*4 matrix. as it combines the 3x3 orthogonal rotation matrix
+    // with a translation. This is passed to the vertex shader where it applies the transformation
+    // to the torus vertices.
+    Utils::Maths::Matrix TorusRotationMatrix =
+    {
+        (x2*oneMinusCos + cosAngle), (x*y*oneMinusCos + z*sinAngle), (x*z*oneMinusCos - y*sinAngle), 0.0f,
+        (x*y*oneMinusCos - z*sinAngle), (y2*oneMinusCos + cosAngle), (y*z*oneMinusCos + x*sinAngle), 0.0f,
+        (x*z*oneMinusCos + y*sinAngle), (y*z*oneMinusCos - x*sinAngle), (z2*oneMinusCos + cosAngle), 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    // Return the calculated matrix which will later be applied to the mesh on rendering.
+    return TorusRotationMatrix;
 }
 
 
@@ -166,8 +210,7 @@ namespace Engine
 
     void Engine::InitializeScene()
     {
-        // Test
-        auto torus = Utils::MeshMaker::CreateTorus(m_direct3D->GetDevice(), 4.0f, 1.0f, 32);
+        auto torus = Utils::MeshMaker::CreateTorus(m_direct3D->GetDevice(), torusMajorRadius, torusMinorRadius, 32);
         auto parentNode = m_scene->AddNode();
         parentNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(0.0f, -Utils::Maths::kPI / 2.0f, 0.0f));
         torusNode = m_scene->AddNode(parentNode);
@@ -238,10 +281,9 @@ namespace Engine
             // axis can be calculated w/|w|
             float angle = currentAngularVelocity.Length() * elapsedTime;
             auto axis = Utils::Maths::Vector3::Normalize(currentAngularVelocity);
-            auto rotation = Utils::Maths::Quaternion::CreateFromAxisAngle(axis, angle);
 
-            // Set rotation on torus
-            torusNode->SetRotation(rotation);
+            auto rotation = CalculateRotationMatrix(currentAngularVelocity, elapsedTime);
+            torusNode->SetTransform(rotation);
         }
 
         // Update the scene
