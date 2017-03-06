@@ -22,7 +22,8 @@ cbuffer Constants : register(b1)
     float aoIntensity; // Controls the sharpness of the calculated AO
     float aoUseSecondLayer; // Interpolates between using one or two layers of deep G-Buffer
     float blurEdgeSharpness; // Controls how sharp the edges are for the blur. A higher value increases sharpness but creates flickering at edges.
-    float2 padding2;
+    float temporalBlendWeight; // Controls how much the current frame colour contributes to the final color
+    float padding2;
     // TODO: Figure out padding
     float2 blurAxis; // Axis that we are blurring along. either [0, 1] for vertical or [1, 0] for horizontal
 }

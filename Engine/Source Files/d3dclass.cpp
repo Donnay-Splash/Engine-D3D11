@@ -382,4 +382,9 @@ namespace Engine
 
         return newTexture;
     }
+
+    Texture::Ptr D3DClass::CopyBackBuffer() const
+    {
+        return CopyTexture(m_backBufferRT->GetTexture());
+    }
 }

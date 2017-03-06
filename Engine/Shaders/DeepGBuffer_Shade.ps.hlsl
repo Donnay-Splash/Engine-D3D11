@@ -10,6 +10,7 @@ Texture2DArray ssVelocity : register(t2);
 Texture2DArray csZ : register(t3);
 Texture2DArray depth : register(t4);
 Texture2D AO : register(t5);
+Texture2D prevFrame : register(t6);
 SamplerState gBufferSampler : register(s0);
 
 #define MAX_LIGHT_COUNT 4
@@ -74,6 +75,10 @@ float4 PSMain(VertexOut input) : SV_Target
     {
         color.rgb = ao;
     }
+
+    float3 prevColor = GammaDecode(prevFrame.Sample(gBufferSampler, samplePoint.xy).rgb);
+
+    color.rgb = lerp(prevColor, color.rgb, temporalBlendWeight);
 
     return float4(GammaEncode(color.rgb), 1.0f);
 }

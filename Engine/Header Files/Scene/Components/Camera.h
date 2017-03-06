@@ -32,6 +32,8 @@ namespace Engine
         void SetProjectionMode(ProjectionMode projection) { m_projectionMode = projection; }
         void SetOrthographicSize(float othographicSize) { m_orthographicSize = othographicSize; }
         void SetAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
+        void SetJitterEnabled(bool enabled) { m_jitterEnabled = enabled; }
+        void SetJitterSequence(std::vector<Utils::Maths::Vector2> sequence) { m_jitterSequence = sequence; }
 
         void SetRenderTargetBundle(RenderTargetBundle::Ptr renderTargetBundle);
 
@@ -39,6 +41,7 @@ namespace Engine
         ProjectionMode GetProjectionMode() const { return m_projectionMode; }
         float GetOrthographicSize() const { return m_orthographicSize; }
         float GetAspectRatio() const { return m_aspectRatio; }
+        bool GetJitterEnabled() const { return m_jitterEnabled; }
 
         RenderTargetBundle::Ptr GetRenderTargetBundle() const { return m_renderTargetBundle; }
 
@@ -57,6 +60,8 @@ namespace Engine
         // e.g. circle of confusion, AO sample radius
         float GetProjectionScale(const Utils::Maths::Vector2& viewSize) const;
 
+        Utils::Maths::Matrix JitterProjection(const Utils::Maths::Vector2& viewSize);
+
     protected:
         RenderTargetBundle::Ptr m_renderTargetBundle;
         
@@ -72,6 +77,14 @@ namespace Engine
         float m_aspectRatio;
         float m_orthographicSize;
         ProjectionMode m_projectionMode;
+
+        // When enabled, randomly jitters projection matrix on sub pixel level.
+        // This is used for temporal super-sampling effects.
+        // Jittered and non-jittered matrices are passed in order to calculate
+        // accurate screen-space velocity vectors
+        bool m_jitterEnabled = false;
+        uint32_t m_jitterCount = 0;
+        std::vector<Utils::Maths::Vector2> m_jitterSequence;
 
         // Note: Given an identity matrix the camera will be centred at the origin
         // looking along the positive z axis with up on the y axis

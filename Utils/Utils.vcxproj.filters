@@ -23,6 +23,9 @@
     <ClInclude Include="Strings\StringHelpers.h">
       <Filter>Strings</Filter>
     </ClInclude>
+    <ClInclude Include="Math\MathHelpers.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -34,6 +37,9 @@
     </ClCompile>
     <ClCompile Include="Loader\MikeLoader.cpp">
       <Filter>Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\MathHelpers.cpp">
+      <Filter>Maths</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

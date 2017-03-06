@@ -64,6 +64,7 @@ namespace Engine
         viewConstants.projectionInfo = GetProjInfo(viewSize);
         viewConstants.invViewSize = Utils::Maths::Vector2(1.0f, 1.0f) / viewSize;
         viewConstants.projectionScale = GetProjectionScale(viewSize);
+        viewConstants.jitteredProjection = JitterProjection(viewSize);
 
         m_viewConstants->SetData(viewConstants);
         m_viewConstants->UploadData(d3dClass->GetDeviceContext());
@@ -112,6 +113,23 @@ namespace Engine
         return viewSize.y / scale;
     }
 
+    Utils::Maths::Matrix Camera::JitterProjection(const Utils::Maths::Vector2& viewSize)
+    {
+        if (m_jitterEnabled && !m_jitterSequence.empty())
+        {
+            auto currentJitter = m_jitterSequence[m_jitterCount];
+            Utils::Maths::Vector3 tranlation = { (currentJitter.x - 0.5f) / viewSize.x, (currentJitter.y - 0.5f) / viewSize.y, 0.0f };
+
+            auto jitter = Utils::Maths::Matrix::CreateFromTranslation(tranlation);
+
+            m_jitterCount = (m_jitterCount+1) % m_jitterSequence.size();
+
+            return m_projectionMatrix * jitter;
+        }
+
+        return m_projectionMatrix;
+    }
+
     void Camera::SetRenderTargetBundle(RenderTargetBundle::Ptr renderTargetBundle)
     {
         m_renderTargetBundle = renderTargetBundle;
@@ -130,6 +148,7 @@ namespace Engine
     void Camera::RegisterPublicProperties()
     {
         //// TODO: Add helpers to try and cut this down to 1 line in most cases
+        // TODO: Camera parameters not changing. FIX
         auto fovSetter = [this](float v) 
         {
             // Convert value from degrees to radians

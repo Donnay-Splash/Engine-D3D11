@@ -16,6 +16,7 @@ namespace Engine
         static const UINT kRegister = 0;
         Utils::Maths::Matrix view;
         Utils::Maths::Matrix projection;
+        Utils::Maths::Matrix jitteredProjection;
         Utils::Maths::Vector4 projectionInfo;
         Utils::Maths::Vector3 cameraPosition;
         Utils::Maths::Vector3 clipInfo;
@@ -26,6 +27,7 @@ namespace Engine
         {
             return  (view != rhs.view) ||
                 (projection != rhs.projection) ||
+                (jitteredProjection != rhs.jitteredProjection) ||
                 (projectionInfo != rhs.projectionInfo) ||
                 (cameraPosition != rhs.cameraPosition) ||
                 (projectionScale != rhs.projectionScale) ||
@@ -37,6 +39,7 @@ namespace Engine
         {
             return  (view == rhs.view) &&
                 (projection == rhs.projection) &&
+                (jitteredProjection == rhs.jitteredProjection) &&
                 (projectionInfo == rhs.projectionInfo) &&
                 (cameraPosition == rhs.cameraPosition) &&
                 (projectionScale == rhs.projectionScale) &&
@@ -165,6 +168,7 @@ namespace Engine
         float aoUseSecondLayer = 1.0f;
         float blurEdgeSharpness = 1.0f; // Controls how sharp the edges are for the blur. A higher value increases sharpness but creates flickering at edges.
         // Axis that we are blurring along. either [0, 1] for vertical or [1, 0] for horizontal
+        float temporalBlendWeight = 1.0f; // Controls the contribution of the current frame to the final color. By default current frame has full contribution
         Utils::Maths::Vector2 blurAxis = { 0.0f, 0.0f };
 
         // Currently empty but can add debug stuff or something later
@@ -180,6 +184,7 @@ namespace Engine
                    (aoIntensity != rhs.aoIntensity) ||
                    (aoUseSecondLayer != rhs.aoUseSecondLayer) ||
                    (blurEdgeSharpness != rhs.blurEdgeSharpness) ||
+                   (temporalBlendWeight != rhs.temporalBlendWeight) ||
                    (blurAxis != rhs.blurAxis);
         }
         bool operator==(const PostEffectConstants& rhs)
@@ -194,6 +199,7 @@ namespace Engine
                    (aoIntensity == rhs.aoIntensity) &&
                    (aoUseSecondLayer == rhs.aoUseSecondLayer) &&
                    (blurEdgeSharpness == rhs.blurEdgeSharpness) &&
+                   (temporalBlendWeight == rhs.temporalBlendWeight) &&
                    (blurAxis == rhs.blurAxis);
         }
 

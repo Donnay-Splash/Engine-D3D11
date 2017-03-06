@@ -23,7 +23,7 @@ float CalculateBilateralWeight(float mainKey, float tapKey)
 
 #define BlurTaps 7
 
-float2 PSMain(VertexOut input) : SV_Target
+float3 PSMain(VertexOut input) : SV_Target
 {
     // Weights for the blur
     const float weights[8] = { 0.197448, 0.174697, 0.120999, 0.065602, 0.02784, 0.009246, 0.002403, 0.000489 };

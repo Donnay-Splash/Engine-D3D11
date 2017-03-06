@@ -77,7 +77,10 @@ namespace Engine
         RenderTargetBundle::Ptr m_aoBundle;
         RenderTargetBundle::Ptr m_blurBundle;
 
+        // Store prev depth for deep G-Buffer prediction
         Texture::Ptr m_prevDepth;
+        // Store previous frame for temporal super sampling
+        Texture::Ptr m_prevFrame;
         Sampler::Ptr m_depthSampler;
 
     };

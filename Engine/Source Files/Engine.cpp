@@ -3,6 +3,7 @@
 #include <MeshMaker\MeshMaker.h>
 #include <Scene\Components\MeshInstance.h>
 #include <Loader.h>
+#include <Utils\Math\MathHelpers.h>
 
 namespace Engine
 {
@@ -36,10 +37,26 @@ namespace Engine
     #undef NUM_PRECOMPUTED
     }
 
+    std::vector<Utils::Maths::Vector2> GenerateCameraJitterSequence(const uint32_t samples)
+    {
+        auto xSamples = Utils::MathHelpers::GenerateHaltonSequence(samples, 2);
+        auto ySamples = Utils::MathHelpers::GenerateHaltonSequence(samples, 3);
+
+        std::vector<Utils::Maths::Vector2> result;
+        for (uint32_t i = 0; i < samples; i++)
+        {
+            result.push_back({ xSamples[i], ySamples[i] });
+        }
+
+        return result;
+    }
+
     // class constants
     const uint32_t kHiZ_MaxMip = 5;
     const uint32_t kAO_numSamples = 20;
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
+    const uint32_t kTemporalAASamples = 8;
+    const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
     // TODO: Attempt to load complex models including Sponza and potentially san-miguel
     // TODO: Continue to maintain debug controls
     // TODO: Map out tasks required for computing AO
@@ -117,6 +134,8 @@ namespace Engine
         // Create the camera object
         auto cameraNode = m_scene->AddNode();
         m_camera = cameraNode->AddComponent<Camera>(m_direct3D->GetDevice());
+        m_camera->SetJitterEnabled(true);
+        m_camera->SetJitterSequence(kJitterSequence);
         cameraNode->SetPosition({ 0.0f, 0.0f, -10.0f });
 
         // Create post processing camera
@@ -207,6 +226,12 @@ namespace Engine
             auto getter = [&]()->float { return m_debugConstants.aoUseSecondLayer; };
             auto setter = [&](float value) {m_debugConstants.aoUseSecondLayer = value; };
             m_globalOptions->RegisterScalarProperty(L"AO Use second layer", getter, setter, 0.0f, 1.0f);
+        }
+
+        {
+            auto getter = [&]()->bool { return m_camera->GetJitterEnabled(); };
+            auto setter = [&](bool value) {m_camera->SetJitterEnabled(value); };
+            m_globalOptions->RegisterBooleanProperty(L"Camera Jitter Enabled", getter, setter);
         }
 
     }
@@ -398,6 +423,11 @@ namespace Engine
             // Upload G-buffer data to device
             bundle->SetShaderResources(m_direct3D->GetDeviceContext());
             aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 5);
+            if (m_prevFrame)
+            {
+                m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 6);
+                m_debugConstants.temporalBlendWeight = 1.0f / float(kTemporalAASamples);
+            }
 
             // Set post effect constants
             m_postEffect->SetEffectData(m_debugConstants);
@@ -407,10 +437,12 @@ namespace Engine
 
             // Now need fullscreen pass to process G-Buffer
             m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
+
         }
 
         // Present the rendered scene to the screen.
         m_direct3D->EndScene();
+        m_prevFrame = m_direct3D->CopyBackBuffer();
 
         return true;
     }

@@ -9,7 +9,7 @@ GeometryInput VSMain(VertexInput input)
     output.position = mul(input.position, objectToCameraTransform);
     // Store the current camera space position
     output.csPosition = output.position;
-    output.position = mul(output.position, projectionMatrix);
+    output.position = mul(output.position, jitteredProjectionMatrix);
 
     // Calculate previous camera space position
     output.csPrevPosition = mul(input.position, prevObjectToCameraTransform);

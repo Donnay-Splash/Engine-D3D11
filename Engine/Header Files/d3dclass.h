@@ -39,6 +39,8 @@ namespace Engine
 
         Texture::Ptr CopyTexture(Texture::Ptr textureToCopy) const;
 
+        Texture::Ptr CopyBackBuffer() const;
+
         void UnbindAllRenderTargets() const;
 
     private:
