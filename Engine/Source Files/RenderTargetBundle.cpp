@@ -13,14 +13,14 @@ namespace Engine
             m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, m_arraySize, TextureCreationFlags::BindShaderResource, m_device);
         }
 
-        m_bundleSampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
+        m_bundleSampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_CLAMP);
 
         if (m_mipLevels < 1) m_mipLevels = 1;
 
         m_renderTargetViews.resize(m_mipLevels);
     }
 
-    void RenderTargetBundle::CreateRenderTarget(std::wstring name, DXGI_FORMAT format)
+    void RenderTargetBundle::CreateRenderTarget(std::wstring name, DXGI_FORMAT format, const Utils::Maths::Color& clearColor /*= {}*/)
     {
         // Not allowed to create bundles greated than max size
         EngineAssert(m_count < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT);
@@ -36,7 +36,7 @@ namespace Engine
         {
             auto newRenderTarget = std::make_shared<RenderTarget>(texture, 0, mip, 0, m_device);
             // Add render target view to array.
-            m_renderTargets.push_back({ name, newRenderTarget });
+            m_renderTargets.push_back(BundleElement(name, newRenderTarget, clearColor));
             m_renderTargetViews[mip][m_count] = newRenderTarget->GetRTV().Get();
         }
 
@@ -62,10 +62,11 @@ namespace Engine
         EngineAssert(m_finalised);
 
         // Can add custom colour later
-        float color[4]{ 1.0f, 0.0f, 0.0f, 1.0f };
 
         for (uint32_t i = 0; i < m_count; i++)
         {
+            auto c = m_renderTargets[i].ClearColour;
+            float color[4]{ c.x , c.y, c.z, c.w };
             deviceContext->ClearRenderTargetView(m_renderTargetViews[0][i], color);
         }
 

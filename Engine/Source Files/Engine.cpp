@@ -285,7 +285,7 @@ namespace Engine
         RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, GBufferLayers);
         GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
-        GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT);
+        GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT, {1.0f, 1.0f, 1.0f, 1.0f});
         GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT);
         GBuffer->Finalise();
 
@@ -426,7 +426,7 @@ namespace Engine
             if (m_prevFrame)
             {
                 m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 6);
-                m_debugConstants.temporalBlendWeight = 1.0f / float(kTemporalAASamples);
+                m_debugConstants.temporalBlendWeight = 0.5f;// 1.0f / float(kTemporalAASamples);
             }
 
             // Set post effect constants

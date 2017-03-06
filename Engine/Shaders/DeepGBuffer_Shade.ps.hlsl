@@ -29,6 +29,8 @@ cbuffer LightBuffer : register(b2)
     float activeLights;
 }
 
+static const float ssVelMaxLength = 0.003f;
+
 float4 PSMain(VertexOut input) : SV_Target
 {
     float4 color = 0.0f.xxxx;
@@ -45,6 +47,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 normal = normalize((csNormals.Sample(gBufferSampler, samplePoint).rgb * 2.0f) - 1.0f);
     float3 viewDirection = normalize(-csPosition);
     float3 radiance = 0.0f;
+    float2 ssVel = ssVelocity.Sample(gBufferSampler, samplePoint).rg;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[0].direction), alpha, baseColor) * lights[0].color.rgb;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[1].direction), alpha, baseColor) * lights[1].color.rgb;
     float3 aoContribution = lerp(1.0f.xxx, ao, aoUseSecondLayer);
@@ -60,7 +63,6 @@ float4 PSMain(VertexOut input) : SV_Target
     }
     else if (target == 2.0f)
     {
-        float2 ssVel = ssVelocity.Sample(gBufferSampler, samplePoint).rg;
         color = float4((ssVel + 1.0f) * 0.5f, 0.5f, 1.0f);
     }
     else if(target == 3.0f)
@@ -76,9 +78,15 @@ float4 PSMain(VertexOut input) : SV_Target
         color.rgb = ao;
     }
 
-    float3 prevColor = GammaDecode(prevFrame.Sample(gBufferSampler, samplePoint.xy).rgb);
+    
+    float ssVelLengthSq = dot(ssVel, ssVel) + 1e-9f;
+    float4 prevFrameSample = prevFrame.Sample(gBufferSampler, samplePoint.xy - ssVel);
+    float3 prevColor = GammaDecode(prevFrameSample.rgb);
+    float prevSSVelLen = prevFrameSample.a;
+    float blendWeight = 0.5f - 0.5f * saturate(ssVelLengthSq / ssVelMaxLength);
+    blendWeight *= saturate(1.0f - abs(ssVelLengthSq - prevSSVelLen) * 2000.0f);
 
-    color.rgb = lerp(prevColor, color.rgb, temporalBlendWeight);
+    color.rgb = lerp(color.rgb, prevColor, blendWeight);
 
-    return float4(GammaEncode(color.rgb), 1.0f);
+    return float4(GammaEncode(color.rgb), ssVelLengthSq);
 }

@@ -68,6 +68,7 @@ PixelOutput PSMain(PixelInput input)
 {
     // Calculate screen space velocity
     float2 ssVelocity = GetSSVelocity(input.csPosition, input.csPrevPosition);
+    ssVelocity.y = -ssVelocity.y; // Flip axis since we are in DirectX and UV is flipped along y
     float2 currentToPrevScale = 1.0f.xx;
 
     // Discard pixels for second layer
