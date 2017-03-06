@@ -62,6 +62,10 @@ namespace Engine
     // TODO: Map out tasks required for computing AO
     // TODO: Begin work on AO
     // TODO: Make switching between different shading models easier. Need way of controlling what is expected as shader constants
+    // TODO: Make AO Sample normals. Face normals are not smooth enough
+    // TODO: Investigate UE4 TSAA. 
+    // TODO: Tidy this class it's getting mad.
+    // TODO: Potentially separate TSAA convergence into separate pass.
     Engine::Engine()
     {
     }
