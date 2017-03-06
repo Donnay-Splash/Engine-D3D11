@@ -1,4 +1,5 @@
 #include "PostEffectConstants.hlsl"
+#include "ReconstructFromDepth.hlsl"
 
 // The input texture we are blurring
 // We expect the texture to contain the
@@ -33,7 +34,7 @@ float2 PSMain(VertexOut input) : SV_Target
     float sum = 0.0f;
     float totalWeight = weights[0];
     sum += sample.r * totalWeight;
-    float mainKey = sample.g;
+    float mainKey = UnpackBilateralKey(sample.gb);
 
     [unroll] // For each sample grab a sample and add it to the sum
     for (int i = -BlurTaps; i < BlurTaps; i++)
@@ -42,7 +43,7 @@ float2 PSMain(VertexOut input) : SV_Target
         {
             int2 samplePos = fragCoord + blurAxis * i;
             float4 temp = inputTexture.Load(int3(samplePos, 0));
-            float key = temp.g;
+            float key = UnpackBilateralKey(temp.gb);
             float value = temp.r;
             float weight = weights[abs(i)]; // do something with keys
             float bilateralWeight = CalculateBilateralWeight(mainKey, key);
@@ -54,5 +55,5 @@ float2 PSMain(VertexOut input) : SV_Target
 
     const float epsilon = 0.0001f;
     float result = sum / (totalWeight + epsilon);
-    return float2(result, mainKey);
+    return float3(result, sample.gb);
 }

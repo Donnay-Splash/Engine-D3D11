@@ -44,3 +44,30 @@ float3 ReconstructNonUnitFaceNormal(float3 csPosition)
     return cross(ddx(csPosition), ddy(csPosition));
 }
 
+/*--------------------------------------
+Packs normalised Z into two 8 bit channels of RGBA texture. Allowing for greated depth precision.
+
+Args:
+key: normalised camera-space depth
+--------------------------------------*/
+float2 PackBilateralKey(float key)
+{
+    float2 result;
+    float temp = floor(key * 255.0f);
+    result.r = temp / 255.0f;
+    result.g = (key * 255.0f) - temp;
+
+    return result;
+}
+
+/*--------------------------------------
+Unpacks normalised camera-space depth from 2 8 bit normalised channels
+
+Args:
+packedKey: packed depth
+--------------------------------------*/
+float UnpackBilateralKey(float2 packedkey)
+{
+    return packedkey.x + packedkey.y * (1.0f / 255.0f);
+}
+

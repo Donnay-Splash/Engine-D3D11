@@ -194,6 +194,8 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 csPosition = ReconstructCSPosition(input.position.xy, csZ, projectionInfo);
 
     float bilateralKey = GetBilateralKey(csZ);
+    float2 packedBilateralKey = PackBilateralKey(bilateralKey);
+    // Pack bilateral key into 2 8 bit channels
 
     uint height, width;
     csZTexture.GetDimensions(width, height);
@@ -214,7 +216,7 @@ float4 PSMain(VertexOut input) : SV_Target
 
 
         // return full visibility
-        return float4(visibility, bilateralKey, 0.0f, 0.0f);
+        return float4(visibility, packedBilateralKey, 0.0f);
     }
     else
     {
@@ -235,7 +237,7 @@ float4 PSMain(VertexOut input) : SV_Target
         // Radius is too small to calculate accurate AO
         // Return full visibility
 
-        return float4(visibility, bilateralKey, 0.0f, 0.0f);
+        return float4(visibility, packedBilateralKey, 0.0f);
     }
 
 
@@ -267,5 +269,5 @@ float4 PSMain(VertexOut input) : SV_Target
 
     // Divide total sum by num samples
     // return calculated A
-    return float4(visibility, bilateralKey, 0.0f, 0.0f);
+    return float4(visibility, packedBilateralKey, 0.0f);
 }
