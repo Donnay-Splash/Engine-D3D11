@@ -29,6 +29,16 @@ cbuffer LightBuffer : register(b2)
     float activeLights;
 }
 
+float EncodeSSVelSq(float ssVelSq)
+{
+    return saturate(ssVelSq * 256.0f);
+}
+
+float DecodeSSVelSq(float value)
+{
+    return value / 256.0f;
+}
+
 static const float ssVelMaxLength = 0.003f;
 
 float4 PSMain(VertexOut input) : SV_Target
@@ -82,11 +92,11 @@ float4 PSMain(VertexOut input) : SV_Target
     float ssVelLengthSq = dot(ssVel, ssVel) + 1e-9f;
     float4 prevFrameSample = prevFrame.Sample(gBufferSampler, samplePoint.xy - ssVel);
     float3 prevColor = GammaDecode(prevFrameSample.rgb);
-    float prevSSVelLen = prevFrameSample.a;
+    float prevSSVelLen = DecodeSSVelSq(prevFrameSample.a);
     float blendWeight = 0.5f - 0.5f * saturate(ssVelLengthSq / ssVelMaxLength);
-    blendWeight *= saturate(1.0f - abs(ssVelLengthSq - prevSSVelLen) * 2000.0f);
+    blendWeight *= saturate(1.0f - abs(ssVelLengthSq - prevSSVelLen) * 4000.0f);
 
     color.rgb = lerp(color.rgb, prevColor, blendWeight);
 
-    return float4(GammaEncode(color.rgb), ssVelLengthSq);
+    return float4(GammaEncode(color.rgb), EncodeSSVelSq(ssVelLengthSq));
 }
