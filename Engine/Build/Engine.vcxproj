@@ -62,7 +62,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;E:\GitHub\Engine-D3D11;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Engine\Header Files;$(SolutionDir)Engine;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <TargetExt>.lib</TargetExt>
     <OutDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</OutDir>
@@ -73,21 +73,21 @@
     <TargetExt>.lib</TargetExt>
     <OutDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;E:\GitHub\Engine-D3D11;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Engine\Header Files;$(SolutionDir)Engine;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetExt>.lib</TargetExt>
     <OutDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;E:\GitHub\Engine-D3D11;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Engine\Header Files;$(SolutionDir)Engine;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.lib</TargetExt>
     <OutDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\Built\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>E:\GitHub\Engine-D3D11\Engine\Header Files;E:\GitHub\Engine-D3D11\Engine;E:\GitHub\Engine-D3D11;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Engine\Header Files;$(SolutionDir)Engine;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -96,7 +96,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>E:\GitHub\Engine-D3D11\Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
@@ -124,7 +124,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>E:\GitHub\Engine-D3D11\Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,7 +143,7 @@
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>E:\GitHub\Engine-D3D11\Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>dxgi.lib;d3d11.lib;pdh.lib;winmm.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -160,7 +160,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>E:\GitHub\Engine-D3D11\Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
