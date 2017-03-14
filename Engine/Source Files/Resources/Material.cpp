@@ -109,6 +109,19 @@ namespace Engine
         auto opacitySetter = [this](float opacity) { SetOpacity(opacity); };
         RegisterScalarProperty(L"Opacity", opacityGetter, opacitySetter, 0.0f, 1.0f);
 
+        auto diffuseEnabledGetter = [this]() { return m_materialData.hasDiffuseTexture == 1.0f ? true : false; };
+        auto diffuseEnabledSetter = [this](bool enabled) { m_materialData.hasDiffuseTexture = enabled ? 1.0f : 0.0f; };
+        RegisterBooleanProperty(L"Diffuse Enabled", diffuseEnabledGetter, diffuseEnabledSetter);
+
+        // TODO: Fix this
+        auto smoothnessEnabledGetter = [this]() { return m_materialData.hasSpecularTexture == 1.0f ? true : false; };
+        auto smoothnessEnabledSetter = [this](bool enabled) { m_materialData.hasSpecularTexture = enabled ? 1.0f : 0.0f; };
+        RegisterBooleanProperty(L"Smoothness Enabled", smoothnessEnabledGetter, smoothnessEnabledSetter);
+
+        auto normalEnabledGetter = [this]() { return m_materialData.hasNormalTexture == 1.0f ? true : false; };
+        auto normalEnabledSetter = [this](bool enabled) { m_materialData.hasNormalTexture = enabled ? 1.0f : 0.0f; };
+        RegisterBooleanProperty(L"Normal Mapping Enabled", normalEnabledGetter, normalEnabledSetter);
+
         // TODO Add colour setter and getter
     }
 }
