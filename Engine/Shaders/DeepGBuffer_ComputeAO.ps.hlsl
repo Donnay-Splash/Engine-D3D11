@@ -208,6 +208,7 @@ float4 PSMain(VertexOut input) : SV_Target
     // its magnitude will be proportional to the square of distance from the camera
     // If the threshold number(0.00006) is too big we will see black dots where we have used a bad normal.
     // Too small and we will see white dots
+    [branch]
     if(dot(cs_n, cs_n) > square(csPosition.z * csPosition.z * 0.00006f))
     {
         // The normals from depth should be very small values before normalisation (since we are using x,y derivatives)
@@ -224,6 +225,7 @@ float4 PSMain(VertexOut input) : SV_Target
         cs_n = normalize(cs_n);
     }
 
+
     // Calculate the random rotation angle used when sampling pixels within the given radius
     // Original hash function given in AlchemyAO paper presented at HPG12 : http://graphics.cs.williams.edu/papers/AlchemyHPG11/
     int2 integerPixelLocation = int2(input.position.xy);
@@ -232,6 +234,7 @@ float4 PSMain(VertexOut input) : SV_Target
     // Calculate screen space disk radius based on projected size of sample sphere
     float ssDiskRadius = projectionScale * aoRadius / csPosition.z;
 
+    [branch]
     if(ssDiskRadius < MIN_RADIUS)
     {
         // Radius is too small to calculate accurate AO
@@ -243,6 +246,7 @@ float4 PSMain(VertexOut input) : SV_Target
 
     float aoSum = 0.0f;
     // For number of samples
+    [loop]
     for (int i = 0; i < numAOSamples; i++)
     {
     // Calculate next sample location

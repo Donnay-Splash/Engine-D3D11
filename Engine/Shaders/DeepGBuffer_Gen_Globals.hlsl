@@ -3,25 +3,19 @@
 
 // Textures and samplers
 Texture2D DiffuseTexture : register(t0);
-SamplerState DiffuseSampler : register(s0);
+SamplerState MaterialSampler : register(s0);
 
 Texture2D SpecularTexture : register(t1);
-SamplerState SpecularSampler : register(s1);
 
 Texture2D EmissiveTexture : register(t2);
-SamplerState EmissiveSampler : register(s2);
 
 Texture2D NormalTexture : register(t3);
-SamplerState NormalSampler : register(s3);
 
 Texture2D SmoothnessTexture : register(t4);
-SamplerState SmoothnessSampler : register(s4);
 
 Texture2D OpacityTexture : register(t5);
-SamplerState OpacitySampler : register(s5);
 
 Texture2D AOTexture : register(t6);
-SamplerState AOSampler : register(s6);
 
 // Previous depth buffer of first layer
 // TODO: Select better registers as 1->n are for material textures

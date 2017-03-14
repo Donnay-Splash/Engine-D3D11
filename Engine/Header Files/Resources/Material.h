@@ -56,6 +56,6 @@ namespace Engine
 
         MaterialConstants m_materialData;
         std::array<Texture::Ptr, static_cast<size_t>(TextureType::Count)> m_textures;
-        std::array<Sampler::Ptr, static_cast<size_t>(TextureType::Count)> m_samplers;
+        Sampler::Ptr m_sampler;
     };
 }

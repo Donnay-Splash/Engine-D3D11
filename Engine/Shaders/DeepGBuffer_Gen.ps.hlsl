@@ -84,12 +84,12 @@ PixelOutput PSMain(PixelInput input)
     [branch]
     if(material_hasDiffuseTexture)
     {
-        output.diffuseColor.rgb = DiffuseTexture.Sample(DiffuseSampler, input.texCoord).rgb;
+        output.diffuseColor.rgb = DiffuseTexture.Sample(MaterialSampler, input.texCoord).rgb;
     }
     [branch]
     if(material_hasSpecularTexture)
     {
-        output.diffuseColor.a = SpecularTexture.Sample(SpecularSampler, input.texCoord).r;
+        output.diffuseColor.a = SpecularTexture.Sample(MaterialSampler, input.texCoord).r;
     }
 
     float3 normal = normalize(input.csNormal);
@@ -106,7 +106,7 @@ PixelOutput PSMain(PixelInput input)
                                                 normal };
 
         // Sample texture and multiply by matrix
-        float3 sampledNormal = NormalTexture.Sample(NormalSampler, input.texCoord).rgb;
+        float3 sampledNormal = NormalTexture.Sample(MaterialSampler, input.texCoord).rgb;
         // convert normal from [0, 1] to [-1, 1]
         sampledNormal = normalize((sampledNormal * 2.0f) - 1.0f);
         normal = mul(sampledNormal, normalTransform);

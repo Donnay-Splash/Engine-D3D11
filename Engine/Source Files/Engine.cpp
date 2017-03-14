@@ -57,10 +57,7 @@ namespace Engine
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     const uint32_t kTemporalAASamples = 8;
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
-    // TODO: Attempt to load complex models including Sponza and potentially san-miguel
     // TODO: Continue to maintain debug controls
-    // TODO: Map out tasks required for computing AO
-    // TODO: Begin work on AO
     // TODO: Make switching between different shading models easier. Need way of controlling what is expected as shader constants
     // TODO: Make AO Sample normals. Face normals are not smooth enough
     // TODO: Investigate UE4 TSAA. 
