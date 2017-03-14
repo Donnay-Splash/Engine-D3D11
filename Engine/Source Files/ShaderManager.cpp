@@ -56,6 +56,12 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl.h"
     }
 
+    // Shader for converging temporal supersampling
+    namespace TSAA
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_TSAA.ps.hlsl.h"
+    }
+
     ShaderManager::ShaderManager(ID3D11Device* device)
     {
         LoadCoreShaders(device);
@@ -132,6 +138,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::BilateralBlur, shaderPipeline);
+        }
+
+        // Load the TSAA shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, TSAA::g_PSMain, sizeof(TSAA::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::TSAA, shaderPipeline);
         }
     }
 

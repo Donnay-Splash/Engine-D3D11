@@ -13,7 +13,8 @@ namespace Engine
         DeepGBuffer_csZCopy = 3,
         Generate_HiZ = 4,
         AO = 5,
-        BilateralBlur = 6
+        BilateralBlur = 6,
+        TSAA = 7
     };
 
     class ShaderManager

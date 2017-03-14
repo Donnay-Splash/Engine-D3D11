@@ -59,7 +59,6 @@ namespace Engine
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
     // TODO: Continue to maintain debug controls
     // TODO: Make switching between different shading models easier. Need way of controlling what is expected as shader constants
-    // TODO: Make AO Sample normals. Face normals are not smooth enough
     // TODO: Investigate UE4 TSAA. 
     // TODO: Tidy this class it's getting mad.
     // TODO: Potentially separate TSAA convergence into separate pass.
@@ -305,9 +304,9 @@ namespace Engine
         m_aoBundle->CreateRenderTarget(L"AO", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_aoBundle->Finalise();
 
-        m_blurBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
-        m_blurBundle->CreateRenderTarget(L"Blurred Texture", DXGI_FORMAT_R8G8B8A8_UNORM);
-        m_blurBundle->Finalise();
+        m_tempBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_tempBundle->Finalise();
     }
 
 
@@ -418,17 +417,12 @@ namespace Engine
             GenerateAO();
 
             // Set render target to back buffer
-            m_postProcessCamera->SetRenderTargetBundle(nullptr);
             auto aoTarget = m_aoBundle->GetRenderTarget(L"AO");
 
             // Upload G-buffer data to device
             bundle->SetShaderResources(m_direct3D->GetDeviceContext());
             aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 5);
-            if (m_prevFrame)
-            {
-                m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 6);
-                m_debugConstants.temporalBlendWeight = 0.5f;// 1.0f / float(kTemporalAASamples);
-            }
+            
 
             // Set post effect constants
             m_postEffect->SetEffectData(m_debugConstants);
@@ -436,9 +430,28 @@ namespace Engine
             // Upload light data for deferred shading
             m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
 
-            // Now need fullscreen pass to process G-Buffer
+            // Shade G-Buffer
+            m_postProcessCamera->SetRenderTargetBundle(m_tempBundle); // Draw to the temp bundle before passing to TSAA
             m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
 
+            // Now converge TSAA to back buffer
+            m_postProcessCamera->SetRenderTargetBundle(nullptr);
+            auto TSAAPipeline = m_shaderManager->GetShaderPipeline(ShaderName::TSAA);
+            auto TSAAEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), TSAAPipeline);
+            TSAAEffect->SetEffectData(m_debugConstants);
+
+            // Upload current, previous and ssVel
+            m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+            if (m_prevFrame)
+            {
+                m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
+                m_debugConstants.temporalBlendWeight = 0.5f;// 1.0f / float(kTemporalAASamples);
+            }
+            auto ssVelTex = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
+            ssVelTex->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 2);
+
+            // Converge TSAA
+            m_postProcessCamera->RenderPostEffect(m_direct3D, TSAAEffect);
         }
 
         // Present the rendered scene to the screen.
@@ -505,7 +518,7 @@ namespace Engine
 
     void Engine::BlurAO()
     {
-        m_postProcessCamera->SetRenderTargetBundle(m_blurBundle);
+        m_postProcessCamera->SetRenderTargetBundle(m_tempBundle);
         auto blurPipeline = m_shaderManager->GetShaderPipeline(ShaderName::BilateralBlur);
         auto blurEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), blurPipeline);
 
@@ -522,7 +535,7 @@ namespace Engine
         // bind old ao render target
         m_debugConstants.blurAxis = { 1.0f, 0.0f };
         blurEffect->SetEffectData(m_debugConstants);
-        m_blurBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
         m_postProcessCamera->RenderPostEffect(m_direct3D, blurEffect);
     }
 

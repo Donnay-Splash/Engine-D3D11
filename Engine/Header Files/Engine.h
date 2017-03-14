@@ -75,7 +75,8 @@ namespace Engine
         RenderTargetBundle::Ptr m_hiZBundle;
         TextureMipView::Ptr m_hiZMipView;
         RenderTargetBundle::Ptr m_aoBundle;
-        RenderTargetBundle::Ptr m_blurBundle;
+        // A bundle for postprocessing temporary steps. e.g. mid seperable blur.
+        RenderTargetBundle::Ptr m_tempBundle; 
 
         // Store prev depth for deep G-Buffer prediction
         Texture::Ptr m_prevDepth;
