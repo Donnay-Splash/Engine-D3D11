@@ -45,7 +45,25 @@ namespace Engine
         std::vector<Utils::Maths::Vector2> result;
         for (uint32_t i = 0; i < samples; i++)
         {
-            result.push_back({ xSamples[i], ySamples[i] });
+            // Similar to UE4
+            // We want to transform into the range[-0.5, 0.5]
+            // and generate the samples in the normal distribution
+            // exp(x^2 / Sigma^2)
+            float u1 = xSamples[i];
+            float u2 = ySamples[i];
+
+            float sigma = 0.47f;
+            float temp = 0.5f / sigma;
+            float inWindow = expf(-0.5f * temp * temp);
+
+            // Box-Muller transform
+            float theta = Utils::Maths::kPI * 2.0f * u2;
+            float r = sigma * sqrt(-2.0f * logf((1.0f - u1) * inWindow + u1 ));
+
+            float sampleX = r * cos(theta);
+            float sampleY = r * sin(theta);
+
+            result.push_back({ sampleX, sampleY });
         }
 
         return result;
@@ -434,24 +452,8 @@ namespace Engine
             m_postProcessCamera->SetRenderTargetBundle(m_tempBundle); // Draw to the temp bundle before passing to TSAA
             m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
 
-            // Now converge TSAA to back buffer
-            m_postProcessCamera->SetRenderTargetBundle(nullptr);
-            auto TSAAPipeline = m_shaderManager->GetShaderPipeline(ShaderName::TSAA);
-            auto TSAAEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), TSAAPipeline);
-            TSAAEffect->SetEffectData(m_debugConstants);
-
-            // Upload current, previous and ssVel
-            m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
-            if (m_prevFrame)
-            {
-                m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
-                m_debugConstants.temporalBlendWeight = 0.5f;// 1.0f / float(kTemporalAASamples);
-            }
-            auto ssVelTex = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
-            ssVelTex->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 2);
-
-            // Converge TSAA
-            m_postProcessCamera->RenderPostEffect(m_direct3D, TSAAEffect);
+            auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
+            RunTSAA(ssVelTexture);
         }
 
         // Present the rendered scene to the screen.
@@ -537,6 +539,68 @@ namespace Engine
         blurEffect->SetEffectData(m_debugConstants);
         m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
         m_postProcessCamera->RenderPostEffect(m_direct3D, blurEffect);
+    }
+
+    float CatMullRom(float x)
+    {
+        float ax = abs(x);
+        if (ax > 1.0f)
+            return ((-0.5f * ax + 2.5f) * ax - 4.0f) * ax + 2.0f;
+        else
+            return (1.5f * ax - 2.5f) *ax*ax + 1.0f;
+    }
+
+    void Engine::RunTSAA(Texture::Ptr ssVelTexture)
+    {
+        // Now converge TSAA to back buffer
+        m_postProcessCamera->SetRenderTargetBundle(nullptr);
+        auto TSAAPipeline = m_shaderManager->GetShaderPipeline(ShaderName::TSAA);
+        auto TSAAEffect = std::make_shared<PostEffect<TemporalAAConstants>>(m_direct3D->GetDevice(), TSAAPipeline);
+        TemporalAAConstants TSAAData;
+
+        static const float sampleOffsets[9][2]  =
+        {
+            { -1.0f, -1.0f },
+            { 0.0f, -1.0f },
+            { 1.0f, -1.0f },
+            { -1.0f,  0.0f },
+            { 0.0f,  0.0f },
+            { 1.0f,  0.0f },
+            { -1.0f,  1.0f },
+            { 0.0f,  1.0f },
+            { 1.0f,  1.0f }
+        };
+
+
+        float weights[kTSAASampleCount];
+        float totalWeight = 0.0f;
+        auto jitter = m_camera->GetCurrentTemporalJitter();
+
+        for (int i = 0; i < kTSAASampleCount; i++)
+        {
+            float offsetX = sampleOffsets[i][0] - jitter.x;
+            float offsetY = sampleOffsets[i][1] - jitter.y;
+
+            weights[i] = CatMullRom(offsetX) * CatMullRom(offsetY);
+            totalWeight += weights[i];
+        }
+        for (int i = 0; i < kTSAASampleCount; i++)
+        {
+            TSAAData.sampleWeights[i] = weights[i] / totalWeight;
+        }
+
+        TSAAEffect->SetEffectData(TSAAData);
+
+        // Upload current, previous and ssVel
+        m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        if (m_prevFrame)// Calculate sample weights
+        {
+            m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
+        }
+        ssVelTexture->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 2);
+
+        // Converge TSAA
+        m_postProcessCamera->RenderPostEffect(m_direct3D, TSAAEffect);
     }
 
 }

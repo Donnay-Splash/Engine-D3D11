@@ -9,6 +9,7 @@
 namespace Engine
 {
     static const uint32_t kMaxLightCount = 4;
+    static const uint32_t kTSAASampleCount = 9;
 
     ALIGN_16
         struct ViewConstants
@@ -171,7 +172,6 @@ namespace Engine
         float temporalBlendWeight = 1.0f; // Controls the contribution of the current frame to the final color. By default current frame has full contribution
         Utils::Maths::Vector2 blurAxis = { 0.0f, 0.0f };
 
-        // Currently empty but can add debug stuff or something later
         bool operator!=(const PostEffectConstants& rhs)
         {
             return (displaySecondLayer != rhs.displaySecondLayer) ||
@@ -203,6 +203,29 @@ namespace Engine
                    (blurAxis == rhs.blurAxis);
         }
 
+    };
+
+    ALIGN_16
+        struct TemporalAAConstants
+    {
+        static const UINT kRegister = 4;
+
+        float sampleWeights[kTSAASampleCount];
+        float pad1;
+        float pad2;
+        float pad3;
+        float currentFrameWeight = 0.04f;
+
+        // We know that these constants will change each frame so 
+        // the comparison operators pass through
+        bool operator != (const TemporalAAConstants& rhs)
+        {
+            return true;
+        }
+        bool operator == (const TemporalAAConstants& rhs)
+        {
+            return false;
+        }
     };
 
     ALIGN_16

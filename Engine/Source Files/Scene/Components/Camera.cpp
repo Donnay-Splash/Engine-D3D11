@@ -117,8 +117,8 @@ namespace Engine
     {
         if (m_jitterEnabled && !m_jitterSequence.empty())
         {
-            auto currentJitter = m_jitterSequence[m_jitterCount];
-            Utils::Maths::Vector3 tranlation = { ((currentJitter.x * 2.0f) -1.0f)/ viewSize.x, ((currentJitter.y * 2.0f) - 1.0f) / viewSize.y, 0.0f };
+            m_currentJitter = m_jitterSequence[m_jitterCount];
+            Utils::Maths::Vector3 tranlation = { (m_currentJitter.x * 2.0f)/ viewSize.x, (m_currentJitter.y * -2.0f) / viewSize.y, 0.0f };
 
             auto jitter = Utils::Maths::Matrix::CreateFromTranslation(tranlation);
 

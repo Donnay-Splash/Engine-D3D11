@@ -9,6 +9,12 @@ Texture2DArray depthTexture : register(t4);
 
 SamplerState TSAASampler : register(s0);
 
+cbuffer TSAAConstants : register(b4)
+{
+    float4 sampleWeights[3];
+    float currentFrameWeight;
+}
+
 float EncodeSSVelSq(float ssVelSq)
 {
     return saturate(ssVelSq * 256.0f);
@@ -111,22 +117,23 @@ float4 PSMain(VertexOut input) : SV_Target
     {
         // This gives us the offset for reading from the velocity texture
         velocitySampleOffset = depthOffset * invViewSize;
-        pixelPos.xy = input.uv + velocitySampleOffset;
+        pixelPos.xy = input.uv + velocitySampleOffset; // TODO: Might not need this
         pixelPos.z = maxXYZW;
     }
 
     // Sample velocity from texture
 
-    float2 ssVel = ssVelocityTexture.Sample(TSAASampler, float3(input.uv + velocitySampleOffset, 0.0f)).rg;
+    float2 ssVel = ssVelocityTexture.Sample(TSAASampler, float3(input.uv + velocitySampleOffset, 0.0f)).rg * 2.0f;
     ssVel.y = -ssVel.y; // Flip Y since we are working in screen space and not UV space
     float2 prevSamplePos = ssVel;
     float2 temp = ssVel / invViewSize;
 
+    #if !AA_BICUBIC // Want to use bicubic for best filtering results
     // Calculate the amount of blur from history based on velocity
     const float historyBlurAmp = 2.0f;
     float historyBlur = saturate(abs(temp.x) * historyBlurAmp + abs(temp.y) * historyBlurAmp);
     float velocity = sqrt(dot(temp, temp));
-
+    #endif
     // converts back projection vector to [-1, 1] offset in viewport
     prevSamplePos = screenPos - prevSamplePos;
     bool offScreen = max(abs(prevSamplePos.x), abs(prevSamplePos.y)) >= 1.0f;
@@ -138,6 +145,8 @@ float4 PSMain(VertexOut input) : SV_Target
     // WARNING: Probs wrong.
     prevSamplePos = prevSamplePos * float2(0.5f, -0.5f) + 0.5f;
 
+    // Looks like YCoCg color space filtering provides better results
+    // TODO: Use YCoCg space
 
     // Filter the pixel
     float4 Neighbor0 = currentFrame.Sample(TSAASampler, input.uv, int2(-1, -1));
@@ -150,32 +159,22 @@ float4 PSMain(VertexOut input) : SV_Target
     float4 Neighbor7 = currentFrame.Sample(TSAASampler, input.uv, int2(0, 1));
     float4 Neighbor8 = currentFrame.Sample(TSAASampler, input.uv, int2(1, 1));
 
-    //TODO: If using HDR weight samples
-    const float gaussianWeights[9] = { 1.0f / 20.0f, 1.0f / 10.0f, 1.0f / 20.0f, 1.0f / 10.0f, 1.0f / 2.5f, 1.0f / 10.0f, 1.0f / 20.0f, 1.0f / 10.0f, 1.0f / 20.0f };
+    // TODDO: Change to catmull-rom filtering
+    // TODO: Remove low pass filter
     const float lowPassWeight = 1.0f / 9.0f;
 
-    float4 Filtered =
-        Neighbor0 * gaussianWeights[0] +
-        Neighbor1 * gaussianWeights[1] +
-        Neighbor2 * gaussianWeights[2] +
-        Neighbor3 * gaussianWeights[3] +
-        Neighbor4 * gaussianWeights[4] +
-        Neighbor5 * gaussianWeights[5] +
-        Neighbor6 * gaussianWeights[6] +
-        Neighbor7 * gaussianWeights[7] +
-        Neighbor8 * gaussianWeights[8];
+    //TODO: If using HDR weight samples
+    float4 Filtered = 
+        Neighbor0 * sampleWeights[0].x +
+        Neighbor1 * sampleWeights[0].y +
+        Neighbor2 * sampleWeights[0].z +
+        Neighbor3 * sampleWeights[0].w +
+        Neighbor4 * sampleWeights[1].x +
+        Neighbor5 * sampleWeights[1].y +
+        Neighbor6 * sampleWeights[1].z +
+        Neighbor7 * sampleWeights[1].w +
+        Neighbor8 * sampleWeights[2].x;
     
-    float4 lowPassFiltered =
-        Neighbor0 * lowPassWeight +
-        Neighbor1 * lowPassWeight +
-        Neighbor2 * lowPassWeight +
-        Neighbor3 * lowPassWeight +
-        Neighbor4 * lowPassWeight +
-        Neighbor5 * lowPassWeight +
-        Neighbor6 * lowPassWeight +
-        Neighbor7 * lowPassWeight +
-        Neighbor8 * lowPassWeight;
-
     // Use unfiltered pixel for the 1 pixel edge of the screen
     float2 testPos = abs(screenPos);
     testPos += 2 * invViewSize;
@@ -183,7 +182,6 @@ float4 PSMain(VertexOut input) : SV_Target
     if (filteredOffScreen)
     {
         Filtered = Neighbor4;
-        lowPassFiltered = Neighbor4;
     }
 
     // Now find min and max of local neighborhood
@@ -199,20 +197,20 @@ float4 PSMain(VertexOut input) : SV_Target
     neighborMax = neighborMax * 0.5f + neighborMax2 * 0.5f;
 
     // Fetch the colour from the previous frame
-    float4 finalColor = previousFrame.Sample(TSAASampler, prevSamplePos);
+    float4 prevColor = previousFrame.Sample(TSAASampler, prevSamplePos);
 
     // TODO: If using HDR weight sample
 
     // convert to luminocity to be used in blend weight calculation
     float lumaMin = LumaFast(neighborMin.rgb);
     float lumaMax = LumaFast(neighborMax.rgb);
-    float lumaPrev = LumaFast(finalColor.rgb);
+    float lumaPrev = LumaFast(prevColor.rgb);
     float lumaContrast = lumaMax - lumaMin;
 
     // Clamp history using color AABB
     // Uses low-pass filtered color to avoid flickering.
-    float clampedBlend = HistoryClamp(finalColor.rgb, lowPassFiltered.rgb, neighborMin.rgb, neighborMax.rgb);
-    finalColor.rgb = lerp(finalColor.rgb, lowPassFiltered.rgb, clampedBlend);
+    float clampedBlend = HistoryClamp(prevColor.rgb, Filtered.rgb, neighborMin.rgb, neighborMax.rgb);
+    prevColor.rgb = lerp(prevColor.rgb, Filtered.rgb, clampedBlend);
 
     // Add back in some aliasing to sharpen overblurred edges
     float addAliasing = saturate(historyBlur) * 0.5f;
@@ -224,15 +222,15 @@ float4 PSMain(VertexOut input) : SV_Target
     // Compute blend weight //
 
     // Replace history with minimum of history from local neightborhood
-    lumaPrev = min(abs(lumaMin - lumaPrev), abs(lumaMax - lumaPrev));
-    float prevAmount = (1.0f / 8.0f) + historyBlur * (1.0f / 8.0f);
-    float prevFactor = lumaPrev * prevAmount * (1.0f + historyBlur * prevAmount * 8.0f);
-    float blendFinal = saturate(prevFactor * rcp(lumaPrev + lumaContrast));
+    float distanceToClamp = min(abs(lumaMin - lumaPrev), abs(lumaMax - lumaPrev));
+    float prevAmount = currentFrameWeight * 3.125 + historyBlur * (1.0f / 8.0f);
+    float prevFactor = distanceToClamp * prevAmount * (1.0f + historyBlur * prevAmount * 8.0f);
+    float blendFinal = saturate(prevFactor * rcp(distanceToClamp + lumaContrast));
 
     // Velocity weighting similar to low_quality method
-    float priorVelocity = finalColor.a;
+    float priorVelocity = prevColor.a;
     float velocityDecay = 0.5f;
-    finalColor.a = max(finalColor.a * velocityDecay, velocity * rcp(velocityDecay));
+    prevColor.a = max(prevColor.a * velocityDecay, velocity * rcp(velocityDecay));
     float velocityDiff = abs(priorVelocity - velocity) / max(1.0f, max(priorVelocity, velocity));
     blendFinal = max(blendFinal, velocityDiff * (1.0f / 8.0f));
     blendFinal = min(1.0f / 2.0f, blendFinal);
@@ -240,15 +238,15 @@ float4 PSMain(VertexOut input) : SV_Target
     // clamp offscreen pixels
     if (offScreen)
     {
-        finalColor = Filtered;
-        finalColor.a = 0.0f;
+        prevColor = Filtered;
+        prevColor.a = 0.0f;
     }
 
     // Perform final blend of color and account for NaN and negative values
-    finalColor.rgb = lerp(finalColor.rgb, Filtered.rgb, blendFinal);
+    float3 finalColor = lerp(prevColor.rgb, Filtered.rgb, blendFinal);
     finalColor.rgb = -min(-finalColor.rgb, 0.0f);
 
-    return finalColor;
+    return float4(finalColor, prevColor.a);
 #endif
 }
 

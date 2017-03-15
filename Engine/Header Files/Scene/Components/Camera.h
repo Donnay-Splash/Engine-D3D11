@@ -42,6 +42,7 @@ namespace Engine
         float GetOrthographicSize() const { return m_orthographicSize; }
         float GetAspectRatio() const { return m_aspectRatio; }
         bool GetJitterEnabled() const { return m_jitterEnabled; }
+        Utils::Maths::Vector2 GetCurrentTemporalJitter() const { return m_currentJitter; }
 
         RenderTargetBundle::Ptr GetRenderTargetBundle() const { return m_renderTargetBundle; }
 
@@ -85,6 +86,7 @@ namespace Engine
         bool m_jitterEnabled = false;
         uint32_t m_jitterCount = 0;
         std::vector<Utils::Maths::Vector2> m_jitterSequence;
+        Utils::Maths::Vector2 m_currentJitter;
 
         // Note: Given an identity matrix the camera will be centred at the origin
         // looking along the positive z axis with up on the y axis

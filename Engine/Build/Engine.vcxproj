@@ -271,6 +271,19 @@
     <ClInclude Include="..\Header Files\ShaderManager.h" />
     <ClInclude Include="..\Header Files\Text.h" />
     <ClInclude Include="..\Header Files\timerclass.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_CameraZCopy.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_ComputeAO.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.gs.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Minify.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Shade.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_TSAA.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\FullscreenQuad.vs.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\Uber.gs.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\Uber.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\Uber.vs.hlsl.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -443,17 +456,17 @@
       </ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_TSAA.ps.hlsl">
-        <FileType>Document</FileType>
-        <EntryPointName>PSMain</EntryPointName>
-        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
-        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
-        <ShaderType>Pixel</ShaderType>
-        <ShaderModel>5.0</ShaderModel>
-        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
-        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
-        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
-        <ObjectFileOutput>
-        </ObjectFileOutput>
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\Shaders\FullscreenQuad.vs.hlsl">
       <FileType>Document</FileType>

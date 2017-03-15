@@ -51,6 +51,7 @@ namespace Engine
         void GenerateHiZ(Texture::Ptr csZTexture);
         void GenerateAO();
         void BlurAO();
+        void RunTSAA(Texture::Ptr ssVelTexture);
 
     private:
         InputManager::Ptr m_inputManager;
