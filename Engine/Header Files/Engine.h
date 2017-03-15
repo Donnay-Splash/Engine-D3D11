@@ -47,6 +47,8 @@ namespace Engine
     private:
         bool HandleInput(float);
         bool RenderGraphics();
+        void GenerateDeepGBuffer();
+        void ShadeGBuffer(RenderTargetBundle::Ptr GBuffer);
         void InitializeScene();
         void GenerateHiZ(Texture::Ptr csZTexture);
         void GenerateAO();

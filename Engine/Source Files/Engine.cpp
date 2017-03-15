@@ -400,6 +400,57 @@ namespace Engine
         // Clear the scene.
         m_direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
 
+        // Render the deep G-Buffer
+        GenerateDeepGBuffer();
+
+        // Now need to copy depth
+        auto bundle = m_camera->GetRenderTargetBundle();
+        if (bundle != nullptr)
+        {
+            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
+
+            // Take the camera-space Z texture and downsample into the mips
+            auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
+            GenerateHiZ(HiZTexture);
+
+            // Generate the ambient occlusion
+            GenerateAO();
+
+            // HERE LIES WHERE WE SHALL GENERATE RADIOSITY
+
+            // Diffuse lighting of scene
+
+            // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
+            // Note: Can use hierarchical Z generated for AO
+
+            // Sample hierarchical G-Buffer to generate radioisty.
+
+            // Blend new samples with radiosity from last frame
+
+            // Save generated texture to be used next frame
+
+            // Bilateral blur on resulting texture
+
+            // BINGO BONGO BANGO: Pass texture to deep G-Buffer shade to have it applied to the scene
+            
+            // HERE ENDS WHERE WE SHALL HAVE GENERATED RADIOSITY
+
+            // Shade the GBuffer using generated AO.
+            ShadeGBuffer(bundle);
+
+            auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
+            RunTSAA(ssVelTexture);
+        }
+
+        // Present the rendered scene to the screen.
+        m_direct3D->EndScene();
+        m_prevFrame = m_direct3D->CopyBackBuffer();
+
+        return true;
+    }
+
+    void Engine::GenerateDeepGBuffer()
+    {
         // Upload previous depth to shader
         if (m_prevDepth)
         {
@@ -419,48 +470,25 @@ namespace Engine
         // We are finished drawing to the G-Buffer and now want to send
         // it as a shader resource so all RTVs must be cleared from the device
         m_direct3D->UnbindAllRenderTargets();
+    }
 
+    void Engine::ShadeGBuffer(RenderTargetBundle::Ptr GBuffer)
+    {
+        auto aoTarget = m_aoBundle->GetRenderTarget(L"AO");
 
-        // Now need to copy depth
-        auto bundle = m_camera->GetRenderTargetBundle();
-        if (bundle != nullptr)
-        {
-            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
+        // Upload G-buffer data to device
+        GBuffer->SetShaderResources(m_direct3D->GetDeviceContext());
+        aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 5);
 
-            // Take the camera-space Z texture and downsample into the mips
-            auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
-            GenerateHiZ(HiZTexture);
+        // Set post effect constants
+        m_postEffect->SetEffectData(m_debugConstants);
 
-            // Generate the ambient occlusion
-            GenerateAO();
+        // Upload light data for deferred shading
+        m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
 
-            // Set render target to back buffer
-            auto aoTarget = m_aoBundle->GetRenderTarget(L"AO");
-
-            // Upload G-buffer data to device
-            bundle->SetShaderResources(m_direct3D->GetDeviceContext());
-            aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 5);
-            
-
-            // Set post effect constants
-            m_postEffect->SetEffectData(m_debugConstants);
-
-            // Upload light data for deferred shading
-            m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
-
-            // Shade G-Buffer
-            m_postProcessCamera->SetRenderTargetBundle(m_tempBundle); // Draw to the temp bundle before passing to TSAA
-            m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
-
-            auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
-            RunTSAA(ssVelTexture);
-        }
-
-        // Present the rendered scene to the screen.
-        m_direct3D->EndScene();
-        m_prevFrame = m_direct3D->CopyBackBuffer();
-
-        return true;
+        // Shade G-Buffer
+        m_postProcessCamera->SetRenderTargetBundle(m_tempBundle); // Draw to the temp bundle before passing to TSAA
+        m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
     }
 
     // Generates the hierachical Z buffer
