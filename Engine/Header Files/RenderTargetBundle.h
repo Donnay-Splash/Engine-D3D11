@@ -33,6 +33,7 @@ namespace Engine
         void CreateRenderTarget(std::wstring name, DXGI_FORMAT format, const Utils::Maths::Color& clearColor = {});
 
         RenderTarget::Ptr GetRenderTarget(std::wstring name);
+        RenderTarget::Ptr GetRenderTarget(uint32_t index);
 
         DepthBuffer::Ptr GetDepthBuffer() const { return m_depthBuffer; }
 
@@ -50,16 +51,15 @@ namespace Engine
         uint32_t RenderTargetCount() const { return m_count; }
         uint32_t GetWidth() const { return m_width; }
         uint32_t GetHeight() const { return m_height; }
+        uint32_t GetMipLevels() const { return m_mipLevels; }
 
         void SetTargetMip(uint32_t targetMip);
 
     private:
         struct BundleElement
         {
-            BundleElement(std::wstring name, RenderTarget::Ptr renderTarget, Utils::Maths::Color clearColour) :
-                Name(name), RenderTarget(renderTarget), ClearColour(clearColour) {}
             std::wstring Name;
-            RenderTarget::Ptr RenderTarget;
+            std::vector<RenderTarget::Ptr> RenderTargets; // Render targets for all mip levels
             Utils::Maths::Color ClearColour = {0.0f, 0.0f, 0.0f, 1.0f};
         };
 

@@ -177,6 +177,9 @@
     <ClCompile Include="..\Source Files\Resources\TextureMipView.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\TextureBundleMipView.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\d3dclass.h">
@@ -359,6 +362,12 @@
     <ClInclude Include="..\Shaders\Compiled shaders\Uber.vs.hlsl.h">
       <Filter>Shader Files\Compiled Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_LambertianOnly.ps.hlsl.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\TextureBundleMipView.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Header Files\Scene\Scene.inl">
@@ -422,6 +431,15 @@
     <None Include="..\Shaders\Lighting.hlsl">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="..\Shaders\LightingHelpers.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\LightingConstants.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\DeepGBuffer_Minify.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">
@@ -451,9 +469,6 @@
     <FxCompile Include="..\Shaders\DeepGBuffer_CameraZCopy.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="..\Shaders\DeepGBuffer_Minify.ps.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_ComputeAO.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
@@ -461,6 +476,15 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_TSAA.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_LambertianOnly.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Minify_CSZ.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Minify_Lambertian.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

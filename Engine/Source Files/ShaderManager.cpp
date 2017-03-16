@@ -39,9 +39,14 @@ namespace Engine
     }
 
     // Generate the hierarchical Z buffer
-    namespace Hierarchical_Z
+    namespace Minify_CSZ
     {
-        #include "Shaders\Compiled shaders\DeepGBuffer_Minify.ps.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Minify_CSZ.ps.hlsl.h"
+    }
+
+    namespace Minify_Lambertian
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_Minify_Lambertian.ps.hlsl.h"
     }
 
     // Scalable Ambient Obscurance algorithm
@@ -60,6 +65,12 @@ namespace Engine
     namespace TSAA
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_TSAA.ps.hlsl.h"
+    }
+
+    // Lambertian only shader
+    namespace LambertianOnly
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_LambertianOnly.ps.hlsl.h"
     }
 
     ShaderManager::ShaderManager(ID3D11Device* device)
@@ -118,10 +129,18 @@ namespace Engine
 
         // Load the Hi_Z generation
         {
-            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Hierarchical_Z::g_PSMain, sizeof(Hierarchical_Z::g_PSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Minify_CSZ::g_PSMain, sizeof(Minify_CSZ::g_PSMain), device);
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
-            m_shaderMap.emplace(ShaderName::Generate_HiZ, shaderPipeline);
+            m_shaderMap.emplace(ShaderName::Minify_CSZ, shaderPipeline);
+        }
+
+        // Load Lambertian minify. This is in preparation for use in the radiosity calculation
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Minify_Lambertian::g_PSMain, sizeof(Minify_Lambertian::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::Minify_Lambertian, shaderPipeline);
         }
 
         // Load the AO shader
@@ -146,6 +165,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::TSAA, shaderPipeline);
+        }
+
+        // Load the Lambertian lighting shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, LambertianOnly::g_PSMain, sizeof(LambertianOnly::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::LambertianOnly, shaderPipeline);
         }
     }
 

@@ -71,6 +71,7 @@ namespace Engine
 
     // class constants
     const uint32_t kHiZ_MaxMip = 5;
+    const uint32_t kRadiosityBuffer_MaxMip = kHiZ_MaxMip;
     const uint32_t kAO_numSamples = 20;
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     const uint32_t kTemporalAASamples = 8;
@@ -136,18 +137,6 @@ namespace Engine
         light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
         light->SetColor({ DirectX::Colors::Wheat });
         light->SetDirection({ 1.0f, -1.0f, -1.0f });
-
-        lightNode = m_scene->AddNode();
-        lightNode->SetPosition({ 0.0f, 0.0f, 1.0f });
-        light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
-        light->SetColor({ DirectX::Colors::Wheat });
-        light->SetDirection({ 0.0f, 0.0f, 1.0f });
-
-        lightNode = m_scene->AddNode();
-        lightNode->SetPosition({ 0.0f, 0.0f, -1.0f });
-        light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
-        light->SetColor({ DirectX::Colors::Wheat });
-        light->SetDirection({ 0.0f, 0.0f, -1.0f });
 
         // Create the camera object
         auto cameraNode = m_scene->AddNode();
@@ -247,6 +236,12 @@ namespace Engine
         }
 
         {
+            auto getter = [&]()->float { return m_weightThisFrame; };
+            auto setter = [&](float value) {m_weightThisFrame = value; };
+            m_globalOptions->RegisterScalarProperty(L"TSAA weight this frame", getter, setter, 0.0f, 1.0f);
+        }
+
+        {
             auto getter = [&]()->bool { return m_camera->GetJitterEnabled(); };
             auto setter = [&](bool value) {m_camera->SetJitterEnabled(value); };
             m_globalOptions->RegisterBooleanProperty(L"Camera Jitter Enabled", getter, setter);
@@ -322,9 +317,23 @@ namespace Engine
         m_aoBundle->CreateRenderTarget(L"AO", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_aoBundle->Finalise();
 
+        // Temporary buffer for post process effects. Used to store temp results. e.g. betweeen seperable blur
         m_tempBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
         m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_tempBundle->Finalise();
+
+        // TODO: Change this to a IndirectLight Prep buffer.
+        // by adding a third target that stores packed normals for each layer in a single RGBA8_UNORM
+        // Then we can find an easier way of generating the mip chain rather than combining targets from
+        // all different sources
+        m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, kRadiosityBuffer_MaxMip + 1, false);
+        m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian1", DXGI_FORMAT_R8G8B8A8_UNORM); //TODO: Eventually make HDR
+        m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian2", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_lambertianOnlyBundle->CreateRenderTarget(L"PackedNormals", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_lambertianOnlyBundle->Finalise();
+
+        // Create the mip view for the lambertian only buffer. This is used to generate the custom downsample
+        m_lambertianOnlyBundleMipView = std::make_shared<TextureBundleMipView>(m_direct3D->GetDevice(), m_lambertianOnlyBundle, kRadiosityBuffer_MaxMip + 1);
     }
 
 
@@ -401,7 +410,9 @@ namespace Engine
         m_direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
 
         // Render the deep G-Buffer
-        GenerateDeepGBuffer();
+        m_direct3D->BeginRenderEvent(L"Generating Deep G-Buffer");
+            GenerateDeepGBuffer();
+        m_direct3D->EndRenderEvent();
 
         // Now need to copy depth
         auto bundle = m_camera->GetRenderTargetBundle();
@@ -409,19 +420,32 @@ namespace Engine
         {
             m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
 
-            // Take the camera-space Z texture and downsample into the mips
-            auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
-            GenerateHiZ(HiZTexture);
+            m_direct3D->BeginRenderEvent(L"Generating Hierarchical Z buffer");
+                // Take the camera-space Z texture and downsample into the mips
+                auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
+                GenerateHiZ(HiZTexture);
+            m_direct3D->EndRenderEvent();
 
-            // Generate the ambient occlusion
-            GenerateAO();
+            m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
+                // Generate the ambient occlusion
+                GenerateAO();
+            m_direct3D->EndRenderEvent();
 
             // HERE LIES WHERE WE SHALL GENERATE RADIOSITY
 
-            // Diffuse lighting of scene
+            // Upload light data for deferred shading
+            m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
 
-            // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
-            // Note: Can use hierarchical Z generated for AO
+            m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
+                // Diffuse lighting of scene
+                LambertianOnly(bundle);
+            m_direct3D->EndRenderEvent();
+
+            m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
+                // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
+                // Note: Can use hierarchical Z generated for AO
+                GenerateRadiosityBufferMips();
+            m_direct3D->EndRenderEvent();
 
             // Sample hierarchical G-Buffer to generate radioisty.
 
@@ -435,11 +459,15 @@ namespace Engine
             
             // HERE ENDS WHERE WE SHALL HAVE GENERATED RADIOSITY
 
-            // Shade the GBuffer using generated AO.
-            ShadeGBuffer(bundle);
+            m_direct3D->BeginRenderEvent(L"Shading G-Buffer");
+                // Shade the GBuffer using generated AO.
+                ShadeGBuffer(bundle);
+            m_direct3D->EndRenderEvent();
 
-            auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
-            RunTSAA(ssVelTexture);
+            m_direct3D->BeginRenderEvent(L"Accumulating TSAA");
+                auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
+                RunTSAA(ssVelTexture);
+            m_direct3D->EndRenderEvent();
         }
 
         // Present the rendered scene to the screen.
@@ -483,12 +511,58 @@ namespace Engine
         // Set post effect constants
         m_postEffect->SetEffectData(m_debugConstants);
 
-        // Upload light data for deferred shading
-        m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
-
         // Shade G-Buffer
         m_postProcessCamera->SetRenderTargetBundle(m_tempBundle); // Draw to the temp bundle before passing to TSAA
         m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
+    }
+
+    void Engine::LambertianOnly(RenderTargetBundle::Ptr GBuffer)
+    {
+        m_postProcessCamera->SetRenderTargetBundle(m_lambertianOnlyBundle);
+        m_lambertianOnlyBundle->Clear(m_direct3D->GetDeviceContext());
+        m_lambertianOnlyBundle->SetTargetMip(0);
+
+        // Upload G-Buffer data
+        GBuffer->SetShaderResources(m_direct3D->GetDeviceContext());
+
+        // Create shader effect
+        auto lambertShaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::LambertianOnly);
+        auto lambertOnlyEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), lambertShaderPipeline);
+
+        // TODO: When ready upload previous indirect lighting
+
+        // Render the effect
+        m_postProcessCamera->RenderPostEffect(m_direct3D, lambertOnlyEffect);
+    }
+
+    void Engine::GenerateRadiosityBufferMips()
+    {
+        // We want to render to the mip maps of the lambertian only buffer
+        m_postProcessCamera->SetRenderTargetBundle(m_lambertianOnlyBundle);
+
+        // Create our effect
+        auto radiosityBufferDownsamplePipeline = m_shaderManager->GetShaderPipeline(ShaderName::Minify_Lambertian);
+        auto radiosityBufferDownsampleEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), radiosityBufferDownsamplePipeline);
+
+        // For each of the targeted mip maps. Render our effect binding the correct RTVs and SRVs
+        PostEffectConstants constants;
+        for (int i = 1; i <= kRadiosityBuffer_MaxMip; i++)
+        {
+            // Unbind current render targets so we don't get collisions when binding previous output views as input
+            m_direct3D->UnbindAllRenderTargets();
+
+            constants.currentMipLevel = float(i); // Set the current mip level so the shader knows
+            radiosityBufferDownsampleEffect->SetEffectData(constants);
+
+            // Set the mip we are currently rendering to
+            m_lambertianOnlyBundle->SetTargetMip(i);
+            // We want to sample from the previous mip map
+            m_lambertianOnlyBundleMipView->SetCurrentMip(i - 1);
+            m_lambertianOnlyBundleMipView->UploadData(m_direct3D->GetDeviceContext());
+
+            // Render our effect
+            m_postProcessCamera->RenderPostEffect(m_direct3D, radiosityBufferDownsampleEffect);
+        }
     }
 
     // Generates the hierachical Z buffer
@@ -500,7 +574,7 @@ namespace Engine
         auto csZCopyPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_csZCopy);
         auto csZCopyEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), csZCopyPipeline);
 
-        auto HiZConstruction = m_shaderManager->GetShaderPipeline(ShaderName::Generate_HiZ);
+        auto HiZConstruction = m_shaderManager->GetShaderPipeline(ShaderName::Minify_CSZ);
         auto HiZPost = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), HiZConstruction);
 
         // From deep G to single texture
@@ -617,6 +691,7 @@ namespace Engine
             TSAAData.sampleWeights[i] = weights[i] / totalWeight;
         }
 
+        TSAAData.currentFrameWeight = m_weightThisFrame;
         TSAAEffect->SetEffectData(TSAAData);
 
         // Upload current, previous and ssVel

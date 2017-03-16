@@ -12,22 +12,6 @@ Texture2DArray depth : register(t4);
 Texture2D AO : register(t5);
 SamplerState gBufferSampler : register(s0);
 
-#define MAX_LIGHT_COUNT 4
-// struct containing light information
-struct Light
-{
-    float3 position;
-    float3 direction;
-    float4 color;
-};
-
-// Contains description of the lights in the scene
-cbuffer LightBuffer : register(b2)
-{
-    Light lights[MAX_LIGHT_COUNT];
-    float activeLights;
-}
-
 
 float4 PSMain(VertexOut input) : SV_Target
 {

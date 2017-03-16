@@ -27,6 +27,11 @@ namespace Engine
         void BeginScene(float, float, float, float);
         void EndScene();
 
+        // Begin and end render event must be called in pairs.
+        // They can be nested bu there must be a matching end for every begin
+        void BeginRenderEvent(const std::wstring& eventLabel);
+        void EndRenderEvent();
+
         // Potentially rename FrameBuffer?
         void SetRenderTarget(RenderTargetBundle::Ptr) const;
 
@@ -61,6 +66,7 @@ namespace Engine
         Microsoft::WRL::ComPtr<ID3D11Device1> m_device;
         Microsoft::WRL::ComPtr<ID3D11Debug> m_debugDevice;
         Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext;
+        Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation> m_userDefinedAnnotation;
         Microsoft::WRL::ComPtr<IDXGIFactory2> m_factory;
         Microsoft::WRL::ComPtr<IDXGIAdapter> m_adapter;
         RenderTarget::Ptr m_backBufferRT;

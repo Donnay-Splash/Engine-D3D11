@@ -86,6 +86,14 @@ namespace Engine
         tempDevice = nullptr;
         // Query the debug device from the device
         Utils::DirectXHelpers::ThrowIfFailed(m_device.As(&m_debugDevice));
+        // Query the UserDefinedAnnotation interface from the device context
+        // This can fail when using Windows 7 so we don't want to throw
+        // We will just fail to write events. No biggy.
+        auto hr = m_deviceContext.As(&m_userDefinedAnnotation);
+        if (hr != S_OK)
+        {
+            m_userDefinedAnnotation = nullptr;
+        }
 
         switch (m_createOptions.RendererMode)
         {
@@ -386,5 +394,21 @@ namespace Engine
     Texture::Ptr D3DClass::CopyBackBuffer() const
     {
         return CopyTexture(m_backBufferRT->GetTexture());
+    }
+
+    void D3DClass::BeginRenderEvent(const std::wstring& eventLabel)
+    {
+        if (m_userDefinedAnnotation != nullptr)
+        {
+            m_userDefinedAnnotation->BeginEvent(eventLabel.c_str());
+        }
+    }
+
+    void D3DClass::EndRenderEvent()
+    {
+        if (m_userDefinedAnnotation != nullptr)
+        {
+            m_userDefinedAnnotation->EndEvent();
+        }
     }
 }

@@ -71,3 +71,40 @@ float UnpackBilateralKey(float2 packedkey)
     return packedkey.x + packedkey.y * (1.0f / 255.0f);
 }
 
+/*--------------------------------------
+Packs a float3 normal into 2 channels using spheremap transform.
+http://aras-p.info/texts/CompactNormalStorage.html#method04spheremap
+
+Note we use negative Z as we are working in screen space and all normals are pointing towards the camera
+This gives us a positive value for the sqrt which seems to produce more accurate results.
+
+Args:
+normal: normalised normal that we want to pack
+--------------------------------------*/
+float2 PackNormal(float3 normal)
+{
+    float p = sqrt(-normal.z * 8 + 8);
+    return float2(normal.xy/p + 0.5f);
+}
+
+/*--------------------------------------
+Reconstructs a packed normal using spheremap transform
+http://aras-p.info/texts/CompactNormalStorage.html#method04spheremap
+
+When encoding we negated the Z coordinate so to revert this we again invert the z coordinate to
+return to the original value. This appears to improve quality.
+
+Args:
+packedNormal: the 2 channel packed normal we want to reconstruct
+--------------------------------------*/
+float3 UnpackNormal(float2 packedNormal)
+{
+    float2 fenc = packedNormal * 4.0f - 2.0f;
+    float f = dot(fenc, fenc);
+    float g = sqrt(1.0f - f/4.0f);
+    float3 normal;
+    normal.xy = fenc * g;
+    normal.z = -(1.0f - f/2.0f);
+    return normal;
+}
+

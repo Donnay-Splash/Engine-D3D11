@@ -31,14 +31,20 @@ namespace Engine
 
         // Create texture resource for render targets
         auto texture = Texture::CreateTextureArray(nullptr, m_width, m_height, m_arraySize, textureFlags, format, m_device);
+
+        BundleElement newBundleElement;
+        newBundleElement.ClearColour = clearColor;
+        newBundleElement.Name = name;
         // Generate render targets to draw to each of the mip levels
         for (uint32_t mip = 0; mip < m_mipLevels; mip++)
         {
             auto newRenderTarget = std::make_shared<RenderTarget>(texture, 0, mip, 0, m_device);
+            // Push this render target into the vector.
+            newBundleElement.RenderTargets.push_back(newRenderTarget);
             // Add render target view to array.
-            m_renderTargets.push_back(BundleElement(name, newRenderTarget, clearColor));
             m_renderTargetViews[mip][m_count] = newRenderTarget->GetRTV().Get();
         }
+        m_renderTargets.push_back(newBundleElement);
 
         // Increment count
         m_count++;
@@ -54,7 +60,15 @@ namespace Engine
         // Ensure that the render target exists in the bundle
         EngineAssert(it != m_renderTargets.end());
 
-        return it->RenderTarget;
+        // Return the render target for the top level mip
+        return it->RenderTargets[0];
+    }
+
+    RenderTarget::Ptr RenderTargetBundle::GetRenderTarget(uint32_t index)
+    {
+        EngineAssert(index < m_count && index >= 0);
+        // Return the render target for the top level mip
+        return m_renderTargets[index].RenderTargets[0];
     }
 
     void RenderTargetBundle::Clear(ID3D11DeviceContext* deviceContext)
@@ -95,7 +109,7 @@ namespace Engine
         int textureRegister = 0;
         for (auto pair : m_renderTargets)
         {
-            auto texture = pair.RenderTarget->GetTexture();
+            auto texture = pair.RenderTargets[0]->GetTexture(); // Get texture from highest level mip
 
             texture->UploadData(deviceContext, PipelineStage::Pixel, textureRegister);
             textureRegister++;

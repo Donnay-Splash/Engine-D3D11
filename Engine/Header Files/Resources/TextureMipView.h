@@ -15,6 +15,7 @@ namespace Engine
         void UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister);
         void SetCurrentMip(uint32_t currentMip) { EngineAssert(currentMip < m_mipLevels); m_currentMip = currentMip; }
         Texture::Ptr GetTexture() const { return m_texture; };
+        uint32_t GetMipCount() const { return m_mipLevels; }
 
     private:
         Texture::Ptr m_texture;

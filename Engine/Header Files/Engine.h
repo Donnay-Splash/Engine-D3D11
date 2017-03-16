@@ -16,7 +16,7 @@
 #include <Scene\Scene.h>
 #include <Resources\Mesh.h>
 #include <Resources\Sampler.h>
-#include <Resources\TextureMipView.h>
+#include <Resources\TextureBundleMipView.h>
 
 // Don't really want this sat here.
 #include <Resources\ConstantBufferLayouts.h>
@@ -45,14 +45,33 @@ namespace Engine
 
 
     private:
+        /*Handles current input for the frame. Taking delta time as input*/
         bool HandleInput(float);
+        /*  Renders the frame*/
         bool RenderGraphics();
+        /*  Renders all objects in the scene into the deep G-Buffer
+            We store diffuse colour, camera-space normal, screen-space velocity and camera-space Z at each pixel*/
         void GenerateDeepGBuffer();
+        /*  Shades the deep G-Buffer*/
         void ShadeGBuffer(RenderTargetBundle::Ptr GBuffer);
+        /*  Shades the G-Buffer with only lambertian shading. This is in preparation
+            for radiosity calculation. Note: we also pack camera-space normals into a single texture
+            TODO: Come up with a better name for this*/
+        void LambertianOnly(RenderTargetBundle::Ptr GBuffer);
+        /*  Takes the lambertian shaded textures and packed normals and generates a mip map chain in exactly the same way as
+            GenerateHiZ. This helps reduce the cache misses for radiosity calculation*/
+        void GenerateRadiosityBufferMips();
+        /*  Initialises the scene and loads generic objects*/
         void InitializeScene();
+        /*  Uses rotated grid subsampling to generate a mip map chain for camera-space Z
+            In the same was as GenerateRadiostityBufferMips. The hierarchical-z helps to
+            reduce texture cache misses for large radii in the AO.*/
         void GenerateHiZ(Texture::Ptr csZTexture);
+        /*  Calculates ambient occlusion at each pixel. Taking the hierarchical Z as input*/
         void GenerateAO();
+        /*  Applys a bilateral filter to the AO to reduce noise while preserving edges*/
         void BlurAO();
+        /*  Runs TSAA merging this frames values with the accumulation*/
         void RunTSAA(Texture::Ptr ssVelTexture);
 
     private:
@@ -80,12 +99,18 @@ namespace Engine
         RenderTargetBundle::Ptr m_aoBundle;
         // A bundle for postprocessing temporary steps. e.g. mid seperable blur.
         RenderTargetBundle::Ptr m_tempBundle; 
+        // Contains 
+        RenderTargetBundle::Ptr m_lambertianOnlyBundle;
+        TextureBundleMipView::Ptr m_lambertianOnlyBundleMipView;
+
 
         // Store prev depth for deep G-Buffer prediction
         Texture::Ptr m_prevDepth;
         // Store previous frame for temporal super sampling
         Texture::Ptr m_prevFrame;
         Sampler::Ptr m_depthSampler;
+
+        float m_weightThisFrame = 0.2f;
 
     };
 }

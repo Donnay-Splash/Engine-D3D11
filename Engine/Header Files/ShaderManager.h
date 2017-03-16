@@ -11,10 +11,12 @@ namespace Engine
         DeepGBuffer_Gen = 1,
         GBuffer_Shade = 2,
         DeepGBuffer_csZCopy = 3,
-        Generate_HiZ = 4,
+        Minify_CSZ = 4,
         AO = 5,
         BilateralBlur = 6,
-        TSAA = 7
+        TSAA = 7,
+        LambertianOnly = 8,
+        Minify_Lambertian = 9
     };
 
     class ShaderManager

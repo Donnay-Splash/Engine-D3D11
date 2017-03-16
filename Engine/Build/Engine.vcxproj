@@ -197,6 +197,7 @@
     <ClCompile Include="..\Source Files\Resources\Shader.cpp" />
     <ClCompile Include="..\Source Files\Resources\ShaderPipeline.cpp" />
     <ClCompile Include="..\Source Files\Resources\Texture.cpp" />
+    <ClCompile Include="..\Source Files\Resources\TextureBundleMipView.cpp" />
     <ClCompile Include="..\Source Files\Resources\TextureMipView.cpp" />
     <ClCompile Include="..\Source Files\Resources\VertexBuffer.cpp" />
     <ClCompile Include="..\Source Files\Scene\Components\BoundingBox.cpp" />
@@ -256,6 +257,7 @@
     <ClInclude Include="..\Header Files\Resources\Shader.h" />
     <ClInclude Include="..\Header Files\Resources\ShaderPipeline.h" />
     <ClInclude Include="..\Header Files\Resources\Texture.h" />
+    <ClInclude Include="..\Header Files\Resources\TextureBundleMipView.h" />
     <ClInclude Include="..\Header Files\Resources\TextureMipView.h" />
     <ClInclude Include="..\Header Files\Resources\VertexBuffer.h" />
     <ClInclude Include="..\Header Files\Scene\Components\BoundingBox.h" />
@@ -277,6 +279,7 @@
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.gs.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.ps.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_LambertianOnly.ps.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Minify.ps.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Shade.ps.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_TSAA.ps.hlsl.h" />
@@ -429,7 +432,39 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <FxCompile Include="..\Shaders\DeepGBuffer_Minify.ps.hlsl">
+    <FxCompile Include="..\Shaders\DeepGBuffer_LambertianOnly.ps.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
+    <None Include="..\Shaders\DeepGBuffer_Minify.ps.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Minify_CSZ.ps.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Minify_Lambertian.ps.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>PSMain</EntryPointName>
       <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
@@ -501,6 +536,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\Shaders\LightingConstants.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Shaders\LightingHelpers.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
     </None>
     <FxCompile Include="..\Shaders\Uber.gs.hlsl">
       <FileType>Document</FileType>
