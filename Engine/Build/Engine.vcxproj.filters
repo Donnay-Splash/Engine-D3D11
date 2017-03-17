@@ -368,6 +368,9 @@
     <ClInclude Include="..\Header Files\Resources\TextureBundleMipView.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl.h">
+      <Filter>Shader Files\Compiled Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Header Files\Scene\Scene.inl">
@@ -485,6 +488,12 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Minify_Lambertian.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\GIHelpers.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

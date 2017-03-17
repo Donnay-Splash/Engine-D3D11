@@ -1,20 +1,12 @@
 #include "PostEffectConstants.hlsl"
 #include "System_Globals.hlsl"
 #include "ReconstructFromDepth.hlsl"
+#include "GIHelpers.hlsl"
 
 //constants
 // Minimum AO radius is 3 pixels.
 #define MIN_RADIUS 3
 #define PI 3.14159265358979323846
-
-// The log of the maximum pixel offset before jumping down to the next lower mip level.
-// If this number is too small (< 3), too many taps will land in the same pixel and we'll
-// get bad variance that manifests as flashing.
-// If it is too high (> 5) we'll get bad performance because we are not using the mip levels efficiently
-#define LOG_MAX_OFFSET 3
-
-// Must be less than or equal to the same macro defined in Engine.cpp
-#define MAX_MIP_LEVEL 5
 
 Texture2D csZTexture : register(t0);
 SamplerState csZSampler : register(s0);
@@ -23,37 +15,6 @@ SamplerState csZSampler : register(s0);
 float square(float val)
 {
     return val * val;
-}
-
-/*------------------------------------------
-Returns a unit vector and screen-space radius on a unit disk.
-This gives us our sample location. Caller must multiply by actual disk radius
-
-Args:
-sampleNum: How many samples have we taken so far. Determines how far we rotate.
-rotationAngle: The calculated random rotation angle step we take for each sample
-OUT ssRadius: The calculated length to sample point along returned unit offset
-------------------------------------------*/
-float2 GetTapLocation(in int sampleNum, in float rotationAngle, out float ssRadius)
-{
-    // radius relative to ssRadius
-    float alpha = float(sampleNum + 0.5f) * (1.0f / numAOSamples);
-    float angle = alpha * (numAOSpiralTurns * PI * 2.0f) + rotationAngle;
-
-    ssRadius = alpha;
-    return float2(cos(angle), sin(angle));
-}
-
-/*------------------------------------------
-Returns the correct mip level to sample from for the projected disk radius
-
-Args:
-ssRadius: screen-space sample radius in pixels
-------------------------------------------*/
-int GetMipLevel(float ssRadius)
-{
-    // Mip level = floor(log(ssr / MAX_OFFSET));
-    return clamp(int(floor(log(ssRadius))) - LOG_MAX_OFFSET, 0, MAX_MIP_LEVEL);
 }
 
 /*------------------------------------------
@@ -156,7 +117,8 @@ invScale: inverse scale of the texture size to convert from explicit texture loc
 float CalculateOcclusion(int2 ssPosition, float rotationAngle, float3 csPosition, float3 csNormal, float ssDiskRadius, int sampleNum, float2 invScale)
 {
     float ssRadius;
-    float2 tapOffset = GetTapLocation(sampleNum, rotationAngle, ssRadius);
+    float radialJitter = 0.5f; // Since we are not temporally jittering rotation set constant jitter
+    float2 tapOffset = GetTapLocation(sampleNum, rotationAngle, radialJitter, ssRadius);
     
     // Ensure that the taps are separated by at least one pixel
     ssRadius = max(0.75f, ssRadius * ssDiskRadius);
@@ -229,7 +191,7 @@ float4 PSMain(VertexOut input) : SV_Target
     // Calculate the random rotation angle used when sampling pixels within the given radius
     // Original hash function given in AlchemyAO paper presented at HPG12 : http://graphics.cs.williams.edu/papers/AlchemyHPG11/
     int2 integerPixelLocation = int2(input.position.xy);
-    float angle = ((3 * integerPixelLocation.x) ^ (integerPixelLocation.y + integerPixelLocation.x*integerPixelLocation.y)) * 10;
+    float angle = GetRandomRotationAngle(integerPixelLocation);
 
     // Calculate screen space disk radius based on projected size of sample sphere
     float ssDiskRadius = projectionScale * aoRadius / csPosition.z;

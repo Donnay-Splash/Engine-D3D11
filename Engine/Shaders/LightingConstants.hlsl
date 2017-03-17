@@ -1,6 +1,7 @@
 static const float PI = 3.14159265358979323846;
 static const float kGammaEncodePower = 1.0f / 2.2f;
 static const float kGammaDecodePower = 2.2f;
+static const float kSolidAngleHemisphere = 2.0f * PI;
 
 #define MAX_LIGHT_COUNT 4
 // struct containing light information

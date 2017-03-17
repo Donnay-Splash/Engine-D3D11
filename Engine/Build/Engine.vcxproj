@@ -275,6 +275,7 @@
     <ClInclude Include="..\Header Files\timerclass.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_CameraZCopy.ps.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_ComputeAO.ps.hlsl.h" />
+    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.gs.hlsl.h" />
     <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.ps.hlsl.h" />
@@ -347,6 +348,19 @@
       </ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_ComputeAO.ps.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>PSMain</EntryPointName>
       <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
@@ -544,6 +558,13 @@
     <None Include="..\Shaders\LightingHelpers.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <FileType>Document</FileType>
+    </None>
+    <None Include="..\Shaders\GIHelpers.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <FxCompile Include="..\Shaders\Uber.gs.hlsl">
       <FileType>Document</FileType>

@@ -16,7 +16,8 @@ namespace Engine
         BilateralBlur = 6,
         TSAA = 7,
         LambertianOnly = 8,
-        Minify_Lambertian = 9
+        Minify_Lambertian = 9,
+        ComputeRadiosity = 10
     };
 
     class ShaderManager

@@ -73,6 +73,11 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_LambertianOnly.ps.hlsl.h"
     }
 
+    namespace ComputeRadiosity
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl.h"
+    }
+
     ShaderManager::ShaderManager(ID3D11Device* device)
     {
         LoadCoreShaders(device);
@@ -173,6 +178,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::LambertianOnly, shaderPipeline);
+        }
+
+        // Load the Radiosity computation shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, ComputeRadiosity::g_PSMain, sizeof(ComputeRadiosity::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::ComputeRadiosity, shaderPipeline);
         }
     }
 

@@ -1,5 +1,5 @@
 /*--------------------------------------
-Taken from G3D engine by Morgan McGuire http://g3d.sourceforge.net/
+Taken from G3D engine http://g3d.sourceforge.net/
 
 Includes multiple functions to reconstruct values from the depth buffer.
 ----------------------------------------*/
