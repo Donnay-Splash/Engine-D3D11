@@ -61,5 +61,5 @@ float4 PSMain(VertexOut input) : SV_Target
     }
 
     
-    return float4(GammaEncode(color.rgb), 1.0f);
+    return float4(color.rgb, 1.0f);
 }

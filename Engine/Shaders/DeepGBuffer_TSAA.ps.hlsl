@@ -197,20 +197,22 @@ float4 PSMain(VertexOut input) : SV_Target
     neighborMax = neighborMax * 0.5f + neighborMax2 * 0.5f;
 
     // Fetch the colour from the previous frame
-    float4 prevColor = previousFrame.Sample(TSAASampler, prevSamplePos);
+    float4 prevSample = previousFrame.Sample(TSAASampler, prevSamplePos);
+    float3 prevColor = GammaDecode(prevSample.rgb);
+    float prevVelocity = prevSample.a;
 
     // TODO: If using HDR weight sample
 
     // convert to luminocity to be used in blend weight calculation
     float lumaMin = LumaFast(neighborMin.rgb);
     float lumaMax = LumaFast(neighborMax.rgb);
-    float lumaPrev = LumaFast(prevColor.rgb);
+    float lumaPrev = LumaFast(prevColor);
     float lumaContrast = lumaMax - lumaMin;
 
     // Clamp history using color AABB
     // Uses low-pass filtered color to avoid flickering.
-    float clampedBlend = HistoryClamp(prevColor.rgb, Filtered.rgb, neighborMin.rgb, neighborMax.rgb);
-    prevColor.rgb = lerp(prevColor.rgb, Filtered.rgb, clampedBlend);
+    float clampedBlend = HistoryClamp(prevColor, Filtered.rgb, neighborMin.rgb, neighborMax.rgb);
+    prevColor = lerp(prevColor, Filtered.rgb, clampedBlend);
 
     // Add back in some aliasing to sharpen overblurred edges
     float addAliasing = saturate(historyBlur) * 0.5f;
@@ -228,10 +230,9 @@ float4 PSMain(VertexOut input) : SV_Target
     float blendFinal = saturate(prevFactor * rcp(distanceToClamp + lumaContrast));
 
     // Velocity weighting similar to low_quality method
-    float priorVelocity = prevColor.a;
     float velocityDecay = 0.5f;
-    prevColor.a = max(prevColor.a * velocityDecay, velocity * rcp(velocityDecay));
-    float velocityDiff = abs(priorVelocity - velocity) / max(1.0f, max(priorVelocity, velocity));
+    prevVelocity = max(prevVelocity * velocityDecay, velocity * rcp(velocityDecay));
+    float velocityDiff = abs(prevVelocity - velocity) / max(1.0f, max(prevVelocity, velocity));
     blendFinal = max(blendFinal, velocityDiff * (1.0f / 8.0f));
     blendFinal = min(1.0f / 2.0f, blendFinal);
 
@@ -239,14 +240,14 @@ float4 PSMain(VertexOut input) : SV_Target
     if (offScreen)
     {
         prevColor = Filtered;
-        prevColor.a = 0.0f;
+        prevVelocity = 0.0f;
     }
 
     // Perform final blend of color and account for NaN and negative values
     float3 finalColor = lerp(prevColor.rgb, Filtered.rgb, blendFinal);
     finalColor.rgb = -min(-finalColor.rgb, 0.0f);
 
-    return float4(finalColor, prevColor.a);
+    return float4(GammaEncode(finalColor), prevVelocity);
 #endif
 }
 
