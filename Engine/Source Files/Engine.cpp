@@ -78,9 +78,9 @@ namespace Engine
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
     // TODO: Continue to maintain debug controls
     // TODO: Make switching between different shading models easier. Need way of controlling what is expected as shader constants
-    // TODO: Investigate UE4 TSAA. 
     // TODO: Tidy this class it's getting mad.
-    // TODO: Potentially separate TSAA convergence into separate pass.
+    // TODO: Fix PostEffect class It's garbage. Each instance shouldn't be assigned to a constant buffer.
+            // Why not just pass post effect camera a shader pipeline and we can set effect data here.
     Engine::Engine()
     {
     }
@@ -170,7 +170,7 @@ namespace Engine
         m_position->SetPosition(0.0f, 0.0f, -10.0f);
 
         // Create depth sampler
-        m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
+        m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
         InitializeScene();
         return true;
     }
@@ -182,11 +182,11 @@ namespace Engine
     void Engine::CreateGlobalOptions()
     {
         // Set initialvalues for constants
-        m_debugConstants.aoRadius = 5.0f; // 1 metre
-        m_debugConstants.aoBias = 0.01f; // 1 cm
-        m_debugConstants.aoIntensity = 1.0f;
-        m_debugConstants.numAOSamples = kAO_numSamples;
-        m_debugConstants.numAOSpiralTurns = float(kAO_numSpiralTurns);
+        m_giConstants.Radius = 5.0f; // 1 metre
+        m_giConstants.aoBias = 0.01f; // 1 cm
+        m_giConstants.aoIntensity = 1.0f;
+        m_giConstants.numSamples = kAO_numSamples;
+        m_giConstants.numSpiralTurns = float(kAO_numSpiralTurns);
 
         m_deepGBufferData.minimumSeparation = 0.3f;
 
@@ -211,39 +211,39 @@ namespace Engine
         }
 
         {
-            auto getter = [&]()->float { return m_debugConstants.aoRadius; };
-            auto setter = [&](float value) {m_debugConstants.aoRadius = value; };
+            auto getter = [&]()->float { return m_giConstants.Radius; };
+            auto setter = [&](float value) {m_giConstants.Radius = value; };
             m_globalOptions->RegisterScalarProperty(L"AO Radius", getter, setter, 0.0f, 10.0f);
         }
 
         {
-            auto getter = [&]()->float { return m_debugConstants.aoBias; };
-            auto setter = [&](float value) {m_debugConstants.aoBias = value; };
+            auto getter = [&]()->float { return m_giConstants.aoBias; };
+            auto setter = [&](float value) {m_giConstants.aoBias = value; };
             m_globalOptions->RegisterScalarProperty(L"AO Bias", getter, setter, 0.0f, 0.1f);
         }
 
         {
-            auto getter = [&]()->float { return m_debugConstants.aoIntensity; };
-            auto setter = [&](float value) {m_debugConstants.aoIntensity = value; };
+            auto getter = [&]()->float { return m_giConstants.aoIntensity; };
+            auto setter = [&](float value) {m_giConstants.aoIntensity = value; };
             m_globalOptions->RegisterScalarProperty(L"AO Intensity", getter, setter, 1.0f, 4.0f);
         }
 
         {
-            auto getter = [&]()->float { return m_debugConstants.aoUseSecondLayer; };
-            auto setter = [&](float value) {m_debugConstants.aoUseSecondLayer = value; };
+            auto getter = [&]()->float { return m_giConstants.aoUseSecondLayer; };
+            auto setter = [&](float value) {m_giConstants.aoUseSecondLayer = value; };
             m_globalOptions->RegisterScalarProperty(L"AO Use second layer", getter, setter, 0.0f, 1.0f);
         }
 
         {
-            auto getter = [&]()->float { return m_weightThisFrame; };
-            auto setter = [&](float value) {m_weightThisFrame = value; };
-            m_globalOptions->RegisterScalarProperty(L"TSAA weight this frame", getter, setter, 0.0f, 1.0f);
+            auto getter = [&]()->bool { return m_debugConstants.aoEnabled == 1.0f; };
+            auto setter = [&](bool value) { m_debugConstants.aoEnabled = value ? 1.0f : 0.0f; };
+            m_globalOptions->RegisterBooleanProperty(L"AO Enabled", getter, setter);
         }
 
         {
-            auto getter = [&]()->bool { return m_camera->GetJitterEnabled(); };
-            auto setter = [&](bool value) {m_camera->SetJitterEnabled(value); };
-            m_globalOptions->RegisterBooleanProperty(L"Camera Jitter Enabled", getter, setter);
+            auto getter = [&]()->bool { return m_debugConstants.radiosityEnabled == 1.0f; };
+            auto setter = [&](bool value) {m_debugConstants.radiosityEnabled = value ? 1.0f : 0.0f; };
+            m_globalOptions->RegisterBooleanProperty(L"Radiosity Enabled", getter, setter);
         }
 
     }
@@ -526,7 +526,7 @@ namespace Engine
         // Upload G-buffer data to device
         GBuffer->SetShaderResources(m_direct3D->GetDeviceContext());
         aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 5);
-        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 6);
+        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 6); // TEST
 
         // Set post effect constants
         m_postEffect->SetEffectData(m_debugConstants);
@@ -550,9 +550,18 @@ namespace Engine
         auto lambertOnlyEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), lambertShaderPipeline);
 
         // TODO: When ready upload previous indirect lighting
+        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 5);
+        if (m_prevDepth != nullptr)
+        {
+            m_prevDepth->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 6);
+        }
 
+        lambertOnlyEffect->SetEffectData(m_debugConstants);
         // Render the effect
         m_postProcessCamera->RenderPostEffect(m_direct3D, lambertOnlyEffect);
+
+        // To avoid the filtered radioisty still being bound as input when generating next radiosity clear that register
+        m_direct3D->UnbindShaderResourceView(5);
     }
 
     void Engine::GenerateRadiosityBufferMips()
@@ -565,13 +574,12 @@ namespace Engine
         auto radiosityBufferDownsampleEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), radiosityBufferDownsamplePipeline);
 
         // For each of the targeted mip maps. Render our effect binding the correct RTVs and SRVs
-        PostEffectConstants constants;
         for (int i = 1; i <= kRadiosityBuffer_MaxMip; i++)
         {
             // Unbind current render targets so we don't get collisions when binding previous output views as input
             m_direct3D->UnbindAllRenderTargets();
 
-            radiosityBufferDownsampleEffect->SetEffectData(constants);
+            radiosityBufferDownsampleEffect->SetEffectData(m_debugConstants);
 
             // Set the mip we are currently rendering to
             m_lambertianOnlyBundle->SetTargetMip(i);
@@ -590,14 +598,15 @@ namespace Engine
 
         // Create post effect
         auto radiosityPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ComputeRadiosity);
-        auto radiosityEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), radiosityPipeline);
+        auto radiosityEffect = std::make_shared<PostEffect<GIConstants>>(m_direct3D->GetDevice(), radiosityPipeline);
 
         // Upload downsampled maps
         m_lambertianOnlyBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 0);
         // upload csZ
         m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 3);
         // Set effect data
-        radiosityEffect->SetEffectData(m_debugConstants);
+        radiosityEffect->SetEffectData(m_giConstants);
 
         // Render effect
         m_postProcessCamera->RenderPostEffect(m_direct3D, radiosityEffect);
@@ -653,7 +662,6 @@ namespace Engine
         m_postProcessCamera->RenderPostEffect(m_direct3D, csZCopyEffect);
 
 
-        PostEffectConstants constants;
         for (int i = 1; i <= kHiZ_MaxMip; i++)
         {
             // Set current render to target mip i.
@@ -661,7 +669,7 @@ namespace Engine
             // Render
             m_direct3D->UnbindAllRenderTargets();
             // render to second mip
-            HiZPost->SetEffectData(constants);
+            HiZPost->SetEffectData(m_debugConstants);
             m_hiZBundle->SetTargetMip(i);
             m_hiZMipView->SetCurrentMip(i - 1); // The mip level we are currently sampling from
             m_hiZMipView->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
@@ -675,8 +683,8 @@ namespace Engine
     {
         // Pass Hierarchical Z to shader to generate AO
         auto aoPipeline = m_shaderManager->GetShaderPipeline(ShaderName::AO);
-        auto aoEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), aoPipeline);
-        aoEffect->SetEffectData(m_debugConstants);
+        auto aoEffect = std::make_shared<PostEffect<GIConstants>>(m_direct3D->GetDevice(), aoPipeline);
+        aoEffect->SetEffectData(m_giConstants);
 
         // Upload hierarchical Z
         m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext());

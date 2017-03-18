@@ -10,7 +10,7 @@ Texture2DArray ssVelocity : register(t2);
 Texture2DArray csZ : register(t3);
 Texture2DArray depth : register(t4);
 Texture2D AO : register(t5);
-Texture2D radiosity : register(t6);
+Texture2D radiosityTexture : register(t6);
 SamplerState gBufferSampler : register(s0);
 
 
@@ -25,19 +25,27 @@ float4 PSMain(VertexOut input) : SV_Target
     
     float4 diffuseSample = diffuseColor.Sample(gBufferSampler, samplePoint);
     float3 baseColor = diffuseSample.rgb;
+
     float roughness = max(1.0f - diffuseSample.a * 0.7f, 0.001f);
     float alpha = roughness * roughness;
+
     float3 normal = normalize((csNormals.Sample(gBufferSampler, samplePoint).rgb * 2.0f) - 1.0f);
+
     float3 viewDirection = normalize(-csPosition);
-    float4 radiositySample = radiosity.Sample(gBufferSampler, input.uv);
-    float3 ambient = radiositySample.rgb;
+
+    float4 radiositySample = radiosityTexture.Sample(gBufferSampler, input.uv);
+    const float radiosityContrastCentre = 0.35f;
     float confidence = radiositySample.a;
+    confidence = saturate(((1.0f - confidence) - radiosityContrastCentre) * 2.0f + radiosityContrastCentre);
+    float3 radiosity = confidence * radiositySample.rgb * radiosityEnabled;
+
+
     float3 radiance = 0.0f;
-    float2 ssVel = ssVelocity.Sample(gBufferSampler, samplePoint).rg;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[0].direction), alpha, baseColor) * lights[0].color.rgb;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[1].direction), alpha, baseColor) * lights[1].color.rgb;
-    float3 aoContribution = lerp(1.0f.xxx, ao, aoUseSecondLayer);
-    radiance += 0.2f * aoContribution * baseColor;
+    float3 aoContribution = lerp(1.0f.xxx, ao, aoEnabled);
+    radiance += radiosity * aoContribution * baseColor;
+    radiance += 0.2f * aoContribution * lerp(1.0f, 0.3f, confidence) * baseColor;
 
     if(target == 0.0f)
     {
@@ -49,6 +57,7 @@ float4 PSMain(VertexOut input) : SV_Target
     }
     else if (target == 2.0f)
     {
+        float2 ssVel = ssVelocity.Sample(gBufferSampler, samplePoint).rg;
         color = float4((ssVel + 1.0f) * 0.5f, 0.5f, 1.0f);
     }
     else if(target == 3.0f)
@@ -65,7 +74,7 @@ float4 PSMain(VertexOut input) : SV_Target
     }
     else if(target == 6.0f)
     {
-        color.rgb = ambient;
+        color.rgb = radiosity;
     }
 
     

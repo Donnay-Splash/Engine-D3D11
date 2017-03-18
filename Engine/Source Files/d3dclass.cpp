@@ -332,6 +332,13 @@ namespace Engine
         m_deviceContext->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, nullViews, nullptr);
     }
 
+    void D3DClass::UnbindShaderResourceView(uint32_t slot) const
+    {
+        EngineAssert(slot < D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT);
+        ID3D11ShaderResourceView* nullView[1] = {};
+        m_deviceContext->VSSetShaderResources(slot, 1, nullView);
+        m_deviceContext->PSSetShaderResources(slot, 1, nullView);
+    }
 
     ID3D11Device* D3DClass::GetDevice()
     {

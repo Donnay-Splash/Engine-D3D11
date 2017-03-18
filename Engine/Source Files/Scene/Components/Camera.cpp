@@ -58,6 +58,9 @@ namespace Engine
         CalculateProjectionMatrix();
         ViewConstants viewConstants;
         viewConstants.view = viewMatrix;
+        viewConstants.invView = transform;
+        // Looks weird but we have yet to notify the scene of the new transform so this is the previous transform
+        viewConstants.prevInvView = sceneNode->GetScene()->GetCameraTransform();
         viewConstants.projection = m_projectionMatrix;
         viewConstants.cameraPosition = sceneNode->GetWorldSpacePosition();
         viewConstants.clipInfo = GetClipInfo();

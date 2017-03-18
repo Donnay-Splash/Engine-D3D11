@@ -16,6 +16,8 @@ namespace Engine
     {
         static const UINT kRegister = 0;
         Utils::Maths::Matrix view;
+        Utils::Maths::Matrix invView;
+        Utils::Maths::Matrix prevInvView;
         Utils::Maths::Matrix projection;
         Utils::Maths::Matrix jitteredProjection;
         Utils::Maths::Vector4 projectionInfo;
@@ -27,6 +29,8 @@ namespace Engine
         bool operator!=(const ViewConstants& rhs)
         {
             return  (view != rhs.view) ||
+                (invView != rhs.invView) ||
+                (prevInvView != rhs.prevInvView) ||
                 (projection != rhs.projection) ||
                 (jitteredProjection != rhs.jitteredProjection) ||
                 (projectionInfo != rhs.projectionInfo) ||
@@ -39,6 +43,8 @@ namespace Engine
         bool operator==(const ViewConstants& rhs)
         {
             return  (view == rhs.view) &&
+                (invView == rhs.invView) &&
+                (prevInvView == rhs.prevInvView) &&
                 (projection == rhs.projection) &&
                 (jitteredProjection == rhs.jitteredProjection) &&
                 (projectionInfo == rhs.projectionInfo) &&
@@ -159,49 +165,39 @@ namespace Engine
         float displaySecondLayer = 0.0f;
         float gBufferTargetIndex = 0.0f;
         float basicTemporalFilterBlend = 0.0f;
-        float numAOSamples = 0.0f;
-
-        float numAOSpiralTurns = 0.0f; // Number of spirals to take when sampling. Best value of turns calculated in engine based on selected number of samples
-        float aoRadius = 0.0f; // Ambient occlusion sphere radius in world-space
-        float aoBias = 0.0f; // AO Bias to avoid darkening in smooth corners e.g. 0.01m
-        float aoIntensity = 0.0f; // Controls the sharpness of the calculated AO
-
-        float aoUseSecondLayer = 1.0f;
         float blurEdgeSharpness = 1.0f; // Controls how sharp the edges are for the blur. A higher value increases sharpness but creates flickering at edges.
-        // Axis that we are blurring along. either [0, 1] for vertical or [1, 0] for horizontal
+        
         float temporalBlendWeight = 1.0f; // Controls the contribution of the current frame to the final color. By default current frame has full contribution
         float sceneTime = 0.0f; // elapsed scene time in seconds
+        float aoEnabled = 1.0f; // contols whether ao is used in final shading
+        float radiosityEnabled = 1.0f; // Controls whether radiosity is used in final shading
+
+        // Axis that we are blurring along. either [0, 1] for vertical or [1, 0] for horizontal
         Utils::Maths::Vector2 blurAxis = { 0.0f, 0.0f };
 
         bool operator!=(const PostEffectConstants& rhs)
         {
             return (displaySecondLayer != rhs.displaySecondLayer) ||
-                   (gBufferTargetIndex != rhs.gBufferTargetIndex) ||
-                   (basicTemporalFilterBlend != rhs.basicTemporalFilterBlend) ||
-                   (numAOSamples != rhs.numAOSamples) ||
-                   (numAOSpiralTurns != rhs.numAOSpiralTurns) ||
-                   (aoRadius != rhs.aoRadius) ||
-                   (aoBias != rhs.aoBias) ||
-                   (aoIntensity != rhs.aoIntensity) ||
-                   (aoUseSecondLayer != rhs.aoUseSecondLayer) ||
-                   (blurEdgeSharpness != rhs.blurEdgeSharpness) ||
-                   (temporalBlendWeight != rhs.temporalBlendWeight) ||
-                   (blurAxis != rhs.blurAxis);
+            (gBufferTargetIndex != rhs.gBufferTargetIndex) ||
+            (basicTemporalFilterBlend != rhs.basicTemporalFilterBlend) ||
+            (blurEdgeSharpness != rhs.blurEdgeSharpness) ||
+            (temporalBlendWeight != rhs.temporalBlendWeight) ||
+            (sceneTime != rhs.sceneTime) ||
+            (aoEnabled != rhs.aoEnabled) ||
+            (radiosityEnabled != rhs.radiosityEnabled) ||
+            (blurAxis != rhs.blurAxis);
         }
         bool operator==(const PostEffectConstants& rhs)
         {
             return (displaySecondLayer == rhs.displaySecondLayer) &&
-                   (gBufferTargetIndex == rhs.gBufferTargetIndex) &&
-                   (basicTemporalFilterBlend == rhs.basicTemporalFilterBlend) &&
-                   (numAOSamples == rhs.numAOSamples) &&
-                   (numAOSpiralTurns == rhs.numAOSpiralTurns) &&
-                   (aoRadius == rhs.aoRadius) &&
-                   (aoBias == rhs.aoBias) &&
-                   (aoIntensity == rhs.aoIntensity) &&
-                   (aoUseSecondLayer == rhs.aoUseSecondLayer) &&
-                   (blurEdgeSharpness == rhs.blurEdgeSharpness) &&
-                   (temporalBlendWeight == rhs.temporalBlendWeight) &&
-                   (blurAxis == rhs.blurAxis);
+            (gBufferTargetIndex == rhs.gBufferTargetIndex) &&
+            (basicTemporalFilterBlend == rhs.basicTemporalFilterBlend) &&
+            (blurEdgeSharpness == rhs.blurEdgeSharpness) &&
+            (temporalBlendWeight == rhs.temporalBlendWeight) &&
+            (sceneTime == rhs.sceneTime) &&
+            (aoEnabled == rhs.aoEnabled) &&
+            (radiosityEnabled == rhs.radiosityEnabled) &&
+            (blurAxis == rhs.blurAxis);
         }
 
     };
@@ -226,6 +222,42 @@ namespace Engine
         bool operator == (const TemporalAAConstants& rhs)
         {
             return false;
+        }
+    };
+
+    ALIGN_16
+        struct GIConstants
+    {
+        static const UINT kRegister = 5;
+
+        float numSamples = 0.0f; // Total number of samples to take for AO
+        float numSpiralTurns = 0.0f; // Number of spirals to take when sampling. Best value of turns calculated in engine based on selected number of samples
+        float Radius = 0.0f; // Ambient occlusion sphere radius in world-space
+        float aoBias = 0.0f; // AO Bias to avoid darkening in smooth corners e.g. 0.01m
+
+        float aoIntensity = 0.0f; // Controls the sharpness of the calculated AO
+        float aoUseSecondLayer = 1.0f;
+        float radiosityPropogationDamping = 0.1f; // Controls how much affect the previous frames radiosity has on the current frame
+
+        // We know that these constants will change each frame so 
+        // the comparison operators pass through
+        bool operator != (const GIConstants& rhs)
+        {
+            return  (numSamples != rhs.numSamples) ||
+            (numSpiralTurns != rhs.numSpiralTurns) ||
+            (Radius != rhs.Radius) ||
+            (aoBias != rhs.aoBias) ||
+            (aoIntensity != rhs.aoIntensity) ||
+            (aoUseSecondLayer != rhs.aoUseSecondLayer);
+        }
+        bool operator == (const GIConstants& rhs)
+        {
+            return (numSamples == rhs.numSamples) &&
+            (numSpiralTurns == rhs.numSpiralTurns) &&
+            (Radius == rhs.Radius) &&
+            (aoBias == rhs.aoBias) &&
+            (aoIntensity == rhs.aoIntensity) &&
+            (aoUseSecondLayer == rhs.aoUseSecondLayer);
         }
     };
 

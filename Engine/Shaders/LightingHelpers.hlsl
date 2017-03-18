@@ -24,7 +24,7 @@ float3 CustomFilmic(float3 linearColor, float shoulderStr, float linearStr, floa
 
 float3 GammaDecode(float3 gammaColor)
 {
-    return pow(gammaColor, kGammaDecodePower);
+    return pow(abs(gammaColor), kGammaDecodePower);
 }
 
 // Isotropic Normal Distribution Functions (NDF) 

@@ -8,8 +8,11 @@ cbuffer ViewBuffer : register(b0)
 {
     // Matrices are set to row_major to match DirectXMath
     row_major matrix viewMatrix; // world to camera-space
+    row_major matrix invViewMatrix; // camera to world-space
+    row_major matrix prevInvViewMatrix; // previous camera to world-space
     row_major matrix projectionMatrix; // camera to screen-space
     row_major matrix jitteredProjectionMatrix; // Camera to screen-space with temporal jitter applied
+    // Add camera to world and prev camera to world aka inv viewMatrix
     float4 projectionInfo; // Projection matrix info for reconstructing camera-space positions
     float3 cameraPos; // position of the camera in world space
     float padding;

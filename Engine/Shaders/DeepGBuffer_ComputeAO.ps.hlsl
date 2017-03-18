@@ -1,6 +1,7 @@
 #include "PostEffectConstants.hlsl"
 #include "System_Globals.hlsl"
 #include "ReconstructFromDepth.hlsl"
+#include "LightingConstants.hlsl"
 #include "GIHelpers.hlsl"
 
 //constants
@@ -52,7 +53,7 @@ epsilon: avoids division by zero. Note a higher epsilon will avoid over darkenin
 ------------------------------------------*/
 float FallOff(float vv, float vn, float epsilon)
 {
-    float radius2 = square(aoRadius);
+    float radius2 = square(Radius);
     float invRadius2 = rcp(radius2);
     // Original falloff function from AlchemyAO paper:http://graphics.cs.williams.edu/papers/AlchemyHPG11/
     // presumes the desired result is intensity/radius^6
@@ -183,7 +184,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float angle = GetRandomRotationAngle(integerPixelLocation);
 
     // Calculate screen space disk radius based on projected size of sample sphere
-    float ssDiskRadius = projectionScale * aoRadius / csPosition.z;
+    float ssDiskRadius = projectionScale * Radius / csPosition.z;
 
     [branch]
     if(ssDiskRadius < MIN_RADIUS)
@@ -197,8 +198,7 @@ float4 PSMain(VertexOut input) : SV_Target
 
     float aoSum = 0.0f;
     // For number of samples
-    [loop]
-    for (int i = 0; i < numAOSamples; i++)
+    for (int i = 0; i < numSamples; i++)
     {
     // Calculate next sample location
     // Calculate required mip level
@@ -209,7 +209,7 @@ float4 PSMain(VertexOut input) : SV_Target
         aoSum += CalculateOcclusion(integerPixelLocation, angle, csPosition, cs_n, ssDiskRadius, i, invSize);
     }
     // High quality normalisation
-    float A = pow(max(0.0f, 1.0f - sqrt(aoSum * (3.0f / numAOSamples))), aoIntensity);
+    float A = pow(max(0.0f, 1.0f - sqrt(aoSum * (3.0f / numSamples))), aoIntensity);
 
     // Low quality normalisation
     //float A = max(0.0f, 1.0f - sum * (aoIntensity/radius^6) * (5.0f / numAOSamples));

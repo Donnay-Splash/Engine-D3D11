@@ -47,6 +47,7 @@ namespace Engine
         Texture::Ptr CopyBackBuffer() const;
 
         void UnbindAllRenderTargets() const;
+        void UnbindShaderResourceView(uint32_t slot) const;
 
     private:
         void GetAdapterInformation();

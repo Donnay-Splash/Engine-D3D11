@@ -2,6 +2,7 @@
 #include "ReconstructFromDepth.hlsl"
 #include "Lighting.hlsl"
 #include "PostEffectConstants.hlsl"
+#include "GIHelpers.hlsl"
 
 // Calculates basic lambertian lighting for both layers of deep G-Buffer
 // Then packs normals of both layers into a single texture.
@@ -13,6 +14,7 @@ Texture2DArray ssVelocityTexture : register(t2);
 Texture2DArray csZTexture : register(t3);
 Texture2DArray depthTexture : register(t4);
 Texture2D previousRadiosityTexture : register(t5);
+Texture2DArray previoudDepthTexture : register(t6);
 SamplerState gBufferSampler : register(s0);
 
 // We can output the result for both layers at the same time as we have the result
@@ -60,7 +62,20 @@ PixelOut PSMain(VertexOut input)
     }
 
     // apply indirect to first layer
+    float2 ssV = ssVelocityTexture.Sample(gBufferSampler, float3(input.uv, 0.0f)).rg;
+    float2 previousCoord = input.uv - (0.5f * ssV);
+    float4 previousRadiosity = previousRadiosityTexture.Sample(gBufferSampler, previousCoord);
+    float3 indirect = previousRadiosity.rgb;
+    float previousDepth = previoudDepthTexture.Sample(gBufferSampler, float3(previousCoord, 0.0f)).r;
+    float3 previousWSPosition = ReconstructWSPosition(previousCoord / invViewSize, ReconstructCSZ(previousDepth, clipInfo), projectionInfo, prevInvViewMatrix);
 
+    float3 wsPosition = mul(float4(csPosition[0], 1.0f), invViewMatrix);
+
+    float dist = length(wsPosition - previousWSPosition);
+    float weight = 1.0f-smoothstep(0.5f, 0.7f, dist);
+
+    indirect *= weight;
+    result.firstLayer.rgb += indirect * (1.0f - radiosityPropogationDamping);
     // Pack normal for both channels
     // This creates some noise on bumpy normal mapped surfaces. Might need to use standard normals
     result.packedNormal.xy = PackNormal(csNormal[0]);

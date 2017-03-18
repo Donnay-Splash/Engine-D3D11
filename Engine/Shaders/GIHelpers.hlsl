@@ -1,5 +1,3 @@
-#include "lightingConstants.hlsl"
-
 // The log of the maximum pixel offset before jumping down to the next lower mip level.
 // If this number is too small (< 3), too many taps will land in the same pixel and we'll
 // get bad variance that manifests as flashing.
@@ -8,6 +6,18 @@
 
 // Must be less than or equal to the same macro defined in Engine.cpp
 #define MAX_MIP_LEVEL 5
+
+cbuffer GIConstants : register(b5)
+{
+    float numSamples; // Number of samples taken when calculating AO
+    float numSpiralTurns; // Number of spirals to take when sampling. Best value of turns calculated in engine based on selected number of samples
+    float Radius; // Ambient occlusion sphere radius in world-space
+    float aoBias; // AO Bias to avoid darkening in smooth corners e.g. 0.01m
+
+    float aoIntensity; // Controls the sharpness of the calculated AO
+    float aoUseSecondLayer; // Interpolates between using one or two layers of deep G-Buffer
+    float radiosityPropogationDamping; // Controls how much of the previous frames indirect lighting is propogated into the current frames
+}
 
 
 /*------------------------------
@@ -32,8 +42,8 @@ OUT ssRadius: The calculated length to sample point along returned unit offset
 float2 GetTapLocation(in int sampleNum, in float rotationAngle, in float radialJitter, out float ssRadius)
 {
     // radius relative to ssRadius
-    float alpha = float(sampleNum + radialJitter) * (1.0f / numAOSamples);
-    float angle = alpha * (numAOSpiralTurns * PI * 2.0f) + rotationAngle;
+    float alpha = float(sampleNum + radialJitter) * (1.0f / numSamples);
+    float angle = alpha * (numSpiralTurns * PI * 2.0f) + rotationAngle;
 
     ssRadius = alpha;
     return float2(cos(angle), sin(angle));
@@ -48,5 +58,5 @@ ssRadius: screen-space sample radius in pixels
 int GetMipLevel(float ssRadius)
 {
     // Mip level = floor(log(ssr / MAX_OFFSET));
-    return clamp(int(floor(log(ssRadius))) - LOG_MAX_OFFSET, 0, MAX_MIP_LEVEL);
+    return clamp(int(floor(log2(ssRadius))) - LOG_MAX_OFFSET, 0, MAX_MIP_LEVEL);
 }

@@ -239,7 +239,7 @@ float4 PSMain(VertexOut input) : SV_Target
     // clamp offscreen pixels
     if (offScreen)
     {
-        prevColor = Filtered;
+        prevColor = Filtered.rgb;
         prevVelocity = 0.0f;
     }
 

@@ -109,6 +109,7 @@ namespace Engine
         RenderTargetBundle::Ptr m_radiosityBundle;
         RenderTargetBundle::Ptr m_filteredRadiosityBundle;
         Texture::Ptr m_prevRawRadiosity;
+        GIConstants m_giConstants;
 
 
         // Store prev depth for deep G-Buffer prediction

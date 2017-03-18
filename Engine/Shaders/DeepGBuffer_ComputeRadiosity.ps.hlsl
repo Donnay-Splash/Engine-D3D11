@@ -1,6 +1,7 @@
 #include "System_Globals.hlsl"
 #include "PostEffectConstants.hlsl"
 #include "ReconstructFromDepth.hlsl"
+#include "LightingConstants.hlsl"
 #include "GIHelpers.hlsl"
 
 Texture2D LambertianTextureLayer1 : register(t0);
@@ -33,17 +34,19 @@ void GetSamplePointData(
     out float3 csPosition1)
 {
     int mipLevel = GetMipLevel(ssRadius);
-    float2 normalisedSampledPoint = ssSamplePoint * invViewSize;
-    float4 normalSample = PackedNormalsTexture.SampleLevel(bufferSampler, normalisedSampledPoint, mipLevel);
-    float2 csZSample = csZTexture.SampleLevel(bufferSampler, normalisedSampledPoint, mipLevel).rg;
+    //int2 ssTap = int2(ssSamplePoint) >> mipLevel;
+    //int3 samplePoint = int3(ssTap, mipLevel);
+    float2 samplePoint = ssSamplePoint * invViewSize;
+    float4 normalSample = PackedNormalsTexture.SampleLevel(bufferSampler, samplePoint, mipLevel);
+    float2 csZSample = csZTexture.SampleLevel(bufferSampler, samplePoint, mipLevel).rg;
 
     // Sampled data for first layer
-    color0 = LambertianTextureLayer1.SampleLevel(bufferSampler, normalisedSampledPoint, mipLevel).rgb;
+    color0 = LambertianTextureLayer1.SampleLevel(bufferSampler, samplePoint, mipLevel).rgb;
     normal0 = normalize(UnpackNormal(normalSample.xy));
     csPosition0 = ReconstructCSPosition(ssSamplePoint, csZSample.x, projectionInfo);
 
     // Sampled data for second layer
-    color1 = LambertianTextureLayer2.SampleLevel(bufferSampler, normalisedSampledPoint, mipLevel).rgb;
+    color1 = LambertianTextureLayer2.SampleLevel(bufferSampler, samplePoint, mipLevel).rgb;
     normal1 = normalize(UnpackNormal(normalSample.zw));
     csPosition1 = ReconstructCSPosition(ssSamplePoint, csZSample.y, projectionInfo);
 }
@@ -83,8 +86,7 @@ void ComputeIndirectLightForPoint(
     float WoNx = dot(w, csNormal_X);
     weight = (WoNx > 0.0f) && (dot(-w, csNormal_Y) > 0.01f) ? 1.0f : 0.0f;
 
-    [branch]
-    if((dot(YminusX, YminusX) < (aoRadius*aoRadius)) && (weight > 0.0f)) // check that the sample is within the world-space radius
+    if((dot(YminusX, YminusX) < (Radius*Radius)) && (weight > 0.0f)) // check that the sample is within the world-space radius
     {
         irradiance = radiosity_Y * WoNx;
     }
@@ -162,7 +164,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 csPosition = ReconstructCSPosition(input.position.xy, csZ, projectionInfo);
     float3 csNormal = normalize(UnpackNormal(PackedNormalsTexture.Sample(bufferSampler, input.uv).rg));
 
-    float ssDiskRadius = aoRadius * projectionScale / csPosition.z;
+    float ssDiskRadius = Radius * projectionScale / csPosition.z;
     float angle = GetRandomRotationAngle(int2(ssPosition)) + elapsedSceneTime;
     // Jitter applied for temporal accumulation of radiosity samples
     // Taken from G3D engine http://g3d.sourceforge.net/
@@ -170,14 +172,14 @@ float4 PSMain(VertexOut input) : SV_Target
 
     float numSamplesUsed = 0.0f;
     float3 irradianceSum = 0.0f;
-    for (int i = 0; i < numAOSamples; i++)
+    for (int i = 0; i < numSamples; i++)
     {
         // Sample indirect lighting. Simples
         SampleIndirectLight(ssPosition, csPosition, csNormal, ssDiskRadius, i, angle, radialJitter, irradianceSum, numSamplesUsed);
     }
 
     float3 indirectResult = (irradianceSum * kSolidAngleHemisphere) / (numSamplesUsed + 0.00001f); // Minor offset avoid divide by zero
-    float visibility = 1.0f - (numSamplesUsed / numAOSamples);
+    float visibility = 1.0f - (numSamplesUsed / numSamples);
 
     return float4(indirectResult, visibility);
 }

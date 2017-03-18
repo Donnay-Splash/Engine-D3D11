@@ -13,17 +13,19 @@ float4 PSMain(VertexOut input) : SV_Target
 {
     float2 ssPosition = input.position.xy;
     float csZ = currentFrameCsZ.Sample(bufferSampler, input.uv).r;
-    float3 csPosition = ReconstructCSPosition(ssPosition, csZ, projectionInfo);
+    float3 wsPosition = ReconstructWSPosition(ssPosition, csZ, projectionInfo, invViewMatrix);
+
     float4 currentValue = currentFrame.Sample(bufferSampler, input.uv);
     float2 ssVel = ssVelocity.Sample(bufferSampler, float3(input.uv, 0.0f)).rg;
 
-    float2 prevSamplePoint = ssPosition - (ssVel / invViewSize);
-    float2 normalisedSamplePoint = prevSamplePoint * invViewSize;
-    float4 previousValue = previousFrame.Sample(bufferSampler, normalisedSamplePoint);
-    float previousZ = previousDepth.Sample(bufferSampler, float3(normalisedSamplePoint, 0.0f)).r;
+    float2 prevSamplePoint = input.uv - (0.5f *ssVel);
+    float4 previousValue = previousFrame.Sample(bufferSampler, prevSamplePoint);
+
+    float previousZ = previousDepth.Sample(bufferSampler, float3(prevSamplePoint, 0.0f)).r;
     float prevcsZ = ReconstructCSZ(previousZ, clipInfo);
-    float3 prevCSPosition = ReconstructCSPosition(prevSamplePoint, prevcsZ, projectionInfo);
-    float dist = length(csPosition - prevCSPosition);
+    float3 prevWSPosition = ReconstructWSPosition(prevSamplePoint /invViewSize, prevcsZ, projectionInfo, prevInvViewMatrix);
+
+    float dist = length(wsPosition - prevWSPosition);
 
     float weight = basicTemporalFilterBlend * (1.0f - smoothstep(0.5f, 0.7f, dist));
 

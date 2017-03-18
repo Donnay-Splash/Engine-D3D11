@@ -46,6 +46,7 @@ namespace Engine
         // TODO: Find a better way to access constants like this.
         Utils::Maths::Matrix GetCameraTransform() const { return m_cameraTransform; }
         Utils::Maths::Matrix GetWorldToCameraTransform() const { return m_invCameraTransform; }
+        Utils::Maths::Matrix GetPrevCameraTransform() const { return m_prevCameraTransform; }
         Utils::Maths::Matrix GetPreviousWorldToCameraTransform() const { return m_prevInvCameraTransform; }
         // TODO: Find a better way to modify constants like this.
         void SetCameraTransform(const Utils::Maths::Matrix& cameraTransform);

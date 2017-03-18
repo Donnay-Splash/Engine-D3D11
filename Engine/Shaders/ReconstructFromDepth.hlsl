@@ -33,6 +33,11 @@ float3 ReconstructCSPosition(float2 ssPosition, float csZ, float4 projectionInfo
     return float3((ssPosition.xy * projectionInfo.xy + projectionInfo.zw) * csZ, csZ);
 }
 
+float3 ReconstructWSPosition(float2 ssPosition, float csZ, float4 projectionInfo, matrix cameraToWorld)
+{
+    return mul(float4(ReconstructCSPosition(ssPosition, csZ, projectionInfo), 1.0f), cameraToWorld).xyz;
+}
+
 /*--------------------------------------
 Reconstructs the camera-space normal for the face based on screen-space derivatives
 
