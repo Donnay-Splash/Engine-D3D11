@@ -158,7 +158,7 @@ namespace Engine
 
         float displaySecondLayer = 0.0f;
         float gBufferTargetIndex = 0.0f;
-        float currentMipLevel = 0.0f;
+        float basicTemporalFilterBlend = 0.0f;
         float numAOSamples = 0.0f;
 
         float numAOSpiralTurns = 0.0f; // Number of spirals to take when sampling. Best value of turns calculated in engine based on selected number of samples
@@ -170,13 +170,14 @@ namespace Engine
         float blurEdgeSharpness = 1.0f; // Controls how sharp the edges are for the blur. A higher value increases sharpness but creates flickering at edges.
         // Axis that we are blurring along. either [0, 1] for vertical or [1, 0] for horizontal
         float temporalBlendWeight = 1.0f; // Controls the contribution of the current frame to the final color. By default current frame has full contribution
+        float sceneTime = 0.0f; // elapsed scene time in seconds
         Utils::Maths::Vector2 blurAxis = { 0.0f, 0.0f };
 
         bool operator!=(const PostEffectConstants& rhs)
         {
             return (displaySecondLayer != rhs.displaySecondLayer) ||
                    (gBufferTargetIndex != rhs.gBufferTargetIndex) ||
-                   (currentMipLevel != rhs.currentMipLevel) ||
+                   (basicTemporalFilterBlend != rhs.basicTemporalFilterBlend) ||
                    (numAOSamples != rhs.numAOSamples) ||
                    (numAOSpiralTurns != rhs.numAOSpiralTurns) ||
                    (aoRadius != rhs.aoRadius) ||
@@ -191,7 +192,7 @@ namespace Engine
         {
             return (displaySecondLayer == rhs.displaySecondLayer) &&
                    (gBufferTargetIndex == rhs.gBufferTargetIndex) &&
-                   (currentMipLevel == rhs.currentMipLevel) &&
+                   (basicTemporalFilterBlend == rhs.basicTemporalFilterBlend) &&
                    (numAOSamples == rhs.numAOSamples) &&
                    (numAOSpiralTurns == rhs.numAOSpiralTurns) &&
                    (aoRadius == rhs.aoRadius) &&

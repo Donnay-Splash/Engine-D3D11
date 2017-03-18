@@ -61,6 +61,10 @@ namespace Engine
         /*  Takes the lambertian shaded textures and packed normals and generates a mip map chain in exactly the same way as
             GenerateHiZ. This helps reduce the cache misses for radiosity calculation*/
         void GenerateRadiosityBufferMips();
+        /*  Takes the downsampled textures and computes the screen space radiosity*/
+        void ComputeRadiosity();
+        /*  Temporally filters the current frames computed raw radiosity with an accumulation buffer. Then applies a bilateral blur*/
+        void FilterRadiosity(Texture::Ptr ssVelTexture);
         /*  Initialises the scene and loads generic objects*/
         void InitializeScene();
         /*  Uses rotated grid subsampling to generate a mip map chain for camera-space Z
@@ -69,8 +73,8 @@ namespace Engine
         void GenerateHiZ(Texture::Ptr csZTexture);
         /*  Calculates ambient occlusion at each pixel. Taking the hierarchical Z as input*/
         void GenerateAO();
-        /*  Applys a bilateral filter to the AO to reduce noise while preserving edges*/
-        void BlurAO();
+        /*  Applys a bilateral filter to the given bundle to reduce noise while preserving edges*/
+        void BlurBundle(RenderTargetBundle::Ptr targetBundle, Texture::Ptr csZTexture);
         /*  Runs TSAA merging this frames values with the accumulation*/
         void RunTSAA(Texture::Ptr ssVelTexture);
 
@@ -99,9 +103,12 @@ namespace Engine
         RenderTargetBundle::Ptr m_aoBundle;
         // A bundle for postprocessing temporary steps. e.g. mid seperable blur.
         RenderTargetBundle::Ptr m_tempBundle; 
-        // Contains 
+
         RenderTargetBundle::Ptr m_lambertianOnlyBundle;
         TextureBundleMipView::Ptr m_lambertianOnlyBundleMipView;
+        RenderTargetBundle::Ptr m_radiosityBundle;
+        RenderTargetBundle::Ptr m_filteredRadiosityBundle;
+        Texture::Ptr m_prevRawRadiosity;
 
 
         // Store prev depth for deep G-Buffer prediction
@@ -111,7 +118,7 @@ namespace Engine
         Sampler::Ptr m_depthSampler;
 
         float m_weightThisFrame = 0.2f;
-
+        float m_elapsedTime = 0.0f;
     };
 }
 

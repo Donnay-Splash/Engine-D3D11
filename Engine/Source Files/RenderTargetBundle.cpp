@@ -100,24 +100,22 @@ namespace Engine
         m_finalised = true;
     }
 
-    void RenderTargetBundle::SetShaderResources(ID3D11DeviceContext* deviceContext)
+    void RenderTargetBundle::SetShaderResources(ID3D11DeviceContext* deviceContext, uint32_t registerOffset /*= 0*/)
     {
         // Clear render target state
         ID3D11RenderTargetView* nullViews[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
         deviceContext->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, nullViews, nullptr);
 
-        int textureRegister = 0;
         for (auto pair : m_renderTargets)
         {
             auto texture = pair.RenderTargets[0]->GetTexture(); // Get texture from highest level mip
 
-            texture->UploadData(deviceContext, PipelineStage::Pixel, textureRegister);
-            textureRegister++;
+            texture->UploadData(deviceContext, PipelineStage::Pixel, registerOffset++);
         }
 
         if (m_depthBuffer != nullptr)
         {
-            m_depthBuffer->GetTexture()->UploadData(deviceContext, PipelineStage::Pixel, textureRegister);
+            m_depthBuffer->GetTexture()->UploadData(deviceContext, PipelineStage::Pixel, registerOffset);
         }
         m_bundleSampler->UploadData(deviceContext, 0);
     }

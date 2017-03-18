@@ -134,17 +134,6 @@ float CalculateOcclusion(int2 ssPosition, float rotationAngle, float3 csPosition
     //return max(AOForPosition(firstLayerPos, csPosition, csNormal), AOForPosition(secondLayerPos, csPosition, csNormal));
 }
 
-/*------------------------------------------
-Packs camera space Z into [0, 1] range for use in depth aware blur.
-Note: clipInfo.z = farPlane
-
-Args:
-csZ: camera-space z coordinate of current pixel
-------------------------------------------*/
-float GetBilateralKey(float csZ)
-{
-    return clamp(csZ * rcp(clipInfo.z), 0.0f, 1.0f);
-}
 
 
 float4 PSMain(VertexOut input) : SV_Target

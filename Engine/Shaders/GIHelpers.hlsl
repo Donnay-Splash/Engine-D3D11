@@ -48,5 +48,5 @@ ssRadius: screen-space sample radius in pixels
 int GetMipLevel(float ssRadius)
 {
     // Mip level = floor(log(ssr / MAX_OFFSET));
-    return clamp(firstbithigh(int(ssRadius)) - LOG_MAX_OFFSET, 0, MAX_MIP_LEVEL);
+    return clamp(int(floor(log(ssRadius))) - LOG_MAX_OFFSET, 0, MAX_MIP_LEVEL);
 }

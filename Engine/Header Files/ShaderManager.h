@@ -14,10 +14,12 @@ namespace Engine
         Minify_CSZ = 4,
         AO = 5,
         BilateralBlur = 6,
-        TSAA = 7,
-        LambertianOnly = 8,
-        Minify_Lambertian = 9,
-        ComputeRadiosity = 10
+        BilateralBlurPacked = 7,
+        TSAA = 8,
+        LambertianOnly = 9,
+        Minify_Lambertian = 10,
+        ComputeRadiosity = 11,
+        BasicTemporalFilter = 12
     };
 
     class ShaderManager

@@ -43,7 +43,7 @@ namespace Engine
 
         // Uploads all render targets as SRV's. User must ensure that the 
         // render targets are not bound for output.
-        void SetShaderResources(ID3D11DeviceContext* deviceContext);
+        void SetShaderResources(ID3D11DeviceContext* deviceContext, uint32_t registerOffset = 0);
 
         // Returns a pointer to the array or render targets
         ID3D11RenderTargetView * const* GetRenderTargetViews();

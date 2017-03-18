@@ -55,16 +55,31 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_ComputeAO.ps.hlsl.h"
     }
 
-    // Depth aware blur for reducing noise in AO
-    namespace BilateralBlur
+    // Depth aware blur for reducing noise in AO and radiosity. 
+    // Sampled depth from a texture
+    namespace BilateralBlurSampled
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl.h"
+    }
+
+
+    // Depth aware blur for reducing noise in AO and radiosity. 
+    // Works with packed bilateral key in alpha
+    namespace BilateralBlurPacked
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_DepthAwareBlur_Packed.ps.hlsl.h"
     }
 
     // Shader for converging temporal supersampling
     namespace TSAA
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_TSAA.ps.hlsl.h"
+    }
+
+    // A basic temporal filter for accumulating effects such as SSR, AO, Radiosity
+    namespace BasicTemporalFilter
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_BasicTemporalFilter.ps.hlsl.h"
     }
 
     // Lambertian only shader
@@ -156,12 +171,20 @@ namespace Engine
             m_shaderMap.emplace(ShaderName::AO, shaderPipeline);
         }
 
-        // Load the Bilateral Blur shader
+        // Load the Bilateral Blur shader with sampled keys
         {
-            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, BilateralBlur::g_PSMain, sizeof(BilateralBlur::g_PSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, BilateralBlurSampled::g_PSMain, sizeof(BilateralBlurSampled::g_PSMain), device);
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::BilateralBlur, shaderPipeline);
+        }
+
+        // Load the Bilateral Blur shader With packed keys
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, BilateralBlurPacked::g_PSMain, sizeof(BilateralBlurPacked::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::BilateralBlurPacked, shaderPipeline);
         }
 
         // Load the TSAA shader
@@ -170,6 +193,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::TSAA, shaderPipeline);
+        }
+
+        // Load the Basic tempral filter
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, BasicTemporalFilter::g_PSMain, sizeof(BasicTemporalFilter::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::BasicTemporalFilter, shaderPipeline);
         }
 
         // Load the Lambertian lighting shader

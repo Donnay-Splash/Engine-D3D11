@@ -108,3 +108,15 @@ float3 UnpackNormal(float2 packedNormal)
     return normal;
 }
 
+/*------------------------------------------
+Packs camera space Z into [0, 1] range for use in depth aware blur.
+Note: clipInfo.z = farPlane
+
+Args:
+csZ: camera-space z coordinate of current pixel
+------------------------------------------*/
+float GetBilateralKey(float csZ)
+{
+    return clamp(csZ * rcp(clipInfo.z), 0.0f, 1.0f);
+}
+

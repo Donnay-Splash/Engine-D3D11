@@ -10,6 +10,7 @@ Texture2DArray ssVelocity : register(t2);
 Texture2DArray csZ : register(t3);
 Texture2DArray depth : register(t4);
 Texture2D AO : register(t5);
+Texture2D radiosity : register(t6);
 SamplerState gBufferSampler : register(s0);
 
 
@@ -28,6 +29,9 @@ float4 PSMain(VertexOut input) : SV_Target
     float alpha = roughness * roughness;
     float3 normal = normalize((csNormals.Sample(gBufferSampler, samplePoint).rgb * 2.0f) - 1.0f);
     float3 viewDirection = normalize(-csPosition);
+    float4 radiositySample = radiosity.Sample(gBufferSampler, input.uv);
+    float3 ambient = radiositySample.rgb;
+    float confidence = radiositySample.a;
     float3 radiance = 0.0f;
     float2 ssVel = ssVelocity.Sample(gBufferSampler, samplePoint).rg;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[0].direction), alpha, baseColor) * lights[0].color.rgb;
@@ -58,6 +62,10 @@ float4 PSMain(VertexOut input) : SV_Target
     else if(target == 5.0f)
     {
         color.rgb = ao;
+    }
+    else if(target == 6.0f)
+    {
+        color.rgb = ambient;
     }
 
     

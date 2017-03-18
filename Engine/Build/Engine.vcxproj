@@ -334,6 +334,19 @@
       <FileType>Document</FileType>
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </None>
+    <FxCompile Include="..\Shaders\DeepGBuffer_BasicTemporalFilter.ps.hlsl">
+      <FileType>Document</FileType>
+      <EntryPointName>PSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_CameraZCopy.ps.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>PSMain</EntryPointName>
@@ -385,6 +398,19 @@
       <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
       <ObjectFileOutput>
       </ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_DepthAwareBlur_Packed.ps.hlsl">
+        <FileType>Document</FileType>
+        <EntryPointName>PSMain</EntryPointName>
+        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+        <ShaderType>Pixel</ShaderType>
+        <ShaderModel>5.0</ShaderModel>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+        <ObjectFileOutput>
+        </ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Gen.gs.hlsl">
       <FileType>Document</FileType>

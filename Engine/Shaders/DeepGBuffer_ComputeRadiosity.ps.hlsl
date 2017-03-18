@@ -163,10 +163,10 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 csNormal = normalize(UnpackNormal(PackedNormalsTexture.Sample(bufferSampler, input.uv).rg));
 
     float ssDiskRadius = aoRadius * projectionScale / csPosition.z;
-    float angle = GetRandomRotationAngle(int2(ssPosition));
+    float angle = GetRandomRotationAngle(int2(ssPosition)) + elapsedSceneTime;
     // Jitter applied for temporal accumulation of radiosity samples
     // Taken from G3D engine http://g3d.sourceforge.net/
-    float radialJitter = frac(sin(ssPosition.x * 1e2 + ssPosition.y) * 1e5 + sin(ssPosition.y * 1e3) * 1e3) * 0.8f + 0.1f;
+    float radialJitter = frac(sin(ssPosition.x * 1e2 + elapsedSceneTime + ssPosition.y) * 1e5 + sin(ssPosition.y * 1e3) * 1e3) * 0.8f + 0.1f;
 
     float numSamplesUsed = 0.0f;
     float3 irradianceSum = 0.0f;
@@ -176,7 +176,7 @@ float4 PSMain(VertexOut input) : SV_Target
         SampleIndirectLight(ssPosition, csPosition, csNormal, ssDiskRadius, i, angle, radialJitter, irradianceSum, numSamplesUsed);
     }
 
-    float3 indirectResult = irradianceSum * kSolidAngleHemisphere / (numSamplesUsed + 1e5f); // Minor offset avoid divide by zero
+    float3 indirectResult = (irradianceSum * kSolidAngleHemisphere) / (numSamplesUsed + 0.00001f); // Minor offset avoid divide by zero
     float visibility = 1.0f - (numSamplesUsed / numAOSamples);
 
     return float4(indirectResult, visibility);

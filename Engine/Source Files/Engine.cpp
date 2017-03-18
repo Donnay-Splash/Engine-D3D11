@@ -171,7 +171,6 @@ namespace Engine
 
         // Create depth sampler
         m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
-
         InitializeScene();
         return true;
     }
@@ -183,7 +182,7 @@ namespace Engine
     void Engine::CreateGlobalOptions()
     {
         // Set initialvalues for constants
-        m_debugConstants.aoRadius = 1.0f; // 1 metre
+        m_debugConstants.aoRadius = 5.0f; // 1 metre
         m_debugConstants.aoBias = 0.01f; // 1 cm
         m_debugConstants.aoIntensity = 1.0f;
         m_debugConstants.numAOSamples = kAO_numSamples;
@@ -202,7 +201,7 @@ namespace Engine
         {
             auto getter = [&]()->float { return m_debugConstants.gBufferTargetIndex; };
             auto setter = [&](float value) {m_debugConstants.gBufferTargetIndex = value; };
-            m_globalOptions->RegisterScalarProperty(L"RenderTarget index", getter, setter, 0.0f, 5.0f);
+            m_globalOptions->RegisterScalarProperty(L"RenderTarget index", getter, setter, 0.0f, 6.0f);
         }
 
         {
@@ -214,7 +213,7 @@ namespace Engine
         {
             auto getter = [&]()->float { return m_debugConstants.aoRadius; };
             auto setter = [&](float value) {m_debugConstants.aoRadius = value; };
-            m_globalOptions->RegisterScalarProperty(L"AO Radius", getter, setter, 0.0f, 4.0f);
+            m_globalOptions->RegisterScalarProperty(L"AO Radius", getter, setter, 0.0f, 10.0f);
         }
 
         {
@@ -281,6 +280,9 @@ namespace Engine
             return false;
         }
 
+        // Convert ms into seconds
+        m_elapsedTime += deltaTime / 1000.0f;
+        m_debugConstants.sceneTime = m_elapsedTime;
         return result;
     }
 
@@ -334,6 +336,14 @@ namespace Engine
 
         // Create the mip view for the lambertian only buffer. This is used to generate the custom downsample
         m_lambertianOnlyBundleMipView = std::make_shared<TextureBundleMipView>(m_direct3D->GetDevice(), m_lambertianOnlyBundle, kRadiosityBuffer_MaxMip + 1);
+
+        m_radiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_radiosityBundle->CreateRenderTarget(L"Radiosity", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_radiosityBundle->Finalise();
+
+        m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_filteredRadiosityBundle->Finalise();
     }
 
 
@@ -418,7 +428,6 @@ namespace Engine
         auto bundle = m_camera->GetRenderTargetBundle();
         if (bundle != nullptr)
         {
-            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
 
             m_direct3D->BeginRenderEvent(L"Generating Hierarchical Z buffer");
                 // Take the camera-space Z texture and downsample into the mips
@@ -447,9 +456,17 @@ namespace Engine
                 GenerateRadiosityBufferMips();
             m_direct3D->EndRenderEvent();
 
-            // Sample hierarchical G-Buffer to generate radioisty.
+            m_direct3D->BeginRenderEvent(L"Generating Radiosity");
+                // Sample hierarchical G-Buffer to generate radioisty.
+                ComputeRadiosity();
+            m_direct3D->EndRenderEvent();
 
+            auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
             // Blend new samples with radiosity from last frame
+            m_direct3D->BeginRenderEvent(L"Filter Radiosity");
+                // Sample hierarchical G-Buffer to generate radioisty.
+                FilterRadiosity(ssVelTexture);
+            m_direct3D->EndRenderEvent();
 
             // Save generated texture to be used next frame
 
@@ -465,14 +482,16 @@ namespace Engine
             m_direct3D->EndRenderEvent();
 
             m_direct3D->BeginRenderEvent(L"Accumulating TSAA");
-                auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
                 RunTSAA(ssVelTexture);
             m_direct3D->EndRenderEvent();
+
+
+            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
         }
 
+        m_prevFrame = m_direct3D->CopyBackBuffer();
         // Present the rendered scene to the screen.
         m_direct3D->EndScene();
-        m_prevFrame = m_direct3D->CopyBackBuffer();
 
         return true;
     }
@@ -507,6 +526,7 @@ namespace Engine
         // Upload G-buffer data to device
         GBuffer->SetShaderResources(m_direct3D->GetDeviceContext());
         aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 5);
+        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 6);
 
         // Set post effect constants
         m_postEffect->SetEffectData(m_debugConstants);
@@ -551,7 +571,6 @@ namespace Engine
             // Unbind current render targets so we don't get collisions when binding previous output views as input
             m_direct3D->UnbindAllRenderTargets();
 
-            constants.currentMipLevel = float(i); // Set the current mip level so the shader knows
             radiosityBufferDownsampleEffect->SetEffectData(constants);
 
             // Set the mip we are currently rendering to
@@ -563,6 +582,56 @@ namespace Engine
             // Render our effect
             m_postProcessCamera->RenderPostEffect(m_direct3D, radiosityBufferDownsampleEffect);
         }
+    }
+
+    void Engine::ComputeRadiosity()
+    {
+        m_postProcessCamera->SetRenderTargetBundle(m_radiosityBundle);
+
+        // Create post effect
+        auto radiosityPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ComputeRadiosity);
+        auto radiosityEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), radiosityPipeline);
+
+        // Upload downsampled maps
+        m_lambertianOnlyBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        // upload csZ
+        m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 3);
+        // Set effect data
+        radiosityEffect->SetEffectData(m_debugConstants);
+
+        // Render effect
+        m_postProcessCamera->RenderPostEffect(m_direct3D, radiosityEffect);
+    }
+
+    void Engine::FilterRadiosity(Texture::Ptr ssVelTexture)
+    {
+        // Apply temporal filter
+        auto temoralFilterPipeline = m_shaderManager->GetShaderPipeline(ShaderName::BasicTemporalFilter);
+        auto temporalFilterEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), temoralFilterPipeline);
+
+        // Upload resources to shader.
+        m_radiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 2);
+        ssVelTexture->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 4);
+        m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 0);
+
+        if (m_prevRawRadiosity != nullptr && m_prevDepth != nullptr)
+        {
+            m_prevRawRadiosity->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
+            m_prevDepth->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 3);
+            m_debugConstants.basicTemporalFilterBlend = 0.9f;
+        }
+
+        temporalFilterEffect->SetEffectData(m_debugConstants);
+        m_postProcessCamera->SetRenderTargetBundle(m_filteredRadiosityBundle);
+        m_postProcessCamera->RenderPostEffect(m_direct3D, temporalFilterEffect);
+
+        // Copy temporally filtered result
+        m_prevRawRadiosity = m_direct3D->CopyTexture(m_filteredRadiosityBundle->GetRenderTarget(0)->GetTexture());
+
+        // Apply bilateral blur
+        auto csZTex = m_hiZBundle->GetRenderTarget(0)->GetTexture();
+        BlurBundle(m_filteredRadiosityBundle, csZTex);
     }
 
     // Generates the hierachical Z buffer
@@ -592,7 +661,6 @@ namespace Engine
             // Render
             m_direct3D->UnbindAllRenderTargets();
             // render to second mip
-            constants.currentMipLevel = float(i);
             HiZPost->SetEffectData(constants);
             m_hiZBundle->SetTargetMip(i);
             m_hiZMipView->SetCurrentMip(i - 1); // The mip level we are currently sampling from
@@ -617,23 +685,29 @@ namespace Engine
         m_postProcessCamera->SetRenderTargetBundle(m_aoBundle);
         m_postProcessCamera->RenderPostEffect(m_direct3D, aoEffect);
 
-        BlurAO();
+        BlurBundle(m_aoBundle, nullptr);
     }
 
-    void Engine::BlurAO()
+    void Engine::BlurBundle(RenderTargetBundle::Ptr targetBundle, Texture::Ptr csZTexture)
     {
         m_postProcessCamera->SetRenderTargetBundle(m_tempBundle);
-        auto blurPipeline = m_shaderManager->GetShaderPipeline(ShaderName::BilateralBlur);
+        ShaderName shader = csZTexture == nullptr ? ShaderName::BilateralBlurPacked : ShaderName::BilateralBlur;
+        auto blurPipeline = m_shaderManager->GetShaderPipeline(shader);
         auto blurEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), blurPipeline);
+
+        if (csZTexture != nullptr)
+        {
+            csZTexture->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
+        }
 
         // vertical blur
         m_debugConstants.blurAxis = { 0.0f, 1.0f };
         blurEffect->SetEffectData(m_debugConstants);
-        m_aoBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        targetBundle->SetShaderResources(m_direct3D->GetDeviceContext());
         m_postProcessCamera->RenderPostEffect(m_direct3D, blurEffect);
 
         // Set camera to render back to the original AO texture
-        m_postProcessCamera->SetRenderTargetBundle(m_aoBundle);
+        m_postProcessCamera->SetRenderTargetBundle(targetBundle);
 
         // horizontal blur
         // bind old ao render target
@@ -696,7 +770,7 @@ namespace Engine
 
         // Upload current, previous and ssVel
         m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
-        if (m_prevFrame)// Calculate sample weights
+        if (m_prevFrame != nullptr)
         {
             m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
         }

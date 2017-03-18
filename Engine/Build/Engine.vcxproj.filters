@@ -443,6 +443,9 @@
     <None Include="..\Shaders\DeepGBuffer_Minify.ps.hlsl">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="..\Shaders\GIHelpers.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">
@@ -493,7 +496,10 @@
     <FxCompile Include="..\Shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="..\Shaders\GIHelpers.hlsl">
+    <FxCompile Include="..\Shaders\DeepGBuffer_BasicTemporalFilter.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_DepthAwareBlur_Packed.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
