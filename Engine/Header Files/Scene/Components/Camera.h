@@ -63,6 +63,8 @@ namespace Engine
 
         Utils::Maths::Matrix JitterProjection(const Utils::Maths::Vector2& viewSize);
 
+        Utils::Maths::Matrix GetCameraToScreenSpaceMatrix(const Utils::Maths::Vector2& viewSize) const;
+
     protected:
         RenderTargetBundle::Ptr m_renderTargetBundle;
         

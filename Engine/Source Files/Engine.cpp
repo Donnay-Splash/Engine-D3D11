@@ -430,13 +430,15 @@ namespace Engine
         auto bundle = m_camera->GetRenderTargetBundle();
         if (bundle != nullptr)
         {
-
+            // We can move this to where we downsample colour and normals to avoid any additional overhead.
             m_direct3D->BeginRenderEvent(L"Generating Hierarchical Z buffer");
                 // Take the camera-space Z texture and downsample into the mips
                 auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
                 GenerateHiZ(HiZTexture);
             m_direct3D->EndRenderEvent();
 
+            // We want to find a way to temporally accumulate the ambient occlusion.
+            // This will avoid flickering on small objects.
             m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
                 // Generate the ambient occlusion
                 GenerateAO();

@@ -595,7 +595,7 @@ namespace Utils
             XMVECTOR thisVector = XMLoadFloat4A(this);
 
             float scale = 1.0f / S;
-            XMVECTOR result = XMVectorScale(thisVector, S);
+            XMVECTOR result = XMVectorScale(thisVector, scale);
 
             XMStoreFloat4A(this, result);
             return *this;
@@ -676,7 +676,7 @@ namespace Utils
             XMVECTOR Vector = XMLoadFloat4A(&V);
 
             float scale = 1.0f / S;
-            XMVECTOR result = XMVectorScale(Vector, S);
+            XMVECTOR result = XMVectorScale(Vector, scale);
 
             Vector4 returnVector;
             XMStoreFloat4A(&returnVector, result);
@@ -826,7 +826,7 @@ namespace Utils
             XMVECTOR thisVector = XMLoadFloat3A(this);
 
             float scale = 1.0f / S;
-            XMVECTOR result = XMVectorScale(thisVector, S);
+            XMVECTOR result = XMVectorScale(thisVector, scale);
 
             XMStoreFloat3A(this, result);
             return *this;
@@ -1042,7 +1042,7 @@ namespace Utils
             XMVECTOR thisVector = XMLoadFloat2A(this);
 
             float scale = 1.0f / S;
-            XMVECTOR result = XMVectorScale(thisVector, S);
+            XMVECTOR result = XMVectorScale(thisVector, scale);
 
             XMStoreFloat2A(this, result);
             return *this;
@@ -1121,7 +1121,7 @@ namespace Utils
             XMVECTOR Vector = XMLoadFloat2A(&V);
 
             float scale = 1.0f / S;
-            XMVECTOR result = XMVectorScale(Vector, S);
+            XMVECTOR result = XMVectorScale(Vector, scale);
 
             Vector2 returnVector;
             XMStoreFloat2A(&returnVector, result);

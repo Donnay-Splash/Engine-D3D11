@@ -12,6 +12,7 @@ cbuffer ViewBuffer : register(b0)
     row_major matrix prevInvViewMatrix; // previous camera to world-space
     row_major matrix projectionMatrix; // camera to screen-space
     row_major matrix jitteredProjectionMatrix; // Camera to screen-space with temporal jitter applied
+    row_major matrix cameraToScreenMatrix; // Converts from camera space to screen pixel position.
     // Add camera to world and prev camera to world aka inv viewMatrix
     float4 projectionInfo; // Projection matrix info for reconstructing camera-space positions
     float3 cameraPos; // position of the camera in world space

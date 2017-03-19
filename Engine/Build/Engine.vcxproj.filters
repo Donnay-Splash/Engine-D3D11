@@ -323,53 +323,8 @@
     <ClInclude Include="..\Header Files\Resources\TextureMipView.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_CameraZCopy.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_ComputeAO.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.gs.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Minify.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_Shade.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_TSAA.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\FullscreenQuad.vs.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\Uber.gs.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\Uber.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\Uber.vs.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_LambertianOnly.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="..\Header Files\Resources\TextureBundleMipView.h">
       <Filter>Header Files\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shaders\Compiled shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl.h">
-      <Filter>Shader Files\Compiled Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

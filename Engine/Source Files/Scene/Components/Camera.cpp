@@ -59,15 +59,15 @@ namespace Engine
         ViewConstants viewConstants;
         viewConstants.view = viewMatrix;
         viewConstants.invView = transform;
-        // Looks weird but we have yet to notify the scene of the new transform so this is the previous transform
-        viewConstants.prevInvView = sceneNode->GetScene()->GetCameraTransform();
+        viewConstants.prevInvView = sceneNode->GetScene()->GetPrevCameraTransform();
         viewConstants.projection = m_projectionMatrix;
+        viewConstants.jitteredProjection = JitterProjection(viewSize);
+        viewConstants.cameraToScreenMatrix = GetCameraToScreenSpaceMatrix(viewSize);
         viewConstants.cameraPosition = sceneNode->GetWorldSpacePosition();
         viewConstants.clipInfo = GetClipInfo();
         viewConstants.projectionInfo = GetProjInfo(viewSize);
         viewConstants.invViewSize = Utils::Maths::Vector2(1.0f, 1.0f) / viewSize;
         viewConstants.projectionScale = GetProjectionScale(viewSize);
-        viewConstants.jitteredProjection = JitterProjection(viewSize);
 
         m_viewConstants->SetData(viewConstants);
         m_viewConstants->UploadData(d3dClass->GetDeviceContext());
@@ -131,6 +131,19 @@ namespace Engine
         }
 
         return m_projectionMatrix;
+    }
+
+    Utils::Maths::Matrix Camera::GetCameraToScreenSpaceMatrix(const Utils::Maths::Vector2& viewSize) const
+    {
+        auto halfSize = viewSize / 2.0f;
+        // Y is inverted here as in NDC y goes up and in UV/screen space y goes down
+        Utils::Maths::Matrix NDCToScreen = 
+        {halfSize.x ,   0.0f,       0.0f,       0.0f,
+            0.0f,    -halfSize.y,    0.0f,       0.0f,
+            0.0f,       0.0f,       1.0f,       0.0f,
+        halfSize.x,  halfSize.y,    0.0f,       1.0f};
+
+        return m_projectionMatrix * NDCToScreen;
     }
 
     void Camera::SetRenderTargetBundle(RenderTargetBundle::Ptr renderTargetBundle)
