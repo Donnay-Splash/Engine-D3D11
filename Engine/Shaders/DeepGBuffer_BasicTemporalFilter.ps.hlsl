@@ -19,6 +19,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float2 ssVel = ssVelocity.Sample(bufferSampler, float3(input.uv, 0.0f)).rg;
 
     float2 prevSamplePoint = input.uv - (0.5f *ssVel);
+    bool offscreen = max(prevSamplePoint.x, prevSamplePoint.y) >= 1.0f || min(prevSamplePoint.x, prevSamplePoint.y) <= 0.0f;
     float4 previousValue = previousFrame.Sample(bufferSampler, prevSamplePoint);
 
     float previousZ = previousDepth.Sample(bufferSampler, float3(prevSamplePoint, 0.0f)).r;
@@ -27,7 +28,7 @@ float4 PSMain(VertexOut input) : SV_Target
 
     float dist = length(wsPosition - prevWSPosition);
 
-    float weight = basicTemporalFilterBlend * (1.0f - smoothstep(0.5f, 0.7f, dist));
+    float weight = basicTemporalFilterBlend * (1.0f - smoothstep(0.5f, 0.7f, dist)) * float(!offscreen);
 
     return lerp(currentValue, previousValue, weight);
 }

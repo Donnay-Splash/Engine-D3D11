@@ -64,15 +64,17 @@ PixelOut PSMain(VertexOut input)
     // apply indirect to first layer
     float2 ssV = ssVelocityTexture.Sample(gBufferSampler, float3(input.uv, 0.0f)).rg;
     float2 previousCoord = input.uv - (0.5f * ssV);
+    bool offscreen = max(previousCoord.x, previousCoord.y) >= 1.0f || min(previousCoord.x, previousCoord.y) <= 0.0f;
+
     float4 previousRadiosity = previousRadiosityTexture.Sample(gBufferSampler, previousCoord);
     float3 indirect = previousRadiosity.rgb;
     float previousDepth = previoudDepthTexture.Sample(gBufferSampler, float3(previousCoord, 0.0f)).r;
     float3 previousWSPosition = ReconstructWSPosition(previousCoord / invViewSize, ReconstructCSZ(previousDepth, clipInfo), projectionInfo, prevInvViewMatrix);
 
-    float3 wsPosition = mul(float4(csPosition[0], 1.0f), invViewMatrix);
+    float3 wsPosition = mul(float4(csPosition[0], 1.0f), invViewMatrix).xyz;
 
     float dist = length(wsPosition - previousWSPosition);
-    float weight = 1.0f-smoothstep(0.5f, 0.7f, dist);
+    float weight = 1.0f - smoothstep(0.5f, 0.7f, dist) * float(!offscreen);
 
     indirect *= weight;
     result.firstLayer.rgb += indirect * (1.0f - radiosityPropogationDamping);
