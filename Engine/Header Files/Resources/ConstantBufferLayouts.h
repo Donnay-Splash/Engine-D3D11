@@ -175,6 +175,9 @@ namespace Engine
         float aoEnabled = 1.0f; // contols whether ao is used in final shading
         float radiosityEnabled = 1.0f; // Controls whether radiosity is used in final shading
 
+        float sceneExposure = 1.0f; // Controls the whitepoint of the scene. Higher value = brighter, Lower value = darker
+        // Pad3
+
         // Axis that we are blurring along. either [0, 1] for vertical or [1, 0] for horizontal
         Utils::Maths::Vector2 blurAxis = { 0.0f, 0.0f };
 
@@ -188,6 +191,7 @@ namespace Engine
             (sceneTime != rhs.sceneTime) ||
             (aoEnabled != rhs.aoEnabled) ||
             (radiosityEnabled != rhs.radiosityEnabled) ||
+            (sceneExposure != rhs.sceneExposure) ||
             (blurAxis != rhs.blurAxis);
         }
         bool operator==(const PostEffectConstants& rhs)
@@ -200,6 +204,7 @@ namespace Engine
             (sceneTime == rhs.sceneTime) &&
             (aoEnabled == rhs.aoEnabled) &&
             (radiosityEnabled == rhs.radiosityEnabled) &&
+            (sceneExposure == rhs.sceneExposure) &&
             (blurAxis == rhs.blurAxis);
         }
 
@@ -235,12 +240,13 @@ namespace Engine
 
         float numSamples = 0.0f; // Total number of samples to take for AO
         float numSpiralTurns = 0.0f; // Number of spirals to take when sampling. Best value of turns calculated in engine based on selected number of samples
-        float Radius = 0.0f; // Ambient occlusion sphere radius in world-space
+        float aoRadius = 0.0f; // Ambient occlusion sphere radius in world-space
         float aoBias = 0.0f; // AO Bias to avoid darkening in smooth corners e.g. 0.01m
 
         float aoIntensity = 0.0f; // Controls the sharpness of the calculated AO
         float aoUseSecondLayer = 1.0f;
         float radiosityPropogationDamping = 0.1f; // Controls how much affect the previous frames radiosity has on the current frame
+        float radiosityRadius = 0.0f; // The sampling radius for screen-space radiosity. Generally about 7-10 * more that AO
 
         // We know that these constants will change each frame so 
         // the comparison operators pass through
@@ -248,19 +254,23 @@ namespace Engine
         {
             return  (numSamples != rhs.numSamples) ||
             (numSpiralTurns != rhs.numSpiralTurns) ||
-            (Radius != rhs.Radius) ||
+            (aoRadius != rhs.aoRadius) ||
             (aoBias != rhs.aoBias) ||
             (aoIntensity != rhs.aoIntensity) ||
-            (aoUseSecondLayer != rhs.aoUseSecondLayer);
+            (aoUseSecondLayer != rhs.aoUseSecondLayer) ||
+            (radiosityPropogationDamping != rhs.radiosityPropogationDamping) ||
+            (radiosityRadius != rhs.radiosityRadius);
         }
         bool operator == (const GIConstants& rhs)
         {
             return (numSamples == rhs.numSamples) &&
             (numSpiralTurns == rhs.numSpiralTurns) &&
-            (Radius == rhs.Radius) &&
+            (aoRadius == rhs.aoRadius) &&
             (aoBias == rhs.aoBias) &&
             (aoIntensity == rhs.aoIntensity) &&
-            (aoUseSecondLayer == rhs.aoUseSecondLayer);
+            (aoUseSecondLayer == rhs.aoUseSecondLayer) &&
+            (radiosityPropogationDamping == rhs.radiosityPropogationDamping) &&
+            (radiosityRadius == rhs.radiosityRadius);
         }
     };
 

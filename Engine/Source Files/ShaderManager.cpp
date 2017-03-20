@@ -93,6 +93,12 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl.h"
     }
 
+    // Transforms HDR data to LDR using filmic tonemap
+    namespace Tonemap
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_TonemapAndExposure.ps.hlsl.h"
+    }
+
     ShaderManager::ShaderManager(ID3D11Device* device)
     {
         LoadCoreShaders(device);
@@ -217,6 +223,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::ComputeRadiosity, shaderPipeline);
+        }
+
+        // Load the Tonemap shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Tonemap::g_PSMain, sizeof(Tonemap::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::Tonemap, shaderPipeline);
         }
     }
 

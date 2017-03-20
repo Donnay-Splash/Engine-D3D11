@@ -53,7 +53,7 @@ epsilon: avoids division by zero. Note a higher epsilon will avoid over darkenin
 ------------------------------------------*/
 float FallOff(float vv, float vn, float epsilon)
 {
-    float radius2 = square(Radius);
+    float radius2 = square(aoRadius);
     float invRadius2 = rcp(radius2);
     // Original falloff function from AlchemyAO paper:http://graphics.cs.williams.edu/papers/AlchemyHPG11/
     // presumes the desired result is intensity/radius^6
@@ -184,7 +184,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float angle = GetRandomRotationAngle(integerPixelLocation);
 
     // Calculate screen space disk radius based on projected size of sample sphere
-    float ssDiskRadius = projectionScale * Radius / csPosition.z;
+    float ssDiskRadius = projectionScale * aoRadius / csPosition.z;
 
     [branch]
     if(ssDiskRadius < MIN_RADIUS)

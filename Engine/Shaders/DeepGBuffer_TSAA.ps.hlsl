@@ -200,7 +200,7 @@ float4 PSMain(VertexOut input) : SV_Target
 
     // Fetch the colour from the previous frame
     float4 prevSample = previousFrame.Sample(TSAASampler, prevSamplePos);
-    float3 prevColor = GammaDecode(prevSample.rgb);
+    float3 prevColor = prevSample.rgb;
     float prevVelocity = prevSample.a;
 
     // TODO: If using HDR weight sample
@@ -249,7 +249,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 finalColor = lerp(prevColor.rgb, Filtered.rgb, blendFinal);
     finalColor.rgb = -min(-finalColor.rgb, 0.0f);
 
-    return float4(GammaEncode(finalColor), prevVelocity);
+    return float4(finalColor, prevVelocity);
 #endif
 }
 

@@ -22,6 +22,23 @@ float3 CustomFilmic(float3 linearColor, float shoulderStr, float linearStr, floa
     return ((linearColor * (shoulderStr * linearColor + linearAngle * linearStr) + toeStr * toeNumer) / (linearColor * (shoulderStr * linearColor + linearStr) + toeStr * toeDenom)) - toeNumer / toeDenom;
 }
 
+/*-----------------------------------------------------------------
+    This function applies a "film-like" tonemap to supplied 
+    HDR pixel. Does not apply 2.2 Gamma correction.
+    Taken from Jim Hejl : https://twitter.com/jimhejl/status/841149752389558272
+
+    Args:
+    hdr: linear colour in HDR
+    whitePoint: scene white point / exposure
+-----------------------------------------------------------------*/
+float3 ToneMapFilmic_Hejl2015(float3 hdr, float whitePoint)
+{
+    float4 vh = float4(hdr, whitePoint);
+    float4 va = (1.425 * vh) + 0.05f; // evaluate filmic curve
+    float4 vf = ((vh * va + 0.004f) / ((vh * (va + 0.55f) + 0.0491f))) - 0.0821f;
+    return vf.rgb / vf.www;
+}
+
 float3 GammaDecode(float3 gammaColor)
 {
     return pow(abs(gammaColor), kGammaDecodePower);

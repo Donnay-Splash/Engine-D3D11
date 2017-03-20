@@ -19,7 +19,8 @@ namespace Engine
         LambertianOnly = 9,
         Minify_Lambertian = 10,
         ComputeRadiosity = 11,
-        BasicTemporalFilter = 12
+        BasicTemporalFilter = 12,
+        Tonemap = 13
     };
 
     class ShaderManager

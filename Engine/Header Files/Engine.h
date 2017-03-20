@@ -77,6 +77,8 @@ namespace Engine
         void BlurBundle(RenderTargetBundle::Ptr targetBundle, Texture::Ptr csZTexture);
         /*  Runs TSAA merging this frames values with the accumulation*/
         void RunTSAA(Texture::Ptr ssVelTexture);
+        /*  Applies conversion from HDR to LDR before presenting*/
+        void Tonemap();
 
     private:
         InputManager::Ptr m_inputManager;
@@ -103,6 +105,9 @@ namespace Engine
         RenderTargetBundle::Ptr m_aoBundle;
         // A bundle for postprocessing temporary steps. e.g. mid seperable blur.
         RenderTargetBundle::Ptr m_tempBundle; 
+        // Contains HDR scene data to be sent to tonemap shader.
+        // When using HDR this should always be the last buffer before presenting
+        RenderTargetBundle::Ptr m_HDRSceneBundle;
 
         RenderTargetBundle::Ptr m_lambertianOnlyBundle;
         TextureBundleMipView::Ptr m_lambertianOnlyBundleMipView;

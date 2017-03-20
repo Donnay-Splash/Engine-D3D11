@@ -22,5 +22,8 @@ cbuffer Constants : register(b1)
     float aoEnabled; // Controls whether ambient occlusion is used in the final shading
     float radiosityEnabled; // Controls whether radiosity is used in final shading
 
+    float sceneExposure; // Controls the whitepoint of the scene
+    float3 pad; // padding
+
     float2 blurAxis; // Axis that we are blurring along. either [0, 1] for vertical or [1, 0] for horizontal
 }

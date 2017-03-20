@@ -184,11 +184,12 @@ namespace Engine
     void Engine::CreateGlobalOptions()
     {
         // Set initialvalues for constants
-        m_giConstants.Radius = 5.0f; // 1 metre
+        m_giConstants.aoRadius = 5.0f; // 1 metre
         m_giConstants.aoBias = 0.01f; // 1 cm
         m_giConstants.aoIntensity = 1.0f;
         m_giConstants.numSamples = kAO_numSamples;
         m_giConstants.numSpiralTurns = float(kAO_numSpiralTurns);
+        m_giConstants.radiosityRadius = m_giConstants.aoRadius * 5.0f;
 
         m_deepGBufferData.minimumSeparation = 0.3f;
 
@@ -213,9 +214,15 @@ namespace Engine
         }
 
         {
-            auto getter = [&]()->float { return m_giConstants.Radius; };
-            auto setter = [&](float value) {m_giConstants.Radius = value; };
+            auto getter = [&]()->float { return m_giConstants.aoRadius; };
+            auto setter = [&](float value) {m_giConstants.aoRadius = value; };
             m_globalOptions->RegisterScalarProperty(L"AO Radius", getter, setter, 0.0f, 10.0f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_giConstants.radiosityRadius; };
+            auto setter = [&](float value) {m_giConstants.radiosityRadius = value; };
+            m_globalOptions->RegisterScalarProperty(L"Radiosity Radius", getter, setter, 0.0f, 50.0f);
         }
 
         {
@@ -248,6 +255,11 @@ namespace Engine
             m_globalOptions->RegisterBooleanProperty(L"Radiosity Enabled", getter, setter);
         }
 
+        {
+            auto getter = [&]()->float { return m_debugConstants.sceneExposure; };
+            auto setter = [&](float value) {m_debugConstants.sceneExposure = value; };
+            m_globalOptions->RegisterScalarProperty(L"Exposure", getter, setter, 0.0f, 10.0f);
+        }
     }
 
     void Engine::SetFrameInput(InputState newInputState)
@@ -343,6 +355,10 @@ namespace Engine
         m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
         m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_filteredRadiosityBundle->Finalise();
+
+        m_HDRSceneBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_HDRSceneBundle->CreateRenderTarget(L"HDR Scene", DXGI_FORMAT_R16G16B16A16_FLOAT);
+        m_HDRSceneBundle->Finalise();
     }
 
 
@@ -484,16 +500,17 @@ namespace Engine
 
             m_direct3D->BeginRenderEvent(L"Accumulating TSAA");
                 RunTSAA(ssVelTexture);
+                // We want the prev frame before it has been tonemapped so we take it from the HDR scene bundle
+                m_prevFrame = m_direct3D->CopyTexture(m_HDRSceneBundle->GetRenderTarget(0)->GetTexture());
             m_direct3D->EndRenderEvent();
             
-
             // Finally apply tonemapping and exposure
-
+            m_direct3D->BeginRenderEvent(L"Tonemap");
+                Tonemap();
+            m_direct3D->EndRenderEvent();
 
             m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
         }
-
-        m_prevFrame = m_direct3D->CopyBackBuffer();
         // Present the rendered scene to the screen.
         m_direct3D->EndScene();
 
@@ -741,7 +758,7 @@ namespace Engine
     void Engine::RunTSAA(Texture::Ptr ssVelTexture)
     {
         // Now converge TSAA to back buffer
-        m_postProcessCamera->SetRenderTargetBundle(nullptr);
+        m_postProcessCamera->SetRenderTargetBundle(m_HDRSceneBundle);
         auto TSAAPipeline = m_shaderManager->GetShaderPipeline(ShaderName::TSAA);
         auto TSAAEffect = std::make_shared<PostEffect<TemporalAAConstants>>(m_direct3D->GetDevice(), TSAAPipeline);
         TemporalAAConstants TSAAData;
@@ -786,10 +803,32 @@ namespace Engine
         {
             m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
         }
+        else
+        {
+            // Need to clear SRV index to avoid reading from incorrect texture
+            m_direct3D->UnbindShaderResourceView(1);
+        }
         ssVelTexture->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 2);
 
         // Converge TSAA
         m_postProcessCamera->RenderPostEffect(m_direct3D, TSAAEffect);
+    }
+
+    void Engine::Tonemap()
+    {
+        m_postProcessCamera->SetRenderTargetBundle(nullptr);
+
+        // Create tonemap effect
+        auto tonemapPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Tonemap);
+        auto tonemapEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), tonemapPipeline);
+
+        tonemapEffect->SetEffectData(m_debugConstants);
+
+        // Upload HDR buffer
+        m_HDRSceneBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+
+        // render to back buffer
+        m_postProcessCamera->RenderPostEffect(m_direct3D, tonemapEffect);
     }
 
 }

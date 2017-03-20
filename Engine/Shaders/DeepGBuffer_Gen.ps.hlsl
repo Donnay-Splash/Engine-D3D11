@@ -49,7 +49,7 @@ prevZ: The previous Z value of the fragment
 bool IsInFrontOfSecondLayer(float2 ssVelocity, float minSeparation, float2 fragCoord, float prevZ)
 {
     // Get previous frag coord
-    float2 ssPrevCoord = (fragCoord * invViewSize) - ssVelocity;
+    float2 ssPrevCoord = (fragCoord * invViewSize) - (0.5f * ssVelocity);
 
     // Sample old depth // Need to convert location to float3 since we are sampling an array
     // ssPrevCoord is given as viewport coordinates. currentToPrevScale needs to be (1/width, 1/height)

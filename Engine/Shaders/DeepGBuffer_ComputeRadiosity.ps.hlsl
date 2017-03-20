@@ -86,7 +86,7 @@ void ComputeIndirectLightForPoint(
     float WoNx = dot(w, csNormal_X);
     weight = (WoNx > 0.0f) && (dot(-w, csNormal_Y) > 0.01f) ? 1.0f : 0.0f;
 
-    if((dot(YminusX, YminusX) < (Radius*Radius)) && (weight > 0.0f)) // check that the sample is within the world-space radius
+    if ((dot(YminusX, YminusX) < (radiosityRadius * radiosityRadius)) && (weight > 0.0f)) // check that the sample is within the world-space radius
     {
         irradiance = radiosity_Y * WoNx;
     }
@@ -164,7 +164,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 csPosition = ReconstructCSPosition(input.position.xy, csZ, projectionInfo);
     float3 csNormal = normalize(UnpackNormal(PackedNormalsTexture.Sample(bufferSampler, input.uv).rg));
 
-    float ssDiskRadius = Radius * projectionScale / csPosition.z;
+    float ssDiskRadius = radiosityRadius * projectionScale / csPosition.z;
     float angle = GetRandomRotationAngle(int2(ssPosition)) + elapsedSceneTime;
     // Jitter applied for temporal accumulation of radiosity samples
     // Taken from G3D engine http://g3d.sourceforge.net/
