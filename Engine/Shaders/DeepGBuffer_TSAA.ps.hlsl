@@ -83,6 +83,8 @@ float4 PSMain(VertexOut input) : SV_Target
 
     return float4(GammaEncode(color), EncodeSSVelSq(ssVelLengthSq));
 #else
+
+    // TODO: Add YCoCg clamping and HDR weighting
     float2 screenPos = (input.uv - 0.5f) * float2(2.0f, -2.0f); // converts uv range [0, 1] into screen coordinate range [-1.0f, 1.0f]
     float3 pixelPos;
     pixelPos.xy = input.uv;

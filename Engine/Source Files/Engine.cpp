@@ -485,6 +485,9 @@ namespace Engine
             m_direct3D->BeginRenderEvent(L"Accumulating TSAA");
                 RunTSAA(ssVelTexture);
             m_direct3D->EndRenderEvent();
+            
+
+            // Finally apply tonemapping and exposure
 
 
             m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
