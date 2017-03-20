@@ -326,10 +326,7 @@ namespace Engine
         m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_tempBundle->Finalise();
 
-        // TODO: Change this to a IndirectLight Prep buffer.
-        // by adding a third target that stores packed normals for each layer in a single RGBA8_UNORM
-        // Then we can find an easier way of generating the mip chain rather than combining targets from
-        // all different sources
+        // Stores lambertian and packed normals for use in radiosity
         m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, kRadiosityBuffer_MaxMip + 1, false);
         m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian1", DXGI_FORMAT_R8G8B8A8_UNORM); //TODO: Eventually make HDR
         m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian2", DXGI_FORMAT_R8G8B8A8_UNORM);

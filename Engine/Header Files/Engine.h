@@ -118,7 +118,7 @@ namespace Engine
         Texture::Ptr m_prevFrame;
         Sampler::Ptr m_depthSampler;
 
-        float m_weightThisFrame = 0.2f;
+        float m_weightThisFrame = 0.05f;
         float m_elapsedTime = 0.0f;
     };
 }
