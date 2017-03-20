@@ -18,6 +18,10 @@ cbuffer GIConstants : register(b5)
     float aoUseSecondLayer; // Interpolates between using one or two layers of deep G-Buffer
     float radiosityPropogationDamping; // Controls how much of the previous frames indirect lighting is propogated into the current frames
     float radiosityRadius;// Sampling radius for screen-space radiosity
+
+    // Both values useful for artifically making colors stand out more in radiosity.
+    float unsaturatedBoost; // How much to boost unsaturated colors
+    float saturatedBoost; // How much to boost saturated colors.
 }
 
 
@@ -27,7 +31,7 @@ cbuffer GIConstants : register(b5)
 ------------------------------*/
 float GetRandomRotationAngle(int2 pixelLocation)
 {
-    return ((3 * pixelLocation.x) ^ (pixelLocation.y + pixelLocation.x * pixelLocation.y)) * 10;
+    return (3 * pixelLocation.x ^ pixelLocation.y + pixelLocation.x * pixelLocation.y) * 10;
 }
 
 /*------------------------------------------

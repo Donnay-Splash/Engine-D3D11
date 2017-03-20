@@ -125,7 +125,7 @@ float4 PSMain(VertexOut input) : SV_Target
 
     // Sample velocity from texture
 
-    float2 ssVel = ssVelocityTexture.Sample(TSAASampler, float3(input.uv + velocitySampleOffset, 0.0f)).rg * 2.0f;
+    float2 ssVel = ssVelocityTexture.Sample(TSAASampler, float3(input.uv + velocitySampleOffset, 0.0f)).rg;
     ssVel.y = -ssVel.y; // Flip Y since we are working in screen space and not UV space
     float2 prevSamplePos = ssVel;
     float2 temp = ssVel / invViewSize;

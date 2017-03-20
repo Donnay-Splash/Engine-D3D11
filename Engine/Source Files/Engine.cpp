@@ -260,6 +260,12 @@ namespace Engine
             auto setter = [&](float value) {m_debugConstants.sceneExposure = value; };
             m_globalOptions->RegisterScalarProperty(L"Exposure", getter, setter, 0.0f, 10.0f);
         }
+
+        {
+            auto getter = [&]()->float { return m_giConstants.radiosityPropogationDamping; };
+            auto setter = [&](float value) {m_giConstants.radiosityPropogationDamping = value; };
+            m_globalOptions->RegisterScalarProperty(L"Radiosity Propogation Damping", getter, setter, 0.0f, 1.0f);
+        }
     }
 
     void Engine::SetFrameInput(InputState newInputState)

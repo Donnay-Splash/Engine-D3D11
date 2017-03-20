@@ -2,6 +2,7 @@
 #include "ReconstructFromDepth.hlsl"
 #include "Lighting.hlsl"
 #include "PostEffectConstants.hlsl"
+#include "GIHelpers.hlsl"
 
 // GBuffer layout
 Texture2DArray diffuseColor : register(t0);
@@ -37,15 +38,15 @@ float4 PSMain(VertexOut input) : SV_Target
     const float radiosityContrastCentre = 0.35f;
     float confidence = radiositySample.a;
     confidence = saturate(((1.0f - confidence) - radiosityContrastCentre) * 2.0f + radiosityContrastCentre);
-    float3 radiosity = confidence * radiositySample.rgb * radiosityEnabled;
+    float3 radiosity = confidence * radiositySample.rgb * radiosityEnabled * ColorBoost(radiositySample.rgb, unsaturatedBoost, saturatedBoost);
 
 
     float3 radiance = 0.0f;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[0].direction), alpha, baseColor) * lights[0].color.rgb;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[1].direction), alpha, baseColor) * lights[1].color.rgb;
     float3 aoContribution = lerp(1.0f.xxx, ao, aoEnabled);
-    radiance += radiosity * aoContribution * baseColor;
-    radiance += 0.2f * aoContribution * lerp(1.0f, 0.3f, confidence) * baseColor;
+    radiance += (radiosity * aoContribution * baseColor) / PI;
+    radiance += (0.2f * aoContribution * lerp(1.0f, 0.3f, confidence) * baseColor) / PI;
 
     if(target == 0.0f)
     {

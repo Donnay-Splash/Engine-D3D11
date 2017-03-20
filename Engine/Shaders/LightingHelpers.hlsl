@@ -8,6 +8,20 @@ float3 GammaEncode(float3 linearColor)
     return pow(linearColor, kGammaEncodePower);
 }
 
+/*Can be used to positively or negatively weight colors*/
+float ColorBoost(float3 color, float unsaturatedBoost, float saturatedBoost)
+{
+    if(unsaturatedBoost == saturatedBoost)
+    {
+        return color;
+    }
+
+    float ma = max(color.x, max(color.y, color.z));
+    float mi = min(color.x, min(color.y, color.z));
+    float saturation = (ma == 0.0f) ? 0.0f : ((ma - mi) / ma);
+
+    return lerp(unsaturatedBoost, saturatedBoost, saturation);
+}
 
 // taken from http://www.slideshare.net/ozlael/hable-john-uncharted2-hdr-lighting
 float3 FilmicAndGamma(float3 linearColor)

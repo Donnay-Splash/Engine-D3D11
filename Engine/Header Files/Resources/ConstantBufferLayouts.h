@@ -248,6 +248,10 @@ namespace Engine
         float radiosityPropogationDamping = 0.1f; // Controls how much affect the previous frames radiosity has on the current frame
         float radiosityRadius = 0.0f; // The sampling radius for screen-space radiosity. Generally about 7-10 * more that AO
 
+        // Both values useful for artifically making colors stand out more in radiosity.
+        float unsaturatedBoost = 1.0f; // How much to boost unsaturated colors
+        float saturatedBoost = 2.0f; // How much to boost saturated colors.
+
         // We know that these constants will change each frame so 
         // the comparison operators pass through
         bool operator != (const GIConstants& rhs)
@@ -259,7 +263,9 @@ namespace Engine
             (aoIntensity != rhs.aoIntensity) ||
             (aoUseSecondLayer != rhs.aoUseSecondLayer) ||
             (radiosityPropogationDamping != rhs.radiosityPropogationDamping) ||
-            (radiosityRadius != rhs.radiosityRadius);
+            (radiosityRadius != rhs.radiosityRadius) ||
+            (unsaturatedBoost != rhs.unsaturatedBoost) ||
+            (saturatedBoost != rhs.saturatedBoost);
         }
         bool operator == (const GIConstants& rhs)
         {
@@ -270,7 +276,9 @@ namespace Engine
             (aoIntensity == rhs.aoIntensity) &&
             (aoUseSecondLayer == rhs.aoUseSecondLayer) &&
             (radiosityPropogationDamping == rhs.radiosityPropogationDamping) &&
-            (radiosityRadius == rhs.radiosityRadius);
+            (radiosityRadius == rhs.radiosityRadius) &&
+            (unsaturatedBoost == rhs.unsaturatedBoost) &&
+            (saturatedBoost == rhs.saturatedBoost);
         }
     };
 

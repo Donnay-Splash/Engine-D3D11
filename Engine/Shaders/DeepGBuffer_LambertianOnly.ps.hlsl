@@ -77,7 +77,7 @@ PixelOut PSMain(VertexOut input)
     float weight = 1.0f - smoothstep(0.5f, 0.7f, dist) * float(!offscreen);
 
     indirect *= weight;
-    result.firstLayer.rgb += indirect * (1.0f - radiosityPropogationDamping) * diffuseColor[0];
+    result.firstLayer.rgb += indirect * (1.0f - radiosityPropogationDamping) * ColorBoost(indirect, unsaturatedBoost, saturatedBoost) * diffuseColor[0];
     // Pack normal for both channels
     // This creates some noise on bumpy normal mapped surfaces. Might need to use standard normals
     result.packedNormal.xy = PackNormal(csNormal[0]);
