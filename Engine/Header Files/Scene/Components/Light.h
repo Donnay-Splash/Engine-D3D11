@@ -41,8 +41,10 @@ namespace Engine
 
         void SetColor(Utils::Maths::Color);
         void SetDirection(Utils::Maths::Vector3);
+        void SetIntensity(float intensity);
 
         LightData GetLightData();
+        float GetIntensity() const;
 
     protected:
         Light(Component::SceneNodePtr sceneNode);
@@ -53,6 +55,8 @@ namespace Engine
 
     private:
         LightData m_lightData;
+        // Doesn't use physically correct values but we don't care.
+        float m_lightIntensity = 1.0f;
 
         friend class SceneNode;
     };

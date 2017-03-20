@@ -323,13 +323,13 @@ namespace Engine
 
         // Temporary buffer for post process effects. Used to store temp results. e.g. betweeen seperable blur
         m_tempBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
-        m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_tempBundle->Finalise();
 
         // Stores lambertian and packed normals for use in radiosity
         m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, kRadiosityBuffer_MaxMip + 1, false);
-        m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian1", DXGI_FORMAT_R8G8B8A8_UNORM); //TODO: Eventually make HDR
-        m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian2", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian1", DXGI_FORMAT_R11G11B10_FLOAT); //TODO: Eventually make HDR
+        m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian2", DXGI_FORMAT_R11G11B10_FLOAT);
         m_lambertianOnlyBundle->CreateRenderTarget(L"PackedNormals", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_lambertianOnlyBundle->Finalise();
 
@@ -337,11 +337,11 @@ namespace Engine
         m_lambertianOnlyBundleMipView = std::make_shared<TextureBundleMipView>(m_direct3D->GetDevice(), m_lambertianOnlyBundle, kRadiosityBuffer_MaxMip + 1);
 
         m_radiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
-        m_radiosityBundle->CreateRenderTarget(L"Radiosity", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_radiosityBundle->CreateRenderTarget(L"Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_radiosityBundle->Finalise();
 
         m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
-        m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R8G8B8A8_UNORM);
+        m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_filteredRadiosityBundle->Finalise();
     }
 

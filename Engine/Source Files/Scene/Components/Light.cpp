@@ -35,6 +35,16 @@ namespace Engine
         m_lightData.Direction = direction;
     }
 
+    void Light::SetIntensity(float intensity)
+    {
+        m_lightIntensity = intensity;
+    }
+
+    float Light::GetIntensity() const
+    {
+        return m_lightIntensity;
+    }
+
     LightData Light::GetLightData()
     {
         m_lightData.Position = GetSceneNode()->GetWorldSpacePosition();
@@ -47,5 +57,9 @@ namespace Engine
         auto positionGetter = [this]() { return m_lightData.Direction; };
         auto positionSetter = [this](Utils::Maths::Vector3 v) { SetDirection(v); };
         RegisterVectorProperty(L"Direction", positionGetter, positionSetter);
+
+        auto intensityGetter = [this]() {return m_lightIntensity; };
+        auto intensitySetter = [this](float value) { m_lightIntensity = value; };
+        RegisterScalarProperty(L"Intensity", intensityGetter, intensitySetter, 0.0f, 10.0f);
     }
 }

@@ -26,6 +26,8 @@ namespace Engine
         for (uint32_t i = 0; i < lightCount; i++)
         {
             lightBuffer.lights[i] = lights[i]->GetLightData();
+            float intensity = lights[i]->GetIntensity();
+            lightBuffer.lights[i].Color *= intensity;
             if (space == LightSpaceModifier::Camera)
             {
                 // Lighting is performed in camera space so we want to transform the directions and positions to camera space

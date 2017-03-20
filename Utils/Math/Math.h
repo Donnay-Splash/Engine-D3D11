@@ -307,6 +307,9 @@ namespace Utils
             static Color FromARGB(uint32_t argb);
             static Color FromABGR(uint32_t abgr);
 
+            Color& operator*= (float S);
+            Color& operator/= (float S);
+
             bool operator==(const Color& rhs) const;
             bool operator!=(const Color& rhs) const;
         };

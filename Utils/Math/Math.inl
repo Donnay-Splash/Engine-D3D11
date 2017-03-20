@@ -1283,6 +1283,30 @@ namespace Utils
             return Color(r, g, b, a);
         }
 
+        inline Color& Color::operator*=(float S)
+        {
+            // Don't want to modify alpha as it has special purpose.
+            // Avoids intrinsics root but is a basic operation so shouldn't
+            // be too costly
+            this->x *= S;
+            this->y *= S;
+            this->z *= S;
+
+            return *this;
+        }
+
+        inline Color& Color::operator/=(float S)
+        {
+            // Don't want to modify alpha as it has special purpose.
+            // Avoids intrinsics root but is a basic operation so shouldn't
+            // be too costly
+            this->x /= S;
+            this->y /= S;
+            this->z /= S;
+
+            return *this;
+        }
+
         inline bool Color::operator == (const Color& rhs) const
         {
             XMVECTOR thisVector = XMLoadFloat4A(this);

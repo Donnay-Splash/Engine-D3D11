@@ -67,7 +67,7 @@ PixelOut PSMain(VertexOut input)
     bool offscreen = max(previousCoord.x, previousCoord.y) >= 1.0f || min(previousCoord.x, previousCoord.y) <= 0.0f;
 
     float4 previousRadiosity = previousRadiosityTexture.Sample(gBufferSampler, previousCoord);
-    float3 indirect = previousRadiosity.rgb;
+    float3 indirect = previousRadiosity.rgb / PI;
     float previousDepth = previoudDepthTexture.Sample(gBufferSampler, float3(previousCoord, 0.0f)).r;
     float3 previousWSPosition = ReconstructWSPosition(previousCoord / invViewSize, ReconstructCSZ(previousDepth, clipInfo), projectionInfo, prevInvViewMatrix);
 
@@ -77,7 +77,7 @@ PixelOut PSMain(VertexOut input)
     float weight = 1.0f - smoothstep(0.5f, 0.7f, dist) * float(!offscreen);
 
     indirect *= weight;
-    result.firstLayer.rgb += indirect * (1.0f - radiosityPropogationDamping);
+    result.firstLayer.rgb += indirect * (1.0f - radiosityPropogationDamping) * diffuseColor[0];
     // Pack normal for both channels
     // This creates some noise on bumpy normal mapped surfaces. Might need to use standard normals
     result.packedNormal.xy = PackNormal(csNormal[0]);
