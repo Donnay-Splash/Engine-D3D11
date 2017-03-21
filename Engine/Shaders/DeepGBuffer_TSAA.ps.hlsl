@@ -99,28 +99,35 @@ float4 PSMain(VertexOut input) : SV_Target
     float depthOffsetXx = float(AA_CrossOffset);
 
     [branch]
-    if (depths.x > depths.y)
+    if (depths.x < depths.y)
     {
         depthOffsetXx = -AA_CrossOffset;
     }
-    if (depths.z > depths.w)
+    if (depths.z < depths.w)
     {
         depthOffset.x = -AA_CrossOffset;
     }
-    float maxXY = max(depths.x, depths.y);
-    float maxZW = max(depths.z, depths.w);
-    if (maxXY > maxZW)
+    float minXY = min(depths.x, depths.y);
+    float minZW = min(depths.z, depths.w);
+    if (minXY < minZW)
     {
         depthOffset.y = -AA_CrossOffset;
         depthOffset.x = depthOffsetXx;
     }
-    float maxXYZW = max(maxXY, maxZW);
-    if (maxXYZW > pixelPos.z)
+    float minXYZW = min(minXY, minZW);
+    if (minXYZW < pixelPos.z)
     {
         // This gives us the offset for reading from the velocity texture
         velocitySampleOffset = depthOffset * invViewSize;
         pixelPos.xy = input.uv + velocitySampleOffset; // TODO: Might not need this
-        pixelPos.z = maxXYZW;
+        pixelPos.z = minXYZW;
+    }
+
+    // We are trying to apply AA to an empty pixel.
+    // return the current color
+    if(pixelPos.z >= 1.0f)
+    {
+        return currentFrame.Sample(TSAASampler, input.uv);
     }
 
     // Sample velocity from texture

@@ -13,7 +13,7 @@ float ColorBoost(float3 color, float unsaturatedBoost, float saturatedBoost)
 {
     if(unsaturatedBoost == saturatedBoost)
     {
-        return color;
+        return unsaturatedBoost;
     }
 
     float ma = max(color.x, max(color.y, color.z));

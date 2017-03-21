@@ -21,6 +21,13 @@ float4 PSMain(VertexOut input) : SV_Target
     float target = floor(gBufferTarget);
     float3 samplePoint = float3(input.uv, displaySecondLayer);
     float z = csZ.Sample(gBufferSampler, samplePoint).r;
+
+    // If z is below zero then we are drawing an empty pixel
+    if(z <= 0.0f)
+    {
+        return 0.0f.xxxx;
+    }
+
     float3 csPosition = ReconstructCSPosition(input.position.xy, z, projectionInfo);
     float3 ao = AO.Sample(gBufferSampler, samplePoint.xy).xxx;
     

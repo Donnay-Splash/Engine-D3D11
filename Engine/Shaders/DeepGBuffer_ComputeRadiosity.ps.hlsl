@@ -84,17 +84,11 @@ void ComputeIndirectLightForPoint(
     float3 YminusX = csPosition_Y - csPosition_X;
     float3 w = normalize(YminusX);
     float WoNx = dot(w, csNormal_X);
-    weight = (WoNx > 0.0f) && (dot(-w, csNormal_Y) > 0.01f) ? 1.0f : 0.0f;
+    weight = ((WoNx > 0.0f) && (dot(-w, csNormal_Y) > 0.01f)) ? 1.0f : 0.0f;
+    weight *= saturate(ceil((radiosityRadius * radiosityRadius) - dot(YminusX, YminusX)));
 
-    if ((dot(YminusX, YminusX) < (radiosityRadius * radiosityRadius)) && (weight > 0.0f)) // check that the sample is within the world-space radius
-    {
-        irradiance = radiosity_Y * WoNx;
-    }
-    else
-    {
-        weight = 0;
-        irradiance = 0;
-    }
+
+    irradiance = radiosity_Y * WoNx * weight;
 }
 
 /*-------------------------
@@ -162,7 +156,13 @@ float4 PSMain(VertexOut input) : SV_Target
     float2 ssPosition = input.position.xy;
     float csZ = csZTexture.Sample(bufferSampler, input.uv).r;
     float3 csPosition = ReconstructCSPosition(input.position.xy, csZ, projectionInfo);
-    float3 csNormal = normalize(UnpackNormal(PackedNormalsTexture.Sample(bufferSampler, input.uv).rg));
+    float3 csNormal = UnpackNormal(PackedNormalsTexture.Sample(bufferSampler, input.uv).rg);
+
+    [branch]
+    if (csZ <= 0.0f)
+    {
+        return 0.0f.xxxx;
+    }
 
     float ssDiskRadius = radiosityRadius * projectionScale / csPosition.z;
     float angle = GetRandomRotationAngle(int2(ssPosition)) + elapsedSceneTime;
@@ -179,6 +179,7 @@ float4 PSMain(VertexOut input) : SV_Target
     }
 
     float3 indirectResult = (irradianceSum * kSolidAngleHemisphere) / (numSamplesUsed + 0.00001f); // Minor offset avoid divide by zero
+    indirectResult = -min(-indirectResult, 0.0f); // avoid NaNs
     float visibility = 1.0f - (numSamplesUsed / numSamples);
 
     return float4(indirectResult, visibility);

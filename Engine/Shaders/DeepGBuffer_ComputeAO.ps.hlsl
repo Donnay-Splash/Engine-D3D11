@@ -142,6 +142,12 @@ float4 PSMain(VertexOut input) : SV_Target
     float visibility = 1.0f;
     // Sample camera space Z for the current pixel
     float csZ = csZTexture.Sample(csZSampler, input.uv).r;
+
+    if(csZ <= 0.0f)
+    {
+        return float4(visibility, 0.0f, 0.0f, 0.0f);
+    }
+
     // reconstruct cs position for current pixel
     float3 csPosition = ReconstructCSPosition(input.position.xy, csZ, projectionInfo);
 

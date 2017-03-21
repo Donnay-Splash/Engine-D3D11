@@ -13,6 +13,10 @@ float4 PSMain(VertexOut input) : SV_Target
 {
     float2 ssPosition = input.position.xy;
     float csZ = currentFrameCsZ.Sample(bufferSampler, input.uv).r;
+    if(csZ <=0.0f)
+    {
+        return 0.0f.xxxx;
+    }
     float3 wsPosition = ReconstructWSPosition(ssPosition, csZ, projectionInfo, invViewMatrix);
 
     float4 currentValue = currentFrame.Sample(bufferSampler, input.uv);
@@ -24,6 +28,11 @@ float4 PSMain(VertexOut input) : SV_Target
 
     float previousZ = previousDepth.Sample(bufferSampler, float3(prevSamplePoint, 0.0f)).r;
     float prevcsZ = ReconstructCSZ(previousZ, clipInfo);
+    if(prevcsZ <= 0.0f)
+    {
+        return currentValue;
+    }
+
     float3 prevWSPosition = ReconstructWSPosition(prevSamplePoint /invViewSize, prevcsZ, projectionInfo, prevInvViewMatrix);
 
     float dist = length(wsPosition - prevWSPosition);

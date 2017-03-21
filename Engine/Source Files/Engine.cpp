@@ -321,7 +321,7 @@ namespace Engine
         GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT, {1.0f, 1.0f, 1.0f, 1.0f});
-        GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT);
+        GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT, {-1.0f, -1.0f, -1.0f, -1.0f });
         GBuffer->Finalise();
 
         // Set the G-Buffer for output from camera

@@ -50,6 +50,11 @@ float4 PSMain(VertexOut input) : SV_Target
         mainKey = GetBilateralKey(mainKey);
     #endif
 
+    if(mainKey <= 0.0f)
+    {
+        return 0.0f.xxxx;
+    }
+
     [unroll] // For each sample grab a sample and add it to the sum
     for (int i = -BlurTaps; i < BlurTaps; i++)
     {
