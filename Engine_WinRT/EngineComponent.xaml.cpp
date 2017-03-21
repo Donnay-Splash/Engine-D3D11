@@ -155,6 +155,7 @@ void EngineComponent::LoadFile(Windows::Storage::StorageFile^ file)
 
 Concurrency::task<void> EngineComponent::LoadFileInternal(Windows::Storage::StorageFile^ file)
 {
+    auto type = file->FileType;
     auto buffer = co_await Windows::Storage::FileIO::ReadBufferAsync(file);
     Microsoft::WRL::ComPtr<Windows::Storage::Streams::IBufferByteAccess> bufferByteAccess;
     reinterpret_cast<IInspectable*>(buffer)->QueryInterface(IID_PPV_ARGS(&bufferByteAccess));
@@ -162,8 +163,15 @@ Concurrency::task<void> EngineComponent::LoadFileInternal(Windows::Storage::Stor
     bufferByteAccess->Buffer(&data);
     // Lock rendering
     Concurrency::critical_section::scoped_lock lock(m_renderingMutex);
-    // Load file
-    m_engine->LoadFile(data, buffer->Length);
+    if (type == L".mike")
+    {
+        // Load file
+        m_engine->LoadFile(data, buffer->Length);
+    }
+    else if (type == L".dds")
+    {
+        m_engine->LoadEnvironment(data, buffer->Length);
+    }
 }
 
 void Engine_WinRT::EngineComponent::OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel ^ sender, Object ^ args)

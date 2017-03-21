@@ -22,6 +22,7 @@ namespace Engine
 
     D3DClass::~D3DClass()
     {
+        m_deviceContext->ClearState();
         m_debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_FLAGS::D3D11_RLDO_DETAIL);
     }
 
@@ -226,6 +227,7 @@ namespace Engine
 
         auto backBufferWidth = m_backBufferRT->GetWidth();
         auto backBufferHeight = m_backBufferRT->GetHeight();
+        m_screenSize = { float(backBufferWidth), float(backBufferHeight) };
 
         m_depthBuffer = std::make_shared<DepthBuffer>(backBufferWidth, backBufferHeight, 1, 0, m_device.Get());
 
@@ -366,18 +368,39 @@ namespace Engine
         return Utils::Maths::Vector2(static_cast<float>(m_backBufferRT->GetWidth()), static_cast<float>(m_backBufferRT->GetHeight()));
     }
 
-    void D3DClass::SetRenderTarget(RenderTargetBundle::Ptr bundle) const
+    void D3DClass::SetRenderTarget(RenderTargetBundle::Ptr bundle, Utils::Maths::Vector2 clipOffset /*= {}*/) const
     {
+        Utils::Maths::Vector2 viewSize;
         if (bundle == nullptr)
         {
             m_deviceContext->OMSetRenderTargets(1, m_backBufferRT->GetRTV().GetAddressOf(), m_depthBuffer->GetDSV().Get());
+            viewSize = m_screenSize;
         }
         else
         {
             ID3D11DepthStencilView* dsv = nullptr;
             if (bundle->GetDepthBuffer() != nullptr) dsv = bundle->GetDepthBuffer()->GetDSV().Get();
             m_deviceContext->OMSetRenderTargets(bundle->RenderTargetCount(), bundle->GetRenderTargetViews(), dsv);
+            viewSize = { float(bundle->GetWidth()), float(bundle->GetHeight()) };
         }
+
+        // Set the correct viewport and scisssor rect depending on given data
+        int left = int(clipOffset.x);
+        int top = int(clipOffset.y);
+        int right = int(viewSize.x - clipOffset.x);
+        int bottom = int(viewSize.y - clipOffset.y);
+        D3D11_RECT rect{ left, top, right, bottom };
+
+        D3D11_VIEWPORT viewport;
+        viewport.Width = viewSize.x;
+        viewport.Height = viewSize.y;
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        viewport.TopLeftX = 0.0f;
+        viewport.TopLeftY = 0.0f;
+
+        m_deviceContext->RSSetViewports(1, &viewport);
+        m_deviceContext->RSSetScissorRects(1, &rect);
     }
 
     void D3DClass::ClearResources()

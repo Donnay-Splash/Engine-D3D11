@@ -190,6 +190,7 @@ Concurrency::task<void> DirectXPage::OpenFile()
 {
     auto picker = ref new Pickers::FileOpenPicker();
     picker->FileTypeFilter->Append(L".mike");
+    picker->FileTypeFilter->Append(L".dds");
 
     auto file = co_await picker->PickSingleFileAsync();
     if (file != nullptr)

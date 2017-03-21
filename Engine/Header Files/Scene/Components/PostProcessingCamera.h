@@ -14,17 +14,18 @@ namespace Engine
         using Ptr = std::shared_ptr<PostProcessingCamera>;
         PostProcessingCamera(const PostProcessingCamera&) = delete;
 
-
         // Given the post effect we can render to our full screen quad
         template<class T>
         void RenderPostEffect(D3DClass::Ptr d3dClass, std::shared_ptr<PostEffect<T>> postEffect)
         {
             EngineAssert(postEffect != nullptr);
 
-            d3dClass->SetRenderTarget(m_renderTargetBundle);
+            d3dClass->SetRenderTarget(m_renderTargetBundle, m_clipOffset);
             postEffect->Render(d3dClass->GetDeviceContext());
             m_screenAlignedQuad->Render(d3dClass->GetDeviceContext());
         }
+
+        void SetClipRect(const Utils::Maths::Vector2& clipRect) { m_clipOffset = clipRect; };
 
     protected:
         PostProcessingCamera(Component::SceneNodePtr sceneNode);
@@ -32,6 +33,7 @@ namespace Engine
 
     private:
         Mesh::Ptr m_screenAlignedQuad; // Our screen aligned quad we will draw to.
+        Utils::Maths::Vector2 m_clipOffset;
 
         friend class SceneNode;
     };

@@ -4,6 +4,9 @@ static const float kGammaDecodePower = 2.2f;
 static const float kSolidAngleHemisphere = 2.0f * PI;
 
 #define MAX_LIGHT_COUNT 4
+#define MAX_ENV_MIP_LEVEL 20
+TextureCube environmentMap : register(t10);
+SamplerState envSampler : register(s10);
 // struct containing light information
 struct Light
 {
@@ -17,4 +20,6 @@ cbuffer LightBuffer : register(b2)
 {
     Light lights[MAX_LIGHT_COUNT];
     float activeLights;
+    float environmentMapMips;
+    float environmentMapEnabled;
 }

@@ -4,6 +4,7 @@
 #include <Scene\Components\MeshInstance.h>
 #include <Loader.h>
 #include <Utils\Math\MathHelpers.h>
+#include <DDSTextureLoader.h>
 
 namespace Engine
 {
@@ -75,7 +76,21 @@ namespace Engine
     const uint32_t kAO_numSamples = 14;
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     const uint32_t kTemporalAASamples = 8;
+    const uint32_t kBilateralBlurWidth = 7;
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
+
+    /*
+        The percentage that we want the guard band to extend the view 
+        The Guard band is required to avoid suppress incorrect AO and Radiosity
+        at screen edges. e.g. A value of 0.1 in x will extend the width by
+        10% in both directions. A resoultion of 1280 in x will result in render
+        targets with an additional 128 pixels on either side giving a total
+        horizontal resolution of 1536
+    */
+    const Utils::Maths::Vector2 kGuardBandPercentage = {0.1f, 0.1f};
+
+
+
     // TODO: Continue to maintain debug controls
     // TODO: Make switching between different shading models easier. Need way of controlling what is expected as shader constants
     // TODO: Tidy this class it's getting mad.
@@ -312,12 +327,15 @@ namespace Engine
         EngineAssert(newHeight > 0);
         m_direct3D->ResizeBuffers(newWidth, newHeight);
 
+        uint32_t guardBandWidth = static_cast<uint32_t>(newWidth * kGuardBandPercentage.x * 2.0f);
+        uint32_t guardBandHeight = static_cast<uint32_t>(newHeight * kGuardBandPercentage.y * 2.0f);
+        m_guardBandSizePixels = { guardBandWidth/2.0f, guardBandHeight/2.0f };
+
         // Re-create G-Buffer with new dimensions
-        // TODO: Find a way to create a frame buffer where we create multiple
-        // render targets to draw to each of the different mip levels of a texture.
-        // This is required for generating the hierarchical Z buffer required for AO and SSR.
-        const uint32_t GBufferLayers = 2; // TODO: Formalise this
-        RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, GBufferLayers);
+        // We use G-Buffer data for ao and radiosity so it must be 
+        // extended to the guard band width
+        const uint32_t GBufferLayers = 2;
+        RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth + guardBandWidth, newHeight + guardBandHeight, GBufferLayers);
         GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT, {1.0f, 1.0f, 1.0f, 1.0f});
@@ -328,24 +346,27 @@ namespace Engine
         m_camera->SetRenderTargetBundle(GBuffer);
 
         // Create bundle for hierarchical Z
-        m_hiZBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, kHiZ_MaxMip + 1, false);
+        // Used in AO calculation and thus must be extended by guard band
+        m_hiZBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kHiZ_MaxMip + 1, false);
         m_hiZBundle->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R32G32_FLOAT);
         m_hiZBundle->Finalise();
 
         auto Hi_ZTex = m_hiZBundle->GetRenderTarget(L"Hi-Z")->GetTexture();
         m_hiZMipView = std::make_shared<TextureMipView>(m_direct3D->GetDevice(), Hi_ZTex, kHiZ_MaxMip + 1);
 
-        m_aoBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        /*AO needs to store data for the guard band and thus must be extended*/
+        m_aoBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_aoBundle->CreateRenderTarget(L"AO", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_aoBundle->Finalise();
 
         // Temporary buffer for post process effects. Used to store temp results. e.g. betweeen seperable blur
-        m_tempBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_tempBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_tempBundle->Finalise();
 
         // Stores lambertian and packed normals for use in radiosity
-        m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, kRadiosityBuffer_MaxMip + 1, false);
+        // Since this is used in radiosity it must be extended by guard band
+        m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kRadiosityBuffer_MaxMip + 1, false);
         m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian1", DXGI_FORMAT_R11G11B10_FLOAT); //TODO: Eventually make HDR
         m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian2", DXGI_FORMAT_R11G11B10_FLOAT);
         m_lambertianOnlyBundle->CreateRenderTarget(L"PackedNormals", DXGI_FORMAT_R8G8B8A8_UNORM);
@@ -354,11 +375,11 @@ namespace Engine
         // Create the mip view for the lambertian only buffer. This is used to generate the custom downsample
         m_lambertianOnlyBundleMipView = std::make_shared<TextureBundleMipView>(m_direct3D->GetDevice(), m_lambertianOnlyBundle, kRadiosityBuffer_MaxMip + 1);
 
-        m_radiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_radiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_radiosityBundle->CreateRenderTarget(L"Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_radiosityBundle->Finalise();
 
-        m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_filteredRadiosityBundle->Finalise();
 
@@ -374,6 +395,16 @@ namespace Engine
         Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
 
         loader->LoadFile(data, byteCount);
+    }
+
+    void Engine::LoadEnvironment(const uint8_t * data, uint64_t byteCount)
+    {
+        auto envMap = Texture::CreateTextureFromMemory(data, byteCount, m_direct3D->GetDevice());
+        if (envMap->IsCubeMap())
+        {
+            // Set cube map ready for rendering
+            m_lightManager.SetEnvironmentMap(envMap);
+        }
     }
 
     bool Engine::HandleInput(float frameTime)
@@ -484,6 +515,9 @@ namespace Engine
                 ComputeRadiosity();
             m_direct3D->EndRenderEvent();
 
+            // TODO: We can add a clip rectangle to the radiosity filter so that only the required pixels
+            // are available for the blur.
+            // During the blur we can then reduce the total width down to the output width
             auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
             // Blend new samples with radiosity from last frame
             m_direct3D->BeginRenderEvent(L"Filter Radiosity");
@@ -665,9 +699,19 @@ namespace Engine
         // Copy temporally filtered result
         m_prevRawRadiosity = m_direct3D->CopyTexture(m_filteredRadiosityBundle->GetRenderTarget(0)->GetTexture());
 
+
         // Apply bilateral blur
+
+        // Reduce viewport to include blur radius without extending
+        // too far into guard band
+        Utils::Maths::Vector2 clipOffset{ std::max(m_guardBandSizePixels.x - kBilateralBlurWidth, 0.0f), std::max(m_guardBandSizePixels.y - kBilateralBlurWidth, 0.0f) };
+        m_postProcessCamera->SetClipRect(clipOffset);
+
         auto csZTex = m_hiZBundle->GetRenderTarget(0)->GetTexture();
         BlurBundle(m_filteredRadiosityBundle, csZTex);
+
+        // Remove clip offset
+        m_postProcessCamera->SetClipRect({ 0.0f, 0.0f });
     }
 
     // Generates the hierachical Z buffer
@@ -720,7 +764,14 @@ namespace Engine
         m_postProcessCamera->SetRenderTargetBundle(m_aoBundle);
         m_postProcessCamera->RenderPostEffect(m_direct3D, aoEffect);
 
+        // Reduce viewport to include blur radius without extending
+        // too far into guard band
+        Utils::Maths::Vector2 clipOffset {std::max(m_guardBandSizePixels.x - kBilateralBlurWidth, 0.0f), std::max(m_guardBandSizePixels.y - kBilateralBlurWidth, 0.0f)};
+        m_postProcessCamera->SetClipRect(clipOffset);
         BlurBundle(m_aoBundle, nullptr);
+        
+        // Remove clip offset
+        m_postProcessCamera->SetClipRect({0.0f, 0.0f});
     }
 
     void Engine::BlurBundle(RenderTargetBundle::Ptr targetBundle, Texture::Ptr csZTexture)
@@ -801,6 +852,7 @@ namespace Engine
         }
 
         TSAAData.currentFrameWeight = m_weightThisFrame;
+        TSAAData.guardBandSize = m_guardBandSizePixels;
         TSAAEffect->SetEffectData(TSAAData);
 
         // Upload current, previous and ssVel

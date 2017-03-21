@@ -33,7 +33,7 @@ namespace Engine
         void EndRenderEvent();
 
         // Potentially rename FrameBuffer?
-        void SetRenderTarget(RenderTargetBundle::Ptr) const;
+        void SetRenderTarget(RenderTargetBundle::Ptr, Utils::Maths::Vector2 clipOffset = {}) const;
 
         ID3D11Device* GetDevice();
         ID3D11DeviceContext* GetDeviceContext();

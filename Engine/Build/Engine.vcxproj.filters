@@ -460,5 +460,8 @@
     <FxCompile Include="..\Shaders\DeepGBuffer_TonemapAndExposure.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="..\Shaders\EnvironmentLighting.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -85,6 +85,8 @@ namespace Engine
         static const UINT kRegister = 2;
         LightData lights[kMaxLightCount];
         float activeLights;
+        float envMapMipLevels;
+        float envMapEnabled = 0.0f;
 
         bool operator!=(const LightConstants& rhs)
         {
@@ -96,7 +98,9 @@ namespace Engine
                 }
             }
 
-            return activeLights != rhs.activeLights;
+            return (activeLights != rhs.activeLights) || 
+            (envMapMipLevels != rhs.envMapMipLevels) ||
+            (envMapEnabled != rhs.envMapEnabled);
         }
 
         bool operator==(const LightConstants& rhs)
@@ -111,7 +115,10 @@ namespace Engine
                 }
             }
 
-            return result && (activeLights == rhs.activeLights);
+            return result &&
+            (activeLights == rhs.activeLights) &&
+            (envMapMipLevels == rhs.envMapMipLevels) &&
+            (envMapEnabled == rhs.envMapEnabled);
         }
     };
 
@@ -219,6 +226,7 @@ namespace Engine
         float pad1;
         float pad2;
         float pad3;
+        Utils::Maths::Vector2 guardBandSize;
         float currentFrameWeight = 0.04f;
 
         // We know that these constants will change each frame so 

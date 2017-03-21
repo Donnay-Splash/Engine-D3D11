@@ -27,6 +27,7 @@ namespace Engine
         static Texture::Ptr CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device);
         static Texture::Ptr CreateTextureFromFile(std::wstring filename, ID3D11Device* device);
         static Texture::Ptr CreateImportedTexture(const Utils::Loader::TextureData& importedData, ID3D11Device* device);
+        static Texture::Ptr CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, ID3D11Device* device);
 
         // Creates a new texture with exactly the same layout as the given texture
         static Texture::Ptr CreateIdenticalTexture(Texture::Ptr const texture, ID3D11Device* device);
@@ -41,6 +42,8 @@ namespace Engine
         uint32_t GetHeight() const { return m_height; }
         uint32_t GetWidth() const { return m_width; }
         uint32_t GetArraySize() const { return m_arraySize; }
+        uint32_t GetMipLevels() const { return m_mipLevels; }
+        bool IsCubeMap() const { return m_isCube; }
 
     protected:
         // Due to the many possible ways of creating a texture
@@ -53,8 +56,8 @@ namespace Engine
         Texture(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device);
         // Create a texture from a file
         Texture(ID3D11Device* device, const wchar_t* filename);
-        // Create a texture from imported texture data
-        Texture(ID3D11Device* device, const Utils::Loader::TextureData& importedTextureData);
+        // Create a texture from memory
+        Texture(ID3D11Device* device, const uint8_t* data, uint64_t byteCount);
         Texture(const Texture&) = delete;
 
     private:
@@ -65,5 +68,7 @@ namespace Engine
         uint32_t m_height;
         uint32_t m_width;
         uint32_t m_arraySize;
+        uint32_t m_mipLevels;
+        bool m_isCube = false;
     };
 }

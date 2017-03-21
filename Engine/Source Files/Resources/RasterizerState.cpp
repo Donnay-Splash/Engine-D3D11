@@ -16,7 +16,7 @@ namespace Engine
         rasterizerDesc.FillMode = fillMode;
         rasterizerDesc.FrontCounterClockwise = false;
         rasterizerDesc.MultisampleEnable = false;
-        rasterizerDesc.ScissorEnable = false;
+        rasterizerDesc.ScissorEnable = true;
         rasterizerDesc.SlopeScaledDepthBias = 0.0f;
 
         // Create the rasterizer state from the description we just filled out.

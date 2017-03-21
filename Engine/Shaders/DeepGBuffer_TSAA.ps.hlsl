@@ -12,6 +12,8 @@ SamplerState TSAASampler : register(s0);
 cbuffer TSAAConstants : register(b4)
 {
     float4 sampleWeights[3];
+    float2 guardBandSize;
+    float2 padddd;
     float currentFrameWeight;
 }
 
@@ -85,10 +87,12 @@ float4 PSMain(VertexOut input) : SV_Target
 #else
 
     // TODO: Add YCoCg clamping and HDR weighting
+    float2 offset = guardBandSize;
+    float2 offsetUV = (input.position.xy + offset) * invViewSize;
     float2 screenPos = (input.uv - 0.5f) * float2(2.0f, -2.0f); // converts uv range [0, 1] into screen coordinate range [-1.0f, 1.0f]
     float3 pixelPos;
-    pixelPos.xy = input.uv;
-    pixelPos.z = depthTexture.Sample(TSAASampler, float3(input.uv, 0.0f)).r;
+    pixelPos.xy = offsetUV;
+    pixelPos.z = depthTexture.Sample(TSAASampler, float3(offsetUV, 0.0f)).r;
 
     int2 velocitySampleOffset = int2(0.0f, 0.0f);
     float4 depths;
@@ -119,7 +123,7 @@ float4 PSMain(VertexOut input) : SV_Target
     {
         // This gives us the offset for reading from the velocity texture
         velocitySampleOffset = depthOffset * invViewSize;
-        pixelPos.xy = input.uv + velocitySampleOffset; // TODO: Might not need this
+        pixelPos.xy = offsetUV + velocitySampleOffset; // TODO: Might not need this
         pixelPos.z = minXYZW;
     }
 
@@ -127,12 +131,11 @@ float4 PSMain(VertexOut input) : SV_Target
     // return the current color
     if(pixelPos.z >= 1.0f)
     {
-        return currentFrame.Sample(TSAASampler, input.uv);
+        return currentFrame.Sample(TSAASampler, offsetUV);
     }
 
     // Sample velocity from texture
-
-    float2 ssVel = ssVelocityTexture.Sample(TSAASampler, float3(input.uv + velocitySampleOffset, 0.0f)).rg;
+    float2 ssVel = ssVelocityTexture.Sample(TSAASampler, float3(offsetUV + velocitySampleOffset, 0.0f)).rg;
     ssVel.y = -ssVel.y; // Flip Y since we are working in screen space and not UV space
     float2 prevSamplePos = ssVel;
     float2 temp = ssVel / invViewSize;
@@ -158,15 +161,15 @@ float4 PSMain(VertexOut input) : SV_Target
     // TODO: Use YCoCg space
 
     // Filter the pixel
-    float4 Neighbor0 = currentFrame.Sample(TSAASampler, input.uv, int2(-1, -1));
-    float4 Neighbor1 = currentFrame.Sample(TSAASampler, input.uv, int2(0, -1));
-    float4 Neighbor2 = currentFrame.Sample(TSAASampler, input.uv, int2(1, -1));
-    float4 Neighbor3 = currentFrame.Sample(TSAASampler, input.uv, int2(-1, 0));
-    float4 Neighbor4 = currentFrame.Sample(TSAASampler, input.uv);
-    float4 Neighbor5 = currentFrame.Sample(TSAASampler, input.uv, int2(1, 0));
-    float4 Neighbor6 = currentFrame.Sample(TSAASampler, input.uv, int2(-1, 1));
-    float4 Neighbor7 = currentFrame.Sample(TSAASampler, input.uv, int2(0, 1));
-    float4 Neighbor8 = currentFrame.Sample(TSAASampler, input.uv, int2(1, 1));
+    float4 Neighbor0 = currentFrame.Sample(TSAASampler, offsetUV, int2(-1, -1));
+    float4 Neighbor1 = currentFrame.Sample(TSAASampler, offsetUV, int2(0, -1));
+    float4 Neighbor2 = currentFrame.Sample(TSAASampler, offsetUV, int2(1, -1));
+    float4 Neighbor3 = currentFrame.Sample(TSAASampler, offsetUV, int2(-1, 0));
+    float4 Neighbor4 = currentFrame.Sample(TSAASampler, offsetUV);
+    float4 Neighbor5 = currentFrame.Sample(TSAASampler, offsetUV, int2(1, 0));
+    float4 Neighbor6 = currentFrame.Sample(TSAASampler, offsetUV, int2(-1, 1));
+    float4 Neighbor7 = currentFrame.Sample(TSAASampler, offsetUV, int2(0, 1));
+    float4 Neighbor8 = currentFrame.Sample(TSAASampler, offsetUV, int2(1, 1));
 
     // TODDO: Change to catmull-rom filtering
     // TODO: Remove low pass filter

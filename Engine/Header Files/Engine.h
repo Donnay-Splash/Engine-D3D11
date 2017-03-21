@@ -41,6 +41,8 @@ namespace Engine
 
         void LoadFile(const uint8_t* data, uint64_t byteCount);
 
+        void LoadEnvironment(const uint8_t* data, uint64_t byteCount);
+
         void CreateGlobalOptions();
 
 
@@ -116,6 +118,7 @@ namespace Engine
         Texture::Ptr m_prevRawRadiosity;
         GIConstants m_giConstants;
 
+        Utils::Maths::Vector2 m_guardBandSizePixels;
 
         // Store prev depth for deep G-Buffer prediction
         Texture::Ptr m_prevDepth;

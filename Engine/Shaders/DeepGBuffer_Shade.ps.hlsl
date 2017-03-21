@@ -51,13 +51,19 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 radiance = 0.0f;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[0].direction), alpha, baseColor) * lights[0].color.rgb;
     radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[1].direction), alpha, baseColor) * lights[1].color.rgb;
+
+    float3 wsN = normalize(mul(float4(normal, 0.0f), invViewMatrix).xyz);
+    float3 wsV = normalize(mul(float4(viewDirection, 0.0f), invViewMatrix).xyz);
+    float3 diffuseAmbient = DiffuseEnvironementLighting(wsN);
+    float3 specularAmbient = SpecularEnvironmentLighting(wsN, wsV, alpha);
+
     float3 aoContribution = lerp(1.0f.xxx, ao, aoEnabled);
-    radiance += (radiosity * aoContribution * baseColor) / PI;
-    radiance += (0.2f * aoContribution * lerp(1.0f, 0.3f, confidence) * baseColor) / PI;
+    radiance += (radiosity * aoContribution + (diffuseAmbient * aoContribution * lerp(1.0f, 0.3f, confidence))) * (baseColor / PI);
+    radiance += (specularAmbient * aoContribution) / PI;
 
     if(target == 0.0f)
     {
-        color.rgb = saturate(radiance);
+        color.rgb = radiance;
     }
     else if (target == 1.0f)
     {
