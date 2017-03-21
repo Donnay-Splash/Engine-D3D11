@@ -7,6 +7,9 @@
 // Must be less than or equal to the same macro defined in Engine.cpp
 #define MAX_MIP_LEVEL 5
 
+// Must be Less than MAX_MIP_LEVEL and >= 0
+#define MIN_MIP_LEVEL 0
+
 cbuffer GIConstants : register(b5)
 {
     float numSamples; // Number of samples taken when calculating AO
@@ -63,5 +66,5 @@ ssRadius: screen-space sample radius in pixels
 int GetMipLevel(float ssRadius)
 {
     // Mip level = floor(log(ssr / MAX_OFFSET));
-    return clamp(int(floor(log2(ssRadius))) - LOG_MAX_OFFSET, 0, MAX_MIP_LEVEL);
+    return clamp(int(floor(log2(ssRadius))) - LOG_MAX_OFFSET, MIN_MIP_LEVEL, MAX_MIP_LEVEL);
 }

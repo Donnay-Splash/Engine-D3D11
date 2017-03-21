@@ -72,7 +72,7 @@ namespace Engine
     // class constants
     const uint32_t kHiZ_MaxMip = 5;
     const uint32_t kRadiosityBuffer_MaxMip = kHiZ_MaxMip;
-    const uint32_t kAO_numSamples = 20;
+    const uint32_t kAO_numSamples = 14;
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     const uint32_t kTemporalAASamples = 8;
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
@@ -191,7 +191,7 @@ namespace Engine
         m_giConstants.numSpiralTurns = float(kAO_numSpiralTurns);
         m_giConstants.radiosityRadius = m_giConstants.aoRadius * 5.0f;
 
-        m_deepGBufferData.minimumSeparation = 0.3f;
+        m_deepGBufferData.minimumSeparation = 2.0f;
 
         m_globalOptions = std::make_shared<SceneElement>(L"Global Options");
 
@@ -210,7 +210,7 @@ namespace Engine
         {
             auto getter = [&]()->float { return m_deepGBufferData.minimumSeparation; };
             auto setter = [&](float value) {m_deepGBufferData.minimumSeparation = value; };
-            m_globalOptions->RegisterScalarProperty(L"Minimum Separation", getter, setter, 0.0f, 1.0f);
+            m_globalOptions->RegisterScalarProperty(L"Minimum Separation", getter, setter, 0.0f, 5.0f);
         }
 
         {
