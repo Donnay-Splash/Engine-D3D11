@@ -1,12 +1,15 @@
 #include "pch.h"
 #include <Scene\Scene.h>
 #include <Scene\Components\BoundingBox.h>
+#include <Header Files\d3dclass.h>
 
 namespace Engine
 {
-    Scene::Scene()
+    Scene::Scene(D3DClass* device) :
+        m_renderDevice(device)
     {
-
+        // Should not be null 
+        EngineAssert(m_renderDevice != nullptr);
     }
 
     void Scene::Initialize()
@@ -38,9 +41,9 @@ namespace Engine
         m_rootNode->Update(frameTime);
     }
 
-    void Scene::Render(ID3D11DeviceContext* deviceContext)
+    void Scene::Render(ShaderPipeline::Ptr shaderOverride /*= nullptr*/)
     {
-        m_rootNode->Render(deviceContext);
+        m_rootNode->Render(m_renderDevice->GetDeviceContext(), shaderOverride);
     }
 
     Utils::Maths::BoundingBox Scene::CalculateBoundingBoxForSceneNode(SceneNode::Ptr sceneNode)

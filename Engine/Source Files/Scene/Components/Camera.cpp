@@ -26,15 +26,6 @@ namespace Engine
         m_viewConstants = std::make_shared<ConstantBuffer<ViewConstants>>(PipelineStage::Vertex | PipelineStage::Pixel, device);
     }
 
-    void Camera::Update(float frameTime)
-    {
-
-    }
-
-    void Camera::Render(ID3D11DeviceContext* deviceContext) const
-    {
-    }
-
     void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene)
     {
         auto sceneNode = GetSceneNode();
@@ -73,7 +64,7 @@ namespace Engine
         m_viewConstants->UploadData(d3dClass->GetDeviceContext());
         d3dClass->SetRenderTarget(m_renderTargetBundle);
 
-        scene->Render(d3dClass->GetDeviceContext());
+        scene->Render();
     }
 
     void Camera::CalculateProjectionMatrix()

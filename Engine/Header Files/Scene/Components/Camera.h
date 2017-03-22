@@ -23,9 +23,7 @@ namespace Engine
         Camera(const Camera&) = delete;
         virtual ~Camera();
 
-        void Render(ID3D11DeviceContext* deviceContext) const override;
         void Render(D3DClass::Ptr d3dClass, Scene::Ptr scene);
-        void Update(float frameTime) override;
 
         // Sets the vertical field of view for the camera
         void SetFieldOfView(float fov) { m_fov = fov; }
@@ -34,6 +32,8 @@ namespace Engine
         void SetAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
         void SetJitterEnabled(bool enabled) { m_jitterEnabled = enabled; }
         void SetJitterSequence(std::vector<Utils::Maths::Vector2> sequence) { m_jitterSequence = sequence; }
+        void SetFarClip(float farClip) { m_farClip = std::max(farClip, m_nearClip); }
+        void SetNearClip(float nearClip) { m_nearClip = std::min(nearClip, m_farClip); }
 
         void SetRenderTargetBundle(RenderTargetBundle::Ptr renderTargetBundle);
 
@@ -67,6 +67,9 @@ namespace Engine
 
     protected:
         RenderTargetBundle::Ptr m_renderTargetBundle;
+        // Note: Given an identity matrix the camera will be centred at the origin
+        // looking along the positive z axis with up on the y axis
+        Utils::Maths::Matrix m_projectionMatrix;
         
     private:
         void RegisterPublicProperties();
@@ -90,9 +93,6 @@ namespace Engine
         std::vector<Utils::Maths::Vector2> m_jitterSequence;
         Utils::Maths::Vector2 m_currentJitter;
 
-        // Note: Given an identity matrix the camera will be centred at the origin
-        // looking along the positive z axis with up on the y axis
-        Utils::Maths::Matrix m_projectionMatrix;
 
         friend class SceneNode;
     };

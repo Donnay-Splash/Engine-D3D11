@@ -43,16 +43,16 @@ namespace Engine
         }
     }
 
-    void SceneNode::Render(ID3D11DeviceContext* deviceContext)
+    void SceneNode::Render(ID3D11DeviceContext* deviceContext, ShaderPipeline::Ptr shaderOverride/* = nullptr*/)
     {
         for (auto child : m_childNodes)
         {
-            child->Render(deviceContext);
+            child->Render(deviceContext, shaderOverride);
         }
 
         for (auto component : m_components)
         {
-            component->Render(deviceContext);
+            component->Render(deviceContext, shaderOverride);
         }
     }
 
@@ -170,6 +170,13 @@ namespace Engine
             return m_position * m_parentNode->GetWorldTransform();
         }
         return m_position;
+    }
+
+    Utils::Maths::Vector3 SceneNode::Forward() const
+    {
+        auto worldTransform = GetWorldTransform();
+        auto trans = worldTransform.Translation();
+        return worldTransform.Forward();
     }
 
     SceneNode::Ptr SceneNode::GetSharedThis()

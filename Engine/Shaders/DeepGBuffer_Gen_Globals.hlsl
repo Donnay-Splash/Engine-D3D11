@@ -25,6 +25,7 @@ SamplerState depthSampler : register(s7);
 // Stores object information. e.g. object local to world transform.
 cbuffer ObjectBuffer : register(b1)
 {
+    row_major matrix objectToWorldTransform;
     row_major matrix objectToCameraTransform;
     row_major matrix prevObjectToCameraTransform;
 }

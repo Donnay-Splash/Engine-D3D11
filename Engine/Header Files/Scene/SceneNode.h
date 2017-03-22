@@ -1,6 +1,7 @@
 #pragma once
 #include <Scene\Components\Component.h>
 #include <Scene\Public Properties\SceneElement.h>
+#include <Resources\ShaderPipeline.h>
 
 namespace Engine
 {
@@ -21,7 +22,7 @@ namespace Engine
         ~SceneNode();
 
         void Update(float frameTime);
-        void Render(ID3D11DeviceContext* deviceContext);
+        void Render(ID3D11DeviceContext* deviceContext, ShaderPipeline::Ptr shaderOverride = nullptr);
 
         void RegisterComponentAddedCallback(ComponentAddedDelegate callback);
         void FireComponentAddedCallback(Component::Ptr componentAdded);
@@ -36,7 +37,7 @@ namespace Engine
 
         // Temporary change. Move device somewhere else
         template <class ComponentType>
-        std::shared_ptr<ComponentType> AddComponent(ID3D11Device* device);
+        std::shared_ptr<ComponentType> AddComponent();
 
         void SetPosition(Utils::Maths::Vector3 position, bool forceTransformUpdate = false);
         // For now only support uniform scale
@@ -50,6 +51,8 @@ namespace Engine
 
         Utils::Maths::Vector3 GetPosition() const;
         Utils::Maths::Vector3 GetWorldSpacePosition() const;
+
+        Utils::Maths::Vector3 Forward() const;
 
         std::shared_ptr<Scene> GetScene() const { return m_scene; }
 

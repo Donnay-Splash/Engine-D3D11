@@ -128,7 +128,7 @@ namespace Engine
         m_mesh = Utils::MeshMaker::CreateCube(m_direct3D->GetDevice());
 
         // Initialise Scene
-        m_scene = std::make_shared<Scene>();
+        m_scene = std::make_shared<Scene>(m_direct3D.get());
         m_scene->Initialize();
 
         CreateGlobalOptions();
@@ -139,32 +139,35 @@ namespace Engine
             m_scene->GetRootNode()->SetChildAddedCallback(createOptions.RootSceneElementAddedCallback);
         }
 
+        // Get the shadow map shader pipeline
+        auto shadowPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ShadowMapping);
         // Initialize light manager
-        m_lightManager.Initialize(m_direct3D->GetDevice());
+        m_lightManager.Initialize(m_direct3D->GetDevice(), m_scene, shadowPipeline);
 
         // Add lights to the scene
         auto lightNode = m_scene->AddNode();
-        lightNode->SetPosition({ -1.0f, 1.0f, 1.0f });
-        auto light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
+        lightNode->SetPosition({ 0.0f, 10.0f, 0.0f });
+        lightNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(0.0f, Utils::Maths::DegreesToRadians(90.0f), 0.0f));
+        auto light = lightNode->AddComponent<Light>();
+        light->SetShadowCastingEnabled(true);
+        light->SetIntensity(2.0f);
         light->SetColor({ DirectX::Colors::Wheat });
-        light->SetDirection({ -1.0f, 1.0f, 1.0f });
 
-        lightNode = m_scene->AddNode();
-        lightNode->SetPosition({ 1.0f, -1.0f, -1.0f });
-        light = lightNode->AddComponent<Light>(m_direct3D->GetDevice());
-        light->SetColor({ DirectX::Colors::Wheat });
-        light->SetDirection({ 1.0f, -1.0f, -1.0f });
+        /*lightNode = m_scene->AddNode();
+        lightNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(Utils::Maths::DegreesToRadians(45.0f), Utils::Maths::DegreesToRadians(45.0f), 0.0f));
+        light = lightNode->AddComponent<Light>();
+        light->SetColor({ DirectX::Colors::Wheat });*/
 
         // Create the camera object
         auto cameraNode = m_scene->AddNode();
-        m_camera = cameraNode->AddComponent<Camera>(m_direct3D->GetDevice());
+        m_camera = cameraNode->AddComponent<Camera>();
         m_camera->SetJitterEnabled(true);
         m_camera->SetJitterSequence(kJitterSequence);
         cameraNode->SetPosition({ 0.0f, 0.0f, -10.0f });
 
         // Create post processing camera
         auto postCameraNode = m_scene->AddNode();
-        m_postProcessCamera = postCameraNode->AddComponent<PostProcessingCamera>(m_direct3D->GetDevice());
+        m_postProcessCamera = postCameraNode->AddComponent<PostProcessingCamera>();
 
         // Create post effect
         auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade);

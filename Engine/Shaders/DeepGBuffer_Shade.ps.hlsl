@@ -49,8 +49,11 @@ float4 PSMain(VertexOut input) : SV_Target
 
 
     float3 radiance = 0.0f;
-    radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[0].direction), alpha, baseColor) * lights[0].color.rgb;
-    radiance += EvaluateBRDF(normal, viewDirection, -normalize(lights[1].direction), alpha, baseColor) * lights[1].color.rgb;
+    for (int i = 0; i < activeLights; i++)
+    {
+        Light light = lights[i];
+        radiance += EvaluateBRDF(normal, viewDirection, -normalize(light.direction), alpha, baseColor) * light.color.rgb;
+    }
 
     float3 wsN = normalize(mul(float4(normal, 0.0f), invViewMatrix).xyz);
     float3 wsV = normalize(mul(float4(viewDirection, 0.0f), invViewMatrix).xyz);

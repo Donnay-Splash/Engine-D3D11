@@ -62,19 +62,22 @@ namespace Engine
         struct ObjectConstants
     {
         static const UINT kRegister = 1;
-        Utils::Maths::Matrix objectToCameraTransform;
+        Utils::Maths::Matrix objectToWorldTransform; // Basic object to world matrix
+        Utils::Maths::Matrix objectToCameraTransform; // concatenated object to world and world to view matrix
         Utils::Maths::Matrix prevObjectToCameraTransform;
 
         bool operator!=(const ObjectConstants& rhs)
         {
-            return  (this->objectToCameraTransform != rhs.objectToCameraTransform) ||
-                    (this->prevObjectToCameraTransform != rhs.prevObjectToCameraTransform);
+            return  (this->objectToWorldTransform != rhs.objectToWorldTransform) ||
+            (this->objectToCameraTransform != rhs.objectToCameraTransform) ||
+            (this->prevObjectToCameraTransform != rhs.prevObjectToCameraTransform);
         }
 
         bool operator==(const ObjectConstants& rhs)
         {
-            return  (this->objectToCameraTransform == rhs.objectToCameraTransform) &&
-                    (this->prevObjectToCameraTransform == rhs.prevObjectToCameraTransform);
+            return  (this->objectToWorldTransform == rhs.objectToWorldTransform) &&
+            (this->objectToCameraTransform == rhs.objectToCameraTransform) &&
+            (this->prevObjectToCameraTransform == rhs.prevObjectToCameraTransform);
         }
     };
 
@@ -87,6 +90,9 @@ namespace Engine
         float activeLights;
         float envMapMipLevels;
         float envMapEnabled = 0.0f;
+        float shadowMapEnabled = 0.0f;
+        Utils::Maths::Vector2 shadowMapDimensions;
+        Utils::Maths::Matrix shadowMapTransform;
 
         bool operator!=(const LightConstants& rhs)
         {
@@ -100,7 +106,10 @@ namespace Engine
 
             return (activeLights != rhs.activeLights) || 
             (envMapMipLevels != rhs.envMapMipLevels) ||
-            (envMapEnabled != rhs.envMapEnabled);
+            (envMapEnabled != rhs.envMapEnabled) ||
+            (shadowMapEnabled != rhs.shadowMapEnabled) ||
+            (shadowMapDimensions != rhs.shadowMapDimensions) ||
+            (shadowMapTransform != rhs.shadowMapTransform);
         }
 
         bool operator==(const LightConstants& rhs)
@@ -118,7 +127,10 @@ namespace Engine
             return result &&
             (activeLights == rhs.activeLights) &&
             (envMapMipLevels == rhs.envMapMipLevels) &&
-            (envMapEnabled == rhs.envMapEnabled);
+            (envMapEnabled == rhs.envMapEnabled) &&
+            (shadowMapEnabled == rhs.shadowMapEnabled) &&
+            (shadowMapDimensions == rhs.shadowMapDimensions) &&
+            (shadowMapTransform == rhs.shadowMapTransform);
         }
     };
 
@@ -306,6 +318,26 @@ namespace Engine
         bool operator==(const DeepGBufferConstants& rhs)
         {
             return minimumSeparation == rhs.minimumSeparation;
+        }
+
+    };
+
+    ALIGN_16
+        struct ShadowMapConstants
+    {
+        static const UINT kRegister = 6;
+
+        // Concatenated view and projection matrix for the light
+        Utils::Maths::Matrix WorldToProjectedLightSpace;
+
+        // Currently empty but can add debug stuff or something later
+        bool operator!=(const ShadowMapConstants& rhs)
+        {
+            return (WorldToProjectedLightSpace != rhs.WorldToProjectedLightSpace);
+        }
+        bool operator==(const ShadowMapConstants& rhs)
+        {
+            return (WorldToProjectedLightSpace == rhs.WorldToProjectedLightSpace);
         }
 
     };

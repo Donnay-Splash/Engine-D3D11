@@ -177,3 +177,46 @@ float3 EvaluateLambert(float3 normal, float3 lightDirection, float3 baseColor)
 
     return (baseColor / PI) * NoL;
 }
+
+float SampleShadowWithOffset(float2 ssPos, float ssZ, float2 offset)
+{
+    float2 samplePoint = (ssPos + offset) / shadowMapDimensions;
+    float shadowSample = shadowMap1.Sample(envSampler, samplePoint).r;
+    return (shadowSample + 0.0001f) < ssZ ? 0.0f : 1.0f;
+}
+
+// Applies pcf shadow filtering
+float PCFFilter(float4 ssPos)
+{
+    float2 uvPos = (ssPos.xy * float2(0.5f, -0.5f)) + 0.5f;
+    float2 ssPosPixels = uvPos * shadowMapDimensions;
+    float2 offset = (float) (frac(ssPosPixels * 0.5f) > 0.25f);
+    offset.y += offset.x;
+
+    if (offset.y > 1.1)
+        offset.y = 0.0f;
+
+    float shadowCoeff = SampleShadowWithOffset(ssPosPixels, ssPos.z, offset + float2(-1.5f, 0.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, offset + float2(0.5f, 0.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, offset + float2(-1.5f, -1.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, offset + float2(0.5f, -1.5f));
+
+    return shadowCoeff * 0.25f;
+}
+
+float SampleShadowMap(float3 csPosition)
+{
+    [branch]
+    if (shadowsEnabled == 0.0f)
+        return 1.0f;
+
+    float4 ssPos = mul(float4(csPosition, 1.0f), shadowMapTransform);
+    ssPos /= ssPos.w;
+    
+    float2 temp = abs(ssPos);
+    // Sample is outside of shadow map
+    if (max(temp.x, temp.y) >= 1.0f)
+        return 1.0f;
+
+    return PCFFilter(ssPos);
+}

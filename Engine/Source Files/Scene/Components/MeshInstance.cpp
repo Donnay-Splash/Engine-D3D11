@@ -16,21 +16,20 @@ namespace Engine
         m_objectConstants = std::make_shared<ConstantBuffer<ObjectConstants>>(PipelineStage::Vertex, device);
     }
 
-    void MeshInstance::Update(float frameTime)
-    {
-
-    }
-
-    void MeshInstance::Render(ID3D11DeviceContext* deviceContext) const
+    void MeshInstance::Render(ID3D11DeviceContext* deviceContext, ShaderPipeline::Ptr shaderOverride /*= nullptr*/) const
     {
         auto sceneNode = GetSceneNode();
         auto transform = sceneNode->GetWorldTransform();
         auto worldToCameraTransform = sceneNode->GetScene()->GetWorldToCameraTransform();
         auto prevWorldToCameraTransform = sceneNode->GetScene()->GetPreviousWorldToCameraTransform();
 
-        m_objectConstants->SetData({ transform * worldToCameraTransform, m_prevTransform * prevWorldToCameraTransform});
+        m_objectConstants->SetData({ transform, transform * worldToCameraTransform, m_prevTransform * prevWorldToCameraTransform});
         m_objectConstants->UploadData(deviceContext);
         m_material->Render(deviceContext);
+        if (shaderOverride != nullptr)
+        {
+            shaderOverride->UploadData(deviceContext);
+        }
 
         m_prevTransform = transform;
 

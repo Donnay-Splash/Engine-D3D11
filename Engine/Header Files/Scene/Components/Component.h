@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Scene\Public Properties\SceneElement.h>
+#include <Resources\ShaderPipeline.h>
 
 namespace Engine
 {
@@ -18,8 +19,11 @@ namespace Engine
 
         SceneNodePtr GetSceneNode() const { return m_sceneNode; }
 
-        virtual void Update(float frameTime) = 0;
-        virtual void Render(ID3D11DeviceContext* deviceContext) const = 0;
+        // Not required to be overidden by child classes. Can be hooked into if needed
+        virtual void Update(float frameTime) {};
+
+        // Not required to be overriden by child classes. Can be hooked into if needed.
+        virtual void Render(ID3D11DeviceContext* deviceContext, ShaderPipeline::Ptr shaderOverride = nullptr) const {};
 
         virtual ~Component() {}
 

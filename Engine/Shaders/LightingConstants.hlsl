@@ -7,6 +7,8 @@ static const float kSolidAngleHemisphere = 2.0f * PI;
 #define MAX_ENV_MIP_LEVEL 20
 TextureCube environmentMap : register(t10);
 SamplerState envSampler : register(s10);
+Texture2D shadowMap1 : register(t11);
+
 // struct containing light information
 struct Light
 {
@@ -22,4 +24,8 @@ cbuffer LightBuffer : register(b2)
     float activeLights;
     float environmentMapMips;
     float environmentMapEnabled;
+    float shadowsEnabled;
+    float2 shadowMapDimensions;
+    float2 lightPad;
+    row_major matrix shadowMapTransform;
 }

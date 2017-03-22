@@ -60,7 +60,7 @@ namespace Engine
 
         // Calculate the bounding box for the root of the model
         auto rootBounds = Scene::CalculateBoundingBoxForSceneNode(rootNode);
-        auto boundsComponent = rootNode->AddComponent<BoundingBox>(m_d3dClass->GetDevice());
+        auto boundsComponent = rootNode->AddComponent<BoundingBox>();
         boundsComponent->SetBounds(rootBounds);
         auto size = rootBounds.GetSize();
         auto maxAxis = std::max(size.x, std::max(size.y, size.z));
@@ -97,7 +97,7 @@ namespace Engine
             Mesh::Ptr mesh = std::make_shared<Mesh>();
             mesh->Load(importedNode, m_d3dClass->GetDevice());
 
-            MeshInstance::Ptr meshInstance = sceneNode->AddComponent<MeshInstance>(m_d3dClass->GetDevice());
+            MeshInstance::Ptr meshInstance = sceneNode->AddComponent<MeshInstance>();
             meshInstance->SetMesh(mesh);
 
             // Retrieve the material for this node. All materials and SceneNodes
@@ -107,7 +107,7 @@ namespace Engine
             meshInstance->SetMaterial(material);
 
             // Add bounding box to node
-            auto bBox = sceneNode->AddComponent<BoundingBox>(m_d3dClass->GetDevice());
+            auto bBox = sceneNode->AddComponent<BoundingBox>();
             bBox->SetBounds(importedNode.Bounds);
         }
 

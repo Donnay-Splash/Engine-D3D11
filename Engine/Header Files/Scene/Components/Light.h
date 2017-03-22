@@ -36,15 +36,13 @@ namespace Engine
     class Light : public Component
     {
     public:
-        virtual void Update(float frameTime) override;
-        virtual void Render(ID3D11DeviceContext* deviceContext) const override;
-
         void SetColor(Utils::Maths::Color);
-        void SetDirection(Utils::Maths::Vector3);
         void SetIntensity(float intensity);
 
         LightData GetLightData();
         float GetIntensity() const;
+        bool CastsShadows() const;
+        void SetShadowCastingEnabled(bool enable);
 
     protected:
         Light(Component::SceneNodePtr sceneNode);
@@ -57,6 +55,7 @@ namespace Engine
         LightData m_lightData;
         // Doesn't use physically correct values but we don't care.
         float m_lightIntensity = 1.0f;
+        bool m_castShadows = false;
 
         friend class SceneNode;
     };

@@ -20,6 +20,12 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h"
     }
 
+    // ShadowMapping shaders
+    namespace ShadowMapping
+    {
+        #include "Shaders\Compiled shaders\ShadowMap.vs.hlsl.h"
+    }
+
     // Full screen quad vertex shader
     namespace FullScreenQuad
     {
@@ -131,7 +137,15 @@ namespace Engine
             m_shaderMap.insert(ShaderMapObject(ShaderName::DeepGBuffer_Gen, shaderPipeline));
         }
             
+        // Load Shadow map shader
+        {
+            // Only position is required for shadow mapping
+            InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position);
+            Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, ShadowMapping::g_VSMain, sizeof(ShadowMapping::g_VSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, nullptr, nullptr);
 
+            m_shaderMap.insert(ShaderMapObject(ShaderName::ShadowMapping, shaderPipeline));
+        }
 
         // Load post process shaders
         InputLayout::Ptr fullscreenQuadLayout = std::make_shared<InputLayout>(InputElement::Position | InputElement::TexCoord0);

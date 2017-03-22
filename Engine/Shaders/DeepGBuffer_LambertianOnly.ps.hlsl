@@ -38,6 +38,7 @@ PixelOut PSMain(VertexOut input)
     float csZ[2];
     float3 csPosition[2];
     float3 viewDirection[2];
+    float lightVisibility[2];
 
     [unroll]
     for (int i = 0; i < 2; i++)
@@ -55,6 +56,9 @@ PixelOut PSMain(VertexOut input)
     {
         return result;
     }
+
+    lightVisibility[0] = SampleShadowMap(csPosition[0]);
+    lightVisibility[1] = 1.0f;
     
     // Calculate lambert lighting for all lights
     [unroll]
@@ -62,7 +66,7 @@ PixelOut PSMain(VertexOut input)
     {
         Light light = lights[lightNum];
         float3 lightDirection = -normalize(light.direction);
-        result.firstLayer.rgb += EvaluateLambert(csNormal[0], lightDirection, diffuseColor[0]) * light.color.rgb;
+        result.firstLayer.rgb += EvaluateLambert(csNormal[0], lightDirection, diffuseColor[0]) * light.color.rgb * lightVisibility[lightNum];
         result.secondLayer.rgb += EvaluateLambert(csNormal[1], lightDirection, diffuseColor[1]) * light.color.rgb;
     }
 

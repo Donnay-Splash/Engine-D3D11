@@ -37,22 +37,22 @@ namespace Utils
 
         inline Vector3 Matrix::Forward()
         {
-            return { _13, _23, _33 };
+            return { _31, _32, _33 };
         }
 
         inline Vector3 Matrix::Up()
         {
-            return { _12, _22, _23 };
+            return { _21, _22, _23 };
         }
 
         inline Vector3 Matrix::Right()
         {
-            return { _11, _21, _31 };
+            return { _11, _12, _13 };
         }
 
         inline Vector3 Matrix::Translation()
         {
-            return { _14, _24, _34 };
+            return { _41, _42, _43 };
         }
 
         inline Matrix Matrix::CreateFromTranslation(Vector3 translation)

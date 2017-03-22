@@ -180,6 +180,9 @@
     <ClCompile Include="..\Source Files\Resources\TextureBundleMipView.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source Files\Scene\Components\ShadowMapCamera.cpp">
+      <Filter>Source Files\Scene\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\d3dclass.h">
@@ -326,6 +329,9 @@
     <ClInclude Include="..\Header Files\Resources\TextureBundleMipView.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="..\Header Files\Scene\Components\ShadowMapCamera.h">
+      <Filter>Header Files\Scene\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Header Files\Scene\Scene.inl">
@@ -401,6 +407,7 @@
     <None Include="..\Shaders\GIHelpers.hlsl">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="..\Shaders\EnvironmentLighting.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">
@@ -460,7 +467,7 @@
     <FxCompile Include="..\Shaders\DeepGBuffer_TonemapAndExposure.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="..\Shaders\EnvironmentLighting.hlsl">
+    <FxCompile Include="..\Shaders\ShadowMap.vs.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
