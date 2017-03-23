@@ -220,6 +220,12 @@ namespace Engine
         }
 
         {
+            auto getter = [&]()->bool { return m_camera->GetJitterEnabled(); };
+            auto setter = [&](bool value) { m_camera->SetJitterEnabled(value); };
+            m_globalOptions->RegisterBooleanProperty(L"Jitter enabled", getter, setter);
+        }
+
+        {
             auto getter = [&]()->float { return m_debugConstants.gBufferTargetIndex; };
             auto setter = [&](float value) {m_debugConstants.gBufferTargetIndex = value; };
             m_globalOptions->RegisterScalarProperty(L"RenderTarget index", getter, setter, 0.0f, 6.0f);

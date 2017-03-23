@@ -49,6 +49,8 @@ namespace Engine
 
         D3DClass* GetDevice() const { return m_renderDevice; }
 
+        Utils::Maths::BoundingBox GetSceneBounds() const { return m_sceneBounds; }
+
         // HACK HACK HACK HACK HACK
         // TODO: Find a better way to access constants like this.
         Utils::Maths::Matrix GetCameraTransform() const { return m_cameraTransform; }
@@ -58,9 +60,15 @@ namespace Engine
         // TODO: Find a better way to modify constants like this.
         void SetCameraTransform(const Utils::Maths::Matrix& cameraTransform);
 
+        /*  Called by SceneNodes and components to notify the scene that it has changed*/
+        void NotifySceneChanged() { m_sceneChangedThisFrame = true; }
+
     private:
         // TODO: Need to ensure that no components are added to the root node.
         SceneNode::Ptr m_rootNode;
+
+        Utils::Maths::BoundingBox m_sceneBounds;
+        bool m_sceneChangedThisFrame = true;
 
         // HACK HACK HACK HACK HACK
         // TODO: Find a better way of storing scene constants like this.

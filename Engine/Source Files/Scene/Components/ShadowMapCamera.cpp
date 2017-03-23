@@ -19,6 +19,7 @@ namespace Engine
         SetProjectionMode(Camera::ProjectionMode::Orthographic);
         SetAspectRatio(1.0f);
         SetOrthographicSize(20.0f);
+        SetNearClip(0.0f);
     }
 
     void ShadowMapCamera::Render(Scene::Ptr scene, Light::Ptr light, ShaderPipeline::Ptr shadowMapPipeline)
@@ -34,7 +35,16 @@ namespace Engine
         m_renderTargetBundle->Clear(deviceContext);
         device->SetRenderTarget(m_renderTargetBundle);
 
+        // We want to place the light outside of the scene bounds so that it includes all visible objects
         auto lightNode = light->GetSceneNode();
+        auto bounds = scene->GetSceneBounds();
+        auto lightDirection = light->GetLightData().Direction;
+        float dist = Utils::Maths::Vector3::Dot(lightDirection, bounds.GetSize());
+        auto position = bounds.GetCentre() + (lightDirection * dist);
+        lightNode->SetPosition(position, true);
+
+        SetFarClip(abs(dist) * 2.0f);
+
         auto worldToLightMatrix = lightNode->GetWorldTransform().GetInverse();
 
         CalculateProjectionMatrix();

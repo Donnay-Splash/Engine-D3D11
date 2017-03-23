@@ -20,7 +20,7 @@ namespace Engine
         Utils::Maths::Matrix prevInvView;
         Utils::Maths::Matrix projection;
         Utils::Maths::Matrix jitteredProjection;
-        Utils::Maths::Matrix cameraToScreenMatrix;
+        Utils::Maths::Matrix invJitteredProjection;
         Utils::Maths::Vector4 projectionInfo;
         Utils::Maths::Vector3 cameraPosition;
         Utils::Maths::Vector3 clipInfo;
@@ -34,7 +34,7 @@ namespace Engine
                 (prevInvView != rhs.prevInvView) ||
                 (projection != rhs.projection) ||
                 (jitteredProjection != rhs.jitteredProjection) ||
-                (cameraToScreenMatrix != rhs.cameraToScreenMatrix) ||
+                (invJitteredProjection != rhs.invJitteredProjection) ||
                 (projectionInfo != rhs.projectionInfo) ||
                 (cameraPosition != rhs.cameraPosition) ||
                 (projectionScale != rhs.projectionScale) ||
@@ -49,7 +49,7 @@ namespace Engine
                 (prevInvView == rhs.prevInvView) &&
                 (projection == rhs.projection) &&
                 (jitteredProjection == rhs.jitteredProjection) &&
-                (cameraToScreenMatrix == rhs.cameraToScreenMatrix) &&
+                (invJitteredProjection == rhs.invJitteredProjection) &&
                 (projectionInfo == rhs.projectionInfo) &&
                 (cameraPosition == rhs.cameraPosition) &&
                 (projectionScale == rhs.projectionScale) &&

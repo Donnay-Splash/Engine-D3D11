@@ -1,5 +1,7 @@
 #include "pch.h"
 #include <Scene\SceneNode.h>
+#include <Scene\Scene.h>
+#include <Scene\Components\BoundingBox.h>
 
 namespace Engine
 {
@@ -72,39 +74,59 @@ namespace Engine
 
     void SceneNode::SetPosition(Utils::Maths::Vector3 position, bool forceTransformUpdate /*= false*/)
     {
-        m_position = position;
-        m_transformDirty = true;
-        if (forceTransformUpdate)
+        if (m_position != position)
         {
-            CalculateTransform();
+            m_position = position;
+            m_transformDirty = true;
+            if (forceTransformUpdate)
+            {
+                CalculateTransform();
+            }
         }
     }
 
     void SceneNode::SetScale(float scale, bool forceTransformUpdate /*= false*/)
     {
-        m_scale = { scale, scale, scale };
-        m_transformDirty = true;
-        if (forceTransformUpdate)
+        if (m_scale.x != scale)
         {
-            CalculateTransform();
+
+            m_scale = { scale, scale, scale };
+            m_transformDirty = true;
+            if (forceTransformUpdate)
+            {
+                CalculateTransform();
+            }
         }
     }
 
     void SceneNode::SetRotation(Utils::Maths::Quaternion rotation, bool forceTransformUpdate /*= false*/)
     {
-        m_rotation = rotation;
-        m_transformDirty = true;
-        if (forceTransformUpdate)
+        if (m_rotation != rotation)
         {
-            CalculateTransform();
+            m_rotation = rotation;
+            m_transformDirty = true;
+            if (forceTransformUpdate)
+            {
+                CalculateTransform();
+            }
         }
     }
 
     void SceneNode::SetTransform(Utils::Maths::Matrix transform)
     {
-        // TODO: Check for finite affine transformation matrix.
-        m_transform = transform;
-        std::tie(m_position, m_rotation, m_scale) = m_transform.Decompose();
+        if (m_transform != transform)
+        {
+            // TODO: Check for finite affine transformation matrix.
+            m_transform = transform;
+            std::tie(m_position, m_rotation, m_scale) = m_transform.Decompose();
+
+            if (GetComponentOfType<BoundingBox>() != nullptr)
+            {
+                // Let the scene know that the transform for this object has changed and
+                // that the bounds of the scene will need to be recomputed
+                m_scene->NotifySceneChanged();
+            }
+        }
     }
 
     void SceneNode::CalculateTransform()
@@ -118,6 +140,13 @@ namespace Engine
             }
             m_transform = Utils::Maths::Matrix::CreateFromTranslationRotationScale(m_position, m_rotation, m_scale.x);;
             m_transformDirty = false;
+
+            if (GetComponentOfType<BoundingBox>() != nullptr)
+            {
+                // Let the scene know that the transform for this object has changed and
+                // that the bounds of the scene will need to be recomputed
+                m_scene->NotifySceneChanged();
+            }
         }
     }
 

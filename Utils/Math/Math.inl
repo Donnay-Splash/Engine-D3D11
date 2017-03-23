@@ -511,6 +511,19 @@ namespace Utils
             return result;
         }
 
+        inline float Vector4::Dot(const Vector4& lhs, const Vector4& rhs)
+        {
+            XMVECTOR vecL = XMLoadFloat4A(&lhs);
+            XMVECTOR vecR = XMLoadFloat4A(&rhs);
+
+            auto result = XMVector4Dot(vecL, vecR);
+
+            float out;
+            XMStoreFloat(&out, result);
+
+            return out;
+        }
+
         inline void Vector4::Normalize()
         {
             XMVECTOR xmVec = XMLoadFloat4A(this);
@@ -742,6 +755,19 @@ namespace Utils
             return result;
         }
 
+        inline float Vector3::Dot(const Vector3& lhs, const Vector3& rhs)
+        {
+            XMVECTOR vecL = XMLoadFloat3A(&lhs);
+            XMVECTOR vecR = XMLoadFloat3A(&rhs);
+
+            auto result = XMVector3Dot(vecL, vecR);
+
+            float out;
+            XMStoreFloat(&out, result);
+
+            return out;
+        }
+
         inline void Vector3::Normalize()
         {
             XMVECTOR xmVec = XMLoadFloat3A(this);
@@ -956,6 +982,19 @@ namespace Utils
             Vector2 result;
             XMStoreFloat2A(&result, normalized);
             return result;
+        }
+
+        inline float Vector2::Dot(const Vector2& lhs, const Vector2& rhs)
+        {
+            XMVECTOR vecL = XMLoadFloat2A(&lhs);
+            XMVECTOR vecR = XMLoadFloat2A(&rhs);
+
+            auto result = XMVector2Dot(vecL, vecR);
+
+            float out;
+            XMStoreFloat(&out, result);
+
+            return out;
         }
 
         inline void Vector2::Normalize()
@@ -1392,6 +1431,8 @@ namespace Utils
             {
                 bounds.AddPosition(position);
             }
+
+            return bounds;
         }
 
         inline BoundingBox BoundingBox::Combine(const BoundingBox& lhs, const BoundingBox& rhs)

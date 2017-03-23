@@ -11,7 +11,7 @@ float3 GammaEncode(float3 linearColor)
 /*Can be used to positively or negatively weight colors*/
 float ColorBoost(float3 color, float unsaturatedBoost, float saturatedBoost)
 {
-    if(unsaturatedBoost == saturatedBoost)
+    if (unsaturatedBoost == saturatedBoost)
     {
         return unsaturatedBoost;
     }
@@ -182,7 +182,7 @@ float SampleShadowWithOffset(float2 ssPos, float ssZ, float2 offset)
 {
     float2 samplePoint = (ssPos + offset) / shadowMapDimensions;
     float shadowSample = shadowMap1.Sample(envSampler, samplePoint).r;
-    return (shadowSample + 0.0001f) < ssZ ? 0.0f : 1.0f;
+    return (shadowSample + SHADOWMAP_BIAS) < ssZ ? 0.0f : 1.0f;
 }
 
 // Applies pcf shadow filtering
@@ -190,21 +190,20 @@ float PCFFilter(float4 ssPos)
 {
     float2 uvPos = (ssPos.xy * float2(0.5f, -0.5f)) + 0.5f;
     float2 ssPosPixels = uvPos * shadowMapDimensions;
-    float2 offset = (float) (frac(ssPosPixels * 0.5f) > 0.25f);
-    offset.y += offset.x;
 
-    if (offset.y > 1.1)
-        offset.y = 0.0f;
+    float shadowCoeff = SampleShadowWithOffset(ssPosPixels, ssPos.z, float2(-1.5f, 0.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, float2(0.5f, 0.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, float2(-1.5f, -1.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, float2(0.5f, -1.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, float2(1.5f, -0.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, float2(-0.5f, -0.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, float2(1.5f, 1.5f)) +
+                        SampleShadowWithOffset(ssPosPixels, ssPos.z, float2(-0.5f, 1.5f));
 
-    float shadowCoeff = SampleShadowWithOffset(ssPosPixels, ssPos.z, offset + float2(-1.5f, 0.5f)) +
-                        SampleShadowWithOffset(ssPosPixels, ssPos.z, offset + float2(0.5f, 0.5f)) +
-                        SampleShadowWithOffset(ssPosPixels, ssPos.z, offset + float2(-1.5f, -1.5f)) +
-                        SampleShadowWithOffset(ssPosPixels, ssPos.z, offset + float2(0.5f, -1.5f));
-
-    return shadowCoeff * 0.25f;
+    return shadowCoeff * (1.0f / 8.0f);
 }
 
-float SampleShadowMap(float3 csPosition)
+float SampleShadowMapPCF(float3 csPosition)
 {
     [branch]
     if (shadowsEnabled == 0.0f)
@@ -213,10 +212,30 @@ float SampleShadowMap(float3 csPosition)
     float4 ssPos = mul(float4(csPosition, 1.0f), shadowMapTransform);
     ssPos /= ssPos.w;
     
-    float2 temp = abs(ssPos);
+    float2 temp = abs(ssPos.xy);
     // Sample is outside of shadow map
     if (max(temp.x, temp.y) >= 1.0f)
         return 1.0f;
 
     return PCFFilter(ssPos);
+}
+
+float SampleShadowMapRaw(float3 csPosition)
+{
+    [branch]
+    if (shadowsEnabled == 0.0f)
+        return 1.0f;
+
+    float4 ssPos = mul(float4(csPosition, 1.0f), shadowMapTransform);
+    ssPos /= ssPos.w;
+    
+    float2 temp = abs(ssPos.xy);
+    // Sample is outside of shadow map
+    if (max(temp.x, temp.y) >= 1.0f)
+        return 1.0f;
+
+    float2 uvPos = (ssPos.xy * float2(0.5f, -0.5f)) + 0.5f;
+    float2 ssPosPixels = uvPos * shadowMapDimensions;
+
+    return SampleShadowWithOffset(ssPosPixels, ssPos.z, 0.0f);
 }

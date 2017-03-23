@@ -57,7 +57,7 @@ PixelOut PSMain(VertexOut input)
         return result;
     }
 
-    lightVisibility[0] = SampleShadowMap(csPosition[0]);
+    lightVisibility[0] = SampleShadowMapRaw(csPosition[0]);
     lightVisibility[1] = 1.0f;
     
     // Calculate lambert lighting for all lights

@@ -12,6 +12,7 @@ namespace Engine
     public:
         using Ptr = std::shared_ptr<MeshInstance>;
         virtual void Render(ID3D11DeviceContext* deviceContext, ShaderPipeline::Ptr shaderOverride = nullptr) const override;
+        virtual void Update(float frameTime) override;
 
         void SetMesh(Mesh::Ptr mesh);
         void SetMaterial(Material::Ptr material);
@@ -30,6 +31,9 @@ namespace Engine
         // Not too proud. But allows us to save the previous transform
         // after rendering. 
         mutable Utils::Maths::Matrix m_prevTransform;
+
+        /*  We need to recompute bounds when a new mesh is added to the object*/
+        bool m_computeBounds = false;
 
         friend class SceneNode;
     };

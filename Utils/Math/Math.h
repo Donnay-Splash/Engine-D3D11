@@ -116,6 +116,7 @@ namespace Utils
             static Vector4 Min(const Vector4& lhs, const Vector4& rhs);
             static Vector4 Max(const Vector4& lhs, const Vector4& rhs);
             static Vector4 Normalize(const Vector4& vec);
+            static float Dot(const Vector4& lhs, const Vector4& rhs);
 
             void Normalize();
             float Length() const;
@@ -160,6 +161,7 @@ namespace Utils
             static Vector3 Max(const Vector3& lhs, const Vector3& rhs);
             static Vector3 Normalize(const Vector3& vec);
             static Vector3 Cross(const Vector3& lhs, const Vector3& rhs);
+            static float Dot(const Vector3& lhs, const Vector3& rhs);
 
             void Normalize();
             float Length() const;
@@ -203,6 +205,7 @@ namespace Utils
             static Vector2 Min(const Vector2& lhs, const Vector2& rhs);
             static Vector2 Max(const Vector2& lhs, const Vector2& rhs);
             static Vector2 Normalize(const Vector2& vec);
+            static float Dot(const Vector2& lhs, const Vector2& rhs);
 
             void Normalize();
             float Length() const;

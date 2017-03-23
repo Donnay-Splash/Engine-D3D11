@@ -21,6 +21,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float target = floor(gBufferTarget);
     float3 samplePoint = float3(input.uv, displaySecondLayer);
     float z = csZ.Sample(gBufferSampler, samplePoint).r;
+    float d = depth.Sample(gBufferSampler, samplePoint).r;
 
     // If z is below zero then we are drawing an empty pixel
     if(z <= 0.0f)
@@ -29,6 +30,9 @@ float4 PSMain(VertexOut input) : SV_Target
     }
 
     float3 csPosition = ReconstructCSPosition(input.position.xy, z, projectionInfo);
+    float2 ssPos = (input.uv - 0.5f) * float2(2.0f, -2.0f);
+    float4 csPos = mul(float4(ssPos, d, 1.0f), invJitteredProjection);
+    csPos /= csPos.w;
     float3 ao = AO.Sample(gBufferSampler, samplePoint.xy).xxx;
     
     float4 diffuseSample = diffuseColor.Sample(gBufferSampler, samplePoint);
@@ -47,12 +51,14 @@ float4 PSMain(VertexOut input) : SV_Target
     confidence = saturate(((1.0f - confidence) - radiosityContrastCentre) * 2.0f + radiosityContrastCentre);
     float3 radiosity = confidence * radiositySample.rgb * radiosityEnabled * ColorBoost(radiositySample.rgb, unsaturatedBoost, saturatedBoost);
 
+    float visibility[MAX_LIGHT_COUNT] = { 1.0f, 1.0f, 1.0f, 1.0f};
+    visibility[0] = SampleShadowMapPCF(csPos.xyz);
 
     float3 radiance = 0.0f;
     for (int i = 0; i < activeLights; i++)
     {
         Light light = lights[i];
-        radiance += EvaluateBRDF(normal, viewDirection, -normalize(light.direction), alpha, baseColor) * light.color.rgb;
+        radiance += EvaluateBRDF(normal, viewDirection, -normalize(light.direction), alpha, baseColor) * light.color.rgb * visibility[i];
     }
 
     float3 wsN = normalize(mul(float4(normal, 0.0f), invViewMatrix).xyz);

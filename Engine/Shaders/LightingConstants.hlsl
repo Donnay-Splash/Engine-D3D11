@@ -5,6 +5,7 @@ static const float kSolidAngleHemisphere = 2.0f * PI;
 
 #define MAX_LIGHT_COUNT 4
 #define MAX_ENV_MIP_LEVEL 20
+#define SHADOWMAP_BIAS 0.02f
 TextureCube environmentMap : register(t10);
 SamplerState envSampler : register(s10);
 Texture2D shadowMap1 : register(t11);

@@ -36,6 +36,7 @@ namespace Engine
     class Light : public Component
     {
     public:
+        using Ptr = std::shared_ptr<Light>;
         void SetColor(Utils::Maths::Color);
         void SetIntensity(float intensity);
 

@@ -39,6 +39,13 @@ namespace Engine
     void Scene::Update(float frameTime)
     {
         m_rootNode->Update(frameTime);
+
+        /*  If the scene has changed this update then recalculate the bounding box*/
+        if (m_sceneChangedThisFrame)
+        {
+            m_sceneBounds = CalculateBoundingBoxForSceneNode(m_rootNode);
+            m_sceneChangedThisFrame = false;
+        }
     }
 
     void Scene::Render(ShaderPipeline::Ptr shaderOverride /*= nullptr*/)

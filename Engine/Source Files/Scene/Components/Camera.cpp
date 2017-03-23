@@ -53,7 +53,7 @@ namespace Engine
         viewConstants.prevInvView = sceneNode->GetScene()->GetPrevCameraTransform();
         viewConstants.projection = m_projectionMatrix;
         viewConstants.jitteredProjection = JitterProjection(viewSize);
-        viewConstants.cameraToScreenMatrix = GetCameraToScreenSpaceMatrix(viewSize);
+        viewConstants.invJitteredProjection = viewConstants.jitteredProjection.GetInverse();
         viewConstants.cameraPosition = sceneNode->GetWorldSpacePosition();
         viewConstants.clipInfo = GetClipInfo();
         viewConstants.projectionInfo = GetProjInfo(viewSize);

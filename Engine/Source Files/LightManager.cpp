@@ -5,7 +5,7 @@ static const uint32_t kEnvironmentMapRegister = 10;
 static const uint32_t kShadowMapRegister = 11;
 
 static const uint32_t kMaxShadowCasters = 2;
-static const uint32_t kShadowMapWidth = 1024;
+static const uint32_t kShadowMapWidth = 2048;
 namespace Engine
 {
     LightManager::LightManager()
@@ -93,6 +93,7 @@ namespace Engine
         EngineAssert(shadowCaster != nullptr);
 
         auto scene = shadowCaster->GetSceneNode()->GetScene();
+        
         auto device = scene->GetDevice();
         device->BeginRenderEvent(L"Render Shadow maps");
             m_shadowMapCamera->SetRenderTargetBundle(m_shadowMapTarget);
