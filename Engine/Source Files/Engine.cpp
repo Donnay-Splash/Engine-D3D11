@@ -411,6 +411,9 @@ namespace Engine
         auto envMap = Texture::CreateTextureFromMemory(data, byteCount, m_direct3D->GetDevice());
         if (envMap->IsCubeMap())
         {
+            // Auto generate mips for environment map.
+            // Don't bother using fancy processing this'll do fine
+            m_direct3D->GetDeviceContext()->GenerateMips(envMap->GetSRV().Get());
             // Set cube map ready for rendering
             m_lightManager.SetEnvironmentMap(envMap);
         }

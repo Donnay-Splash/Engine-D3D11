@@ -524,6 +524,11 @@ namespace Utils
             return out;
         }
 
+        inline Vector4 Vector4::Abs(const Vector4& vec)
+        {
+            return{ abs(vec.x), abs(vec.y), abs(vec.z), abs(vec.w) };
+        }
+
         inline void Vector4::Normalize()
         {
             XMVECTOR xmVec = XMLoadFloat4A(this);
@@ -661,6 +666,11 @@ namespace Utils
             return returnVector;
         }
 
+        inline Vector4 operator- (const Vector4& vec)
+        {
+            return{ -vec.x, -vec.y, -vec.z, -vec.w };
+        }
+
         inline Vector4 operator* (const Vector4& V1, const Vector4& V2)
         {
             XMVECTOR Vector1 = XMLoadFloat4A(&V1);
@@ -766,6 +776,11 @@ namespace Utils
             XMStoreFloat(&out, result);
 
             return out;
+        }
+
+        inline Vector3 Vector3::Abs(const Vector3& vec)
+        {
+            return{ abs(vec.x), abs(vec.y), abs(vec.z) };
         }
 
         inline void Vector3::Normalize()
@@ -905,6 +920,11 @@ namespace Utils
             return returnVector;
         }
 
+        inline Vector3 operator- (const Vector3& vec)
+        {
+            return { -vec.x, -vec.y, -vec.z };
+        }
+
         inline Vector3 operator* (const Vector3& V1, const Vector3& V2)
         {
             XMVECTOR Vector1 = XMLoadFloat3A(&V1);
@@ -995,6 +1015,11 @@ namespace Utils
             XMStoreFloat(&out, result);
 
             return out;
+        }
+
+        inline Vector2 Vector2::Abs(const Vector2& vec)
+        {
+            return{ abs(vec.x), abs(vec.y) };
         }
 
         inline void Vector2::Normalize()
@@ -1130,6 +1155,11 @@ namespace Utils
 
             XMStoreFloat2A(&returnVector, result);
             return returnVector;
+        }
+
+        inline Vector2 operator- (const Vector2& vec)
+        {
+            return{ -vec.x, -vec.y };
         }
 
         inline Vector2 operator* (const Vector2& V1, const Vector2& V2)

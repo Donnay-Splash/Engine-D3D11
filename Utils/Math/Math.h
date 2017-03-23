@@ -117,6 +117,7 @@ namespace Utils
             static Vector4 Max(const Vector4& lhs, const Vector4& rhs);
             static Vector4 Normalize(const Vector4& vec);
             static float Dot(const Vector4& lhs, const Vector4& rhs);
+            static Vector4 Abs(const Vector4& vec);
 
             void Normalize();
             float Length() const;
@@ -136,6 +137,7 @@ namespace Utils
         Vector4 operator* (const Vector4& vector, const Matrix& matrix);
         Vector4 operator+ (const Vector4& V1, const Vector4& V2);
         Vector4 operator- (const Vector4& V1, const Vector4& V2);
+        Vector4 operator- (const Vector4& vec);
         Vector4 operator* (const Vector4& V1, const Vector4& V2);
         Vector4 operator* (const Vector4& M, float S);
         Vector4 operator/ (const Vector4& M, float S);
@@ -162,6 +164,7 @@ namespace Utils
             static Vector3 Normalize(const Vector3& vec);
             static Vector3 Cross(const Vector3& lhs, const Vector3& rhs);
             static float Dot(const Vector3& lhs, const Vector3& rhs);
+            static Vector3 Abs(const Vector3& vec);
 
             void Normalize();
             float Length() const;
@@ -182,6 +185,7 @@ namespace Utils
         Vector3 operator* (const Vector3& vector, const Matrix& matrix);
         Vector3 operator+ (const Vector3& V1, const Vector3& V2);
         Vector3 operator- (const Vector3& V1, const Vector3& V2);
+        Vector3 operator- (const Vector3& vec);
         Vector3 operator* (const Vector3& V1, const Vector3& V2);
         Vector3 operator* (const Vector3& M, float S);
         Vector3 operator/ (const Vector3& M, float S);
@@ -206,6 +210,7 @@ namespace Utils
             static Vector2 Max(const Vector2& lhs, const Vector2& rhs);
             static Vector2 Normalize(const Vector2& vec);
             static float Dot(const Vector2& lhs, const Vector2& rhs);
+            static Vector2 Abs(const Vector2& vec);
 
             void Normalize();
             float Length() const;
@@ -225,6 +230,7 @@ namespace Utils
         Vector2 operator* (const Vector2& vector, const Matrix& matrix);
         Vector2 operator+ (const Vector2& V1, const Vector2& V2);
         Vector2 operator- (const Vector2& V1, const Vector2& V2);
+        Vector2 operator- (const Vector2& vec);
         Vector2 operator* (const Vector2& V1, const Vector2& V2);
         Vector2 operator* (const Vector2& M, float S);
         Vector2 operator/ (const Vector2& M, float S);

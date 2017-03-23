@@ -35,10 +35,11 @@ PixelOut PSMain(VertexOut input)
     // Shading data for each layer
     float3 diffuseColor[2];
     float3 csNormal[2];
-    float csZ[2];
-    float3 csPosition[2];
-    float3 viewDirection[2];
-    float lightVisibility[2];
+    float depth[2];
+    float4 csPosition[2];
+    float2 lightVisibility[2];
+
+    float2 ssPos = (input.uv - 0.5f) * float2(2.0f, -2.0f);
 
     [unroll]
     for (int i = 0; i < 2; i++)
@@ -47,17 +48,18 @@ PixelOut PSMain(VertexOut input)
         diffuseColor[i] = diffuseColorTexture.Sample(gBufferSampler, samplePoint).rgb;
         float3 normal = csNormalsTexture.Sample(gBufferSampler, samplePoint).rgb;
         csNormal[i] = normalize((normal * 2.0f) - 1.0f);
-        csZ[i] = csZTexture.Sample(gBufferSampler, samplePoint).r;
-        csPosition[i] = ReconstructCSPosition(input.position.xy, csZ[i], projectionInfo);
-        viewDirection[i] = normalize(-csPosition[i]);
+        depth[i] = depthTexture.Sample(gBufferSampler, samplePoint).r;
+        csPosition[i] = mul(float4(ssPos, depth[i], 1.0f), invJitteredProjection);
+        csPosition[i] /= csPosition[i].w;
     }
 
-    if(csZ[0] <= 0.0f)
+    if (depth[0] >= 1.0f)
     {
         return result;
     }
 
-    lightVisibility[0] = SampleShadowMapRaw(csPosition[0]);
+    lightVisibility[0].r = SampleShadowMapRaw(csPosition[0].xyz);
+    lightVisibility[0].g = SampleShadowMapRaw(csPosition[1].xyz);
     lightVisibility[1] = 1.0f;
     
     // Calculate lambert lighting for all lights
@@ -66,8 +68,8 @@ PixelOut PSMain(VertexOut input)
     {
         Light light = lights[lightNum];
         float3 lightDirection = -normalize(light.direction);
-        result.firstLayer.rgb += EvaluateLambert(csNormal[0], lightDirection, diffuseColor[0]) * light.color.rgb * lightVisibility[lightNum];
-        result.secondLayer.rgb += EvaluateLambert(csNormal[1], lightDirection, diffuseColor[1]) * light.color.rgb;
+        result.firstLayer.rgb += EvaluateLambert(csNormal[0], lightDirection, diffuseColor[0]) * light.color.rgb * lightVisibility[lightNum].r;
+        result.secondLayer.rgb += EvaluateLambert(csNormal[1], lightDirection, diffuseColor[1]) * light.color.rgb * lightVisibility[lightNum].g;
     }
 
     // apply indirect to first layer
@@ -80,7 +82,7 @@ PixelOut PSMain(VertexOut input)
     float previousDepth = previoudDepthTexture.Sample(gBufferSampler, float3(previousCoord, 0.0f)).r;
     float3 previousWSPosition = ReconstructWSPosition(previousCoord / invViewSize, ReconstructCSZ(previousDepth, clipInfo), projectionInfo, prevInvViewMatrix);
 
-    float3 wsPosition = mul(float4(csPosition[0], 1.0f), invViewMatrix).xyz;
+    float3 wsPosition = mul(float4(csPosition[0].xyz, 1.0f), invViewMatrix).xyz;
 
     float dist = length(wsPosition - previousWSPosition);
     float weight = 1.0f - smoothstep(0.5f, 0.7f, dist) * float(!offscreen);

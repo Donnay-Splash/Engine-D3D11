@@ -1,6 +1,8 @@
 #include "pch.h"
 #include <Scene\Components\ShadowMapCamera.h>
 
+namespace UM = Utils::Maths;
+
 namespace Engine
 {
     ShadowMapCamera::ShadowMapCamera(Component::SceneNodePtr sceneNode) : Camera(sceneNode)
@@ -39,10 +41,21 @@ namespace Engine
         auto lightNode = light->GetSceneNode();
         auto bounds = scene->GetSceneBounds();
         auto lightDirection = light->GetLightData().Direction;
-        float dist = Utils::Maths::Vector3::Dot(lightDirection, bounds.GetSize());
-        auto position = bounds.GetCentre() + (lightDirection * dist);
+        auto absDir = UM::Vector3::Abs(lightDirection);
+        float dist = UM::Vector3::Dot(absDir, bounds.GetSize());
+        auto position = bounds.GetCentre() + (-lightDirection * dist);
         lightNode->SetPosition(position, true);
 
+        auto transform = light->GetSceneNode()->GetWorldTransform();
+        auto up = UM::Vector3::Abs(transform.Up());
+        auto right = UM::Vector3::Abs(transform.Right());
+
+        float orthographicHeight = UM::Vector3::Dot(up, bounds.GetSize());
+        float orthographicWidth = UM::Vector3::Dot(right, bounds.GetSize());
+
+        float aspect = orthographicWidth / orthographicHeight;
+        SetOrthographicSize(orthographicHeight * 2.0f);
+        SetAspectRatio(aspect);
         SetFarClip(abs(dist) * 2.0f);
 
         auto worldToLightMatrix = lightNode->GetWorldTransform().GetInverse();
