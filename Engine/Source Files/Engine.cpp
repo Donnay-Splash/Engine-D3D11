@@ -73,7 +73,7 @@ namespace Engine
     // class constants
     const uint32_t kHiZ_MaxMip = 5;
     const uint32_t kRadiosityBuffer_MaxMip = kHiZ_MaxMip;
-    const uint32_t kAO_numSamples = 30;
+    const uint32_t kAO_numSamples = 14;
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     const uint32_t kTemporalAASamples = 8;
     const uint32_t kBilateralBlurWidth = 7;
@@ -311,6 +311,12 @@ namespace Engine
             auto setter = [&](float value) {m_giConstants.confidenceCentre = value; };
             m_giOptions->RegisterScalarProperty(L"Confidence Centre", getter, setter, 0.0f, 1.0f);
         }
+
+        {
+            auto getter = [&]()->float { return m_giConstants.envIntensity; };
+            auto setter = [&](float value) {m_giConstants.envIntensity = value; };
+            m_giOptions->RegisterScalarProperty(L"Environment Intensity", getter, setter, 0.0f, 1.0f);
+        }
     }
 
     void Engine::SetFrameInput(InputState newInputState)
@@ -430,13 +436,9 @@ namespace Engine
 
     void Engine::LoadEnvironment(const uint8_t * data, uint64_t byteCount)
     {
-        auto envMap = Texture::CreateTextureFromMemory(data, byteCount, m_direct3D->GetDevice());
+        auto envMap = Texture::CreateTextureFromMemory(data, byteCount, m_direct3D.get(), true);
         if (envMap->IsCubeMap())
         {
-            // Auto generate mips for environment map.
-            // Don't bother using fancy processing this'll do fine
-            m_direct3D->GetDeviceContext()->GenerateMips(envMap->GetSRV().Get());
-            // Set cube map ready for rendering
             m_lightManager.SetEnvironmentMap(envMap);
         }
     }

@@ -275,6 +275,7 @@ namespace Engine
         float unsaturatedBoost = 1.0f; // How much to boost unsaturated colors
         float saturatedBoost = 2.0f; // How much to boost saturated colors.
         float confidenceCentre = 0.35f; // Modifier for radiosity confidence
+        float envIntensity = 1.0f; // Multiplier controls how much the environment map adds to the final solution
 
         // We know that these constants will change each frame so 
         // the comparison operators pass through
@@ -290,7 +291,8 @@ namespace Engine
             (radiosityRadius != rhs.radiosityRadius) ||
             (unsaturatedBoost != rhs.unsaturatedBoost) ||
             (saturatedBoost != rhs.saturatedBoost) ||
-            (confidenceCentre != rhs.confidenceCentre);
+            (confidenceCentre != rhs.confidenceCentre) ||
+            (envIntensity != rhs.envIntensity);
         }
         bool operator == (const GIConstants& rhs)
         {
@@ -304,7 +306,8 @@ namespace Engine
             (radiosityRadius == rhs.radiosityRadius) &&
             (unsaturatedBoost == rhs.unsaturatedBoost) &&
             (saturatedBoost == rhs.saturatedBoost) &&
-            (confidenceCentre == rhs.confidenceCentre);
+            (confidenceCentre == rhs.confidenceCentre) &&
+            (envIntensity == rhs.envIntensity);
         }
     };
 

@@ -65,8 +65,8 @@ float4 PSMain(VertexOut input) : SV_Target
 
     float3 wsN = normalize(mul(float4(normal, 0.0f), invViewMatrix).xyz);
     float3 wsV = normalize(mul(float4(viewDirection, 0.0f), invViewMatrix).xyz);
-    float3 diffuseAmbient = DiffuseEnvironementLighting(wsN);
-    float3 specularAmbient = SpecularEnvironmentLighting(wsN, wsV, alpha);
+    float3 diffuseAmbient = DiffuseEnvironementLighting(wsN) * envIntensity;
+    float3 specularAmbient = SpecularEnvironmentLighting(wsN, wsV, alpha) * envIntensity;
 
     float3 aoContribution = lerp(1.0f.xxx, ao, aoEnabled);
     radiance += (radiosity * aoContribution + (diffuseAmbient * aoContribution * lerp(1.0f, 0.3f, confidence))) * (baseColor / PI);

@@ -2,6 +2,7 @@
 #include <Resources\Texture.h>
 #include <DDSTextureLoader.h>
 #include <Resources\ConstantBuffer.h>
+#include <Header Files\d3dclass.h>
 
 // TODO: Tidy
 namespace Engine
@@ -190,9 +191,16 @@ namespace Engine
         return std::shared_ptr<Texture>(new Texture(device, importedTextureData.data.data(), importedTextureData.dataSize));
     }
 
-    Texture::Ptr Texture::CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, ID3D11Device* device)
+    Texture::Ptr Texture::CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, D3DClass* d3d, bool generateMips /*= false*/)
     {
-        return std::shared_ptr<Texture>(new Texture(device, data, byteCount));
+        if (generateMips)
+        {
+            return std::shared_ptr<Texture>(new Texture(d3d->GetDevice(), d3d->GetDeviceContext(), data, byteCount));
+        }
+        else
+        {
+            return std::shared_ptr<Texture>(new Texture(d3d->GetDevice(), data, byteCount));
+        }
     }
 
     // Create a texture from imported texture data
@@ -238,6 +246,48 @@ namespace Engine
         }
     }
 
+    // Create a texture from imported texture data and auto generate mips
+    Texture::Texture(ID3D11Device* device, ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount)
+    {
+        ID3D11Resource* subresource;
+        Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, context, data, byteCount, &subresource, m_srv.GetAddressOf()));
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        m_srv->GetDesc(&srvDesc);
+        m_format = srvDesc.Format;
+
+        switch (srvDesc.ViewDimension)
+        {
+        case D3D11_SRV_DIMENSION_TEXTURE2D:
+        {
+            Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+            Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+            D3D11_TEXTURE2D_DESC texDesc;
+            tex2D->GetDesc(&texDesc);
+            m_height = texDesc.Height;
+            m_width = texDesc.Width;
+            m_arraySize = texDesc.ArraySize;
+            m_mipLevels = texDesc.MipLevels;
+            break;
+        }
+        case D3D11_SRV_DIMENSION_TEXTURECUBE:
+        {
+            Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+            Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+            D3D11_TEXTURE2D_DESC texDesc;
+            tex2D->GetDesc(&texDesc);
+            m_height = texDesc.Height;
+            m_width = texDesc.Width;
+            m_arraySize = texDesc.ArraySize;
+            m_mipLevels = texDesc.MipLevels;
+            m_isCube = true;
+            break;
+        }
+        default:
+            // Unexpected view dimension received
+            EngineAssert(false);
+            break;
+        }
+    }
 
     Texture::Ptr Texture::CreateIdenticalTexture(Texture::Ptr const texture, ID3D11Device* device)
     {

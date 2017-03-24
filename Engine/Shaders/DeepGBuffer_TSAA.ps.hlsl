@@ -5,7 +5,7 @@
 Texture2D currentFrame : register(t0);
 Texture2D previousFrame : register(t1);
 Texture2DArray ssVelocityTexture : register(t2);
-Texture2DArray depthTexture : register(t4);
+Texture2DArray depthTexture : register(t5);
 
 SamplerState TSAASampler : register(s0);
 

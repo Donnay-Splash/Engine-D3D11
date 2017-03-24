@@ -5,7 +5,7 @@ static const uint32_t kEnvironmentMapRegister = 10;
 static const uint32_t kShadowMapRegister = 11;
 
 static const uint32_t kMaxShadowCasters = 2;
-static const uint32_t kShadowMapWidth = 2048;
+static const uint32_t kShadowMapWidth = 4096;
 namespace Engine
 {
     LightManager::LightManager()

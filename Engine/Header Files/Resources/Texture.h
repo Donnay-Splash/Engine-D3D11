@@ -4,6 +4,9 @@
 
 namespace Engine
 {
+    // Forward declaration
+    class D3DClass;
+
     namespace TextureCreationFlags
     {
         static const uint32_t BindRenderTarget = 0x0001;
@@ -27,7 +30,7 @@ namespace Engine
         static Texture::Ptr CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device);
         static Texture::Ptr CreateTextureFromFile(std::wstring filename, ID3D11Device* device);
         static Texture::Ptr CreateImportedTexture(const Utils::Loader::TextureData& importedData, ID3D11Device* device);
-        static Texture::Ptr CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, ID3D11Device* device);
+        static Texture::Ptr CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, D3DClass* device, bool generateMips = false);
 
         // Creates a new texture with exactly the same layout as the given texture
         static Texture::Ptr CreateIdenticalTexture(Texture::Ptr const texture, ID3D11Device* device);
@@ -58,6 +61,8 @@ namespace Engine
         Texture(ID3D11Device* device, const wchar_t* filename);
         // Create a texture from memory
         Texture(ID3D11Device* device, const uint8_t* data, uint64_t byteCount);
+        // Create a texture from memory and generates mips. Mirrors what is done in DirectXTK
+        Texture(ID3D11Device* device, ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount);
         Texture(const Texture&) = delete;
 
     private:

@@ -26,6 +26,7 @@ cbuffer GIConstants : register(b5)
     float unsaturatedBoost; // How much to boost unsaturated colors
     float saturatedBoost; // How much to boost saturated colors.
     float radiosityContrastCentre;
+    float envIntensity; // Multiplier controls how much the environment map adds to the final radiance
 }
 
 
