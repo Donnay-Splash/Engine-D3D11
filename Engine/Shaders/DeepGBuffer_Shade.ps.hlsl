@@ -6,12 +6,13 @@
 
 // GBuffer layout
 Texture2DArray diffuseColor : register(t0);
-Texture2DArray csNormals : register(t1);
-Texture2DArray ssVelocity : register(t2);
-Texture2DArray csZ : register(t3);
-Texture2DArray depth : register(t4);
-Texture2D AO : register(t5);
-Texture2D radiosityTexture : register(t6);
+Texture2DArray emissiveTexture : register(t1);
+Texture2DArray csNormals : register(t2);
+Texture2DArray ssVelocity : register(t3);
+Texture2DArray csZ : register(t4);
+Texture2DArray depth : register(t5);
+Texture2D AO : register(t6);
+Texture2D radiosityTexture : register(t7);
 SamplerState gBufferSampler : register(s0);
 
 
@@ -38,6 +39,8 @@ float4 PSMain(VertexOut input) : SV_Target
     float4 diffuseSample = diffuseColor.Sample(gBufferSampler, samplePoint);
     float3 baseColor = diffuseSample.rgb;
 
+    float3 emissiveColor = emissiveTexture.Sample(gBufferSampler, samplePoint).rgb;
+
     float roughness = max(1.0f - diffuseSample.a * 0.7f, 0.001f);
     float alpha = roughness * roughness;
 
@@ -46,7 +49,6 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 viewDirection = normalize(-csPosition);
 
     float4 radiositySample = radiosityTexture.Sample(gBufferSampler, input.uv);
-    const float radiosityContrastCentre = 0.35f;
     float confidence = radiositySample.a;
     confidence = saturate(((1.0f - confidence) - radiosityContrastCentre) * 2.0f + radiosityContrastCentre);
     float3 radiosity = confidence * radiositySample.rgb * radiosityEnabled * ColorBoost(radiositySample.rgb, unsaturatedBoost, saturatedBoost);
@@ -69,6 +71,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 aoContribution = lerp(1.0f.xxx, ao, aoEnabled);
     radiance += (radiosity * aoContribution + (diffuseAmbient * aoContribution * lerp(1.0f, 0.3f, confidence))) * (baseColor / PI);
     radiance += (specularAmbient * aoContribution) / PI;
+    radiance += emissiveColor;
 
     if(target == 0.0f)
     {

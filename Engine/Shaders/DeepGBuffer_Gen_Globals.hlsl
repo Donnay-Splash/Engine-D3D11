@@ -40,6 +40,7 @@ cbuffer MaterialBuffer : register(b3)
     float4 material_diffuseColorAndOpacity;
     float4 material_specularColorAndSmoothness;
     float4 material_emissiveColor;
+    float material_emissiveIntensity;
     bool material_hasDiffuseTexture;
     bool material_hasSpecularTexture;
     bool material_hasEmissiveTexture;

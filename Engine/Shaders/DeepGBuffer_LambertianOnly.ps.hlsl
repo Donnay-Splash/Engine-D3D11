@@ -9,12 +9,13 @@
 // TODO: Rename this shader to something more appropriate. e.g. IndirectLightPrep, RadiosityPrep, RadiosityGBuffer
 
 Texture2DArray diffuseColorTexture : register(t0);
-Texture2DArray csNormalsTexture : register(t1);
-Texture2DArray ssVelocityTexture : register(t2);
-Texture2DArray csZTexture : register(t3);
-Texture2DArray depthTexture : register(t4);
-Texture2D previousRadiosityTexture : register(t5);
-Texture2DArray previoudDepthTexture : register(t6);
+Texture2DArray emissiveTexture : register(t1);
+Texture2DArray csNormalsTexture : register(t2);
+Texture2DArray ssVelocityTexture : register(t3);
+Texture2DArray csZTexture : register(t4);
+Texture2DArray depthTexture : register(t5);
+Texture2D previousRadiosityTexture : register(t6);
+Texture2DArray previoudDepthTexture : register(t7);
 SamplerState gBufferSampler : register(s0);
 
 // We can output the result for both layers at the same time as we have the result
@@ -28,8 +29,8 @@ struct PixelOut
 PixelOut PSMain(VertexOut input)
 {
     PixelOut result;
-    result.firstLayer = 0.0f;
-    result.secondLayer = 0.0f;
+    result.firstLayer = emissiveTexture.Sample(gBufferSampler, float3(input.uv, 0));
+    result.secondLayer = emissiveTexture.Sample(gBufferSampler, float3(input.uv, 1));
     result.packedNormal = 0.0f;
 
     // Shading data for each layer

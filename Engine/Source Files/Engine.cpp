@@ -73,7 +73,7 @@ namespace Engine
     // class constants
     const uint32_t kHiZ_MaxMip = 5;
     const uint32_t kRadiosityBuffer_MaxMip = kHiZ_MaxMip;
-    const uint32_t kAO_numSamples = 14;
+    const uint32_t kAO_numSamples = 30;
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     const uint32_t kTemporalAASamples = 8;
     const uint32_t kBilateralBlurWidth = 7;
@@ -135,7 +135,9 @@ namespace Engine
         // If defined attach the root scene element added callback.
         if (createOptions.RootSceneElementAddedCallback != nullptr)
         {
-            createOptions.RootSceneElementAddedCallback(m_globalOptions, 0);
+            createOptions.RootSceneElementAddedCallback(m_debugOptions, 0);
+            createOptions.RootSceneElementAddedCallback(m_aoOptions, 0);
+            createOptions.RootSceneElementAddedCallback(m_giOptions, 0);
             m_scene->GetRootNode()->SetChildAddedCallback(createOptions.RootSceneElementAddedCallback);
         }
 
@@ -211,84 +213,103 @@ namespace Engine
 
         m_deepGBufferData.minimumSeparation = 2.0f;
 
-        m_globalOptions = std::make_shared<SceneElement>(L"Global Options");
+        m_debugOptions = std::make_shared<SceneElement>(L"Debug Options");
+        m_giOptions = std::make_shared<SceneElement>(L"GI Options");
+        m_aoOptions = std::make_shared<SceneElement>(L"AO Options");
 
+        // DEBUG OPTIONS
         {
             auto getter = [&]()->bool { return m_debugConstants.displaySecondLayer == 1.0f; };
             auto setter = [&](bool value) {m_debugConstants.displaySecondLayer = value ? 1.0f : 0.0f; };
-            m_globalOptions->RegisterBooleanProperty(L"Display Second Layer", getter, setter);
+            m_debugOptions->RegisterBooleanProperty(L"Display Second Layer", getter, setter);
         }
 
         {
             auto getter = [&]()->bool { return m_camera->GetJitterEnabled(); };
             auto setter = [&](bool value) { m_camera->SetJitterEnabled(value); };
-            m_globalOptions->RegisterBooleanProperty(L"Jitter enabled", getter, setter);
+            m_debugOptions->RegisterBooleanProperty(L"Jitter enabled", getter, setter);
         }
 
         {
             auto getter = [&]()->float { return m_debugConstants.gBufferTargetIndex; };
             auto setter = [&](float value) {m_debugConstants.gBufferTargetIndex = value; };
-            m_globalOptions->RegisterScalarProperty(L"RenderTarget index", getter, setter, 0.0f, 6.0f);
+            m_debugOptions->RegisterScalarProperty(L"RenderTarget index", getter, setter, 0.0f, 6.0f);
         }
 
         {
             auto getter = [&]()->float { return m_deepGBufferData.minimumSeparation; };
             auto setter = [&](float value) {m_deepGBufferData.minimumSeparation = value; };
-            m_globalOptions->RegisterScalarProperty(L"Minimum Separation", getter, setter, 0.0f, 5.0f);
-        }
-
-        {
-            auto getter = [&]()->float { return m_giConstants.aoRadius; };
-            auto setter = [&](float value) {m_giConstants.aoRadius = value; };
-            m_globalOptions->RegisterScalarProperty(L"AO Radius", getter, setter, 0.0f, 10.0f);
-        }
-
-        {
-            auto getter = [&]()->float { return m_giConstants.radiosityRadius; };
-            auto setter = [&](float value) {m_giConstants.radiosityRadius = value; };
-            m_globalOptions->RegisterScalarProperty(L"Radiosity Radius", getter, setter, 0.0f, 50.0f);
-        }
-
-        {
-            auto getter = [&]()->float { return m_giConstants.aoBias; };
-            auto setter = [&](float value) {m_giConstants.aoBias = value; };
-            m_globalOptions->RegisterScalarProperty(L"AO Bias", getter, setter, 0.0f, 0.1f);
-        }
-
-        {
-            auto getter = [&]()->float { return m_giConstants.aoIntensity; };
-            auto setter = [&](float value) {m_giConstants.aoIntensity = value; };
-            m_globalOptions->RegisterScalarProperty(L"AO Intensity", getter, setter, 1.0f, 4.0f);
-        }
-
-        {
-            auto getter = [&]()->float { return m_giConstants.aoUseSecondLayer; };
-            auto setter = [&](float value) {m_giConstants.aoUseSecondLayer = value; };
-            m_globalOptions->RegisterScalarProperty(L"AO Use second layer", getter, setter, 0.0f, 1.0f);
-        }
-
-        {
-            auto getter = [&]()->bool { return m_debugConstants.aoEnabled == 1.0f; };
-            auto setter = [&](bool value) { m_debugConstants.aoEnabled = value ? 1.0f : 0.0f; };
-            m_globalOptions->RegisterBooleanProperty(L"AO Enabled", getter, setter);
-        }
-
-        {
-            auto getter = [&]()->bool { return m_debugConstants.radiosityEnabled == 1.0f; };
-            auto setter = [&](bool value) {m_debugConstants.radiosityEnabled = value ? 1.0f : 0.0f; };
-            m_globalOptions->RegisterBooleanProperty(L"Radiosity Enabled", getter, setter);
+            m_debugOptions->RegisterScalarProperty(L"Minimum Separation", getter, setter, 0.0f, 5.0f);
         }
 
         {
             auto getter = [&]()->float { return m_debugConstants.sceneExposure; };
             auto setter = [&](float value) {m_debugConstants.sceneExposure = value; };
-            m_globalOptions->RegisterScalarProperty(L"Exposure", getter, setter, 0.0f, 10.0f);
+            m_debugOptions->RegisterScalarProperty(L"Exposure", getter, setter, 0.0f, 10.0f);
+        }
+
+        // AO OPTIONS
+
+        {
+            auto getter = [&]()->float { return m_giConstants.aoRadius; };
+            auto setter = [&](float value) {m_giConstants.aoRadius = value; };
+            m_aoOptions->RegisterScalarProperty(L"AO Radius", getter, setter, 0.0f, 10.0f);
+        }
+
+
+        {
+            auto getter = [&]()->float { return m_giConstants.aoBias; };
+            auto setter = [&](float value) {m_giConstants.aoBias = value; };
+            m_aoOptions->RegisterScalarProperty(L"AO Bias", getter, setter, 0.0f, 0.1f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_giConstants.aoIntensity; };
+            auto setter = [&](float value) {m_giConstants.aoIntensity = value; };
+            m_aoOptions->RegisterScalarProperty(L"AO Intensity", getter, setter, 1.0f, 4.0f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_giConstants.aoUseSecondLayer; };
+            auto setter = [&](float value) {m_giConstants.aoUseSecondLayer = value; };
+            m_aoOptions->RegisterScalarProperty(L"AO Use second layer", getter, setter, 0.0f, 1.0f);
+        }
+
+        {
+            auto getter = [&]()->bool { return m_debugConstants.aoEnabled == 1.0f; };
+            auto setter = [&](bool value) { m_debugConstants.aoEnabled = value ? 1.0f : 0.0f; };
+            m_aoOptions->RegisterBooleanProperty(L"AO Enabled", getter, setter);
+        }
+
+        // GI OPTIONS
+        {
+            auto getter = [&]()->bool { return m_debugConstants.radiosityEnabled == 1.0f; };
+            auto setter = [&](bool value) {m_debugConstants.radiosityEnabled = value ? 1.0f : 0.0f; };
+            m_giOptions->RegisterBooleanProperty(L"Radiosity Enabled", getter, setter);
+        }
+
+        {
+            auto getter = [&]()->float { return m_giConstants.radiosityRadius; };
+            auto setter = [&](float value) {m_giConstants.radiosityRadius = value; };
+            m_giOptions->RegisterScalarProperty(L"Radiosity Radius", getter, setter, 0.0f, 50.0f);
         }
 
         {
             auto getter = [&]()->float { return m_giConstants.radiosityPropogationDamping; };
             auto setter = [&](float value) {m_giConstants.radiosityPropogationDamping = value; };
-            m_globalOptions->RegisterScalarProperty(L"Radiosity Propogation Damping", getter, setter, 0.0f, 1.0f);
+            m_giOptions->RegisterScalarProperty(L"Propogation Damping", getter, setter, 0.0f, 1.0f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_giConstants.saturatedBoost; };
+            auto setter = [&](float value) {m_giConstants.saturatedBoost = value; };
+            m_giOptions->RegisterScalarProperty(L"Color Boost", getter, setter, 1.0f, 2.0f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_giConstants.confidenceCentre; };
+            auto setter = [&](float value) {m_giConstants.confidenceCentre = value; };
+            m_giOptions->RegisterScalarProperty(L"Confidence Centre", getter, setter, 0.0f, 1.0f);
         }
     }
 
@@ -346,6 +367,7 @@ namespace Engine
         const uint32_t GBufferLayers = 2;
         RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth + guardBandWidth, newHeight + guardBandHeight, GBufferLayers);
         GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
+        GBuffer->CreateRenderTarget(L"Emissive", DXGI_FORMAT_R11G11B10_FLOAT);
         GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT, {1.0f, 1.0f, 1.0f, 1.0f});
         GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT, {-1.0f, -1.0f, -1.0f, -1.0f });
@@ -598,8 +620,8 @@ namespace Engine
 
         // Upload G-buffer data to device
         GBuffer->SetShaderResources(m_direct3D->GetDeviceContext());
-        aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 5);
-        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 6); // TEST
+        aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 6);
+        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 7);
 
         // Set post effect constants
         m_postEffect->SetEffectData(m_debugConstants);
@@ -623,10 +645,11 @@ namespace Engine
         auto lambertOnlyEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), lambertShaderPipeline);
 
         // TODO: When ready upload previous indirect lighting
-        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 5);
+        const uint32_t radiosityRegister = 6;
+        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), radiosityRegister);
         if (m_prevDepth != nullptr)
         {
-            m_prevDepth->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 6);
+            m_prevDepth->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 7);
         }
 
         lambertOnlyEffect->SetEffectData(m_debugConstants);
@@ -634,7 +657,7 @@ namespace Engine
         m_postProcessCamera->RenderPostEffect(m_direct3D, lambertOnlyEffect);
 
         // To avoid the filtered radioisty still being bound as input when generating next radiosity clear that register
-        m_direct3D->UnbindShaderResourceView(5);
+        m_direct3D->UnbindShaderResourceView(radiosityRegister);
     }
 
     void Engine::GenerateRadiosityBufferMips()

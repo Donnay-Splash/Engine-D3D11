@@ -142,6 +142,7 @@ namespace Engine
         Utils::Maths::Color diffuseColorAndOpacity;
         Utils::Maths::Color specularColorAndSmoothness;
         Utils::Maths::Color emissiveColor;
+        float emissiveIntensity = 1.0f;
         float hasDiffuseTexture = 0.0f;
         float hasSpecularTexture = 0.0f;
         float hasEmissiveTexture = 0.0f;
@@ -155,6 +156,7 @@ namespace Engine
             return (diffuseColorAndOpacity != rhs.diffuseColorAndOpacity) ||
                 (specularColorAndSmoothness != rhs.specularColorAndSmoothness) ||
                 (emissiveColor != rhs.emissiveColor) ||
+                (emissiveIntensity != rhs.emissiveIntensity) ||
                 (hasDiffuseTexture != rhs.hasDiffuseTexture) ||
                 (hasSpecularTexture != rhs.hasSpecularTexture) ||
                 (hasEmissiveTexture != rhs.hasEmissiveTexture) ||
@@ -169,6 +171,7 @@ namespace Engine
             return (diffuseColorAndOpacity == rhs.diffuseColorAndOpacity) &&
                 (specularColorAndSmoothness == rhs.specularColorAndSmoothness) &&
                 (emissiveColor == rhs.emissiveColor) &&
+                (emissiveIntensity == rhs.emissiveIntensity) &&
                 (hasDiffuseTexture == rhs.hasDiffuseTexture) &&
                 (hasSpecularTexture == rhs.hasSpecularTexture) &&
                 (hasEmissiveTexture == rhs.hasEmissiveTexture) &&
@@ -271,6 +274,7 @@ namespace Engine
         // Both values useful for artifically making colors stand out more in radiosity.
         float unsaturatedBoost = 1.0f; // How much to boost unsaturated colors
         float saturatedBoost = 2.0f; // How much to boost saturated colors.
+        float confidenceCentre = 0.35f; // Modifier for radiosity confidence
 
         // We know that these constants will change each frame so 
         // the comparison operators pass through
@@ -285,7 +289,8 @@ namespace Engine
             (radiosityPropogationDamping != rhs.radiosityPropogationDamping) ||
             (radiosityRadius != rhs.radiosityRadius) ||
             (unsaturatedBoost != rhs.unsaturatedBoost) ||
-            (saturatedBoost != rhs.saturatedBoost);
+            (saturatedBoost != rhs.saturatedBoost) ||
+            (confidenceCentre != rhs.confidenceCentre);
         }
         bool operator == (const GIConstants& rhs)
         {
@@ -298,7 +303,8 @@ namespace Engine
             (radiosityPropogationDamping == rhs.radiosityPropogationDamping) &&
             (radiosityRadius == rhs.radiosityRadius) &&
             (unsaturatedBoost == rhs.unsaturatedBoost) &&
-            (saturatedBoost == rhs.saturatedBoost);
+            (saturatedBoost == rhs.saturatedBoost) &&
+            (confidenceCentre == rhs.confidenceCentre);
         }
     };
 

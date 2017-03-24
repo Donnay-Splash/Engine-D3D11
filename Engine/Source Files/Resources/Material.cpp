@@ -101,6 +101,10 @@ namespace Engine
         auto opacitySetter = [this](float opacity) { SetOpacity(opacity); };
         RegisterScalarProperty(L"Opacity", opacityGetter, opacitySetter, 0.0f, 1.0f);
 
+        auto emissiveGetter = [this]() { return m_materialData.emissiveIntensity; };
+        auto emissiveSetter = [this](float value) { m_materialData.emissiveIntensity = value; };
+        RegisterScalarProperty(L"Emissive Intensity", emissiveGetter, emissiveSetter, 0.0f, 10.0f);
+
         auto diffuseEnabledGetter = [this]() { return m_materialData.hasDiffuseTexture == 1.0f ? true : false; };
         auto diffuseEnabledSetter = [this](bool enabled) { m_materialData.hasDiffuseTexture = enabled ? 1.0f : 0.0f; };
         RegisterBooleanProperty(L"Diffuse Enabled", diffuseEnabledGetter, diffuseEnabledSetter);

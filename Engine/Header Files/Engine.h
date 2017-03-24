@@ -99,7 +99,9 @@ namespace Engine
         PostProcessingCamera::Ptr m_postProcessCamera;
         PostEffect<PostEffectConstants>::Ptr m_postEffect;
         PostEffectConstants m_debugConstants;
-        SceneElement::Ptr m_globalOptions;
+        SceneElement::Ptr m_debugOptions;
+        SceneElement::Ptr m_giOptions;
+        SceneElement::Ptr m_aoOptions;
         ConstantBuffer<DeepGBufferConstants>::Ptr m_deepGBufferConstant;
         DeepGBufferConstants m_deepGBufferData;
         RenderTargetBundle::Ptr m_hiZBundle;

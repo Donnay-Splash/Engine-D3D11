@@ -8,10 +8,11 @@
 struct PixelOutput
 {
     float4 diffuseColor : SV_Target0;
+    float3 emissiveColor : SV_Target1;
     // Specular Color and smoothness
-    float4 csNormal : SV_Target1;
-    float2 ssVelocity : SV_Target2;
-    float csZ : SV_Target3;
+    float4 csNormal : SV_Target2;
+    float2 ssVelocity : SV_Target3;
+    float csZ : SV_Target4;
 };
 
 /*-------------------------------
@@ -91,6 +92,15 @@ PixelOutput PSMain(PixelInput input)
     {
         output.diffuseColor.a = SpecularTexture.Sample(MaterialSampler, input.texCoord).r;
     }
+
+    // Calculate emissive
+    output.emissiveColor = material_emissiveColor.rgb;
+    [branch]
+    if(material_hasEmissiveTexture)
+    {
+        output.emissiveColor = EmissiveTexture.Sample(MaterialSampler, input.texCoord).rgb;
+    }
+    output.emissiveColor *= material_emissiveIntensity;
 
     float3 normal = normalize(input.csNormal);
     [branch]

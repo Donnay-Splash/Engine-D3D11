@@ -25,6 +25,7 @@ cbuffer GIConstants : register(b5)
     // Both values useful for artifically making colors stand out more in radiosity.
     float unsaturatedBoost; // How much to boost unsaturated colors
     float saturatedBoost; // How much to boost saturated colors.
+    float radiosityContrastCentre;
 }
 
 
