@@ -19,8 +19,8 @@ cbuffer DoFConstants : register(b7)
 
 struct PixelOut
 {
-    float4 halfResNearField;
-    float4 halfResFarField;
+    float4 halfResNearField : SV_Target0;
+    float4 halfResFarField : SV_Target1;
 };
 
 PixelOut PSMain(VertexOut input)
