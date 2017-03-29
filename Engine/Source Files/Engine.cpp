@@ -80,7 +80,7 @@ namespace Engine
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
 
     /*
-        The percentage that we want the guard band to extend the view 
+        The percentage that we want the guard band to extend the view.
         The Guard band is required to avoid suppress incorrect AO and Radiosity
         at screen edges. e.g. A value of 0.1 in x will extend the width by
         10% in both directions. A resoultion of 1280 in x will result in render
