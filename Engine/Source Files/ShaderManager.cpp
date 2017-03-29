@@ -105,6 +105,11 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_TonemapAndExposure.ps.hlsl.h"
     }
 
+    namespace DoF_Split
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_DoF_SplitScene.ps.hlsl.h"
+    }
+
     ShaderManager::ShaderManager(ID3D11Device* device)
     {
         LoadCoreShaders(device);
@@ -245,6 +250,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::Tonemap, shaderPipeline);
+        }
+
+        // Load the DoF scene split shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DoF_Split::g_PSMain, sizeof(DoF_Split::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::DoF_Split, shaderPipeline);
         }
     }
 

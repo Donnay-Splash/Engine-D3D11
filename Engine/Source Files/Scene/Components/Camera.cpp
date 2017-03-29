@@ -58,7 +58,8 @@ namespace Engine
         viewConstants.clipInfo = GetClipInfo();
         viewConstants.projectionInfo = GetProjInfo(viewSize);
         viewConstants.invViewSize = Utils::Maths::Vector2(1.0f, 1.0f) / viewSize;
-        viewConstants.projectionScale = GetProjectionScale(viewSize);
+        m_projScale = CalculateProjectionScale(viewSize);
+        viewConstants.projectionScale = m_projScale;
 
         m_viewConstants->SetData(viewConstants);
         m_viewConstants->UploadData(d3dClass->GetDeviceContext());
@@ -100,7 +101,7 @@ namespace Engine
                 (1.0f + m_projectionMatrix._23) / m_projectionMatrix._22};
     }
 
-    float Camera::GetProjectionScale(const Utils::Maths::Vector2& viewSize) const
+    float Camera::CalculateProjectionScale(const Utils::Maths::Vector2& viewSize) const
     {
         const float scale = 2.0f * tan(m_fov * 0.5f);
 

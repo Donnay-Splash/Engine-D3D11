@@ -41,8 +41,11 @@ namespace Engine
         ProjectionMode GetProjectionMode() const { return m_projectionMode; }
         float GetOrthographicSize() const { return m_orthographicSize; }
         float GetAspectRatio() const { return m_aspectRatio; }
+        float GetNearClip() const { return m_nearClip; }
+        float GetFarClip() const { return m_farClip; }
         bool GetJitterEnabled() const { return m_jitterEnabled; }
         Utils::Maths::Vector2 GetCurrentTemporalJitter() const { return m_currentJitter; }
+        float GetProjectionScale() const { return m_projScale; }
 
         RenderTargetBundle::Ptr GetRenderTargetBundle() const { return m_renderTargetBundle; }
 
@@ -59,7 +62,7 @@ namespace Engine
         // Returns the number of pixels per metre at z = 1 for the given viewport.
         // This can be used to perform projections from world space values to screen space.
         // e.g. circle of confusion, AO sample radius
-        float GetProjectionScale(const Utils::Maths::Vector2& viewSize) const;
+        float CalculateProjectionScale(const Utils::Maths::Vector2& viewSize) const;
 
         Utils::Maths::Matrix JitterProjection(const Utils::Maths::Vector2& viewSize);
 
@@ -83,6 +86,9 @@ namespace Engine
         float m_aspectRatio;
         float m_orthographicSize;
         ProjectionMode m_projectionMode;
+
+        // YUCK YUCK YUCK
+        float m_projScale = 0.0f;
 
         // When enabled, randomly jitters projection matrix on sub pixel level.
         // This is used for temporal super-sampling effects.

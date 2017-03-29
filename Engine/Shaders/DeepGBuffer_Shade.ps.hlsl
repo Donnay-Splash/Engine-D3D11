@@ -69,7 +69,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 specularAmbient = SpecularEnvironmentLighting(wsN, wsV, alpha) * envIntensity;
 
     float3 aoContribution = lerp(1.0f.xxx, ao, aoEnabled);
-    radiance += (radiosity * aoContribution + (diffuseAmbient * aoContribution * lerp(1.0f, 0.3f, confidence))) * (baseColor / PI);
+    radiance += ((radiosity * aoContribution) + (diffuseAmbient * aoContribution * lerp(1.0f, 0.3f, confidence))) * (baseColor / PI);
     radiance += (specularAmbient * aoContribution) / PI;
     radiance += emissiveColor;
 

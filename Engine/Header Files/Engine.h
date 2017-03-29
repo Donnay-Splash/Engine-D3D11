@@ -79,6 +79,8 @@ namespace Engine
         void BlurBundle(RenderTargetBundle::Ptr targetBundle, Texture::Ptr csZTexture);
         /*  Runs TSAA merging this frames values with the accumulation*/
         void RunTSAA(Texture::Ptr ssVelTexture);
+        /*  Applies a post process depth of field effect to the scene*/
+        void ApplyDoF();
         /*  Applies conversion from HDR to LDR before presenting*/
         void Tonemap();
 
@@ -99,9 +101,11 @@ namespace Engine
         PostProcessingCamera::Ptr m_postProcessCamera;
         PostEffect<PostEffectConstants>::Ptr m_postEffect;
         PostEffectConstants m_debugConstants;
+        DepthOfFieldConstants m_dofConstants;
         SceneElement::Ptr m_debugOptions;
         SceneElement::Ptr m_giOptions;
         SceneElement::Ptr m_aoOptions;
+        SceneElement::Ptr m_dofOptions;
         ConstantBuffer<DeepGBufferConstants>::Ptr m_deepGBufferConstant;
         DeepGBufferConstants m_deepGBufferData;
         RenderTargetBundle::Ptr m_hiZBundle;
@@ -117,6 +121,7 @@ namespace Engine
         TextureBundleMipView::Ptr m_lambertianOnlyBundleMipView;
         RenderTargetBundle::Ptr m_radiosityBundle;
         RenderTargetBundle::Ptr m_filteredRadiosityBundle;
+        RenderTargetBundle::Ptr m_dofBundle;
         Texture::Ptr m_prevRawRadiosity;
         GIConstants m_giConstants;
 
@@ -130,6 +135,7 @@ namespace Engine
 
         float m_weightThisFrame = 0.05f;
         float m_elapsedTime = 0.0f;
+        float m_lensRadius = 0.01f;
     };
 }
 

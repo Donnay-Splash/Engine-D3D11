@@ -350,4 +350,34 @@ namespace Engine
         }
 
     };
+
+    ALIGN_16
+        struct DepthOfFieldConstants
+    {
+        static const UINT kRegister = 7;
+
+        float dofEnabled = 0.0f;
+        float focusPlaneZ = 10.0f;
+        float scale = 0.0f;
+        float maxCoCNear = 20.0f;
+        float maxCoCFar = 20.0f;
+
+        bool operator!=(const DepthOfFieldConstants& rhs)
+        {
+            return dofEnabled != rhs.dofEnabled ||
+            focusPlaneZ != rhs.focusPlaneZ ||
+            scale != rhs.scale ||
+            maxCoCNear != rhs.maxCoCNear ||
+            maxCoCFar != rhs.maxCoCFar;
+        }
+        bool operator==(const DepthOfFieldConstants& rhs)
+        {
+            return dofEnabled == rhs.dofEnabled &&
+            focusPlaneZ == rhs.focusPlaneZ &&
+            scale == rhs.scale &&
+            maxCoCNear == rhs.maxCoCNear &&
+            maxCoCFar == rhs.maxCoCFar;
+        }
+
+    };
 }

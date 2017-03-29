@@ -77,6 +77,7 @@ namespace Engine
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     const uint32_t kTemporalAASamples = 8;
     const uint32_t kBilateralBlurWidth = 7;
+    const float kMaxCoCRadiusPixels = 30.0f;
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
 
     /*
@@ -138,6 +139,7 @@ namespace Engine
             createOptions.RootSceneElementAddedCallback(m_debugOptions, 0);
             createOptions.RootSceneElementAddedCallback(m_aoOptions, 0);
             createOptions.RootSceneElementAddedCallback(m_giOptions, 0);
+            createOptions.RootSceneElementAddedCallback(m_dofOptions, 0);
             m_scene->GetRootNode()->SetChildAddedCallback(createOptions.RootSceneElementAddedCallback);
         }
 
@@ -213,9 +215,15 @@ namespace Engine
 
         m_deepGBufferData.minimumSeparation = 2.0f;
 
+        m_debugConstants.aoEnabled = 0.0f;
+        m_debugConstants.radiosityEnabled = 0.0f;
+
+        m_lensRadius = 0.05f;
+
         m_debugOptions = std::make_shared<SceneElement>(L"Debug Options");
         m_giOptions = std::make_shared<SceneElement>(L"GI Options");
         m_aoOptions = std::make_shared<SceneElement>(L"AO Options");
+        m_dofOptions = std::make_shared<SceneElement>(L"DoF Options");
 
         // DEBUG OPTIONS
         {
@@ -317,6 +325,26 @@ namespace Engine
             auto setter = [&](float value) {m_giConstants.envIntensity = value; };
             m_giOptions->RegisterScalarProperty(L"Environment Intensity", getter, setter, 0.0f, 1.0f);
         }
+
+        // DoF OPTIONS
+        {
+            auto getter = [&]()->bool { return m_dofConstants.dofEnabled == 1.0f; };
+            auto setter = [&](bool value) {m_dofConstants.dofEnabled = value ? 1.0f : 0.0f; };
+            m_dofOptions->RegisterBooleanProperty(L"DoF Enabled", getter, setter);
+        }
+
+        {
+            auto getter = [&]()->float { return m_dofConstants.focusPlaneZ; };
+            auto setter = [&](float value) {m_dofConstants.focusPlaneZ = value; };
+            m_dofOptions->RegisterScalarProperty(L"Focus Z plane", getter, setter, 0.0f, 50.0f);
+        }
+
+        {
+            auto getter = [&]()->float { return m_lensRadius; };
+            auto setter = [&](float value) {m_lensRadius = value; };
+            m_dofOptions->RegisterScalarProperty(L"Lens radius", getter, setter, 0.001f, 1.0f);
+        }
+
     }
 
     void Engine::SetFrameInput(InputState newInputState)
@@ -416,6 +444,12 @@ namespace Engine
         m_radiosityBundle->CreateRenderTarget(L"Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_radiosityBundle->Finalise();
 
+        m_dofBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        m_dofBundle->CreateRenderTarget(L"Packed Colour", DXGI_FORMAT_R16G16B16A16_FLOAT); // TODO: How many of these need to be HDR
+        m_dofBundle->CreateRenderTarget(L"Near field", DXGI_FORMAT_R16G16B16A16_FLOAT);
+        m_dofBundle->CreateRenderTarget(L"Far field", DXGI_FORMAT_R16G16B16A16_FLOAT);
+        m_dofBundle->Finalise();
+
         m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_filteredRadiosityBundle->Finalise();
@@ -423,6 +457,7 @@ namespace Engine
         m_HDRSceneBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
         m_HDRSceneBundle->CreateRenderTarget(L"HDR Scene", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_HDRSceneBundle->Finalise();
+
     }
 
 
@@ -518,61 +553,64 @@ namespace Engine
         {
             // We can move this to where we downsample colour and normals to avoid any additional overhead.
             m_direct3D->BeginRenderEvent(L"Generating Hierarchical Z buffer");
-                // Take the camera-space Z texture and downsample into the mips
-                auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
-                GenerateHiZ(HiZTexture);
+            // Take the camera-space Z texture and downsample into the mips
+            auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
+            GenerateHiZ(HiZTexture);
             m_direct3D->EndRenderEvent();
 
-            // We want to find a way to temporally accumulate the ambient occlusion.
-            // This will avoid flickering on small objects.
-            m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
+            if (m_debugConstants.aoEnabled == 1.0f)
+            {
+                // We want to find a way to temporally accumulate the ambient occlusion.
+                // This will avoid flickering on small objects.
+                m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
                 // Generate the ambient occlusion
                 GenerateAO();
-            m_direct3D->EndRenderEvent();
-
-            // HERE LIES WHERE WE SHALL GENERATE RADIOSITY
+                m_direct3D->EndRenderEvent();
+            }
 
             // Upload light data for deferred shading
             m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
+            auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
 
-            m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
+            if (m_debugConstants.radiosityEnabled == 1.0f)
+            {
+
+                m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
                 // Diffuse lighting of scene
                 LambertianOnly(bundle);
-            m_direct3D->EndRenderEvent();
+                m_direct3D->EndRenderEvent();
 
-            m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
+                m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
                 // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
                 // Note: Can use hierarchical Z generated for AO
                 GenerateRadiosityBufferMips();
-            m_direct3D->EndRenderEvent();
+                m_direct3D->EndRenderEvent();
 
-            m_direct3D->BeginRenderEvent(L"Generating Radiosity");
+                m_direct3D->BeginRenderEvent(L"Generating Radiosity");
                 // Sample hierarchical G-Buffer to generate radioisty.
                 ComputeRadiosity();
-            m_direct3D->EndRenderEvent();
-
-            // TODO: We can add a clip rectangle to the radiosity filter so that only the required pixels
-            // are available for the blur.
-            // During the blur we can then reduce the total width down to the output width
-            auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
-            // Blend new samples with radiosity from last frame
-            m_direct3D->BeginRenderEvent(L"Filter Radiosity");
-                // Sample hierarchical G-Buffer to generate radioisty.
-                FilterRadiosity(ssVelTexture);
-            m_direct3D->EndRenderEvent();
-
-            // Save generated texture to be used next frame
-
-            // Bilateral blur on resulting texture
-
-            // BINGO BONGO BANGO: Pass texture to deep G-Buffer shade to have it applied to the scene
+                m_direct3D->EndRenderEvent();
             
-            // HERE ENDS WHERE WE SHALL HAVE GENERATED RADIOSITY
+
+                // Blend new samples with radiosity from last frame
+                m_direct3D->BeginRenderEvent(L"Filter Radiosity");
+                    // Sample hierarchical G-Buffer to generate radioisty.
+                    FilterRadiosity(ssVelTexture);
+                m_direct3D->EndRenderEvent();
+            }
 
             m_direct3D->BeginRenderEvent(L"Shading G-Buffer");
                 // Shade the GBuffer using generated AO.
                 ShadeGBuffer(bundle);
             m_direct3D->EndRenderEvent();
+
+            if (m_dofConstants.dofEnabled == 1.0f)
+            {
+                // We want to apply DoF before AA and tonemapping
+                m_direct3D->BeginRenderEvent(L"Apply Depth of Field");
+                    ApplyDoF();
+                m_direct3D->EndRenderEvent();
+            }
 
             m_direct3D->BeginRenderEvent(L"Accumulating TSAA");
                 RunTSAA(ssVelTexture);
@@ -907,6 +945,51 @@ namespace Engine
 
         // Converge TSAA
         m_postProcessCamera->RenderPostEffect(m_direct3D, TSAAEffect);
+    }
+
+    float CalculateCoCRadiusPixels(float Z, float focus, float lensRadius, float projectionScale)
+    {
+        // Radius at Z
+        float rZ = (Z - focus) * lensRadius / focus;
+
+        // radius projected to screen
+        float rProjected = rZ / -Z;
+
+        // radius in pixels
+        return rProjected * projectionScale;
+    }
+
+    float CalculateMaxCoCPixels(float nearPlane, float farPlane, float focus, float lensRadius, float projectionScale)
+    {
+        return std::min(std::max(CalculateCoCRadiusPixels(nearPlane, focus, lensRadius, projectionScale),
+            CalculateCoCRadiusPixels(farPlane, focus, lensRadius, projectionScale)), kMaxCoCRadiusPixels);
+    }
+
+    void Engine::ApplyDoF()
+    {
+        // Split scene into near and far based on depth
+        // At the same time store CoC in alpha channel
+        m_postProcessCamera->SetRenderTargetBundle(m_dofBundle);
+
+        // Create Dof PostEffect
+        auto dofPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DoF_Split);
+        auto dofEffect = std::make_shared<PostEffect<DepthOfFieldConstants>>(m_direct3D->GetDevice(), dofPipeline);
+
+        // Upload rendered scene and csZ
+        m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 1);
+
+        // TODO: Calculate correct scale for CoC
+        m_dofConstants.maxCoCFar = CalculateMaxCoCPixels(m_camera->GetNearClip(), m_camera->GetFarClip(), m_dofConstants.focusPlaneZ, m_lensRadius, m_camera->GetProjectionScale());
+        m_dofConstants.scale = (m_camera->GetProjectionScale() * m_lensRadius) / (m_dofConstants.focusPlaneZ * m_dofConstants.maxCoCFar);
+        dofEffect->SetEffectData(m_dofConstants);
+        m_postProcessCamera->RenderPostEffect(m_direct3D, dofEffect);
+
+        // Apply blur to both layers of the scene
+
+        // Composite layers together
+
+        // NOTE: COMPOSITING MUST BE DONE TO m_tempBundle
     }
 
     void Engine::Tonemap()
