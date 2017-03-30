@@ -23,6 +23,9 @@ namespace Engine
         Tonemap = 13,
         ShadowMapping = 14,
         DoF_Split = 15,
+        DoF_Blur_Vertical = 16,
+        DoF_Blur_Horizontal = 17,
+        DoF_Composite = 18
     };
 
     class ShaderManager

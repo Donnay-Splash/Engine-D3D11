@@ -357,26 +357,44 @@ namespace Engine
         static const UINT kRegister = 7;
 
         float dofEnabled = 0.0f;
-        float focusPlaneZ = 10.0f;
-        float scale = 0.0f;
-        float maxCoCNear = 20.0f;
-        float maxCoCFar = 20.0f;
+        float nearBlurryPlaneZ;
+        float nearSharpPlaneZ;
+        float farSharpPlaneZ;
+        float farBlurryPlaneZ;
+        float nearScale;
+        float farScale;
+        float maxCoCRadiusPixels = 20.0f;
+        float nearFieldBlurRadius = 0.0f;
+        float invNearFieldBlurRadius = 0.0f;
+        float farFieldRescale = 1.0f;
 
         bool operator!=(const DepthOfFieldConstants& rhs)
         {
             return dofEnabled != rhs.dofEnabled ||
-            focusPlaneZ != rhs.focusPlaneZ ||
-            scale != rhs.scale ||
-            maxCoCNear != rhs.maxCoCNear ||
-            maxCoCFar != rhs.maxCoCFar;
+            nearBlurryPlaneZ != rhs.nearBlurryPlaneZ ||
+            nearSharpPlaneZ != rhs.nearSharpPlaneZ ||
+            farSharpPlaneZ != rhs.farSharpPlaneZ ||
+            farBlurryPlaneZ != rhs.farBlurryPlaneZ ||
+            nearScale != rhs.nearScale ||
+            farScale != rhs.farScale ||
+            maxCoCRadiusPixels != rhs.maxCoCRadiusPixels ||
+            nearFieldBlurRadius != rhs.nearFieldBlurRadius ||
+            invNearFieldBlurRadius != rhs.invNearFieldBlurRadius ||
+            farFieldRescale != rhs.farFieldRescale;
         }
         bool operator==(const DepthOfFieldConstants& rhs)
         {
             return dofEnabled == rhs.dofEnabled &&
-            focusPlaneZ == rhs.focusPlaneZ &&
-            scale == rhs.scale &&
-            maxCoCNear == rhs.maxCoCNear &&
-            maxCoCFar == rhs.maxCoCFar;
+            nearBlurryPlaneZ == rhs.nearBlurryPlaneZ &&
+            nearSharpPlaneZ == rhs.nearSharpPlaneZ &&
+            farSharpPlaneZ == rhs.farSharpPlaneZ &&
+            farBlurryPlaneZ == rhs.farBlurryPlaneZ &&
+            nearScale == rhs.nearScale &&
+            farScale == rhs.farScale &&
+            maxCoCRadiusPixels == rhs.maxCoCRadiusPixels &&
+            nearFieldBlurRadius == rhs.nearFieldBlurRadius &&
+            invNearFieldBlurRadius == rhs.invNearFieldBlurRadius &&
+            farFieldRescale == rhs.farFieldRescale;
         }
 
     };

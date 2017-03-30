@@ -110,6 +110,21 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_DoF_SplitScene.ps.hlsl.h"
     }
 
+    namespace DoF_Blur_Vertical
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_DoF_Blur.ps.hlsl.h"
+    }
+
+    namespace DoF_Blur_Horizontal
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_DoF_Blur_Horizontal.ps.hlsl.h"
+    }
+
+    namespace DoF_Composite
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_DoF_Composite.ps.hlsl.h"
+    }
+
     ShaderManager::ShaderManager(ID3D11Device* device)
     {
         LoadCoreShaders(device);
@@ -258,6 +273,30 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::DoF_Split, shaderPipeline);
+        }
+
+        // Load the DoF vertical blur shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DoF_Blur_Vertical::g_PSMain, sizeof(DoF_Blur_Vertical::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::DoF_Blur_Vertical, shaderPipeline);
+        }
+
+        // Load the DoF horizontal blur shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DoF_Blur_Horizontal::g_PSMain, sizeof(DoF_Blur_Horizontal::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::DoF_Blur_Horizontal, shaderPipeline);
+        }
+
+        // Load the shader for compositing depth of field together
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DoF_Composite::g_PSMain, sizeof(DoF_Composite::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::DoF_Composite, shaderPipeline);
         }
     }
 

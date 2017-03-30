@@ -1,20 +1,12 @@
 /*  Splits the scene into near and far fields depending on depth and DoF settings*/
 
 #include "PostEffectConstants.hlsl"
+#include "DoFConstants.hlsl"
 
 // As input take camera space Z and shaded scene
 Texture2D colourTexture : register(t0);
 Texture2D csZTexture : register(t1);
 SamplerState dofSampler : register(s0);
-
-cbuffer DoFConstants : register(b7)
-{
-    float dofEnabled;
-    float focusPlaneZ ;
-    float scale;
-    float maxCoCNear;
-    float maxCoCFar;
-}
 
 struct PixelOut
 {
@@ -29,13 +21,32 @@ PixelOut PSMain(VertexOut input)
 
     float3 colour = colourTexture.Sample(dofSampler, input.uv).rgb;
     float z = csZTexture.Sample(dofSampler, input.uv).r;
-    float radius = (z - focusPlaneZ) * scale;
+    float radius;
 
-    radius = radius * 0.5f + 0.5f;
-    float blend = smoothstep(0, 0.25, radius);
+    if(z < nearSharpPlaneZ)
+    {
+        // In front of focus area
+        radius = (nearSharpPlaneZ - max(z, nearBlurryPlaneZ)) * nearScale; // CoC [0, 1]
+    }
+    else if(z < farSharpPlaneZ)
+    {
+        // In focus area
+        radius = 0.0f;
+    }
+    else
+    {
+        // behind focus area
+        radius = (farSharpPlaneZ - min(z, farBlurryPlaneZ)) * farScale; // CoC [-1, 0]
+    }
+
+    float blend = smoothstep(0.0f, 0.05f, radius);
+
+    // TODO: Mix in second layer into far plane colour for areas of low blend
 
     result.packedColorAndCoC = float4(colour, radius);
-    result.nearPlane.rgb = (1 - blend) * colour;
-    result.farPlane.rgb = blend * colour;
+    result.nearPlane.rgb = blend * colour;
+    result.nearPlane.a = radius;
+    result.farPlane.rgb = (1 - floor(blend)) * colour;
+    result.farPlane.a = radius;
     return result;
 }

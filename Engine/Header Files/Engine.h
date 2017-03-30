@@ -56,17 +56,17 @@ namespace Engine
         void GenerateDeepGBuffer();
         /*  Shades the deep G-Buffer*/
         void ShadeGBuffer(RenderTargetBundle::Ptr GBuffer);
-        /*  Shades the G-Buffer with only lambertian shading. This is in preparation
-            for radiosity calculation. Note: we also pack camera-space normals into a single texture
-            TODO: Come up with a better name for this*/
-        void LambertianOnly(RenderTargetBundle::Ptr GBuffer);
-        /*  Takes the lambertian shaded textures and packed normals and generates a mip map chain in exactly the same way as
-            GenerateHiZ. This helps reduce the cache misses for radiosity calculation*/
-        void GenerateRadiosityBufferMips();
-        /*  Takes the downsampled textures and computes the screen space radiosity*/
-        void ComputeRadiosity();
-        /*  Temporally filters the current frames computed raw radiosity with an accumulation buffer. Then applies a bilateral blur*/
-        void FilterRadiosity(Texture::Ptr ssVelTexture);
+        ///*  Shades the G-Buffer with only lambertian shading. This is in preparation
+        //    for radiosity calculation. Note: we also pack camera-space normals into a single texture
+        //    TODO: Come up with a better name for this*/
+        //void LambertianOnly(RenderTargetBundle::Ptr GBuffer);
+        ///*  Takes the lambertian shaded textures and packed normals and generates a mip map chain in exactly the same way as
+        //    GenerateHiZ. This helps reduce the cache misses for radiosity calculation*/
+        //void GenerateRadiosityBufferMips();
+        ///*  Takes the downsampled textures and computes the screen space radiosity*/
+        //void ComputeRadiosity();
+        ///*  Temporally filters the current frames computed raw radiosity with an accumulation buffer. Then applies a bilateral blur*/
+        //void FilterRadiosity(Texture::Ptr ssVelTexture);
         /*  Initialises the scene and loads generic objects*/
         void InitializeScene();
         /*  Uses rotated grid subsampling to generate a mip map chain for camera-space Z
@@ -74,13 +74,17 @@ namespace Engine
             reduce texture cache misses for large radii in the AO.*/
         void GenerateHiZ(Texture::Ptr csZTexture);
         /*  Calculates ambient occlusion at each pixel. Taking the hierarchical Z as input*/
-        void GenerateAO();
+        //void GenerateAO();
         /*  Applys a bilateral filter to the given bundle to reduce noise while preserving edges*/
         void BlurBundle(RenderTargetBundle::Ptr targetBundle, Texture::Ptr csZTexture);
         /*  Runs TSAA merging this frames values with the accumulation*/
         void RunTSAA(Texture::Ptr ssVelTexture);
         /*  Applies a post process depth of field effect to the scene*/
         void ApplyDoF();
+        /*  Applied blur to both layers of the Depth of Field*/
+        void ApplyDoFBlur();
+        /*  Composits the multiple layers of blurred DoF targets*/
+        void CompositeDoF();
         /*  Applies conversion from HDR to LDR before presenting*/
         void Tonemap();
 
@@ -98,32 +102,36 @@ namespace Engine
         EngineCreateOptions m_createOptions;
 
         // These can be moved to a more specific application class
-        PostProcessingCamera::Ptr m_postProcessCamera;
-        PostEffect<PostEffectConstants>::Ptr m_postEffect;
-        PostEffectConstants m_debugConstants;
-        DepthOfFieldConstants m_dofConstants;
         SceneElement::Ptr m_debugOptions;
         SceneElement::Ptr m_giOptions;
         SceneElement::Ptr m_aoOptions;
         SceneElement::Ptr m_dofOptions;
+        PostProcessingCamera::Ptr m_postProcessCamera;
+        PostEffect<PostEffectConstants>::Ptr m_postEffect;
+        PostEffectConstants m_debugConstants;
+        DepthOfFieldConstants m_dofConstants;
         ConstantBuffer<DeepGBufferConstants>::Ptr m_deepGBufferConstant;
         DeepGBufferConstants m_deepGBufferData;
+        GIConstants m_giConstants;
+
+
         RenderTargetBundle::Ptr m_hiZBundle;
         TextureMipView::Ptr m_hiZMipView;
-        RenderTargetBundle::Ptr m_aoBundle;
+        //RenderTargetBundle::Ptr m_aoBundle;
         // A bundle for postprocessing temporary steps. e.g. mid seperable blur.
         RenderTargetBundle::Ptr m_tempBundle; 
         // Contains HDR scene data to be sent to tonemap shader.
         // When using HDR this should always be the last buffer before presenting
         RenderTargetBundle::Ptr m_HDRSceneBundle;
 
-        RenderTargetBundle::Ptr m_lambertianOnlyBundle;
+        /*RenderTargetBundle::Ptr m_lambertianOnlyBundle;
         TextureBundleMipView::Ptr m_lambertianOnlyBundleMipView;
         RenderTargetBundle::Ptr m_radiosityBundle;
-        RenderTargetBundle::Ptr m_filteredRadiosityBundle;
+        RenderTargetBundle::Ptr m_filteredRadiosityBundle;*/
         RenderTargetBundle::Ptr m_dofBundle;
-        Texture::Ptr m_prevRawRadiosity;
-        GIConstants m_giConstants;
+        RenderTargetBundle::Ptr m_dofTempBundle;
+        RenderTargetBundle::Ptr m_dofBlurBundle;
+        //Texture::Ptr m_prevRawRadiosity;
 
         Utils::Maths::Vector2 m_guardBandSizePixels;
 
@@ -135,7 +143,10 @@ namespace Engine
 
         float m_weightThisFrame = 0.05f;
         float m_elapsedTime = 0.0f;
-        float m_lensRadius = 0.01f;
+
+        // Physical DoF constraints create weird artefacts. Best instead to use artistic controls
+        float m_nearBlurRadiusFraction = 0.0f;
+        float m_farBlurRadiusFraction = 0.0f;
     };
 }
 

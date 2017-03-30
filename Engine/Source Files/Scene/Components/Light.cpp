@@ -51,5 +51,9 @@ namespace Engine
         auto intensityGetter = [this]() {return m_lightIntensity; };
         auto intensitySetter = [this](float value) { m_lightIntensity = value; };
         RegisterScalarProperty(L"Intensity", intensityGetter, intensitySetter, 0.0f, 10.0f);
+
+        auto shadowCastingGetter = [this]() {return m_castShadows; };
+        auto shadowCastingSetter = [this](bool value) { m_castShadows = value; };
+        RegisterBooleanProperty(L"Casts Shadows", shadowCastingGetter, shadowCastingSetter);
     }
 }

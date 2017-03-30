@@ -407,7 +407,12 @@
     <None Include="..\Shaders\GIHelpers.hlsl">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="..\Shaders\EnvironmentLighting.hlsl" />
+    <None Include="..\Shaders\EnvironmentLighting.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\Shaders\DoFConstants.hlsl">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">
@@ -476,5 +481,9 @@
     <FxCompile Include="..\Shaders\DeepGBuffer_DoF_Blur.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_DoF_Blur_Horizontal.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_DoF_Composite.ps.hlsl" />
   </ItemGroup>
 </Project>

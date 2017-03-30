@@ -11,8 +11,8 @@ Texture2DArray csNormals : register(t2);
 Texture2DArray ssVelocity : register(t3);
 Texture2DArray csZ : register(t4);
 Texture2DArray depth : register(t5);
-Texture2D AO : register(t6);
-Texture2D radiosityTexture : register(t7);
+//Texture2D AO : register(t6);
+//Texture2D radiosityTexture : register(t7);
 SamplerState gBufferSampler : register(s0);
 
 
@@ -34,7 +34,7 @@ float4 PSMain(VertexOut input) : SV_Target
     float2 ssPos = (input.uv - 0.5f) * float2(2.0f, -2.0f);
     float4 csPos = mul(float4(ssPos, d, 1.0f), invJitteredProjection);
     csPos /= csPos.w;
-    float3 ao = AO.Sample(gBufferSampler, samplePoint.xy).xxx;
+    //float3 ao = AO.Sample(gBufferSampler, samplePoint.xy).xxx;
     
     float4 diffuseSample = diffuseColor.Sample(gBufferSampler, samplePoint);
     float3 baseColor = diffuseSample.rgb;
@@ -48,10 +48,10 @@ float4 PSMain(VertexOut input) : SV_Target
 
     float3 viewDirection = normalize(-csPosition);
 
-    float4 radiositySample = radiosityTexture.Sample(gBufferSampler, input.uv);
-    float confidence = radiositySample.a;
-    confidence = saturate(((1.0f - confidence) - radiosityContrastCentre) * 2.0f + radiosityContrastCentre);
-    float3 radiosity = confidence * radiositySample.rgb * radiosityEnabled * ColorBoost(radiositySample.rgb, unsaturatedBoost, saturatedBoost);
+    //float4 radiositySample = radiosityTexture.Sample(gBufferSampler, input.uv);
+    //float confidence = radiositySample.a;
+    //confidence = saturate(((1.0f - confidence) - radiosityContrastCentre) * 2.0f + radiosityContrastCentre);
+    //float3 radiosity = confidence * radiositySample.rgb * radiosityEnabled * ColorBoost(radiositySample.rgb, unsaturatedBoost, saturatedBoost);
 
     float visibility[MAX_LIGHT_COUNT] = { 1.0f, 1.0f, 1.0f, 1.0f};
     visibility[0] = SampleShadowMapPCF(csPos.xyz);
@@ -68,9 +68,9 @@ float4 PSMain(VertexOut input) : SV_Target
     float3 diffuseAmbient = DiffuseEnvironementLighting(wsN) * envIntensity;
     float3 specularAmbient = SpecularEnvironmentLighting(wsN, wsV, alpha) * envIntensity;
 
-    float3 aoContribution = lerp(1.0f.xxx, ao, aoEnabled);
-    radiance += ((radiosity * aoContribution) + (diffuseAmbient * aoContribution * lerp(1.0f, 0.3f, confidence))) * (baseColor / PI);
-    radiance += (specularAmbient * aoContribution) / PI;
+    //float3 aoContribution = lerp(1.0f.xxx, ao, aoEnabled);
+    radiance += (/*(radiosity * aoContribution)*/ + (diffuseAmbient /** aoContribution * lerp(1.0f, 0.3f, confidence)*/)) * (baseColor / PI);
+    radiance += (specularAmbient /** aoContribution*/) / PI;
     radiance += emissiveColor;
 
     if(target == 0.0f)
@@ -96,11 +96,11 @@ float4 PSMain(VertexOut input) : SV_Target
     }
     else if(target == 5.0f)
     {
-        color.rgb = ao;
+        //color.rgb = ao;
     }
     else if(target == 6.0f)
     {
-        color.rgb = radiosity;
+        //color.rgb = radiosity;
     }
 
     
