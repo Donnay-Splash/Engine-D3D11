@@ -360,13 +360,17 @@ namespace Engine
         float nearBlurryPlaneZ;
         float nearSharpPlaneZ;
         float farSharpPlaneZ;
+
         float farBlurryPlaneZ;
         float nearScale;
         float farScale;
         float maxCoCRadiusPixels = 20.0f;
+
         float nearFieldBlurRadius = 0.0f;
         float invNearFieldBlurRadius = 0.0f;
         float farFieldRescale = 1.0f;
+
+        Utils::Maths::Vector2 CoCTextureDimensions;
 
         bool operator!=(const DepthOfFieldConstants& rhs)
         {
@@ -380,7 +384,8 @@ namespace Engine
             maxCoCRadiusPixels != rhs.maxCoCRadiusPixels ||
             nearFieldBlurRadius != rhs.nearFieldBlurRadius ||
             invNearFieldBlurRadius != rhs.invNearFieldBlurRadius ||
-            farFieldRescale != rhs.farFieldRescale;
+            farFieldRescale != rhs.farFieldRescale ||
+            CoCTextureDimensions != rhs.CoCTextureDimensions;
         }
         bool operator==(const DepthOfFieldConstants& rhs)
         {
@@ -394,7 +399,8 @@ namespace Engine
             maxCoCRadiusPixels == rhs.maxCoCRadiusPixels &&
             nearFieldBlurRadius == rhs.nearFieldBlurRadius &&
             invNearFieldBlurRadius == rhs.invNearFieldBlurRadius &&
-            farFieldRescale == rhs.farFieldRescale;
+            farFieldRescale == rhs.farFieldRescale &&
+            CoCTextureDimensions == rhs.CoCTextureDimensions;
         }
 
     };

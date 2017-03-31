@@ -483,9 +483,9 @@ namespace Engine
 
         // Want this to be at full res
         m_dofBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
-        m_dofBundle->CreateRenderTarget(L"Packed Colour", DXGI_FORMAT_R16G16B16A16_FLOAT); // TODO: How many of these need to be HDR
-        m_dofBundle->CreateRenderTarget(L"Near field", DXGI_FORMAT_R16G16B16A16_FLOAT);
-        m_dofBundle->CreateRenderTarget(L"Far field", DXGI_FORMAT_R16G16B16A16_FLOAT);
+        m_dofBundle->CreateRenderTarget(L"Near field", DXGI_FORMAT_R11G11B10_FLOAT); // Stores colour for near field
+        m_dofBundle->CreateRenderTarget(L"Far field", DXGI_FORMAT_R11G11B10_FLOAT); // Stores colour for far field
+        m_dofBundle->CreateRenderTarget(L"CoC", DXGI_FORMAT_R16G16_FLOAT); // Stores CoC for near and far field respectively
         m_dofBundle->Finalise();
 
         // Then temp blur bundle we want to be at 1/2 res in blur direction
@@ -1058,6 +1058,7 @@ namespace Engine
         m_dofConstants.nearFieldBlurRadius = nearFrac * dimension;
         m_dofConstants.invNearFieldBlurRadius = 1.0f / std::max(m_dofConstants.nearFieldBlurRadius, 0.001f);
         m_dofConstants.farFieldRescale = std::max(farFrac, nearFrac) / std::max(farFrac, 0.0001f);
+        m_dofConstants.CoCTextureDimensions = { static_cast<float>(m_dofBundle->GetWidth()), dimension };
         dofEffect->SetEffectData(m_dofConstants);
         m_postProcessCamera->RenderPostEffect(m_direct3D, dofEffect);
 
@@ -1104,7 +1105,7 @@ namespace Engine
 
         // Upload horizontal blur result
         // Need to offset by 1 to account for dofBundle having 3 targets and m_dofTempBundle having only 2
-        m_dofTempBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 1);
+        m_dofTempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
         // Render to camera
         m_postProcessCamera->RenderPostEffect(m_direct3D, verticalBlurEffect);
     }
@@ -1119,8 +1120,10 @@ namespace Engine
         auto compositeEffect = std::make_shared<PostEffect<DepthOfFieldConstants>>(m_direct3D->GetDevice(), compositePipeline);
 
         // Upload blurred shader resources and sharp far field image
-        m_dofBundle->GetRenderTarget(2)->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
-        m_dofBlurBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 1);
+        m_dofBundle->GetRenderTarget(1)->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
+        // Upload CoC at slot 1
+        m_dofBundle->GetRenderTarget(2)->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
+        m_dofBlurBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 2);
         compositeEffect->SetEffectData(m_dofConstants);
 
         // render effect

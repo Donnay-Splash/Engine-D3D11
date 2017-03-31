@@ -4,9 +4,9 @@
 #include "DoFConstants.hlsl"
 
 // As input takes packed colour and CoC alongside near and far field images
-Texture2D packedColourTexture : register(t0);
-Texture2D nearFieldTexture : register(t1);
-Texture2D farFieldTexture : register(t2);
+Texture2D nearFieldTexture : register(t0);
+Texture2D farFieldTexture : register(t1);
+Texture2D CoCTexture : register(t2);
 SamplerState dofSampler : register(s0);
 
 struct PixelOut
@@ -26,6 +26,7 @@ PixelOut PSMain(VertexOut input)
     nearFieldTexture.GetDimensions(textureDimensions.x, textureDimensions.y);
 
     float2 samplePointPixels = input.uv * textureDimensions;
+    float2 CoCSamplePoint = input.uv * CoCTextureDimensions;
 
     // Uses same Kernel used for DoF in Skylanders SWAP Force : http://casual-effects.blogspot.co.uk/2013/09/the-skylanders-swap-force-depth-of.html 
     // 11 x 11 kernel. Does not dictate DoF weights but is scaled to fit a CoC based kernel at each pixel
@@ -43,10 +44,15 @@ PixelOut PSMain(VertexOut input)
     float4 nearFieldColourSum = 0.0f;
     float nearFieldWeightSum = 0.0f;
 
-    float nearFieldCoC = nearFieldTexture.Sample(dofSampler, input.uv).a;
+	// TODO: Use this when sampling for near field blur.
+	// If tap is outside of nearFieldCoC then it does not contribute.
+	// Hopefully this should spread blur out into dark regions.
+    float2 CoCSample = CoCTexture.Sample(dofSampler, input.uv).rg;
+    float nearFieldCoC = CoCSample.r;
     float nearFieldRadius = nearFieldCoC * maxCoCRadiusPixels;
+    float invNearFieldRadius = 1.0f / nearFieldRadius;
 
-    float farFieldCoC = farFieldTexture.Sample(dofSampler, input.uv).a;
+    float farFieldCoC = CoCSample.g;
     float farFieldRadius = farFieldCoC * maxCoCRadiusPixels;
 
     for (int i = -maxCoCRadiusPixels; i <= maxCoCRadiusPixels; ++i)
@@ -56,18 +62,21 @@ PixelOut PSMain(VertexOut input)
         ////////////////////////////////////////
          
         float2 tapLocation = samplePointPixels + (blurAxis * i);
+        float2 CoCTap = CoCSamplePoint + (blurAxis * i);
         float2 normalisedTapLocation = tapLocation / textureDimensions;
+        float2 normalisedCoCTap = CoCTap / CoCTextureDimensions;
+        float2 tapCoC = CoCTexture.Sample(dofSampler, normalisedCoCTap).rg;
 
         // Blur far-field image
         float4 farFieldInput = farFieldTexture.Sample(dofSampler, normalisedTapLocation);
-        float tapRadiusPixels = farFieldInput.a * maxCoCRadiusPixels;
+        float farFieldTapRadius = tapCoC.g * maxCoCRadiusPixels;
 
         float weight =
             // Only want to blur tap over current pixel if it is closer to the viewer. i.e. If taps CoC is < farFieldCoC
-            //float(tapRadiusPixels <= farFieldRadius) * // TODO: Look at optimising this
+            //float(farFieldTapRadius <= farFieldRadius) * // TODO: Look at optimising this
         
             // Stretch kernel to fit radius at tap location
-            kernel[clamp(int(floor(abs(i) * (KERNEL_TAPS - 1)) / (0.001f + abs(tapRadiusPixels * 0.8f))), 0.0f, KERNEL_TAPS)];
+            kernel[clamp(int(floor(abs(i) * (KERNEL_TAPS - 1)) / (0.001f + abs(farFieldTapRadius * 0.8f))), 0.0f, KERNEL_TAPS)];
 
         farFieldWeightSum += weight;
         farFieldColourSum.rgb += farFieldInput.rgb * weight;
@@ -84,26 +93,26 @@ PixelOut PSMain(VertexOut input)
 
         // Get the tap from the near field image
         float4 nearFieldTap = nearFieldTexture.Sample(dofSampler, normalisedTapLocation);
-        float blurRadius = nearFieldBlurRadius;
+        float nearFieldWeight = float(abs(i) < nearFieldRadius);
         #ifdef HORIZONTAL
         // For first horizontal pass calculate coverage from tap CoC
 
         // Calculate the blur radius from the signed CoC
-        float nearFieldRadius = nearFieldTap.a * maxCoCRadiusPixels;
-        blurRadius = nearFieldRadius;
+        float nearFieldTapRadius = tapCoC.r * maxCoCRadiusPixels;
 
         // Calculate coverage based on sample. I think we want CoC for dark near field values to be 0 as to not contribute to blur maybe? idk
-        nearFieldTap.a = float(abs(i) <= nearFieldRadius) * saturate(nearFieldRadius * invNearFieldBlurRadius * 4.0f); //Note: this might need to be changed depedning on sign of nearFieldRadius;
+        nearFieldTap.a = float(abs(i) <= nearFieldTapRadius) * saturate(nearFieldTapRadius * invNearFieldRadius * 4.0f); //Note: this might need to be changed depedning on sign of nearFieldRadius;
         // Optionally increase fade at near field edge
         // nearFieldTap.a *= nearFieldTap.a; nearFieldTap.a *= nearFieldTap.a;
 
         // Compute pre-multiplied alpha colour
         nearFieldTap.rgb *= nearFieldTap.a;
+        nearFieldWeight = float(abs(i) <= abs(nearFieldRadius));// * float(nearFieldTapRadius >= nearFieldRadius);
+        #else
         #endif
 
         // According to research carried out for SWAP Force DoF the more complex kernel function is
         // not worth the additional cost here so instead we use a simple box filter
-        float nearFieldWeight = float(abs(i) < blurRadius);
         nearFieldColourSum += nearFieldTap * nearFieldWeight;
         nearFieldWeightSum += nearFieldWeight;
     }

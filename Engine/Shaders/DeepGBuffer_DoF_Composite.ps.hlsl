@@ -2,14 +2,16 @@
 #include "PostEffectConstants.hlsl"
 
 Texture2D farFieldSharpTexture : register(t0);
-Texture2D nearFieldBlurredTexture : register(t1);
-Texture2D farFieldBlurredTexture : register(t2);
+Texture2D CoCTexture : register(t1);
+Texture2D nearFieldBlurredTexture : register(t2);
+Texture2D farFieldBlurredTexture : register(t3);
 SamplerState dofSampler : register(s0);
 
 float3 PSMain(VertexOut input) : SV_Target0
 {
     float4 sharpSample = farFieldSharpTexture.Sample(dofSampler, input.uv);
-    float farFieldCoC = sharpSample.a;
+    float2 CoCSample = CoCTexture.Sample(dofSampler, input.uv);
+    float farFieldCoC = CoCSample.g;
     float3 sharpColour = sharpSample.rgb;
 
     float4 nearFieldSample = nearFieldBlurredTexture.Sample(dofSampler, input.uv);

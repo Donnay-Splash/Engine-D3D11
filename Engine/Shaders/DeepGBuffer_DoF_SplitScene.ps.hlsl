@@ -10,9 +10,9 @@ SamplerState dofSampler : register(s0);
 
 struct PixelOut
 {
-    float4 packedColorAndCoC : SV_Target0;
-    float4 nearPlane : SV_Target1;
-    float4 farPlane : SV_Target2;
+    float3 nearPlane : SV_Target0;
+    float3 farPlane : SV_Target1;
+    float2 CoC : SV_Target2;
 };
 
 PixelOut PSMain(VertexOut input)
@@ -43,10 +43,10 @@ PixelOut PSMain(VertexOut input)
 
     // TODO: Mix in second layer into far plane colour for areas of low blend
 
-    result.packedColorAndCoC = float4(colour, radius);
     result.nearPlane.rgb = blend * colour;
-    result.nearPlane.a = radius;
     result.farPlane.rgb = (1 - floor(blend)) * colour;
-    result.farPlane.a = radius;
+    result.CoC.r = lerp(-1.0f, radius, blend);
+    result.CoC.g = radius;
+
     return result;
 }
