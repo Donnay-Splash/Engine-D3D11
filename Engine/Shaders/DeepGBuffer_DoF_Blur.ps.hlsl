@@ -93,7 +93,7 @@ PixelOut PSMain(VertexOut input)
 
         // Get the tap from the near field image
         float4 nearFieldTap = nearFieldTexture.Sample(dofSampler, normalisedTapLocation);
-        float nearFieldWeight = float(abs(i) < nearFieldRadius);
+        float nearFieldWeight = float(abs(i) <= abs(nearFieldRadius));
         #ifdef HORIZONTAL
         // For first horizontal pass calculate coverage from tap CoC
 
@@ -101,14 +101,12 @@ PixelOut PSMain(VertexOut input)
         float nearFieldTapRadius = tapCoC.r * maxCoCRadiusPixels;
 
         // Calculate coverage based on sample. I think we want CoC for dark near field values to be 0 as to not contribute to blur maybe? idk
-        nearFieldTap.a = float(abs(i) <= nearFieldTapRadius) * saturate(nearFieldTapRadius * invNearFieldRadius * 4.0f); //Note: this might need to be changed depedning on sign of nearFieldRadius;
+        nearFieldTap.a = float(abs(i) <= nearFieldTapRadius) * saturate(nearFieldTapRadius * abs(invNearFieldRadius) * 4.0f); //Note: this might need to be changed depedning on sign of nearFieldRadius;
         // Optionally increase fade at near field edge
         // nearFieldTap.a *= nearFieldTap.a; nearFieldTap.a *= nearFieldTap.a;
 
         // Compute pre-multiplied alpha colour
         nearFieldTap.rgb *= nearFieldTap.a;
-        nearFieldWeight = float(abs(i) <= abs(nearFieldRadius));// * float(nearFieldTapRadius >= nearFieldRadius);
-        #else
         #endif
 
         // According to research carried out for SWAP Force DoF the more complex kernel function is

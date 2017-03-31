@@ -13,7 +13,7 @@ cbuffer DoFConstants : register(b7)
     float nearFieldBlurRadius;
     float invNearFieldBlurRadius;
     float farFieldRescale;
-    float dofPad;
+    float useSecondLayer;
 
     float2 CoCTextureDimensions;
 }

@@ -369,6 +369,7 @@ namespace Engine
         float nearFieldBlurRadius = 0.0f;
         float invNearFieldBlurRadius = 0.0f;
         float farFieldRescale = 1.0f;
+        float useSecondLayer = 0.0f;
 
         Utils::Maths::Vector2 CoCTextureDimensions;
 
@@ -385,6 +386,7 @@ namespace Engine
             nearFieldBlurRadius != rhs.nearFieldBlurRadius ||
             invNearFieldBlurRadius != rhs.invNearFieldBlurRadius ||
             farFieldRescale != rhs.farFieldRescale ||
+            useSecondLayer != rhs.useSecondLayer ||
             CoCTextureDimensions != rhs.CoCTextureDimensions;
         }
         bool operator==(const DepthOfFieldConstants& rhs)
@@ -400,6 +402,7 @@ namespace Engine
             nearFieldBlurRadius == rhs.nearFieldBlurRadius &&
             invNearFieldBlurRadius == rhs.invNearFieldBlurRadius &&
             farFieldRescale == rhs.farFieldRescale &&
+            useSecondLayer == rhs.useSecondLayer &&
             CoCTextureDimensions == rhs.CoCTextureDimensions;
         }
 

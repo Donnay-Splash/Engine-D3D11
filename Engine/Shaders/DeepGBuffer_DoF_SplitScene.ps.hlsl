@@ -42,10 +42,12 @@ PixelOut PSMain(VertexOut input)
     float blend = smoothstep(0.0f, 0.05f, radius);
 
     // TODO: Mix in second layer into far plane colour for areas of low blend
+    // TODO: When deep G-Buffer blending not enabled. store near field colour
+    //       else store deep G-Buffer data
 
     result.nearPlane.rgb = blend * colour;
-    result.farPlane.rgb = (1 - floor(blend)) * colour;
     result.CoC.r = lerp(-1.0f, radius, blend);
+    result.farPlane.rgb = colour;
     result.CoC.g = radius;
 
     return result;
