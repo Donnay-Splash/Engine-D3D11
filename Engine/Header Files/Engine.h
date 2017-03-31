@@ -128,6 +128,7 @@ namespace Engine
         TextureBundleMipView::Ptr m_lambertianOnlyBundleMipView;
         RenderTargetBundle::Ptr m_radiosityBundle;
         RenderTargetBundle::Ptr m_filteredRadiosityBundle;*/
+        RenderTargetBundle::Ptr m_shadedSceneBundle;
         RenderTargetBundle::Ptr m_dofBundle;
         RenderTargetBundle::Ptr m_dofTempBundle;
         RenderTargetBundle::Ptr m_dofBlurBundle;

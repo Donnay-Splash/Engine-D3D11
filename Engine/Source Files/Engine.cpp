@@ -80,8 +80,6 @@ namespace Engine
     const float kMaxCoCRadiusPixels = 30.0f;
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
 
-    static int dofIndex = 1;
-
     /*
         The percentage that we want the guard band to extend the view.
         The Guard band is required to avoid suppress incorrect AO and Radiosity
@@ -225,6 +223,7 @@ namespace Engine
         m_dofConstants.nearSharpPlaneZ = 10.0f;
         m_dofConstants.farSharpPlaneZ = 15.0f;
         m_dofConstants.farBlurryPlaneZ = 50.0f;
+        m_dofConstants.useSecondLayer = 0.0f;
         m_nearBlurRadiusFraction = 0.0f;
         m_farBlurRadiusFraction = 0.5f;
 
@@ -342,9 +341,9 @@ namespace Engine
         }
 
         {
-            auto getter = [&]()->bool { return dofIndex == 0; };
-            auto setter = [&](bool value) {dofIndex = value ? 0 : 1; };
-            m_dofOptions->RegisterBooleanProperty(L"Show Near Field", getter, setter);
+            auto getter = [&]()->bool { return m_dofConstants.useSecondLayer == 1.0f; };
+            auto setter = [&](bool value) {m_dofConstants.useSecondLayer = value ? 1.0f : 0.0f; };
+            m_dofOptions->RegisterBooleanProperty(L"Use second layer", getter, setter);
         }
 
         {
@@ -465,6 +464,11 @@ namespace Engine
         m_tempBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_tempBundle->Finalise();
+
+        m_shadedSceneBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        m_shadedSceneBundle->CreateRenderTarget(L"Front Layer", DXGI_FORMAT_R11G11B10_FLOAT);
+        m_shadedSceneBundle->CreateRenderTarget(L"Back Layer", DXGI_FORMAT_R11G11B10_FLOAT);
+        m_shadedSceneBundle->Finalise();
 
         //// Stores lambertian and packed normals for use in radiosity
         //// Since this is used in radiosity it must be extended by guard band
@@ -717,8 +721,11 @@ namespace Engine
         m_postEffect->SetEffectData(m_debugConstants);
 
         // Shade G-Buffer
-        m_postProcessCamera->SetRenderTargetBundle(m_tempBundle); // Draw to the temp bundle before passing to TSAA
+        m_postProcessCamera->SetRenderTargetBundle(m_shadedSceneBundle); // Draw to the temp bundle before passing to TSAA
         m_postProcessCamera->RenderPostEffect(m_direct3D, m_postEffect);
+
+        // Need to ensure target not still bound on output.
+        m_direct3D->UnbindAllRenderTargets();
     }
 
     //void Engine::LambertianOnly(RenderTargetBundle::Ptr GBuffer)
@@ -981,7 +988,7 @@ namespace Engine
         TSAAEffect->SetEffectData(TSAAData);
 
         // Upload current, previous and ssVel
-        m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        m_shadedSceneBundle->GetRenderTarget(0)->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
         if (m_prevFrame != nullptr)
         {
             m_prevFrame->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 1);
@@ -1029,8 +1036,8 @@ namespace Engine
         auto dofEffect = std::make_shared<PostEffect<DepthOfFieldConstants>>(m_direct3D->GetDevice(), dofPipeline);
 
         // Upload rendered scene and csZ
-        m_tempBundle->SetShaderResources(m_direct3D->GetDeviceContext());
-        m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 1);
+        m_shadedSceneBundle->SetShaderResources(m_direct3D->GetDeviceContext());
+        m_hiZBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 2);
 
         float nearBlurry = m_dofConstants.nearBlurryPlaneZ;
         float nearSharp = std::max(m_dofConstants.nearSharpPlaneZ, nearBlurry);
@@ -1113,7 +1120,7 @@ namespace Engine
     void Engine::CompositeDoF()
     {
         // Set render target as temp bundle
-        m_postProcessCamera->SetRenderTargetBundle(m_tempBundle);
+        m_postProcessCamera->SetRenderTargetBundle(m_shadedSceneBundle);
 
         // Create composite shader effect
         auto compositePipeline = m_shaderManager->GetShaderPipeline(ShaderName::DoF_Composite);
@@ -1128,6 +1135,9 @@ namespace Engine
 
         // render effect
         m_postProcessCamera->RenderPostEffect(m_direct3D, compositeEffect);
+
+        // Unbind shaded scene ready for TSAA
+        m_direct3D->UnbindAllRenderTargets();
     }
 
     void Engine::Tonemap()
@@ -1142,10 +1152,6 @@ namespace Engine
 
         // Upload HDR buffer
         m_HDRSceneBundle->SetShaderResources(m_direct3D->GetDeviceContext());
-
-                    //// HACK HACK HACK
-                    //// Upload far field blurred buffer
-                    //m_dofBlurBundle->GetRenderTarget(dofIndex)->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 0);
 
         // render to back buffer
         m_postProcessCamera->RenderPostEffect(m_direct3D, tonemapEffect);
