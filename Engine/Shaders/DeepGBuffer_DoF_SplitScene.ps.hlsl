@@ -60,12 +60,13 @@ PixelOut PSMain(VertexOut input)
 
     float3 farPlaneFillColour = lerp(frontLayerColour, backLayerColour, useSecondLayer);
     float fillRadius = lerp(frontLayerRadius, backLayerRadius, useSecondLayer);
-    float fillFactor = floor(blend);
+    float farFillFactor = floor(blend);
+    float nearBlendFactor = ceil(blend);
 
-    result.nearPlane.rgb = blend * frontLayerColour;
-    result.CoC.r = lerp(-1.0f, frontLayerRadius, blend);
-    result.farPlane.rgb = lerp(frontLayerColour, farPlaneFillColour, fillFactor);
-    result.CoC.g = lerp(frontLayerRadius, fillRadius, fillFactor);
+    result.nearPlane.rgb = nearBlendFactor * frontLayerColour;
+    result.CoC.r = lerp(-1.0f, frontLayerRadius, nearBlendFactor);
+    result.farPlane.rgb = lerp(frontLayerColour, farPlaneFillColour, farFillFactor);
+    result.CoC.g = lerp(frontLayerRadius, fillRadius, farFillFactor);
 
     return result;
 }
