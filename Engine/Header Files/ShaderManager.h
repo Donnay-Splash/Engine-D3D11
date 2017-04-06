@@ -23,7 +23,8 @@ namespace Engine
         Tonemap = 13,
         ShadowMapping = 14,
         DeepGBuffer_Gen_DepthPeel = 15,
-        GBuffer_Gen = 16
+        GBuffer_Gen = 16,
+        DeepGBuffer_Shade = 17
     };
 
     class ShaderManager

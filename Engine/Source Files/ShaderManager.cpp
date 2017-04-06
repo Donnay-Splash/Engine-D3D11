@@ -45,7 +45,13 @@ namespace Engine
     }
 
     // Final fullscreen shader to resolve shader G-Buffer
-    namespace Deferred
+    namespace GBuffer_Shade
+    {
+        #include "Shaders\Compiled shaders\GBuffer_Shade.ps.hlsl.h"
+    }
+
+    // Final fullscreen shader to resolve deep G-Buffer
+    namespace DeepGBuffer_Shade
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_Shade.ps.hlsl.h"
     }
@@ -183,12 +189,20 @@ namespace Engine
         InputLayout::Ptr fullscreenQuadLayout = std::make_shared<InputLayout>(InputElement::Position | InputElement::TexCoord0);
         Shader::Ptr fullScreenQuadVS = std::make_shared<Shader>(Shader::Type::Vertex, FullScreenQuad::g_VSMain, sizeof(FullScreenQuad::g_VSMain), device);
 
-        // Load the post process deferred shaders
+        // Load the single layer G-Buffer shader
         {
-            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Deferred::g_PSMain, sizeof(Deferred::g_PSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, GBuffer_Shade::g_PSMain, sizeof(GBuffer_Shade::g_PSMain), device);
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::GBuffer_Shade, shaderPipeline);
+        }
+
+        // Load the deep G-Buffer shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DeepGBuffer_Shade::g_PSMain, sizeof(DeepGBuffer_Shade::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::DeepGBuffer_Shade, shaderPipeline);
         }
 
         // Load the camera-space Z copy

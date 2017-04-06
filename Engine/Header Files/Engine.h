@@ -113,6 +113,8 @@ namespace Engine
         // When using HDR this should always be the last buffer before presenting
         RenderTargetBundle::Ptr m_HDRSceneBundle;
 
+        RenderTargetBundle::Ptr m_depthPeelBundle;
+
         RenderTargetBundle::Ptr m_lambertianOnlyBundle;
         TextureBundleMipView::Ptr m_lambertianOnlyBundleMipView;
         RenderTargetBundle::Ptr m_radiosityBundle;

@@ -26,7 +26,7 @@ namespace Engine
         m_viewConstants = std::make_shared<ConstantBuffer<ViewConstants>>(PipelineStage::Vertex | PipelineStage::Pixel, device);
     }
 
-    void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene)
+    void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene, ShaderPipeline::Ptr overrideShader/* = nullptr*/)
     {
         auto sceneNode = GetSceneNode();
         auto transform = sceneNode->GetWorldTransform();
@@ -64,7 +64,7 @@ namespace Engine
         m_viewConstants->UploadData(d3dClass->GetDeviceContext());
         d3dClass->SetRenderTarget(m_renderTargetBundle);
 
-        scene->Render();
+        scene->Render(overrideShader);
     }
 
     void Camera::CalculateProjectionMatrix()

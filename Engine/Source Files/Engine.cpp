@@ -77,6 +77,8 @@ namespace Engine
     const uint32_t kAO_numSpiralTurns = CalcSpiralTurns(kAO_numSamples);
     const uint32_t kTemporalAASamples = 8;
     const uint32_t kBilateralBlurWidth = 7;
+    const uint32_t kGBufferLayers = 2;
+    const bool kDepthPeel = kGBufferLayers > 1 && false;
     const std::vector<Utils::Maths::Vector2> kJitterSequence = GenerateCameraJitterSequence(kTemporalAASamples);
 
     /*
@@ -87,7 +89,7 @@ namespace Engine
         targets with an additional 128 pixels on either side giving a total
         horizontal resolution of 1536
     */
-    const Utils::Maths::Vector2 kGuardBandPercentage = {0.1f, 0.1f};
+    const Utils::Maths::Vector2 kGuardBandPercentage = {0.0f, 0.0f};
 
 
 
@@ -172,7 +174,8 @@ namespace Engine
         m_postProcessCamera = postCameraNode->AddComponent<PostProcessingCamera>();
 
         // Create post effect
-        auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade);
+        ShaderName finalStage = kGBufferLayers > 1 && !kDepthPeel ? ShaderName::DeepGBuffer_Shade : ShaderName::GBuffer_Shade;
+        auto postEffectPipeline = m_shaderManager->GetShaderPipeline(finalStage);
         m_postEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), postEffectPipeline);
 
         // Create deep G-Buffer constant buffer
@@ -367,17 +370,25 @@ namespace Engine
         uint32_t guardBandHeight = static_cast<uint32_t>(newHeight * kGuardBandPercentage.y * 2.0f);
         m_guardBandSizePixels = { guardBandWidth/2.0f, guardBandHeight/2.0f };
 
-        // Re-create G-Buffer with new dimensions
-        // We use G-Buffer data for ao and radiosity so it must be 
-        // extended to the guard band width
-        const uint32_t GBufferLayers = 2;
-        RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth + guardBandWidth, newHeight + guardBandHeight, GBufferLayers);
+        const int layers = kDepthPeel ? 1 : kGBufferLayers;
+        RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth + guardBandWidth, newHeight + guardBandHeight, layers);
         GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"Emissive", DXGI_FORMAT_R11G11B10_FLOAT);
         GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT, {1.0f, 1.0f, 1.0f, 1.0f});
         GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT, {-1.0f, -1.0f, -1.0f, -1.0f });
         GBuffer->Finalise();
+
+        if (kDepthPeel)
+        {
+            m_depthPeelBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth + guardBandWidth, newHeight + guardBandHeight, layers);
+            m_depthPeelBundle->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
+            m_depthPeelBundle->CreateRenderTarget(L"Emissive", DXGI_FORMAT_R11G11B10_FLOAT);
+            m_depthPeelBundle->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
+            m_depthPeelBundle->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT, { 1.0f, 1.0f, 1.0f, 1.0f });
+            m_depthPeelBundle->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT, { -1.0f, -1.0f, -1.0f, -1.0f });
+            m_depthPeelBundle->Finalise();
+        }
 
         // Set the G-Buffer for output from camera
         m_camera->SetRenderTargetBundle(GBuffer);
@@ -428,7 +439,8 @@ namespace Engine
 
     void Engine::LoadFile(const uint8_t * data, uint64_t byteCount)
     {
-        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen_Reproject);
+        ShaderName GBufferShader = (kGBufferLayers < 2 || kDepthPeel) ? ShaderName::GBuffer_Gen : ShaderName::DeepGBuffer_Gen_Reproject;
+        auto shaderPipeline = m_shaderManager->GetShaderPipeline(GBufferShader);
         Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
 
         loader->LoadFile(data, byteCount);
@@ -523,51 +535,41 @@ namespace Engine
                 GenerateHiZ(HiZTexture);
             m_direct3D->EndRenderEvent();
 
-            // We want to find a way to temporally accumulate the ambient occlusion.
-            // This will avoid flickering on small objects.
-            m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
-                // Generate the ambient occlusion
-                GenerateAO();
-            m_direct3D->EndRenderEvent();
+            //// We want to find a way to temporally accumulate the ambient occlusion.
+            //// This will avoid flickering on small objects.
+            //m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
+            //    // Generate the ambient occlusion
+            //    GenerateAO();
+            //m_direct3D->EndRenderEvent();
 
             // HERE LIES WHERE WE SHALL GENERATE RADIOSITY
 
             // Upload light data for deferred shading
             m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
-
-            m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
-                // Diffuse lighting of scene
-                LambertianOnly(bundle);
-            m_direct3D->EndRenderEvent();
-
-            m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
-                // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
-                // Note: Can use hierarchical Z generated for AO
-                GenerateRadiosityBufferMips();
-            m_direct3D->EndRenderEvent();
-
-            m_direct3D->BeginRenderEvent(L"Generating Radiosity");
-                // Sample hierarchical G-Buffer to generate radioisty.
-                ComputeRadiosity();
-            m_direct3D->EndRenderEvent();
-
-            // TODO: We can add a clip rectangle to the radiosity filter so that only the required pixels
-            // are available for the blur.
-            // During the blur we can then reduce the total width down to the output width
             auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
-            // Blend new samples with radiosity from last frame
-            m_direct3D->BeginRenderEvent(L"Filter Radiosity");
-                // Sample hierarchical G-Buffer to generate radioisty.
-                FilterRadiosity(ssVelTexture);
-            m_direct3D->EndRenderEvent();
 
-            // Save generated texture to be used next frame
+            //m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
+            //    // Diffuse lighting of scene
+            //    LambertianOnly(bundle);
+            //m_direct3D->EndRenderEvent();
 
-            // Bilateral blur on resulting texture
+            //m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
+            //    // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
+            //    // Note: Can use hierarchical Z generated for AO
+            //    GenerateRadiosityBufferMips();
+            //m_direct3D->EndRenderEvent();
 
-            // BINGO BONGO BANGO: Pass texture to deep G-Buffer shade to have it applied to the scene
-            
-            // HERE ENDS WHERE WE SHALL HAVE GENERATED RADIOSITY
+            //m_direct3D->BeginRenderEvent(L"Generating Radiosity");
+            //    // Sample hierarchical G-Buffer to generate radioisty.
+            //    ComputeRadiosity();
+            //m_direct3D->EndRenderEvent();
+
+            //// During the blur we can then reduce the total width down to the output width
+            //// Blend new samples with radiosity from last frame
+            //m_direct3D->BeginRenderEvent(L"Filter Radiosity");
+            //    // Sample hierarchical G-Buffer to generate radioisty.
+            //    FilterRadiosity(ssVelTexture);
+            //m_direct3D->EndRenderEvent();
 
             m_direct3D->BeginRenderEvent(L"Shading G-Buffer");
                 // Shade the GBuffer using generated AO.
@@ -596,7 +598,7 @@ namespace Engine
     void Engine::GenerateDeepGBuffer()
     {
         // Upload previous depth to shader
-        if (m_prevDepth)
+        if (m_prevDepth && kGBufferLayers > 1 && !kDepthPeel)
         {
             // Upload at register 7 as material takes registers 0 -> 6
             // TODO: Formalise this
@@ -611,6 +613,33 @@ namespace Engine
         // This generates our deep G-Buffer
         m_camera->Render(m_direct3D, m_scene);
 
+        // If using depth peel
+        // Render the scene again using the depth peel shader and first layer depth
+        if (kDepthPeel)
+        {
+            auto bundle = m_camera->GetRenderTargetBundle();
+            m_camera->SetRenderTargetBundle(m_depthPeelBundle);
+            // change the render target to the second Deep G-Buffer layer
+            auto depthPeelPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen_DepthPeel);
+
+            // Get first layer depth
+            auto depth = bundle->GetDepthBuffer();
+
+            // Upload deep gbuffer constants
+            m_deepGBufferConstant->SetData(m_deepGBufferData);
+            m_deepGBufferConstant->UploadData(m_direct3D->GetDeviceContext());
+            // Render the scene.
+            // This generates our deep G-Buffer
+            // Upload depth of first layer to register 7
+            depth->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 7);
+            m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
+            m_camera->Render(m_direct3D, m_scene, depthPeelPipeline);
+
+
+            // Set target back to normal bundle
+            m_camera->SetRenderTargetBundle(bundle);
+        }
+
         // We are finished drawing to the G-Buffer and now want to send
         // it as a shader resource so all RTVs must be cleared from the device
         m_direct3D->UnbindAllRenderTargets();
@@ -622,8 +651,8 @@ namespace Engine
 
         // Upload G-buffer data to device
         GBuffer->SetShaderResources(m_direct3D->GetDeviceContext());
-        aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 6);
-        m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 7);
+        //aoTarget->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 6);
+        //m_filteredRadiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext(), 7);
 
         // Set post effect constants
         m_postEffect->SetEffectData(m_debugConstants);

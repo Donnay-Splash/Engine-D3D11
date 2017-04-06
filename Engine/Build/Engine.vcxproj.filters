@@ -431,9 +431,6 @@
     <FxCompile Include="..\Shaders\FullscreenQuad.vs.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="..\Shaders\DeepGBuffer_Shade.ps.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_CameraZCopy.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
@@ -480,6 +477,12 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_Gen_Reproject.gs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\GBuffer_Shade.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Shade.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
