@@ -97,9 +97,7 @@ namespace Engine
     // TODO: Tidy this class it's getting mad.
     // TODO: Fix PostEffect class It's garbage. Each instance shouldn't be assigned to a constant buffer.
             // Why not just pass post effect camera a shader pipeline and we can set effect data here.
-    // TODO: Something seems up with ssVel calculation. Check to make sure it is correct.
     // TODO: Apply basic temporal filtering to AO. as it is flickering
-    // TODO: Figure out how to correctly blur near field to allow for blending with background. It is behaving a little weird ATM.
     Engine::Engine()
     {
     }
