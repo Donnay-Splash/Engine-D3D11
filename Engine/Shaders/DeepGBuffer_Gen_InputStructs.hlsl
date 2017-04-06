@@ -9,7 +9,7 @@ struct VertexInput
     float3 bitangent : BINORMAL;
 };
 
-struct GeometryInput
+struct VertexOutput
 {
     float4 position : SV_Position;
     float3 csNormal : NORMAL0;
@@ -29,5 +29,7 @@ struct PixelInput
     float3 csBitangent : BINORMAL;
     float4 csPosition : POSITION0;
     float4 csPrevPosition : POSITION1;
+    #ifdef GEN_REPROJECT
     uint renderTargetIndex : SV_RenderTargetArrayIndex;
+    #endif
 };

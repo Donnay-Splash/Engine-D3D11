@@ -1,11 +1,11 @@
 #include "DeepGBuffer_Gen_Globals.hlsl"
 #include "DeepGBuffer_Gen_InputStructs.hlsl"
 
-GeometryInput VSMain(VertexInput input)
+VertexOutput VSMain(VertexInput input)
 {
     input.position.w = 1.0f;
 
-    GeometryInput output;
+    VertexOutput output;
     output.position = mul(input.position, objectToCameraTransform);
     // Store the current camera space position
     output.csPosition = output.position;

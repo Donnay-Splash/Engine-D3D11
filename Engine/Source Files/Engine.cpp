@@ -428,7 +428,7 @@ namespace Engine
 
     void Engine::LoadFile(const uint8_t * data, uint64_t byteCount)
     {
-        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen);
+        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen_Reproject);
         Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
 
         loader->LoadFile(data, byteCount);

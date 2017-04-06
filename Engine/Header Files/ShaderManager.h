@@ -8,7 +8,7 @@ namespace Engine
     enum class ShaderName
     {
         Uber = 0,
-        DeepGBuffer_Gen = 1,
+        DeepGBuffer_Gen_Reproject = 1,
         GBuffer_Shade = 2,
         DeepGBuffer_csZCopy = 3,
         Minify_CSZ = 4,
@@ -21,7 +21,9 @@ namespace Engine
         ComputeRadiosity = 11,
         BasicTemporalFilter = 12,
         Tonemap = 13,
-        ShadowMapping = 14
+        ShadowMapping = 14,
+        DeepGBuffer_Gen_DepthPeel = 15,
+        GBuffer_Gen = 16
     };
 
     class ShaderManager

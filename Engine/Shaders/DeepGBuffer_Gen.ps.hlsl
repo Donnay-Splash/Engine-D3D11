@@ -49,19 +49,30 @@ prevZ: The previous Z value of the fragment
 --------------------------------*/
 bool IsInFrontOfSecondLayer(float2 ssVelocity, float minSeparation, float2 fragCoord, float prevZ)
 {
+    float2 samplePoint = (fragCoord * invViewSize);
+    
+    #ifdef GEN_REPROJECT
     // Get previous frag coord
-    float2 ssPrevCoord = (fragCoord * invViewSize) - (0.5f * ssVelocity);
+    samplePoint -= (0.5f * ssVelocity);
+    #endif
 
+    float depth;
+
+    #ifdef GEN_REPROJECT
     // Sample old depth // Need to convert location to float3 since we are sampling an array
     // ssPrevCoord is given as viewport coordinates. currentToPrevScale needs to be (1/width, 1/height)
-    float oldDepth = previousDepth.SampleLevel(depthSampler, float3(ssPrevCoord, 0.0f), 0).r;
+    depth = previousDepth.SampleLevel(depthSampler, float3(samplePoint, 0.0f), 0).r;
+    #endif
+    #ifdef GEN_PEEL
+    depth = firstLayerDepth.SampleLevel(depthSampler, samplePoint, 0).r;
+    #endif
 
     // Reconstruct Z from old depth
-    float oldZ = ReconstructCSZ(oldDepth, clipInfo);
+    float firstLayerZ = ReconstructCSZ(depth, clipInfo);
 
     // Check to see if the current pixel is behind the previously rendered pixel.
     // If so then we want to discard it.
-    return oldZ + minSeparation >= prevZ;
+    return firstLayerZ + minSeparation >= prevZ;
 }
 
 // TODO: need to uberise this to avoid invalid shader code.
@@ -72,11 +83,13 @@ PixelOutput PSMain(PixelInput input)
     ssVelocity.y = -ssVelocity.y; // Flip axis since we are in DirectX and UV is flipped along y
     float2 currentToPrevScale = 1.0f.xx;
 
+    #ifdef GEN_REPROJECT // Used during single pass reprojection method
     // Discard pixels for second layer
     if (input.renderTargetIndex == 1 && IsInFrontOfSecondLayer(ssVelocity, minSeparation, input.position.xy, input.csPrevPosition.z))
     {
         discard;
     }
+    #endif
 
     // Ouput values to g_buffer
     PixelOutput output;

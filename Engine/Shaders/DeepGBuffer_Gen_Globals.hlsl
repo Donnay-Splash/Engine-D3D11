@@ -17,10 +17,16 @@ Texture2D OpacityTexture : register(t5);
 
 Texture2D AOTexture : register(t6);
 
+#ifdef GEN_REPROJECT
 // Previous depth buffer of first layer
 // TODO: Select better registers as 1->n are for material textures
 Texture2DArray previousDepth : register(t7);
 SamplerState depthSampler : register(s7);
+#endif
+#ifdef GEN_PEEL
+Texture2D firstLayerDepth : register(t7);
+SamplerState depthSampler : register(s7);
+#endif
 
 // Stores object information. e.g. object local to world transform.
 cbuffer ObjectBuffer : register(b1)

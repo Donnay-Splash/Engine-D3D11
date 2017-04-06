@@ -12,12 +12,24 @@ namespace Engine
         #include "Shaders\Compiled shaders\Uber.vs.hlsl.h"
     }
 
-    // Deep G-Buffer generation pipeline
-    namespace DeepGBuffer
+    // Deep G-Buffer reproject generation pipeline
+    namespace DeepGBuffer_Reproject
     {
-        #include "Shaders\Compiled shaders\DeepGBuffer_Gen.ps.hlsl.h"
-        #include "Shaders\Compiled shaders\DeepGBuffer_Gen.gs.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen_Reproject.ps.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen_Reproject.gs.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen_Reproject.vs.hlsl.h"
+    }
+
+    namespace GBufferGen
+    {
         #include "Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen.ps.hlsl.h"
+    }
+
+    namespace DeepGBuffer_DepthPeel
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen.vs.hlsl.h"
+        #include "Shaders\Compiled shaders\DeepGBuffer_Gen_DepthPeel.ps.hlsl.h"
     }
 
     // ShadowMapping shaders
@@ -126,15 +138,35 @@ namespace Engine
             m_shaderMap.insert(ShaderMapObject(ShaderName::Uber, shaderPipeline));
         }
 
-        // Load deep G-Buffer generation shaders
+        // Load deep G-Buffer reprojection generation shaders
         {
             InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0 | InputElement::Tangents);
-            Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, DeepGBuffer::g_VSMain, sizeof(DeepGBuffer::g_VSMain), device);
-            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DeepGBuffer::g_PSMain, sizeof(DeepGBuffer::g_PSMain), device);
-            Shader::Ptr geometryShader = std::make_shared<Shader>(Shader::Type::Geometry, DeepGBuffer::g_GSMain, sizeof(DeepGBuffer::g_GSMain), device);
+            Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, DeepGBuffer_Reproject::g_VSMain, sizeof(DeepGBuffer_Reproject::g_VSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DeepGBuffer_Reproject::g_PSMain, sizeof(DeepGBuffer_Reproject::g_PSMain), device);
+            Shader::Ptr geometryShader = std::make_shared<Shader>(Shader::Type::Geometry, DeepGBuffer_Reproject::g_GSMain, sizeof(DeepGBuffer_Reproject::g_GSMain), device);
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, pixelShader, geometryShader);
 
-            m_shaderMap.insert(ShaderMapObject(ShaderName::DeepGBuffer_Gen, shaderPipeline));
+            m_shaderMap.insert(ShaderMapObject(ShaderName::DeepGBuffer_Gen_Reproject, shaderPipeline));
+        }
+
+        // Load deep G-Buffer depth peel shaders
+        {
+            InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0 | InputElement::Tangents);
+            Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, DeepGBuffer_DepthPeel::g_VSMain, sizeof(DeepGBuffer_DepthPeel::g_VSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DeepGBuffer_DepthPeel::g_PSMain, sizeof(DeepGBuffer_DepthPeel::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, pixelShader);
+
+            m_shaderMap.insert(ShaderMapObject(ShaderName::DeepGBuffer_Gen_DepthPeel, shaderPipeline));
+        }
+
+        // Load standard G-Buffer generation shaders
+        {
+            InputLayout::Ptr layout = std::make_shared<InputLayout>(InputElement::Position | InputElement::Normal0 | InputElement::TexCoord0 | InputElement::Tangents);
+            Shader::Ptr vertexShader = std::make_shared<Shader>(Shader::Type::Vertex, GBufferGen::g_VSMain, sizeof(GBufferGen::g_VSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, GBufferGen::g_PSMain, sizeof(GBufferGen::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, layout, vertexShader, pixelShader);
+
+            m_shaderMap.insert(ShaderMapObject(ShaderName::GBuffer_Gen, shaderPipeline));
         }
             
         // Load Shadow map shader
