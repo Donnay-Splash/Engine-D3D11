@@ -24,5 +24,10 @@ namespace Utils
             }
             return sequence;
         }
+
+        bool IsPowerOfTwo(int val)
+        {
+            return (val != 0) && ((val & (val - 1)) == 0);
+        }
     }
 }

@@ -6,6 +6,7 @@
 #include <locale>
 #include <Shlwapi.h>
 #include <Utils\DirectxHelpers\EngineHelpers.h>
+#include <Utils\Math\MathHelpers.h>
 
 TextureManager::TextureManager()
 {
@@ -135,7 +136,7 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
 
     // Check to see if the texture can be compressed.
     // Texture dimensions must be multiples of 4 when using block compression
-    bool compressable = rawImage.GetMetadata().height % 4 == 0 && rawImage.GetMetadata().width % 4 == 0;
+    bool compressable = Utils::MathHelpers::IsPowerOfTwo(rawImage.GetMetadata().height) && Utils::MathHelpers::IsPowerOfTwo(rawImage.GetMetadata().width);
 
     switch (textureInfo.Type)
     {
@@ -156,7 +157,14 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
         else
         {
             // convert to SRGB
-            DirectX::Convert(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, TEX_FILTER_DEFAULT, TEX_THRESHOLD_DEFAULT, finalImage);
+            if (!DirectX::IsSRGB(mipMapImage.GetMetadata().format))
+            {
+                DirectX::Convert(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, TEX_FILTER_DEFAULT, TEX_THRESHOLD_DEFAULT, finalImage);
+            }
+            else
+            {
+                finalImage = std::move(mipMapImage);
+            }
         }
         break;
     }
@@ -175,7 +183,14 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
         else
         {
             // convert to SRGB
-            DirectX::Convert(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, TEX_FILTER_DEFAULT, TEX_THRESHOLD_DEFAULT, finalImage);
+            if (!DirectX::IsSRGB(mipMapImage.GetMetadata().format))
+            {
+                DirectX::Convert(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, TEX_FILTER_DEFAULT, TEX_THRESHOLD_DEFAULT, finalImage);
+            }
+            else
+            {
+                finalImage = std::move(mipMapImage);
+            }
         }
         break;
     }
