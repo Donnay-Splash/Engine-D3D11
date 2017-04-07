@@ -91,6 +91,13 @@ PixelOutput PSMain(PixelInput input)
     }
     #endif
 
+#ifdef GEN_PEEL
+    if (IsInFrontOfSecondLayer(ssVelocity, minSeparation, input.position.xy, input.csPosition.z))
+    {
+        discard;
+    }
+#endif
+
     // Ouput values to g_buffer
     PixelOutput output;
     output.diffuseColor = material_diffuseColorAndOpacity;

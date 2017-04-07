@@ -153,7 +153,7 @@ namespace Engine
         lightNode->SetPosition({ 0.0f, 10.0f, 0.0f });
         lightNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(0.0f, Utils::Maths::DegreesToRadians(90.0f), 0.0f));
         auto light = lightNode->AddComponent<Light>();
-        light->SetShadowCastingEnabled(true);
+        light->SetShadowCastingEnabled(false);
         light->SetIntensity(2.0f);
         light->SetColor({ DirectX::Colors::Wheat });
 
@@ -192,7 +192,29 @@ namespace Engine
         m_position = std::make_shared<PositionClass>();
 
         // Set the initial position of the viewer to the same as the initial camera position.
-        m_position->SetPosition(0.0f, 0.0f, -10.0f);
+        // SPONZA camera settings
+        m_position->SetPosition(32.7f, 8.63f, 1.32f);
+        m_position->SetRotation(0.0f, -90.0f, 0.0f);
+
+        // LIVING_ROOM camera settings
+        /*m_position->SetPosition(2.68f, 1.34f, -7.27f);
+        m_position->SetRotation(0.0f, -35.0f, 0.0f);*/
+
+        // FIREPLACE camera settings
+        /*m_position->SetPosition(5.29f, 0.768f, 3.014f);
+        m_position->SetRotation(0.0f, -108.0f, 0.0f);*/
+
+        // CONFERENCE camera settings
+        /*m_position->SetPosition(68.5f, 16.8f, 41.07f);
+        m_position->SetRotation(0.0f, -128.0f, 0.0f);*/
+
+        // San Miguel camera settings
+        /*m_position->SetPosition(-65.0f, 9.0f, -34.35f);
+        m_position->SetRotation(0.0f, 128.0f, 0.0f);*/
+
+        // Vokseila Spawn camera settings
+       /* m_position->SetPosition(3.22f, 1.613f, -2.98f);
+        m_position->SetRotation(23.0f, 315.0f, 0.0f);*/
 
         // Create depth sampler
         m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
@@ -535,12 +557,12 @@ namespace Engine
                 GenerateHiZ(HiZTexture);
             m_direct3D->EndRenderEvent();
 
-            //// We want to find a way to temporally accumulate the ambient occlusion.
-            //// This will avoid flickering on small objects.
-            //m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
-            //    // Generate the ambient occlusion
-            //    GenerateAO();
-            //m_direct3D->EndRenderEvent();
+            // We want to find a way to temporally accumulate the ambient occlusion.
+            // This will avoid flickering on small objects.
+            m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
+                // Generate the ambient occlusion
+                GenerateAO();
+            m_direct3D->EndRenderEvent();
 
             // HERE LIES WHERE WE SHALL GENERATE RADIOSITY
 
@@ -548,28 +570,28 @@ namespace Engine
             m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
             auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
 
-            //m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
-            //    // Diffuse lighting of scene
-            //    LambertianOnly(bundle);
-            //m_direct3D->EndRenderEvent();
+            m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
+                // Diffuse lighting of scene
+                LambertianOnly(bundle);
+            m_direct3D->EndRenderEvent();
 
-            //m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
-            //    // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
-            //    // Note: Can use hierarchical Z generated for AO
-            //    GenerateRadiosityBufferMips();
-            //m_direct3D->EndRenderEvent();
+            m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
+                // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
+                // Note: Can use hierarchical Z generated for AO
+                GenerateRadiosityBufferMips();
+            m_direct3D->EndRenderEvent();
 
-            //m_direct3D->BeginRenderEvent(L"Generating Radiosity");
-            //    // Sample hierarchical G-Buffer to generate radioisty.
-            //    ComputeRadiosity();
-            //m_direct3D->EndRenderEvent();
+            m_direct3D->BeginRenderEvent(L"Generating Radiosity");
+                // Sample hierarchical G-Buffer to generate radioisty.
+                ComputeRadiosity();
+            m_direct3D->EndRenderEvent();
 
-            //// During the blur we can then reduce the total width down to the output width
-            //// Blend new samples with radiosity from last frame
-            //m_direct3D->BeginRenderEvent(L"Filter Radiosity");
-            //    // Sample hierarchical G-Buffer to generate radioisty.
-            //    FilterRadiosity(ssVelTexture);
-            //m_direct3D->EndRenderEvent();
+            // During the blur we can then reduce the total width down to the output width
+            // Blend new samples with radiosity from last frame
+            m_direct3D->BeginRenderEvent(L"Filter Radiosity");
+                // Sample hierarchical G-Buffer to generate radioisty.
+                FilterRadiosity(ssVelTexture);
+            m_direct3D->EndRenderEvent();
 
             m_direct3D->BeginRenderEvent(L"Shading G-Buffer");
                 // Shade the GBuffer using generated AO.
@@ -618,26 +640,30 @@ namespace Engine
         if (kDepthPeel)
         {
             auto bundle = m_camera->GetRenderTargetBundle();
-            m_camera->SetRenderTargetBundle(m_depthPeelBundle);
-            // change the render target to the second Deep G-Buffer layer
-            auto depthPeelPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen_DepthPeel);
+            if (bundle != nullptr)
+            {
+                m_direct3D->UnbindAllRenderTargets();
+                m_camera->SetRenderTargetBundle(m_depthPeelBundle);
+                // change the render target to the second Deep G-Buffer layer
+                auto depthPeelPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen_DepthPeel);
 
-            // Get first layer depth
-            auto depth = bundle->GetDepthBuffer();
+                // Get first layer depth
+                auto depth = bundle->GetDepthBuffer();
 
-            // Upload deep gbuffer constants
-            m_deepGBufferConstant->SetData(m_deepGBufferData);
-            m_deepGBufferConstant->UploadData(m_direct3D->GetDeviceContext());
-            // Render the scene.
-            // This generates our deep G-Buffer
-            // Upload depth of first layer to register 7
-            depth->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 7);
-            m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
-            m_camera->Render(m_direct3D, m_scene, depthPeelPipeline);
+                // Upload deep gbuffer constants
+                m_deepGBufferConstant->SetData(m_deepGBufferData);
+                m_deepGBufferConstant->UploadData(m_direct3D->GetDeviceContext());
+                // Render the scene.
+                // This generates our deep G-Buffer
+                // Upload depth of first layer to register 7
+                depth->GetTexture()->UploadData(m_direct3D->GetDeviceContext(), PipelineStage::Pixel, 7);
+                m_depthSampler->UploadData(m_direct3D->GetDeviceContext(), 7);
+                m_camera->Render(m_direct3D, m_scene, depthPeelPipeline);
 
 
-            // Set target back to normal bundle
-            m_camera->SetRenderTargetBundle(bundle);
+                // Set target back to normal bundle
+                m_camera->SetRenderTargetBundle(bundle);
+            }
         }
 
         // We are finished drawing to the G-Buffer and now want to send
