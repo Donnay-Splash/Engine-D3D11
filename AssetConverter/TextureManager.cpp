@@ -131,7 +131,12 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
     // We may need to do some additional processing.
     // For now we are skipping Opacity, Shininess and AO textures. Till I find resources
     // to test with. 
-    DirectX::ScratchImage compressedImage;
+    DirectX::ScratchImage finalImage;
+
+    // Check to see if the texture can be compressed.
+    // Texture dimensions must be multiples of 4 when using block compression
+    bool compressable = rawImage.GetMetadata().height % 4 == 0 && rawImage.GetMetadata().width % 4 == 0;
+
     switch (textureInfo.Type)
     {
     case aiTextureType_DIFFUSE:
@@ -143,8 +148,16 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
         DirectX::GenerateMipMaps(preMultipliedImage.GetImages(), preMultipliedImage.GetImageCount(), preMultipliedImage.GetMetadata(), flags, 0, mipMapImage);
-        // Compress BC3
-        DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
+        if (compressable)
+        {
+            // Compress BC3
+            DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
+        }
+        else
+        {
+            // convert to SRGB
+            DirectX::Convert(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, TEX_FILTER_DEFAULT, TEX_THRESHOLD_DEFAULT, finalImage);
+        }
         break;
     }
     case aiTextureType_SPECULAR:
@@ -154,8 +167,16 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
         DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, 0, mipMapImage);
-        // Compress BC3
-        DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
+        if (compressable)
+        {
+            // Compress BC3
+            DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
+        }
+        else
+        {
+            // convert to SRGB
+            DirectX::Convert(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, TEX_FILTER_DEFAULT, TEX_THRESHOLD_DEFAULT, finalImage);
+        }
         break;
     }
     case aiTextureType_NORMALS:
@@ -164,9 +185,16 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
         DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, 0, mipMapImage);
-        // Compress Bc3
-        DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
-        DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
+        if (compressable)
+        {
+            // Compress Bc3
+            DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
+            DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
+        }
+        else
+        {
+            finalImage = std::move(mipMapImage);
+        }
         break;
     }
     case aiTextureType_HEIGHT:
@@ -179,9 +207,16 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
         DirectX::GenerateMipMaps(normalMapImage.GetImages(), normalMapImage.GetImageCount(), normalMapImage.GetMetadata(), flags, 0, mipMapImage);
-        // Compress Bc3
-        DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
-        DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, compressedImage);
+        if (compressable)
+        {
+            // Compress Bc3
+            DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
+            DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
+        }
+        else
+        {
+            finalImage = std::move(mipMapImage);
+        }
         break;
     }
     }
@@ -189,7 +224,8 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
     // Now we have processed the data we will save it to DDS memory for storage in the .mike.
     DWORD flags = 0;
     DirectX::Blob fileData;
-    DirectX::SaveToDDSMemory(compressedImage.GetImages(), compressedImage.GetImageCount(), compressedImage.GetMetadata(), flags, fileData);
+    DirectX::SaveToDDSMemory(finalImage.GetImages(), finalImage.GetImageCount(), finalImage.GetMetadata(), flags, fileData);
+
     if (fileData.GetBufferSize() > 0)
     {
         Utils::Loader::TextureData textureData;
