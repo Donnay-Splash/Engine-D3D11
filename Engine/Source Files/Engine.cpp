@@ -98,6 +98,8 @@ namespace Engine
             // Why not just pass post effect camera a shader pipeline and we can set effect data here.
     // TODO: Something seems up with ssVel calculation. Check to make sure it is correct.
     // TODO: Apply basic temporal filtering to AO. as it is flickering
+
+    // TODO: Prepare AO and indirect lighting to run with single and double layer
     Engine::Engine()
     {
     }
@@ -190,6 +192,10 @@ namespace Engine
 
         // Set the initial position of the viewer to the same as the initial camera position.
         m_position->SetPosition(0.0f, 0.0f, -10.0f);
+
+        // SPONZA camera settings
+        m_position->SetPosition(32.7f, 8.63f, 1.32f);
+        m_position->SetRotation(0.0f, -90.0f, 0.0f);
 
         // Create depth sampler
         m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);

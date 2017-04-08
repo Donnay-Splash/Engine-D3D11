@@ -21,7 +21,9 @@ namespace Engine
         ComputeRadiosity = 11,
         BasicTemporalFilter = 12,
         Tonemap = 13,
-        ShadowMapping = 14
+        ShadowMapping = 14,
+        AO_Deep = 15,
+        ComputeRadiosity_Deep = 16
     };
 
     class ShaderManager

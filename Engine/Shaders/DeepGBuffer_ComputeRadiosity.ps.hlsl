@@ -10,8 +10,9 @@ Texture2D PackedNormalsTexture : register(t2);
 Texture2D csZTexture : register(t3);
 SamplerState bufferSampler : register(s0);
 
+#ifdef RADIOSITY_DEEP
 /*-------------------------
-Fetches the data from the textures for the given sample point.
+Fetches the data for both layers from the given sample point
 
 Args:
 ssSamplePoint: The screen-space position to sample the texture at. This will be conveted to u,v space [0, 1] before sampling
@@ -50,7 +51,37 @@ void GetSamplePointData(
     normal1 = normalize(UnpackNormal(normalSample.zw));
     csPosition1 = ReconstructCSPosition(ssSamplePoint, csZSample.y, projectionInfo);
 }
+#else
+/*-------------------------
+Fetches the data for a single layer from the textures for the given sample point.
 
+Args:
+ssSamplePoint: The screen-space position to sample the texture at. This will be conveted to u,v space [0, 1] before sampling
+ssRadius: The distance from the current pixel to the sample point in pixels. This is used to select the best mip level
+Out color0: Sampled color for the first layer
+Out normal0: Sampled unit normal for the first layer
+Out csPosition0: Reconstructed camera-space position of the sample point in the first layer
+-------------------------*/
+void GetSamplePointData(
+    in float2 ssSamplePoint,
+    in float ssRadius,
+    out float3 color0,
+    out float3 normal0,
+    out float3 csPosition0)
+{
+    int mipLevel = GetMipLevel(ssRadius);
+    //int2 ssTap = int2(ssSamplePoint) >> mipLevel;
+    //int3 samplePoint = int3(ssTap, mipLevel);
+    float2 samplePoint = ssSamplePoint * invViewSize;
+    float2 normalSample = PackedNormalsTexture.SampleLevel(bufferSampler, samplePoint, mipLevel).rg;
+    float csZSample = csZTexture.SampleLevel(bufferSampler, samplePoint, mipLevel).r;
+
+    // Sampled data for first layer
+    color0 = LambertianTextureLayer1.SampleLevel(bufferSampler, samplePoint, mipLevel).rgb;
+    normal0 = normalize(UnpackNormal(normalSample));
+    csPosition0 = ReconstructCSPosition(ssSamplePoint, csZSample, projectionInfo);
+}
+#endif
 /*-------------------------
 Computes the indirect lighting at point X from the sampled point csPosition with given normal and radiosity.
 Based on "A Deferred Shading Algorithm for Real-Time Indirect Illumination" by Soler, C., Hoel, O. and Rochet, F.
@@ -84,7 +115,13 @@ void ComputeIndirectLightForPoint(
     float3 YminusX = csPosition_Y - csPosition_X;
     float3 w = normalize(YminusX);
     float WoNx = dot(w, csNormal_X);
-    weight = ((WoNx > 0.0f) && (dot(-w, csNormal_Y) > 0.01f)) ? 1.0f : 0.0f;
+#define BALANCED
+#ifndef HIGH_PERFORMANCE
+    float WoNy = dot(-w, csNormal_Y);
+    weight = ((WoNx > 0.0f) && (WoNy > 0.01f)) ? 1.0f : 0.0f;
+#else
+    weight = (WoNx > 0.0f) ? 1.0f : 0.0f;
+#endif
     weight *= saturate(ceil((radiosityRadius * radiosityRadius) - dot(YminusX, YminusX)));
 
 
@@ -131,21 +168,32 @@ void SampleIndirectLight(
 
     // Get the data for both layers at the calcuated sample point
     float3 color0, normal0, csPosition0;
-    float3 color1, normal1, csPosition1;
+#ifdef RADIOSITY_DEEP
+    float3 color1, normal1, csPosition1; // Create shader for just single layer
     GetSamplePointData(ssSamplePoint, ssRadius, color0, normal0, csPosition0, color1, normal1, csPosition1);
+#else
+    GetSamplePointData(ssSamplePoint, ssRadius, color0, normal0, csPosition0);
+#endif
 
     float3 irradiance0;
     float weight0;
     ComputeIndirectLightForPoint(csPosition, csNormal, csPosition0, normal0, color0, irradiance0, weight0);
+
+#ifdef RADIOSITY_DEEP
     float adjustedWeight0 = weight0 * dot(irradiance0, irradiance0) + weight0;
 
     float3 irradiance1;
     float weight1;
+    // Create shader for just single layer
     ComputeIndirectLightForPoint(csPosition, csNormal, csPosition1, normal1, color1, irradiance1, weight1);
     float adjustedWeight1 = weight1 * dot(irradiance1, irradiance1) + weight1;
 
     float weight = (adjustedWeight0 > adjustedWeight1) ? weight0 : weight1;
     float3 irradiance = (adjustedWeight0 > adjustedWeight1) ? irradiance0 : irradiance1;
+#else
+    float weight = weight0;
+    float3 irradiance = irradiance0;
+#endif
 
     numSamplesUsed += weight;
     irradianceSum += irradiance;

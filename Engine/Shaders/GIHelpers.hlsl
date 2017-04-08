@@ -7,8 +7,22 @@
 // Must be less than or equal to the same macro defined in Engine.cpp
 #define MAX_MIP_LEVEL 5
 
+#define BALANCED
+
+#ifdef HIGH_QUALITY
 // Must be Less than MAX_MIP_LEVEL and >= 0
 #define MIN_MIP_LEVEL 0
+#endif
+
+#ifdef BALANCED
+// Must be Less than MAX_MIP_LEVEL and >= 0
+#define MIN_MIP_LEVEL 2
+#endif
+
+#ifdef HIGH_PERFORMANCE
+// Must be Less than MAX_MIP_LEVEL and >= 0
+#define MIN_MIP_LEVEL 3
+#endif
 
 cbuffer GIConstants : register(b5)
 {

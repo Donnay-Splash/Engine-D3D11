@@ -55,10 +55,16 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_Minify_Lambertian.ps.hlsl.h"
     }
 
-    // Scalable Ambient Obscurance algorithm
+    // Scalable Ambient Obscurance algorithm for a single layer
     namespace AO
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_ComputeAO.ps.hlsl.h"
+    }
+
+    // Scalable Ambient Obscurance algorithm using deep G-Buffer
+    namespace AO_DEEP
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_ComputeAO_Deep.ps.hlsl.h"
     }
 
     // Depth aware blur for reducing noise in AO and radiosity. 
@@ -67,7 +73,6 @@ namespace Engine
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl.h"
     }
-
 
     // Depth aware blur for reducing noise in AO and radiosity. 
     // Works with packed bilateral key in alpha
@@ -94,9 +99,16 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_LambertianOnly.ps.hlsl.h"
     }
 
+    // Compute indirect radiosity for a single layer
     namespace ComputeRadiosity
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl.h"
+    }
+
+    // Compute indirect lighting using deep G-Buffer
+    namespace ComputeRadiosity_Deep
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_ComputeRadiosity_Deep.ps.hlsl.h"
     }
 
     // Transforms HDR data to LDR using filmic tonemap
@@ -191,6 +203,14 @@ namespace Engine
             m_shaderMap.emplace(ShaderName::AO, shaderPipeline);
         }
 
+        // Load the Deep G-Buffer AO shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, AO_DEEP::g_PSMain, sizeof(AO_DEEP::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::AO_Deep, shaderPipeline);
+        }
+
         // Load the Bilateral Blur shader with sampled keys
         {
             Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, BilateralBlurSampled::g_PSMain, sizeof(BilateralBlurSampled::g_PSMain), device);
@@ -237,6 +257,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::ComputeRadiosity, shaderPipeline);
+        }
+
+        // Load the Deep G-Buffer Radiosity computation shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, ComputeRadiosity_Deep::g_PSMain, sizeof(ComputeRadiosity_Deep::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::ComputeRadiosity_Deep, shaderPipeline);
         }
 
         // Load the Tonemap shader

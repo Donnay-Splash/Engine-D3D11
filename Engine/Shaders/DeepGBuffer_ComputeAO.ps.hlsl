@@ -29,7 +29,11 @@ inverseScale: Scales the calculated texture coordinates to the normalised [0, 1]
 OUT firstLayerPos: sampled camera-space location from first layer of deep G-Buffer
 OUT secondLayerPos: sampled camera-space location from second layer of deep G-Buffer
 ------------------------------------------*/
-void SampleOffsetPositions(int2 ssPosition, float2 unitOffset, float ssRadius, float2 invScale, out float3 firstLayerPos, out float3 secondLayerPos)
+void SampleOffsetPositions(int2 ssPosition, float2 unitOffset, float ssRadius, float2 invScale, out float3 firstLayerPos
+#ifdef AO_DEEP
+    , out float3 secondLayerPos
+#endif
+)
 {
     int mipLevel = GetMipLevel(ssRadius);
     float2 ssSamplePoint = float2(ssRadius * unitOffset) + ssPosition;
@@ -40,7 +44,9 @@ void SampleOffsetPositions(int2 ssPosition, float2 unitOffset, float ssRadius, f
 
     // Return sampled positions offset to pixel centre
     firstLayerPos = ReconstructCSPosition(float2(ssSamplePoint), Zs.x, projectionInfo);
+#ifdef AO_DEEP
     secondLayerPos = ReconstructCSPosition(float2(ssSamplePoint), Zs.y, projectionInfo);
+#endif
 }
 
 /*------------------------------------------
@@ -124,18 +130,24 @@ float CalculateOcclusion(int2 ssPosition, float rotationAngle, float3 csPosition
     // Ensure that the taps are separated by at least one pixel
     ssRadius = max(0.75f, ssRadius * ssDiskRadius);
 
-    float3 firstLayerPos, secondLayerPos;
+    float3 firstLayerPos;
+#ifdef AO_DEEP
+    float3 secondLayerPos; // Create shader for single layer
     SampleOffsetPositions(ssPosition, tapOffset, ssRadius, invScale, firstLayerPos, secondLayerPos);
+#else
+    SampleOffsetPositions(ssPosition, tapOffset, ssRadius, invScale, firstLayerPos);
+#endif
 
     // Return the max value. i.e. layer with least occlusion
     float AO1 = AOForPosition(firstLayerPos, csPosition, csNormal);
-    float AO2 = AOForPosition(secondLayerPos, csPosition, csNormal);
-
+#ifdef AO_DEEP
+    float AO2 = AOForPosition(secondLayerPos, csPosition, csNormal); // Create shader for single layer
     return lerp(AO1, max(AO1, AO2), aoUseSecondLayer);
+#else
+    return AO1;
+#endif
     //return max(AOForPosition(firstLayerPos, csPosition, csNormal), AOForPosition(secondLayerPos, csPosition, csNormal));
 }
-
-
 
 float4 PSMain(VertexOut input) : SV_Target
 { 

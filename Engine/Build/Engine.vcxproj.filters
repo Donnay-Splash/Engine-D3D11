@@ -470,5 +470,11 @@
     <FxCompile Include="..\Shaders\ShadowMap.vs.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_ComputeRadiosity_Deep.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_ComputeAO_Deep.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

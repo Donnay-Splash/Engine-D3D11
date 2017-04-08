@@ -360,6 +360,19 @@
       <ObjectFileOutput>
       </ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_ComputeAO_Deep.ps.hlsl">
+        <FileType>Document</FileType>
+        <EntryPointName>PSMain</EntryPointName>
+        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+        <ShaderType>Pixel</ShaderType>
+        <ShaderModel>5.0</ShaderModel>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+        <ObjectFileOutput>
+        </ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_ComputeRadiosity.ps.hlsl">
       <FileType>Document</FileType>
       <EntryPointName>PSMain</EntryPointName>
@@ -372,6 +385,19 @@
       <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
       <ObjectFileOutput>
       </ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_ComputeRadiosity_Deep.ps.hlsl">
+        <FileType>Document</FileType>
+        <EntryPointName>PSMain</EntryPointName>
+        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+        <ShaderType>Pixel</ShaderType>
+        <ShaderModel>5.0</ShaderModel>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+        <ObjectFileOutput>
+        </ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_DepthAwareBlur.ps.hlsl">
       <FileType>Document</FileType>
@@ -600,17 +626,17 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <FxCompile Include="..\Shaders\ShadowMap.vs.hlsl">
-        <FileType>Document</FileType>
-        <EntryPointName>VSMain</EntryPointName>
-        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
-        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
-        <ShaderType>Vertex</ShaderType>
-        <ShaderModel>5.0</ShaderModel>
-        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
-        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
-        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
-        <ObjectFileOutput>
-        </ObjectFileOutput>
+      <FileType>Document</FileType>
+      <EntryPointName>VSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\Shaders\Uber.gs.hlsl">
       <FileType>Document</FileType>
