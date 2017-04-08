@@ -485,5 +485,11 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="..\Shaders\DeepGBuffer_DoF_Composite.ps.hlsl" />
+    <FxCompile Include="..\Shaders\DeepGBuffer_DoF_SplitScene_Deep.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\DeepGBuffer_Shade_Deep.ps.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -173,7 +173,7 @@ namespace Engine
         m_postProcessCamera = postCameraNode->AddComponent<PostProcessingCamera>();
 
         // Create post effect
-        auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade);
+        auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade_Deep);
         m_postEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), postEffectPipeline);
 
         // Create deep G-Buffer constant buffer
@@ -190,7 +190,11 @@ namespace Engine
         m_position = std::make_shared<PositionClass>();
 
         // Set the initial position of the viewer to the same as the initial camera position.
-        m_position->SetPosition(0.0f, 0.0f, -10.0f);
+        //m_position->SetPosition(0.0f, 0.0f, -10.0f);
+
+        // SPONZA camera settings
+        m_position->SetPosition(32.7f, 8.63f, 1.32f);
+        m_position->SetRotation(0.0f, -90.0f, 0.0f);
 
         // Create depth sampler
         m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
@@ -221,8 +225,9 @@ namespace Engine
         m_dofConstants.nearSharpPlaneZ = 10.0f;
         m_dofConstants.farSharpPlaneZ = 15.0f;
         m_dofConstants.farBlurryPlaneZ = 50.0f;
-        m_dofConstants.useSecondLayer = 0.0f;
-        m_nearBlurRadiusFraction = 0.0f;
+        m_dofConstants.useSecondLayer = 1.0f;
+        m_dofConstants.dofEnabled = 1.0f;
+        m_nearBlurRadiusFraction = 0.5f;
         m_farBlurRadiusFraction = 0.5f;
 
         m_debugOptions = std::make_shared<SceneElement>(L"Debug Options");
@@ -656,7 +661,7 @@ namespace Engine
                 ShadeGBuffer(bundle);
             m_direct3D->EndRenderEvent();
 
-            if (m_dofConstants.dofEnabled == 1.0f)
+            if (true)
             {
                 // We want to apply DoF before AA and tonemapping
                 m_direct3D->BeginRenderEvent(L"Apply Depth of Field");
@@ -1030,7 +1035,7 @@ namespace Engine
         m_postProcessCamera->SetRenderTargetBundle(m_dofBundle);
 
         // Create Dof PostEffect
-        auto dofPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DoF_Split);
+        auto dofPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DoF_Split_Deep);
         auto dofEffect = std::make_shared<PostEffect<DepthOfFieldConstants>>(m_direct3D->GetDevice(), dofPipeline);
 
         // Upload rendered scene and csZ
@@ -1067,11 +1072,11 @@ namespace Engine
         dofEffect->SetEffectData(m_dofConstants);
         m_postProcessCamera->RenderPostEffect(m_direct3D, dofEffect);
 
-        // Apply blur to both layers of the scene
-        ApplyDoFBlur();
+        //// Apply blur to both layers of the scene
+        //ApplyDoFBlur();
 
-        // Composite layers together
-        CompositeDoF();
+        //// Composite layers together
+        //CompositeDoF();
     }
 
     void Engine::ApplyDoFBlur()

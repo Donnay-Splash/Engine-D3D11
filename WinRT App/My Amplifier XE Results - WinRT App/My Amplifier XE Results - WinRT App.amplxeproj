@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+ <connectionOption>localhost</connectionOption>
+ <rdmgr>
+  <timestamp type="u64_t">1491683249</timestamp>
+  <hostname>Michael-PC</hostname>
+  <os>windows</os>
+  <product>Intel® VTune™ Amplifier XE 2017 Update 2</product>
+  <buildNumber type="s32_t">499904</buildNumber>
+  <logicalCPUCount type="s32_t">4</logicalCPUCount>
+  <CPUFrequency type="s64_t">3400000000</CPUFrequency>
+  <CPUFamily type="s32_t">6</CPUFamily>
+  <CPUModel type="s32_t">58</CPUModel>
+  <CPUStepping type="s32_t">9</CPUStepping>
+  <CPUBrandName>       Intel(R) Core(TM) i5-3570K CPU @ 3.40GHz</CPUBrandName>
+  <isa>avx</isa>
+ </rdmgr>
+ <All_Configurations-All_Platforms>
+  <target_settings>
+   <selected_workload>
+    <localhost>launch</localhost>
+   </selected_workload>
+   <result_dir>
+    <localhost>E:\GitHub\Engine-D3D11\WinRT App\My Amplifier XE Results - WinRT App</localhost>
+   </result_dir>
+   <workloads>
+    <localhost>
+     <attach type="pointer" type_id="dasID_cctrl2::AttachWorkload" ptr_type="dasID_cctrl2::IWorkload">
+      <workload>
+       <targetName>attach</targetName>
+       <use_app_dir_as_work_dir type="bool">false</use_app_dir_as_work_dir>
+       <attach.process_name>WinRT App.exe</attach.process_name>
+       <attach.pid type="null"></attach.pid>
+       <result_directory.path>E:\GitHub\Engine-D3D11\WinRT App\My Amplifier XE Results - WinRT App\r@@@{at}</result_directory.path>
+       <search_directories>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\x64\Release\WinRT App</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\Engine\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\x64\Release\Engine_WinRT</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\AssetConverter\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\Utils\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\x64\Release\WinRT App</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(VC_ExecutablePath_x64)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(WindowsSDK_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(VS_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(MSBuild_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\FxCop</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\NativeBinaries\x86</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Intel\SWTools\compilers_and_libraries_2017.2.187\windows\mpi\intel64\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Intel\SWTools\compilers_and_libraries_2017.1.143\windows\mpi\intel64\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\mpirt</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\mpirt</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\compiler</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\compiler</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Python35\Scripts</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Python35</value>
+        </item>
+        <item>
+         <value>bin=C:\ProgramData\Oracle\Java\javapath</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\system32</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\System32\Wbem</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\System32\WindowsPowerShel l\v1.0</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\GnuWin32\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Python27-64Bit</value>
+        </item>
+        <item>
+         <value>bin=E:\Python27-64Bit\Scripts</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common</value>
+        </item>
+        <item>
+         <value>bin=C:\WINDOWS\System32\WindowsPowerShell\v1.0</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Microsoft SQL Server\120\Tools\Binn</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Microsoft\Web Platform Installer</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Git\cmd</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\TortoiseSVN\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\G3D\G3D10\build\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\CMake\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\GtkSharp\2.12\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Skype\Phone</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Common Files\Microsoft Shared\Windows Live</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\AssetConverter\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\Engine\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\x64\Release\Engine_WinRT</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\Utils\Built\x64\Release</value>
+        </item>
+       </search_directories>
+       <context>
+        <contextValue>
+         <id>allowMultipleRuns</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>analyzeKvmGuest</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>analyzeSystemWide</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>cpuMask</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>customCollector</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>dataLimit</id>
+         <value type="s32_t">500</value>
+        </contextValue>
+        <contextValue>
+         <id>enableRing</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>followChild</id>
+         <value type="bool">true</value>
+        </contextValue>
+        <contextValue>
+         <id>followChildStrategy</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>kvmGuestKallsyms</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>kvmGuestModules</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>kvmProfileGuest</id>
+         <value type="null"></value>
+        </contextValue>
+        <contextValue>
+         <id>mrteMode</id>
+         <value>auto</value>
+        </contextValue>
+        <contextValue>
+         <id>targetDurationType</id>
+         <value>short</value>
+        </contextValue>
+        <contextValue>
+         <id>targetRingBuffer</id>
+         <value type="s32_t">0</value>
+        </contextValue>
+        <contextValue>
+         <id>targetType</id>
+         <value>attach</value>
+        </contextValue>
+        <contextValue>
+         <id>tracingMode</id>
+         <value type="null"></value>
+        </contextValue>
+       </context>
+      </workload>
+     </attach>
+     <launch type="pointer" type_id="dasID_cctrl2::ApplicationWorkload" ptr_type="dasID_cctrl2::IWorkload">
+      <workload>
+       <targetName>launch</targetName>
+       <launch_app.inherit_sys_environment type="bool">true</launch_app.inherit_sys_environment>
+       <launch_app.app_to_launch>E:\GitHub\Engine-D3D11\x64\Release\WinRT App\WinRT App.exe</launch_app.app_to_launch>
+       <launch_app.working_folder>E:\GitHub\Engine-D3D11\WinRT App</launch_app.working_folder>
+       <launch_app.app_parameters></launch_app.app_parameters>
+       <launch_app.environment></launch_app.environment>
+       <launch_app.environment_prepend>PATH=</launch_app.environment_prepend>
+       <use_app_dir_as_work_dir type="bool">false</use_app_dir_as_work_dir>
+       <result_directory.path>E:\GitHub\Engine-D3D11\WinRT App\My Amplifier XE Results - WinRT App\r@@@{at}</result_directory.path>
+       <search_directories>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\x64\Release\WinRT App</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\Engine\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\x64\Release\Engine_WinRT</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\AssetConverter\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\Utils\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\x64\Release\WinRT App</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(VC_ExecutablePath_x64)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(WindowsSDK_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(VS_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(MSBuild_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\FxCop</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\NativeBinaries\x86</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Intel\SWTools\compilers_and_libraries_2017.2.187\windows\mpi\intel64\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Intel\SWTools\compilers_and_libraries_2017.1.143\windows\mpi\intel64\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\mpirt</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\mpirt</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\compiler</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\compiler</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Python35\Scripts</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Python35</value>
+        </item>
+        <item>
+         <value>bin=C:\ProgramData\Oracle\Java\javapath</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\system32</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\System32\Wbem</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\System32\WindowsPowerShel l\v1.0</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\GnuWin32\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Python27-64Bit</value>
+        </item>
+        <item>
+         <value>bin=E:\Python27-64Bit\Scripts</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common</value>
+        </item>
+        <item>
+         <value>bin=C:\WINDOWS\System32\WindowsPowerShell\v1.0</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Microsoft SQL Server\120\Tools\Binn</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Microsoft\Web Platform Installer</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Git\cmd</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\TortoiseSVN\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\G3D\G3D10\build\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\CMake\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\GtkSharp\2.12\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Skype\Phone</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Common Files\Microsoft Shared\Windows Live</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\AssetConverter\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\Engine\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\x64\Release\Engine_WinRT</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\Utils\Built\x64\Release</value>
+        </item>
+       </search_directories>
+       <context>
+        <contextValue>
+         <id>allowMultipleRuns</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>analyzeKvmGuest</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>analyzeSystemWide</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>cpuMask</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>customCollector</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>dataLimit</id>
+         <value type="s32_t">500</value>
+        </contextValue>
+        <contextValue>
+         <id>enableRing</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>followChild</id>
+         <value type="bool">true</value>
+        </contextValue>
+        <contextValue>
+         <id>followChildStrategy</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>kvmGuestKallsyms</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>kvmGuestModules</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>kvmProfileGuest</id>
+         <value type="null"></value>
+        </contextValue>
+        <contextValue>
+         <id>mrteMode</id>
+         <value>auto</value>
+        </contextValue>
+        <contextValue>
+         <id>targetDurationType</id>
+         <value>short</value>
+        </contextValue>
+        <contextValue>
+         <id>targetRingBuffer</id>
+         <value type="s32_t">0</value>
+        </contextValue>
+        <contextValue>
+         <id>targetType</id>
+         <value>launch</value>
+        </contextValue>
+        <contextValue>
+         <id>traceMpi</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>tracingMode</id>
+         <value type="null"></value>
+        </contextValue>
+       </context>
+      </workload>
+     </launch>
+     <system type="pointer" type_id="dasID_cctrl2::SystemWideWorkload" ptr_type="dasID_cctrl2::IWorkload">
+      <workload>
+       <targetName>system</targetName>
+       <use_app_dir_as_work_dir type="bool">false</use_app_dir_as_work_dir>
+       <result_directory.path>E:\GitHub\Engine-D3D11\WinRT App\My Amplifier XE Results - WinRT App\r@@@{at}</result_directory.path>
+       <search_directories>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\x64\Release\WinRT App</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\Engine\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\x64\Release\Engine_WinRT</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\AssetConverter\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>sym=E:\GitHub\Engine-D3D11\Utils\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\x64\Release\WinRT App</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(VC_ExecutablePath_x64)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(WindowsSDK_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(VS_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=E:/GitHub\Engine-D3D11\WinRT App\$(MSBuild_ExecutablePath)</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\FxCop</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\NativeBinaries\x86</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Intel\SWTools\compilers_and_libraries_2017.2.187\windows\mpi\intel64\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Intel\SWTools\compilers_and_libraries_2017.1.143\windows\mpi\intel64\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\mpirt</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\mpirt</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\compiler</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\compiler</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Python35\Scripts</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\Python35</value>
+        </item>
+        <item>
+         <value>bin=C:\ProgramData\Oracle\Java\javapath</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\system32</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\System32\Wbem</value>
+        </item>
+        <item>
+         <value>bin=C:\Windows\System32\WindowsPowerShel l\v1.0</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\GnuWin32\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Python27-64Bit</value>
+        </item>
+        <item>
+         <value>bin=E:\Python27-64Bit\Scripts</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common</value>
+        </item>
+        <item>
+         <value>bin=C:\WINDOWS\System32\WindowsPowerShell\v1.0</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Microsoft SQL Server\120\Tools\Binn</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Microsoft\Web Platform Installer</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Git\cmd</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\TortoiseSVN\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\G3D\G3D10\build\bin</value>
+        </item>
+        <item>
+         <value>bin=E:\Programs\CMake\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\GtkSharp\2.12\bin</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files (x86)\Skype\Phone</value>
+        </item>
+        <item>
+         <value>bin=C:\Program Files\Common Files\Microsoft Shared\Windows Live</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\AssetConverter\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\Engine\Built\x64\Release</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\x64\Release\Engine_WinRT</value>
+        </item>
+        <item>
+         <value>bin=E:\GitHub\Engine-D3D11\Utils\Built\x64\Release</value>
+        </item>
+       </search_directories>
+       <context>
+        <contextValue>
+         <id>allowMultipleRuns</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>analyzeKvmGuest</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>cpuMask</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>customCollector</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>dataLimit</id>
+         <value type="s32_t">500</value>
+        </contextValue>
+        <contextValue>
+         <id>enableRing</id>
+         <value type="bool">false</value>
+        </contextValue>
+        <contextValue>
+         <id>followChild</id>
+         <value type="bool">true</value>
+        </contextValue>
+        <contextValue>
+         <id>kvmGuestKallsyms</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>kvmGuestModules</id>
+         <value></value>
+        </contextValue>
+        <contextValue>
+         <id>kvmProfileGuest</id>
+         <value type="null"></value>
+        </contextValue>
+        <contextValue>
+         <id>mrteMode</id>
+         <value>native</value>
+        </contextValue>
+        <contextValue>
+         <id>targetDurationType</id>
+         <value>short</value>
+        </contextValue>
+        <contextValue>
+         <id>targetRingBuffer</id>
+         <value type="s32_t">0</value>
+        </contextValue>
+        <contextValue>
+         <id>targetType</id>
+         <value>system</value>
+        </contextValue>
+        <contextValue>
+         <id>tracingMode</id>
+         <value type="null"></value>
+        </contextValue>
+       </context>
+      </workload>
+     </system>
+    </localhost>
+   </workloads>
+  </target_settings>
+  <analysis_type_settings>
+   <selected_analysis_type_path>E:\Programs\Intel\SWTools\VTune Amplifier XE 2017\config\analysis_type\basic_hotspots.cfg</selected_analysis_type_path>
+  </analysis_type_settings>
+ </All_Configurations-All_Platforms>
+ <contextValues type="bag"/>
+</root>

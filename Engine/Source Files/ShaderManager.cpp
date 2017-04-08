@@ -33,9 +33,14 @@ namespace Engine
     }
 
     // Final fullscreen shader to resolve shader G-Buffer
-    namespace Deferred
+    namespace GBuffer_Shade
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_Shade.ps.hlsl.h"
+    }
+
+    namespace GBuffer_Shade_Deep
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_Shade_Deep.ps.hlsl.h"
     }
 
     // Copy the two layer camera space Z into two channels of a single texture
@@ -110,6 +115,11 @@ namespace Engine
         #include "Shaders\Compiled shaders\DeepGBuffer_DoF_SplitScene.ps.hlsl.h"
     }
 
+    namespace DoF_Split_Deep
+    {
+        #include "Shaders\Compiled shaders\DeepGBuffer_DoF_SplitScene_Deep.ps.hlsl.h"
+    }
+
     namespace DoF_Blur_Vertical
     {
         #include "Shaders\Compiled shaders\DeepGBuffer_DoF_Blur.ps.hlsl.h"
@@ -171,12 +181,20 @@ namespace Engine
         InputLayout::Ptr fullscreenQuadLayout = std::make_shared<InputLayout>(InputElement::Position | InputElement::TexCoord0);
         Shader::Ptr fullScreenQuadVS = std::make_shared<Shader>(Shader::Type::Vertex, FullScreenQuad::g_VSMain, sizeof(FullScreenQuad::g_VSMain), device);
 
-        // Load the post process deferred shaders
+        // Load the GBuffer lighting shader
         {
-            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, Deferred::g_PSMain, sizeof(Deferred::g_PSMain), device);
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, GBuffer_Shade::g_PSMain, sizeof(GBuffer_Shade::g_PSMain), device);
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::GBuffer_Shade, shaderPipeline);
+        }
+
+        // Load the deep GBuffer lighting shader
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, GBuffer_Shade_Deep::g_PSMain, sizeof(GBuffer_Shade_Deep::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::GBuffer_Shade_Deep, shaderPipeline);
         }
 
         // Load the camera-space Z copy
@@ -273,6 +291,14 @@ namespace Engine
             ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
 
             m_shaderMap.emplace(ShaderName::DoF_Split, shaderPipeline);
+        }
+
+        // Load the DoF scene split shader for deep G-Buffers
+        {
+            Shader::Ptr pixelShader = std::make_shared<Shader>(Shader::Type::Pixel, DoF_Split_Deep::g_PSMain, sizeof(DoF_Split_Deep::g_PSMain), device);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(device, fullscreenQuadLayout, fullScreenQuadVS, pixelShader);
+
+            m_shaderMap.emplace(ShaderName::DoF_Split_Deep, shaderPipeline);
         }
 
         // Load the DoF vertical blur shader

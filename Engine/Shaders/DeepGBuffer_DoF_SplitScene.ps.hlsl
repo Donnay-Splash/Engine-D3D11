@@ -47,10 +47,14 @@ PixelOut PSMain(VertexOut input)
     PixelOut result;
 
     float3 frontLayerColour = frontLayerShadedTexture.Sample(dofSampler, input.uv).rgb;
+#ifdef DOF_DEEP
     float3 backLayerColour = backLayerShadedTexture.Sample(dofSampler, input.uv).rgb;
+#endif
     float2 zSample = csZTexture.Sample(dofSampler, input.uv);
     float frontLayerRadius = GetCoCRadius(zSample.r);
+#ifdef DOF_DEEP
     float backLayerRadius = GetCoCRadius(zSample.g);
+#endif
 
     float blend = smoothstep(0.0f, 0.05f, frontLayerRadius);
 
@@ -58,8 +62,13 @@ PixelOut PSMain(VertexOut input)
     // TODO: When deep G-Buffer blending not enabled. store near field colour
     //       else store deep G-Buffer data
 
+#ifdef DOF_DEEP
     float3 farPlaneFillColour = lerp(frontLayerColour, backLayerColour, useSecondLayer);
     float fillRadius = lerp(frontLayerRadius, backLayerRadius, useSecondLayer);
+#else
+    float3 farPlaneFillColour = frontLayerColour;
+    float fillRadius = frontLayerRadius;
+#endif
     float farFillFactor = floor(blend);
     float nearBlendFactor = ceil(blend);
 
