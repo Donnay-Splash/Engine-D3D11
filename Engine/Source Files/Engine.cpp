@@ -193,8 +193,8 @@ namespace Engine
         //m_position->SetPosition(0.0f, 0.0f, -10.0f);
 
         // SPONZA camera settings
-        m_position->SetPosition(32.7f, 8.63f, 1.32f);
-        m_position->SetRotation(0.0f, -90.0f, 0.0f);
+        m_position->SetPosition(27.66f, 6.9f, 2.0f);
+        m_position->SetRotation(-1.83f, 271.26f, 0.0f);
 
         // Create depth sampler
         m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
@@ -221,14 +221,14 @@ namespace Engine
         m_debugConstants.aoEnabled = 0.0f;
         m_debugConstants.radiosityEnabled = 0.0f;
 
-        m_dofConstants.nearBlurryPlaneZ = 5.0f;
-        m_dofConstants.nearSharpPlaneZ = 10.0f;
-        m_dofConstants.farSharpPlaneZ = 15.0f;
-        m_dofConstants.farBlurryPlaneZ = 50.0f;
+        m_dofConstants.nearBlurryPlaneZ = 7.5f;
+        m_dofConstants.nearSharpPlaneZ = 21.0f;
+        m_dofConstants.farSharpPlaneZ = 100.0f;
+        m_dofConstants.farBlurryPlaneZ = 100.0f;
         m_dofConstants.useSecondLayer = 1.0f;
         m_dofConstants.dofEnabled = 1.0f;
-        m_nearBlurRadiusFraction = 0.5f;
-        m_farBlurRadiusFraction = 0.5f;
+        m_nearBlurRadiusFraction = 0.0f;
+        m_farBlurRadiusFraction = 0.0f;
 
         m_debugOptions = std::make_shared<SceneElement>(L"Debug Options");
         m_giOptions = std::make_shared<SceneElement>(L"GI Options");
@@ -1021,7 +1021,7 @@ namespace Engine
 
     float CalculateMaxCoCPixels(float viewportWidth, float nearBlurFraction, float farBlurFraction)
     {
-        return std::max(nearBlurFraction, farBlurFraction) * viewportWidth;
+        return std::max(std::max(nearBlurFraction, farBlurFraction) * viewportWidth, 0.1f);
     }
 
     void Engine::ApplyDoF()
@@ -1072,11 +1072,11 @@ namespace Engine
         dofEffect->SetEffectData(m_dofConstants);
         m_postProcessCamera->RenderPostEffect(m_direct3D, dofEffect);
 
-        //// Apply blur to both layers of the scene
-        //ApplyDoFBlur();
+        // Apply blur to both layers of the scene
+        ApplyDoFBlur();
 
-        //// Composite layers together
-        //CompositeDoF();
+        // Composite layers together
+        CompositeDoF();
     }
 
     void Engine::ApplyDoFBlur()

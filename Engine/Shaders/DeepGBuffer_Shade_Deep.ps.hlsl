@@ -93,8 +93,8 @@ PixelOut PSMain(VertexOut input)
     for (int layerNum = 0; layerNum < 2; layerNum++)
     {
         float3 wsN = normalize(mul(float4(normal[layerNum], 0.0f), invViewMatrix).xyz);
-        diffuseAmbient[layerNum] = DiffuseEnvironementLighting(wsN) * envIntensity;
-        specularAmbient[layerNum] = SpecularEnvironmentLighting(wsN, wsV, alpha[layerNum]) * envIntensity;
+        diffuseAmbient[layerNum] = DiffuseEnvironementLighting(wsN);
+        specularAmbient[layerNum] = SpecularEnvironmentLighting(wsN, wsV, alpha[layerNum]);
     }
 
     float3 radiance[2] = { emissiveColor[0], emissiveColor[1] };

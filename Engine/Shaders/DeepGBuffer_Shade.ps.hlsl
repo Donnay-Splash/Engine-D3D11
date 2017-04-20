@@ -56,8 +56,8 @@ float3 PSMain(VertexOut input) : SV_Target0
     float3 wsV = normalize(mul(float4(viewDirection, 0.0f), invViewMatrix).xyz);
 
     float3 wsN = normalize(mul(float4(normal, 0.0f), invViewMatrix).xyz);
-    float3 diffuseAmbient = DiffuseEnvironementLighting(wsN) * envIntensity;
-    float3 specularAmbient = SpecularEnvironmentLighting(wsN, wsV, alpha) * envIntensity;
+    float3 diffuseAmbient = DiffuseEnvironementLighting(wsN);
+    float3 specularAmbient = SpecularEnvironmentLighting(wsN, wsV, alpha);
 
     float3 radiance = emissiveColor;
     for (int lightNum = 0; lightNum < activeLights; lightNum++)
