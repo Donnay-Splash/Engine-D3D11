@@ -40,6 +40,38 @@ DirectXPage::DirectXPage()
     auto height = coreTitleBar->Height;
     engineComponent->SceneElementAdded += ref new Engine_WinRT::SceneElementAddedEventHandler(this, &DirectXPage::OnSceneElementAdded);
 
+    create_task(StorageFile::GetFileFromApplicationUriAsync(ref new Uri("ms-appx:///Assets/snowy.dds"))).then([this](task<StorageFile^> t)
+    {
+        try
+        {
+            auto storageFile = t.get();
+            if (storageFile != nullptr)
+            {
+                engineComponent->LoadFile(storageFile);
+            }
+        }
+        catch (...)
+        {
+
+        }
+    });
+
+    create_task(StorageFile::GetFileFromApplicationUriAsync(ref new Uri("ms-appx:///Assets/sponza.mike"))).then([this](task<StorageFile^> t)
+    {
+        try
+        {
+            auto storageFile = t.get();
+            if (storageFile != nullptr)
+            {
+                engineComponent->LoadFile(storageFile);
+            }
+        }
+        catch (...)
+        {
+
+        }
+    });
+
     //// Register event handlers for page lifecycle.
     //CoreWindow^ window = Window::Current->CoreWindow;
 

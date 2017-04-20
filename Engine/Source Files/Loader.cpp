@@ -6,7 +6,7 @@
 #include <Scene\Components\BoundingBox.h>
 
 using namespace Utils::Loader;
-
+static int loads = 0;
 namespace Engine
 {
     Loader::Loader(D3DClass::Ptr d3dClass, Scene::Ptr scene, ShaderPipeline::Ptr shaderPipeline) :
@@ -65,6 +65,11 @@ namespace Engine
         auto size = rootBounds.GetSize();
         auto maxAxis = std::max(size.x, std::max(size.y, size.z));
         auto scale = 1.0f / maxAxis;
+        if (loads == 0)
+        {
+            rootNode->SetScale(0.05f);
+            loads++;
+        }
         //rootNode->SetScale(scale); // TODO: Allow for enabling or disabling mesh unit scaling
     }
 

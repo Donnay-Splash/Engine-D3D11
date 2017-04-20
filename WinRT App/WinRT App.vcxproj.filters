@@ -123,6 +123,9 @@
     <Image Include="Assets\StoreLogo.png">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\snowy.dds">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -130,6 +133,9 @@
   <ItemGroup>
     <None Include="WinRT App_TemporaryKey.pfx" />
     <None Include="packages.config" />
+    <None Include="Assets\sponza.mike">
+      <Filter>Assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Page Include="DirectXPage.xaml" />

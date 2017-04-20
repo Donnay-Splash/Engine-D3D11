@@ -136,8 +136,8 @@ namespace Engine
         if (createOptions.RootSceneElementAddedCallback != nullptr)
         {
             createOptions.RootSceneElementAddedCallback(m_debugOptions, 0);
-            createOptions.RootSceneElementAddedCallback(m_aoOptions, 0);
-            createOptions.RootSceneElementAddedCallback(m_giOptions, 0);
+            /*createOptions.RootSceneElementAddedCallback(m_aoOptions, 0);
+            createOptions.RootSceneElementAddedCallback(m_giOptions, 0);*/
             createOptions.RootSceneElementAddedCallback(m_dofOptions, 0);
             m_scene->GetRootNode()->SetChildAddedCallback(createOptions.RootSceneElementAddedCallback);
         }
@@ -164,7 +164,7 @@ namespace Engine
         // Create the camera object
         auto cameraNode = m_scene->AddNode();
         m_camera = cameraNode->AddComponent<Camera>();
-        m_camera->SetJitterEnabled(true);
+        m_camera->SetJitterEnabled(false);
         m_camera->SetJitterSequence(kJitterSequence);
         cameraNode->SetPosition({ 0.0f, 0.0f, -10.0f });
 
@@ -193,8 +193,8 @@ namespace Engine
         //m_position->SetPosition(0.0f, 0.0f, -10.0f);
 
         // SPONZA camera settings
-        m_position->SetPosition(27.66f, 6.9f, 2.0f);
-        m_position->SetRotation(-1.83f, 271.26f, 0.0f);
+        m_position->SetPosition(61.0f, 31.5f, 2.56f);
+        m_position->SetRotation(3.18f, 272.0f, 0.0f);
 
         // Create depth sampler
         m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
@@ -221,14 +221,14 @@ namespace Engine
         m_debugConstants.aoEnabled = 0.0f;
         m_debugConstants.radiosityEnabled = 0.0f;
 
-        m_dofConstants.nearBlurryPlaneZ = 7.5f;
-        m_dofConstants.nearSharpPlaneZ = 21.0f;
-        m_dofConstants.farSharpPlaneZ = 100.0f;
+        m_dofConstants.nearBlurryPlaneZ = 16.0f;
+        m_dofConstants.nearSharpPlaneZ = 48.0f;
+        m_dofConstants.farSharpPlaneZ = 98.0;
         m_dofConstants.farBlurryPlaneZ = 100.0f;
         m_dofConstants.useSecondLayer = 1.0f;
         m_dofConstants.dofEnabled = 1.0f;
-        m_nearBlurRadiusFraction = 0.0f;
-        m_farBlurRadiusFraction = 0.0f;
+        m_nearBlurRadiusFraction = 1.98f;
+        m_farBlurRadiusFraction = 0.5f;
 
         m_debugOptions = std::make_shared<SceneElement>(L"Debug Options");
         m_giOptions = std::make_shared<SceneElement>(L"GI Options");
@@ -375,13 +375,13 @@ namespace Engine
         {
             auto getter = [&]()->float { return m_nearBlurRadiusFraction; };
             auto setter = [&](float value) {m_nearBlurRadiusFraction = value; };
-            m_dofOptions->RegisterScalarProperty(L"Near Blur Radius", getter, setter, 0.0f, 4.0f);
+            m_dofOptions->RegisterScalarProperty(L"Near Blur Fraction", getter, setter, 0.0f, 4.0f);
         }
 
         {
             auto getter = [&]()->float { return m_farBlurRadiusFraction; };
             auto setter = [&](float value) {m_farBlurRadiusFraction = value; };
-            m_dofOptions->RegisterScalarProperty(L"Far Blur Radius", getter, setter, 0.0f, 4.0f);
+            m_dofOptions->RegisterScalarProperty(L"Far Blur Fraction", getter, setter, 0.0f, 4.0f);
         }
 
     }
