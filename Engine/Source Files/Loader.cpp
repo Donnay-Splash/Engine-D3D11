@@ -25,21 +25,21 @@ namespace Engine
         // cache optimisations, etc...
         MikeLoader importer;
         auto importedScene = importer.LoadFile(filePath);
-        LoadScene(importedScene);
+        LoadScene(importedScene, 1.0f, 0.0f);
     }
 
-    void Loader::LoadFile(const uint8_t* data, uint64_t byteCount)
+    void Loader::LoadFile(const uint8_t* data, uint64_t byteCount, float scale, float yOffset)
     {
         MikeLoader importer;
         auto importedScene = importer.LoadFile(data, byteCount);
-        LoadScene(importedScene);
+        LoadScene(importedScene, scale, yOffset);
     }
 
-    void Loader::LoadScene(const SceneData& importedScene)
+    void Loader::LoadScene(const SceneData& importedScene, float scale, float yOffset)
     {
         LoadTextures(importedScene.Textures);
         LoadMaterials(importedScene.Materials);
-        LoadSceneNodes(importedScene.SceneNodes);
+        LoadSceneNodes(importedScene.SceneNodes, scale, yOffset);
 
         m_textureMap.clear();
         m_materialMap.clear();
@@ -47,7 +47,7 @@ namespace Engine
     }
 
 
-    void Loader::LoadSceneNodes(const std::vector<Utils::Loader::SceneNodeData>& importedSceneNodes)
+    void Loader::LoadSceneNodes(const std::vector<Utils::Loader::SceneNodeData>& importedSceneNodes, float scale, float yOffset)
     {
         for (auto importedNode : importedSceneNodes)
         {
@@ -64,8 +64,17 @@ namespace Engine
         boundsComponent->SetBounds(rootBounds);
         auto size = rootBounds.GetSize();
         auto maxAxis = std::max(size.x, std::max(size.y, size.z));
-        auto scale = 1.0f / maxAxis;
-        //rootNode->SetScale(scale); // TODO: Allow for enabling or disabling mesh unit scaling
+        //auto scale = 100.0f / maxAxis;
+        rootNode->SetScale(scale); // TODO: Allow for enabling or disabling mesh unit scaling
+        if (yOffset == 2.6f)
+        {
+            rootNode->SetPosition({ 0.0f, yOffset, 2.0f });
+            rootNode->SetRotation(Utils::Maths::Quaternion::CreateFromAxisAngle({ 0.0f, 1.0f, 0.0f }, Utils::Maths::DegreesToRadians(62.5)));
+        }
+        else
+        {
+            rootNode->SetPosition({ 0.0f, yOffset, 0.0f });
+        }
     }
 
     void Loader::LoadNode(const SceneNodeData& importedNode)

@@ -194,7 +194,7 @@ namespace Engine
         m_position->SetPosition(0.0f, 0.0f, -10.0f);
 
         // SPONZA camera settings
-        m_position->SetPosition(32.7f, 8.63f, 1.32f);
+        m_position->SetPosition(46.0f, 8.63f, 1.8f);
         m_position->SetRotation(0.0f, -90.0f, 0.0f);
 
         // Create depth sampler
@@ -215,7 +215,12 @@ namespace Engine
         m_giConstants.aoIntensity = 1.0f;
         m_giConstants.numSamples = kAO_numSamples;
         m_giConstants.numSpiralTurns = float(kAO_numSpiralTurns);
-        m_giConstants.radiosityRadius = m_giConstants.aoRadius * 5.0f;
+
+        m_giConstants.radiosityRadius = 40.0f;
+        m_giConstants.saturatedBoost = 1.5f;
+        m_giConstants.confidenceCentre = 0.5f;
+        m_giConstants.radiosityPropogationDamping = 0.2f;
+        m_debugConstants.radiosityEnabled = 1.0f;
 
         m_deepGBufferData.minimumSeparation = 2.0f;
 
@@ -432,12 +437,12 @@ namespace Engine
     }
 
 
-    void Engine::LoadFile(const uint8_t * data, uint64_t byteCount)
+    void Engine::LoadFile(const uint8_t * data, uint64_t byteCount, float scale, float yOffset)
     {
         auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen);
         Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
 
-        loader->LoadFile(data, byteCount);
+        loader->LoadFile(data, byteCount, scale, yOffset);
     }
 
     void Engine::LoadEnvironment(const uint8_t * data, uint64_t byteCount)

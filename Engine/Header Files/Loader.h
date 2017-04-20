@@ -19,10 +19,10 @@ namespace Engine
         ~Loader();
 
         void LoadFile(const std::string& filePath);
-        void LoadFile(const uint8_t* data, uint64_t byteCount);
+        void LoadFile(const uint8_t* data, uint64_t byteCount, float scale, float yOffset);
     private:
-        void LoadScene(const Utils::Loader::SceneData& importedScene);
-        void LoadSceneNodes(const std::vector<Utils::Loader::SceneNodeData>& importedSceneNodes);
+        void LoadScene(const Utils::Loader::SceneData& importedScene, float scale, float yOffset);
+        void LoadSceneNodes(const std::vector<Utils::Loader::SceneNodeData>& importedSceneNodes, float scale, float yOffset);
         void LoadMaterials(const std::vector<Utils::Loader::MaterialData>& importedMaterials);
         void LoadTextures(const std::vector<Utils::Loader::TextureData>& importedTextures);
         void LoadNode(const Utils::Loader::SceneNodeData& importedNode);

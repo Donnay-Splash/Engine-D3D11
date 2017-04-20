@@ -39,7 +39,7 @@ namespace Engine
 
         InputManager::Ptr GetInputManager() const { return m_inputManager; }
 
-        void LoadFile(const uint8_t* data, uint64_t byteCount);
+        void LoadFile(const uint8_t* data, uint64_t byteCount, float scale, float yOffset);
 
         void LoadEnvironment(const uint8_t* data, uint64_t byteCount);
 

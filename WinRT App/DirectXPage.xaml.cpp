@@ -40,6 +40,33 @@ DirectXPage::DirectXPage()
     auto height = coreTitleBar->Height;
     engineComponent->SceneElementAdded += ref new Engine_WinRT::SceneElementAddedEventHandler(this, &DirectXPage::OnSceneElementAdded);
 
+    create_task(StorageFile::GetFileFromApplicationUriAsync(ref new Uri("ms-appx:///Assets/Sponza-purp.dds"))).then([this](task<StorageFile^> t)
+    {
+        auto storageFile = t.get();
+        if (storageFile != nullptr)
+        {
+            engineComponent->LoadFile(storageFile, 1.0f, 0.0f);
+        }
+    });
+
+    create_task(StorageFile::GetFileFromApplicationUriAsync(ref new Uri("ms-appx:///Assets/sponza-purple.mike"))).then([this](task<StorageFile^> t)
+    {
+        auto storageFile = t.get();
+        if (storageFile != nullptr)
+        {
+            engineComponent->LoadFile(storageFile, 0.05f, 0.0f);
+        }
+    });
+
+    create_task(StorageFile::GetFileFromApplicationUriAsync(ref new Uri("ms-appx:///Assets/dragon.mike"))).then([this](task<StorageFile^> t)
+    {
+        auto storageFile = t.get();
+        if (storageFile != nullptr)
+        {
+            engineComponent->LoadFile(storageFile, 10.0f, 2.6f);
+        }
+    });
+
     //// Register event handlers for page lifecycle.
     //CoreWindow^ window = Window::Current->CoreWindow;
 
@@ -195,7 +222,7 @@ Concurrency::task<void> DirectXPage::OpenFile()
     auto file = co_await picker->PickSingleFileAsync();
     if (file != nullptr)
     {
-        engineComponent->LoadFile(file);
+        engineComponent->LoadFile(file, 1.0f, 0.0f);
     }
     // Best Idea is to pass the data to EngineComponent. do this and then lock and pass to engine to load.
 }

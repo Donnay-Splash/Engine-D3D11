@@ -148,12 +148,12 @@ void EngineComponent::OnSceneElementAdded(Engine::SceneElement::Ptr sceneElement
     }));
 }
 
-void EngineComponent::LoadFile(Windows::Storage::StorageFile^ file)
+void EngineComponent::LoadFile(Windows::Storage::StorageFile^ file, float scale, float yOffset)
 {
-    LoadFileInternal(file);
+    LoadFileInternal(file, scale, yOffset);
 }
 
-Concurrency::task<void> EngineComponent::LoadFileInternal(Windows::Storage::StorageFile^ file)
+Concurrency::task<void> EngineComponent::LoadFileInternal(Windows::Storage::StorageFile^ file, float scale, float yOffset)
 {
     auto type = file->FileType;
     auto buffer = co_await Windows::Storage::FileIO::ReadBufferAsync(file);
@@ -166,7 +166,7 @@ Concurrency::task<void> EngineComponent::LoadFileInternal(Windows::Storage::Stor
     if (type == L".mike")
     {
         // Load file
-        m_engine->LoadFile(data, buffer->Length);
+        m_engine->LoadFile(data, buffer->Length, scale, yOffset);
     }
     else if (type == L".dds")
     {

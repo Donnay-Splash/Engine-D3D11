@@ -23,7 +23,7 @@ namespace Engine_WinRT
         EngineComponent();
         virtual ~EngineComponent();
 
-        void LoadFile(Windows::Storage::StorageFile^ fileToLoad);
+        void LoadFile(Windows::Storage::StorageFile^ fileToLoad, float scale, float yOffset);
 
         event SceneElementAddedEventHandler^ SceneElementAdded;
 
@@ -49,7 +49,7 @@ namespace Engine_WinRT
         void StartRendererThread();
 
 
-        Concurrency::task<void> LoadFileInternal(Windows::Storage::StorageFile^ fileToLoad);
+        Concurrency::task<void> LoadFileInternal(Windows::Storage::StorageFile^ fileToLoad, float scale, float yOffset);
 
     private:
         Engine::Engine::Ptr m_engine;
