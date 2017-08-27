@@ -130,6 +130,7 @@ namespace Engine
 
         float m_weightThisFrame = 0.05f;
         float m_elapsedTime = 0.0f;
+        bool m_radiosityUseSecondLayer = true;
     };
 }
 

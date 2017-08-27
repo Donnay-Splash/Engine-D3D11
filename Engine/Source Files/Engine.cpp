@@ -6,6 +6,9 @@
 #include <Utils\Math\MathHelpers.h>
 #include <DDSTextureLoader.h>
 
+// Test
+#include <Utils\Threading\ThreadPool.h>
+
 namespace Engine
 {
     // Taken from DeepGBuffer paper : http://graphics.cs.williams.edu/papers/DeepGBuffer16/
@@ -297,6 +300,12 @@ namespace Engine
             auto getter = [&]()->bool { return m_debugConstants.radiosityEnabled == 1.0f; };
             auto setter = [&](bool value) {m_debugConstants.radiosityEnabled = value ? 1.0f : 0.0f; };
             m_giOptions->RegisterBooleanProperty(L"Radiosity Enabled", getter, setter);
+        }
+
+        {
+            auto getter = [&]()->bool { return m_radiosityUseSecondLayer; };
+            auto setter = [&](bool value) { m_radiosityUseSecondLayer = value; };
+            m_giOptions->RegisterBooleanProperty(L"Use Second Layer", getter, setter);
         }
 
         {
@@ -706,7 +715,8 @@ namespace Engine
         m_postProcessCamera->SetRenderTargetBundle(m_radiosityBundle);
 
         // Create post effect
-        auto radiosityPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ComputeRadiosity);
+        auto radiosityShader = m_radiosityUseSecondLayer ? ShaderName::ComputeRadiosity_Deep : ShaderName::ComputeRadiosity;
+        auto radiosityPipeline = m_shaderManager->GetShaderPipeline(radiosityShader);
         auto radiosityEffect = std::make_shared<PostEffect<GIConstants>>(m_direct3D->GetDevice(), radiosityPipeline);
 
         // Upload downsampled maps
