@@ -153,6 +153,8 @@
     <ClInclude Include="Math\MathHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Strings\StringHelpers.h" />
+    <ClInclude Include="Threading\ThreadPool.h" />
+    <ClInclude Include="Threading\ThreadSafeQueue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Loader\Exporter.cpp" />

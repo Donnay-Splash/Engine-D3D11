@@ -26,6 +26,12 @@
     <ClInclude Include="Math\MathHelpers.h">
       <Filter>Maths</Filter>
     </ClInclude>
+    <ClInclude Include="Threading\ThreadSafeQueue.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Threading\ThreadPool.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -54,6 +60,9 @@
     </Filter>
     <Filter Include="Strings">
       <UniqueIdentifier>{1467f52a-a58e-435c-9af9-db2632f4ec6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Threading">
+      <UniqueIdentifier>{4f24af8b-7371-4937-8acb-64c7070473b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
