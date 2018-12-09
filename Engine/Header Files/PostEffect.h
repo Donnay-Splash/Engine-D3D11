@@ -11,11 +11,11 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<PostEffect<T>>;
-        PostEffect(ID3D11Device* device, ShaderPipeline::Ptr shaderPipeline) :
+        PostEffect(ShaderPipeline::Ptr shaderPipeline) :
             m_shaderPipeline(shaderPipeline)
         {
-            m_pipelineState = std::make_shared<PipelineState>(device, BlendMode::Opaque, D3D11_CULL_NONE, false);
-            m_effectConstants = std::make_shared<ConstantBuffer<T>>(PipelineStage::Pixel, device);
+            m_pipelineState = std::make_shared<PipelineState>(BlendMode::Opaque, D3D11_CULL_NONE, false);
+            m_effectConstants = std::make_shared<ConstantBuffer<T>>(PipelineStage::Pixel);
         }
 
         void Render(ID3D11DeviceContext* deviceContext)

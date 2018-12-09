@@ -4,14 +4,14 @@
 
 namespace Engine
 {
-    Material::Material(ID3D11Device* device, ShaderPipeline::Ptr shaderPipeline) : SceneElement(L"Material"),
+    Material::Material(ShaderPipeline::Ptr shaderPipeline) : SceneElement(L"Material"),
         m_shaderPipeline(shaderPipeline)
     {
-        m_pipelineState = std::make_shared<PipelineState>(device, BlendMode::Opaque, D3D11_CULL_BACK, true);
-        m_materialConstants = std::make_shared<ConstantBuffer<MaterialConstants>>(PipelineStage::Pixel, device);
+        m_pipelineState = std::make_shared<PipelineState>(BlendMode::Opaque, D3D11_CULL_BACK, true);
+        m_materialConstants = std::make_shared<ConstantBuffer<MaterialConstants>>(PipelineStage::Pixel);
 
         // Only need one sampler for all textures. No need to complicate it.
-        m_sampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP);
+        m_sampler = std::make_shared<Sampler>(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP);
 
         RegisterPublicProperties();
     }

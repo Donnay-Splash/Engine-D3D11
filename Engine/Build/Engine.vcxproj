@@ -166,6 +166,7 @@
   <ItemGroup>
     <ClCompile Include="..\Header Files\MeshMaker\MeshMaker.cpp" />
     <ClCompile Include="..\Source Files\d3dclass.cpp" />
+    <ClCompile Include="..\Source Files\DX11Impl.cpp" />
     <ClCompile Include="..\Source Files\Engine.cpp" />
     <ClCompile Include="..\Source Files\Font.cpp" />
     <ClCompile Include="..\Source Files\FontShader.cpp" />
@@ -223,6 +224,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\d3dclass.h" />
+    <ClInclude Include="..\Header Files\DX11Impl.h" />
     <ClInclude Include="..\Header Files\Engine.h" />
     <ClInclude Include="..\Header Files\EngineCreateOptions.h" />
     <ClInclude Include="..\Header Files\Font.h" />

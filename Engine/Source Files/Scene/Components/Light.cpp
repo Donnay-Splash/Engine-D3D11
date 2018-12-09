@@ -9,7 +9,7 @@ namespace Engine
         AddPublicProperties();
     }
 
-    void Light::Initialize(ID3D11Device* device)
+    void Light::Initialize()
     {
 
     }

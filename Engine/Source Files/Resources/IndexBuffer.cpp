@@ -3,7 +3,7 @@
 
 namespace Engine
 {
-    IndexBuffer::IndexBuffer(void* data, uint32_t indexCount, ID3D11Device* device, bool  useBigIndices/* = true*/)
+    IndexBuffer::IndexBuffer(void* data, uint32_t indexCount, bool  useBigIndices/* = true*/)
         : m_indexCount(indexCount),
         m_indexSizeInBytes(useBigIndices ? sizeof(uint32_t) : sizeof(uint16_t)),
         m_indexFormat(useBigIndices ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT)

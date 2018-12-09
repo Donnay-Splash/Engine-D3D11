@@ -26,7 +26,7 @@ namespace Engine
         LightManager(const LightManager&) = delete;
         ~LightManager();
 
-        void Initialize(ID3D11Device* device, Scene::Ptr scene, ShaderPipeline::Ptr shadowMapPipeline);
+        void Initialize(Scene::Ptr scene, ShaderPipeline::Ptr shadowMapPipeline);
         // Gathers lights and uploads data to GPU
         void GatherLights(Scene::Ptr scene, ID3D11DeviceContext* deviceContext, LightSpaceModifier space = LightSpaceModifier::World);
         // Renders the shadow map for the shadow caster and returns the camera to light space

@@ -3,7 +3,7 @@
 
 namespace Engine
 {
-    VertexBuffer::VertexBuffer(void* data, uint32_t vertexCount, size_t vertexSizeInBytes, ID3D11Device* device)
+    VertexBuffer::VertexBuffer(void* data, uint32_t vertexCount, size_t vertexSizeInBytes)
         : m_stride(static_cast<UINT>(vertexSizeInBytes))
     {
         // The vertex must have a size greater than zero

@@ -31,13 +31,13 @@ namespace Engine
 
         // TODO: eventually make shader manager a friend of the Renderer class
         // so that it can set this up without having to pass too much stuff around.
-        ShaderManager(ID3D11Device* device);
+        ShaderManager();
 
         ShaderPipeline::Ptr GetShaderPipeline(ShaderName);
     private:
         using ShaderMap = std::map<ShaderName, ShaderPipeline::Ptr>;
         using ShaderMapObject = ShaderMap::value_type;
-        void LoadCoreShaders(ID3D11Device* device);
+        void LoadCoreShaders();
 
     private:
         ShaderMap m_shaderMap;

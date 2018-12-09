@@ -22,13 +22,13 @@ FontShader::~FontShader()
 }
 
 
-bool FontShader::Initialize(ID3D11Device* device, HWND hwnd)
+bool FontShader::Initialize(HWND hwnd)
 {
     bool result;
 
 
     // Initialize the vertex and pixel shaders.
-    result = InitializeShader(device, hwnd, L"../Engine/font.vs", L"../Engine/font.ps");
+    result = InitializeShader(hwnd, L"../Engine/font.vs", L"../Engine/font.ps");
     if(!result)
     {
         return false;
@@ -67,7 +67,7 @@ bool FontShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, Util
 }
 
 
-bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+bool FontShader::InitializeShader(HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
 {
     HRESULT result;
     ID3D10Blob* errorMessage;

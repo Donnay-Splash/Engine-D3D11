@@ -22,7 +22,7 @@ namespace Engine
 
     protected:
         MeshInstance(Component::SceneNodePtr sceneNode);
-        virtual void Initialize(ID3D11Device* device) override;
+        virtual void Initialize() override;
 
     private:
         Mesh::Ptr m_mesh;

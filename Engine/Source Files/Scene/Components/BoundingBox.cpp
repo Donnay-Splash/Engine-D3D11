@@ -8,7 +8,7 @@ namespace Engine
 
     }
 
-    void BoundingBox::Initialize(ID3D11Device* device)
+    void BoundingBox::Initialize()
     {
 
     }

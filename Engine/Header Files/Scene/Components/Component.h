@@ -30,7 +30,7 @@ namespace Engine
     protected:
         Component(SceneNodePtr sceneNode, std::wstring elementName);
         Component(const Component&) = delete;
-        virtual void Initialize(ID3D11Device* device) = 0;
+        virtual void Initialize() = 0;
         virtual void OnSceneNodeTransformChanged(const Utils::Maths::Matrix& prevWorldTransform) {}
 
     private:

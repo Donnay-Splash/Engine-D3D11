@@ -25,7 +25,7 @@ namespace Engine
         Text();
         ~Text();
 
-        bool Initialize(ID3D11Device*, ID3D11DeviceContext*, HWND, int, int, Utils::Maths::Matrix);
+        bool Initialize(ID3D11DeviceContext*, HWND, int, int, Utils::Maths::Matrix);
         void Shutdown();
         bool Render(ID3D11DeviceContext*, FontShader*, Utils::Maths::Matrix, Utils::Maths::Matrix);
 
@@ -36,7 +36,7 @@ namespace Engine
         bool SetCameraRotation(float, float, float, ID3D11DeviceContext*);
 
     private:
-        bool InitializeSentence(SentenceType**, int, ID3D11Device*);
+        bool InitializeSentence(SentenceType**, int);
         bool UpdateSentence(SentenceType*, char*, int, int, float, float, float, ID3D11DeviceContext*);
         void ReleaseSentence(SentenceType**);
         bool RenderSentence(SentenceType*, ID3D11DeviceContext*, FontShader*, Utils::Maths::Matrix, Utils::Maths::Matrix);

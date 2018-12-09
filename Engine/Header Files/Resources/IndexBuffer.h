@@ -7,7 +7,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<IndexBuffer>;
-        IndexBuffer(void* data, uint32_t indexCount, ID3D11Device* device, bool bigIndices = true);
+        IndexBuffer(void* data, uint32_t indexCount, bool bigIndices = true);
 
         void UploadData(ID3D11DeviceContext* deviceContext);
 

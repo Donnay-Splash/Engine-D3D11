@@ -4,7 +4,7 @@
 using namespace Engine;
 namespace Utils
 {
-        Mesh::Ptr MeshMaker::CreateTriangle(ID3D11Device* device)
+        Mesh::Ptr MeshMaker::CreateTriangle()
         {
             Mesh::PositionContainer positions(3);
             Mesh::NormalContainer normals(3);
@@ -37,14 +37,14 @@ namespace Utils
             return mesh;
         }
 
-        Mesh::Ptr MeshMaker::CreateSphere(ID3D11Device* device)
+        Mesh::Ptr MeshMaker::CreateSphere()
         {
             // Not yet implemented.
             EngineAssert(false);
             return nullptr;
         }
 
-        Mesh::Ptr MeshMaker::CreateCube(ID3D11Device* device)
+        Mesh::Ptr MeshMaker::CreateCube()
         {
             Mesh::PositionContainer positions(24);
             Mesh::NormalContainer normals(24);
@@ -217,7 +217,7 @@ namespace Utils
             return mesh;
         }
 
-        Engine::Mesh::Ptr MeshMaker::CreateTorus(ID3D11Device * device, float internalRadius, float externalRadius, uint32_t triDensity)
+        Engine::Mesh::Ptr MeshMaker::CreateTorus(float internalRadius, float externalRadius, uint32_t triDensity)
         {
             const uint32_t minAngleIterations = 8;
             uint32_t angleIterations = std::max(minAngleIterations, triDensity);
@@ -333,14 +333,14 @@ namespace Utils
             return mesh;
         }
 
-        Mesh::Ptr MeshMaker::CreateGroundPlane(ID3D11Device* device)
+        Mesh::Ptr MeshMaker::CreateGroundPlane()
         {
             // Not yet implemented.
             EngineAssert(false);
             return nullptr;
         }
 
-        Mesh::Ptr MeshMaker::CreateTesselatedGroundPlane(ID3D11Device* device, uint32_t width, uint32_t height)
+        Mesh::Ptr MeshMaker::CreateTesselatedGroundPlane(uint32_t width, uint32_t height)
         {
             // Calculate the number of vertices in the terrain mesh.
             uint32_t vertexCount = (width - 1) * (height - 1) * 8;
@@ -434,7 +434,7 @@ namespace Utils
             return mesh;
         }
 
-        Mesh::Ptr MeshMaker::CreateFullScreenQuad(ID3D11Device* device)
+        Mesh::Ptr MeshMaker::CreateFullScreenQuad()
         {
             const uint32_t vertexCount = 4;
             const uint32_t indexCount = 6;

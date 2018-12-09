@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-    TextureBundleMipView::TextureBundleMipView(ID3D11Device* device, RenderTargetBundle::Ptr bundle, uint32_t mipLevels/* = 0*/) :
+    TextureBundleMipView::TextureBundleMipView(RenderTargetBundle::Ptr bundle, uint32_t mipLevels/* = 0*/) :
         m_mipLevels(mipLevels), m_currentMipLevel(0), m_renderTargetBundle(bundle)
     {
         EngineAssert(m_renderTargetBundle != nullptr);
@@ -13,7 +13,7 @@ namespace Engine
         for (uint32_t i = 0; i < m_renderTargetBundle->RenderTargetCount(); i++)
         {
             auto texture = m_renderTargetBundle->GetRenderTarget(i)->GetTexture();
-            auto mipView = std::make_shared<TextureMipView>(device, texture, m_mipLevels);
+            auto mipView = std::make_shared<TextureMipView>(texture, m_mipLevels);
             m_mipViews.push_back(mipView);
             m_mipLevels = mipView->GetMipCount();
         }

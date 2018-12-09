@@ -29,10 +29,10 @@ namespace Engine
         Mesh(const Mesh&) = delete;
         ~Mesh();
 
-        void Load(const Utils::Loader::SceneNodeData& mesh, ID3D11Device* device);
+        void Load(const Utils::Loader::SceneNodeData& mesh);
 
         void Render(ID3D11DeviceContext*);
-        void FinaliseMesh(ID3D11Device* device);
+        void FinaliseMesh();
         uint32_t GetIndexCount() const { return static_cast<uint32_t>(m_indexData.size()); };
         uint32_t GetVertexCount() const { return static_cast<uint32_t>(m_vertexCount); }
 

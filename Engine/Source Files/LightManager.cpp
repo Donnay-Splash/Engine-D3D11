@@ -17,13 +17,13 @@ namespace Engine
 
     }
 
-    void LightManager::Initialize(ID3D11Device* device, Scene::Ptr scene, ShaderPipeline::Ptr shadowMapPipeline)
+    void LightManager::Initialize(Scene::Ptr scene, ShaderPipeline::Ptr shadowMapPipeline)
     {
-        m_lightBuffer = std::make_shared<ConstantBuffer<LightConstants>>(PipelineStage::Pixel, device);
-        m_environmentSampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP);
+        m_lightBuffer = std::make_shared<ConstantBuffer<LightConstants>>(PipelineStage::Pixel);
+        m_environmentSampler = std::make_shared<Sampler>(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP);
 
         // Don't need to add any render targets as we are only rendering to depth
-        m_shadowMapTarget = std::make_shared<RenderTargetBundle>(device, kShadowMapWidth, kShadowMapWidth, 1, 0, true);
+        m_shadowMapTarget = std::make_shared<RenderTargetBundle>(kShadowMapWidth, kShadowMapWidth, 1, 0, true);
         m_shadowMapTarget->Finalise();
 
         m_shadowMapPipeline = shadowMapPipeline;

@@ -21,9 +21,9 @@ namespace Engine
     {
     }
 
-    void Camera::Initialize(ID3D11Device* device)
+    void Camera::Initialize()
     {
-        m_viewConstants = std::make_shared<ConstantBuffer<ViewConstants>>(PipelineStage::Vertex | PipelineStage::Pixel, device);
+        m_viewConstants = std::make_shared<ConstantBuffer<ViewConstants>>(PipelineStage::Vertex | PipelineStage::Pixel);
     }
 
     void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene)

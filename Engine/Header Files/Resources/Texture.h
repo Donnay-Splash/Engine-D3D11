@@ -24,16 +24,16 @@ namespace Engine
 
         using Ptr = std::shared_ptr<Texture>;
 
-        static Texture::Ptr CreateTexture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device);
-        static Texture::Ptr CreateTextureArray(void* data, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device);
+        static Texture::Ptr CreateTexture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format);
+        static Texture::Ptr CreateTextureArray(void* data, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t flags, DXGI_FORMAT format);
         // static Texture::Ptr CreateCubeMapTexture(); // Not yet implemented
-        static Texture::Ptr CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device);
-        static Texture::Ptr CreateTextureFromFile(std::wstring filename, ID3D11Device* device);
-        static Texture::Ptr CreateImportedTexture(const Utils::Loader::TextureData& importedData, ID3D11Device* device);
-        static Texture::Ptr CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, D3DClass* device, bool generateMips = false);
+        static Texture::Ptr CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags);
+        static Texture::Ptr CreateTextureFromFile(std::wstring filename);
+        static Texture::Ptr CreateImportedTexture(const Utils::Loader::TextureData& importedData);
+        static Texture::Ptr CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, bool generateMips = false);
 
         // Creates a new texture with exactly the same layout as the given texture
-        static Texture::Ptr CreateIdenticalTexture(Texture::Ptr const texture, ID3D11Device* device);
+        static Texture::Ptr CreateIdenticalTexture(Texture::Ptr const texture);
 
         void UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister);
 
@@ -54,15 +54,15 @@ namespace Engine
         // static methods. Thus the constructors are kept protected.
 
         // Create a texture from set of parameters
-        Texture(void* data, D3D11_TEXTURE2D_DESC desc, ID3D11Device* device);
+        Texture(void* data, D3D11_TEXTURE2D_DESC desc);
         // Create texture from D3D11 resource.
-        Texture(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device);
+        Texture(ID3D11Texture2D* texture, uint32_t flags);
         // Create a texture from a file
-        Texture(ID3D11Device* device, const wchar_t* filename);
+        Texture(const wchar_t* filename);
         // Create a texture from memory
-        Texture(ID3D11Device* device, const uint8_t* data, uint64_t byteCount);
+        Texture(const uint8_t* data, uint64_t byteCount);
         // Create a texture from memory and generates mips. Mirrors what is done in DirectXTK
-        Texture(ID3D11Device* device, ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount);
+        Texture(ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount);
         Texture(const Texture&) = delete;
 
     private:

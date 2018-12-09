@@ -16,7 +16,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<BlendState>;
-        BlendState(ID3D11Device* device, BlendMode initMode = BlendMode::Opaque);
+        BlendState(BlendMode initMode = BlendMode::Opaque);
         ~BlendState() {};
 
         void SetBlendMode(BlendMode mode);

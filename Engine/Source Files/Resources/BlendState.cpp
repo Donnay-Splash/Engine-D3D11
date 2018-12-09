@@ -3,7 +3,7 @@
 
 namespace Engine
 {
-    BlendState::BlendState(ID3D11Device* device, BlendMode initMode /* = BlendMode::Opaque*/)
+    BlendState::BlendState(BlendMode initMode /* = BlendMode::Opaque*/)
     {
         // Create an alpha enabled blend state description.
         D3D11_BLEND_DESC blendStateDescription;

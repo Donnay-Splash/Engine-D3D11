@@ -25,7 +25,7 @@ namespace Engine
         Font(const Font&) = delete;
         ~Font();
 
-        bool Initialize(ID3D11Device*, char*, WCHAR*);
+        bool Initialize(char*, WCHAR*);
 
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture();
 
@@ -34,7 +34,7 @@ namespace Engine
     private:
         bool LoadFontData(char*);
         void ReleaseFontData();
-        bool LoadTexture(ID3D11Device*, WCHAR*);
+        bool LoadTexture(WCHAR*);
 
     private:
         static const int kCharacterCount = 95;

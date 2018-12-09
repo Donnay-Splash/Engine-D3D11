@@ -2,9 +2,11 @@
 #include "Engine.h"
 #include <MeshMaker\MeshMaker.h>
 #include <Scene\Components\MeshInstance.h>
+#include <Scene\Components\BoundingBox.h>
 #include <Loader.h>
 #include <Utils\Math\MathHelpers.h>
 #include <DDSTextureLoader.h>
+#include <DX11Impl.h>
 
 namespace Engine
 {
@@ -107,7 +109,7 @@ namespace Engine
     {
     }
 
-
+	static SceneNode* testObject;
     bool Engine::Initialize(EngineCreateOptions createOptions)
     {
         bool result;
@@ -116,16 +118,13 @@ namespace Engine
         m_inputManager = std::make_shared<InputManager>();
 
         // Create the Direct3D object.
-        m_direct3D = std::make_shared<D3DClass>();
+        m_direct3D = std::make_shared<DX11Impl>();
 
         // Initialize the Direct3D object.
         m_direct3D->Initialize(createOptions);
 
         // Initialise the shader manager
-        m_shaderManager = std::make_shared<ShaderManager>(m_direct3D->GetDevice());
-
-        // Create Mesh object
-        m_mesh = Utils::MeshMaker::CreateCube(m_direct3D->GetDevice());
+        m_shaderManager = std::make_shared<ShaderManager>();
 
         // Initialise Scene
         m_scene = std::make_shared<Scene>(m_direct3D.get());
@@ -141,10 +140,11 @@ namespace Engine
             m_scene->GetRootNode()->SetChildAddedCallback(createOptions.RootSceneElementAddedCallback);
         }
 
+		
         // Get the shadow map shader pipeline
         auto shadowPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ShadowMapping);
         // Initialize light manager
-        m_lightManager.Initialize(m_direct3D->GetDevice(), m_scene, shadowPipeline);
+        m_lightManager.Initialize(m_scene, shadowPipeline);
 
         // Add lights to the scene
         auto lightNode = m_scene->AddNode();
@@ -155,6 +155,20 @@ namespace Engine
         light->SetIntensity(2.0f);
         light->SetColor({ DirectX::Colors::Wheat });
 
+		// Create Mesh object
+		m_mesh = Utils::MeshMaker::CreateCube();
+		auto cubeNode = m_scene->AddNode();
+		cubeNode->SetPosition({ 0.0f, 0.0f, -7.0f });
+		auto meshInstance = cubeNode->AddComponent<MeshInstance>();
+		meshInstance->SetMesh(m_mesh);
+		auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
+		auto material = std::make_shared<Material>(shaderPipeline);
+		material->SetDiffuseColor(DirectX::Colors::CornflowerBlue);
+		material->SetSmoothness(0.25f);
+		meshInstance->SetMaterial(material);
+		auto bounds = cubeNode->AddComponent<BoundingBox>();
+		testObject = cubeNode.get();
+
         /*lightNode = m_scene->AddNode();
         lightNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(Utils::Maths::DegreesToRadians(45.0f), Utils::Maths::DegreesToRadians(45.0f), 0.0f));
         light = lightNode->AddComponent<Light>();
@@ -163,7 +177,7 @@ namespace Engine
         // Create the camera object
         auto cameraNode = m_scene->AddNode();
         m_camera = cameraNode->AddComponent<Camera>();
-        m_camera->SetJitterEnabled(true);
+        m_camera->SetJitterEnabled(false);
         m_camera->SetJitterSequence(kJitterSequence);
         cameraNode->SetPosition({ 0.0f, 0.0f, -10.0f });
 
@@ -173,10 +187,10 @@ namespace Engine
 
         // Create post effect
         auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade);
-        m_postEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), postEffectPipeline);
+        m_postEffect = std::make_shared<PostEffect<PostEffectConstants>>(postEffectPipeline);
 
         // Create deep G-Buffer constant buffer
-        m_deepGBufferConstant = std::make_shared<ConstantBuffer<DeepGBufferConstants>>(PipelineStage::Pixel, m_direct3D->GetDevice());
+        m_deepGBufferConstant = std::make_shared<ConstantBuffer<DeepGBufferConstants>>(PipelineStage::Pixel);
 
         // Create the timer object.
         m_timer = std::make_shared<TimerClass>();
@@ -192,7 +206,7 @@ namespace Engine
         m_position->SetPosition(0.0f, 0.0f, -10.0f);
 
         // Create depth sampler
-        m_depthSampler = std::make_shared<Sampler>(m_direct3D->GetDevice(), D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
+        m_depthSampler = std::make_shared<Sampler>(D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP);
         InitializeScene();
         return true;
     }
@@ -351,6 +365,8 @@ namespace Engine
             return false;
         }
 
+		testObject->SetRotation(Utils::Maths::Quaternion::CreateFromAxisAngle({ 0.0f, 1.0f, 0.0f }, m_elapsedTime));
+
         // Convert ms into seconds
         m_elapsedTime += deltaTime / 1000.0f;
         m_debugConstants.sceneTime = m_elapsedTime;
@@ -371,7 +387,7 @@ namespace Engine
         // We use G-Buffer data for ao and radiosity so it must be 
         // extended to the guard band width
         const uint32_t GBufferLayers = 2;
-        RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth + guardBandWidth, newHeight + guardBandHeight, GBufferLayers);
+        RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(newWidth + guardBandWidth, newHeight + guardBandHeight, GBufferLayers);
         GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
         GBuffer->CreateRenderTarget(L"Emissive", DXGI_FORMAT_R11G11B10_FLOAT);
         GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
@@ -384,43 +400,43 @@ namespace Engine
 
         // Create bundle for hierarchical Z
         // Used in AO calculation and thus must be extended by guard band
-        m_hiZBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kHiZ_MaxMip + 1, false);
+        m_hiZBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kHiZ_MaxMip + 1, false);
         m_hiZBundle->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R32G32_FLOAT);
         m_hiZBundle->Finalise();
 
         auto Hi_ZTex = m_hiZBundle->GetRenderTarget(L"Hi-Z")->GetTexture();
-        m_hiZMipView = std::make_shared<TextureMipView>(m_direct3D->GetDevice(), Hi_ZTex, kHiZ_MaxMip + 1);
+        m_hiZMipView = std::make_shared<TextureMipView>(Hi_ZTex, kHiZ_MaxMip + 1);
 
         /*AO needs to store data for the guard band and thus must be extended*/
-        m_aoBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        m_aoBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_aoBundle->CreateRenderTarget(L"AO", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_aoBundle->Finalise();
 
         // Temporary buffer for post process effects. Used to store temp results. e.g. betweeen seperable blur
-        m_tempBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        m_tempBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_tempBundle->Finalise();
 
         // Stores lambertian and packed normals for use in radiosity
         // Since this is used in radiosity it must be extended by guard band
-        m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kRadiosityBuffer_MaxMip + 1, false);
+        m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kRadiosityBuffer_MaxMip + 1, false);
         m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian1", DXGI_FORMAT_R11G11B10_FLOAT); //TODO: Eventually make HDR
         m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian2", DXGI_FORMAT_R11G11B10_FLOAT);
         m_lambertianOnlyBundle->CreateRenderTarget(L"PackedNormals", DXGI_FORMAT_R8G8B8A8_UNORM);
         m_lambertianOnlyBundle->Finalise();
 
         // Create the mip view for the lambertian only buffer. This is used to generate the custom downsample
-        m_lambertianOnlyBundleMipView = std::make_shared<TextureBundleMipView>(m_direct3D->GetDevice(), m_lambertianOnlyBundle, kRadiosityBuffer_MaxMip + 1);
+        m_lambertianOnlyBundleMipView = std::make_shared<TextureBundleMipView>(m_lambertianOnlyBundle, kRadiosityBuffer_MaxMip + 1);
 
-        m_radiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        m_radiosityBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_radiosityBundle->CreateRenderTarget(L"Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_radiosityBundle->Finalise();
 
-        m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
         m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_filteredRadiosityBundle->Finalise();
 
-        m_HDRSceneBundle = std::make_shared<RenderTargetBundle>(m_direct3D->GetDevice(), newWidth, newHeight, 1, 0, false);
+        m_HDRSceneBundle = std::make_shared<RenderTargetBundle>(newWidth, newHeight, 1, 0, false);
         m_HDRSceneBundle->CreateRenderTarget(L"HDR Scene", DXGI_FORMAT_R16G16B16A16_FLOAT);
         m_HDRSceneBundle->Finalise();
     }
@@ -428,7 +444,7 @@ namespace Engine
 
     void Engine::LoadFile(const uint8_t * data, uint64_t byteCount)
     {
-        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_Gen);
+        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
         Loader::Ptr loader = std::make_shared<Loader>(m_direct3D, m_scene, shaderPipeline);
 
         loader->LoadFile(data, byteCount);
@@ -436,7 +452,7 @@ namespace Engine
 
     void Engine::LoadEnvironment(const uint8_t * data, uint64_t byteCount)
     {
-        auto envMap = Texture::CreateTextureFromMemory(data, byteCount, m_direct3D.get(), true);
+        auto envMap = Texture::CreateTextureFromMemory(data, byteCount, true);
         if (envMap->IsCubeMap())
         {
             m_lightManager.SetEnvironmentMap(envMap);
@@ -508,85 +524,80 @@ namespace Engine
         m_direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
 
         // Render the deep G-Buffer
-        m_direct3D->BeginRenderEvent(L"Generating Deep G-Buffer");
-            GenerateDeepGBuffer();
+        m_direct3D->BeginRenderEvent(L"Forward Render");
+
+		// Render the scene.
+		// This generates our deep G-Buffer
+		m_camera->SetRenderTargetBundle(nullptr);
+		m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
+		m_camera->Render(m_direct3D, m_scene);
+
         m_direct3D->EndRenderEvent();
 
-        // Now need to copy depth
-        auto bundle = m_camera->GetRenderTargetBundle();
-        if (bundle != nullptr)
-        {
-            // We can move this to where we downsample colour and normals to avoid any additional overhead.
-            m_direct3D->BeginRenderEvent(L"Generating Hierarchical Z buffer");
-                // Take the camera-space Z texture and downsample into the mips
-                auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
-                GenerateHiZ(HiZTexture);
-            m_direct3D->EndRenderEvent();
+        //// Now need to copy depth
+        //auto bundle = m_camera->GetRenderTargetBundle();
+        //if (bundle != nullptr)
+        //{
+        //    // We can move this to where we downsample colour and normals to avoid any additional overhead.
+        //    m_direct3D->BeginRenderEvent(L"Generating Hierarchical Z buffer");
+        //        // Take the camera-space Z texture and downsample into the mips
+        //        auto HiZTexture = bundle->GetRenderTarget(L"CSZ")->GetTexture();
+        //        GenerateHiZ(HiZTexture);
+        //    m_direct3D->EndRenderEvent();
 
-            // We want to find a way to temporally accumulate the ambient occlusion.
-            // This will avoid flickering on small objects.
-            m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
-                // Generate the ambient occlusion
-                GenerateAO();
-            m_direct3D->EndRenderEvent();
+        //    // We want to find a way to temporally accumulate the ambient occlusion.
+        //    // This will avoid flickering on small objects.
+        //    m_direct3D->BeginRenderEvent(L"Generating Ambient Occlusion");
+        //        // Generate the ambient occlusion
+        //        GenerateAO();
+        //    m_direct3D->EndRenderEvent();
 
-            // HERE LIES WHERE WE SHALL GENERATE RADIOSITY
+        //    // HERE LIES WHERE WE SHALL GENERATE RADIOSITY
 
-            // Upload light data for deferred shading
-            m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
+        //    // Upload light data for deferred shading
+        //    m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);
 
-            m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
-                // Diffuse lighting of scene
-                LambertianOnly(bundle);
-            m_direct3D->EndRenderEvent();
+        //    m_direct3D->BeginRenderEvent(L"Rendering lambertian only and packed normals");
+        //        // Diffuse lighting of scene
+        //        LambertianOnly(bundle);
+        //    m_direct3D->EndRenderEvent();
 
-            m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
-                // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
-                // Note: Can use hierarchical Z generated for AO
-                GenerateRadiosityBufferMips();
-            m_direct3D->EndRenderEvent();
+        //    m_direct3D->BeginRenderEvent(L"Downsampling lambertian and normals");
+        //        // Generate Hierarchical mip chain for colour, normals and camera-space Z for all layers
+        //        // Note: Can use hierarchical Z generated for AO
+        //        GenerateRadiosityBufferMips();
+        //    m_direct3D->EndRenderEvent();
 
-            m_direct3D->BeginRenderEvent(L"Generating Radiosity");
-                // Sample hierarchical G-Buffer to generate radioisty.
-                ComputeRadiosity();
-            m_direct3D->EndRenderEvent();
+        //    m_direct3D->BeginRenderEvent(L"Generating Radiosity");
+        //        // Sample hierarchical G-Buffer to generate radioisty.
+        //        ComputeRadiosity();
+        //    m_direct3D->EndRenderEvent();
 
-            // TODO: We can add a clip rectangle to the radiosity filter so that only the required pixels
-            // are available for the blur.
-            // During the blur we can then reduce the total width down to the output width
-            auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
-            // Blend new samples with radiosity from last frame
-            m_direct3D->BeginRenderEvent(L"Filter Radiosity");
-                // Sample hierarchical G-Buffer to generate radioisty.
-                FilterRadiosity(ssVelTexture);
-            m_direct3D->EndRenderEvent();
+        //    auto ssVelTexture = bundle->GetRenderTarget(L"SSVelocity")->GetTexture();
+        //    // Blend new samples with radiosity from last frame
+        //    m_direct3D->BeginRenderEvent(L"Filter Radiosity");
+        //        // Sample hierarchical G-Buffer to generate radioisty.
+        //        FilterRadiosity(ssVelTexture);
+        //    m_direct3D->EndRenderEvent();
 
-            // Save generated texture to be used next frame
+        //    m_direct3D->BeginRenderEvent(L"Shading G-Buffer");
+        //        // Shade the GBuffer using generated AO.
+        //        ShadeGBuffer(bundle);
+        //    m_direct3D->EndRenderEvent();
 
-            // Bilateral blur on resulting texture
+        //    m_direct3D->BeginRenderEvent(L"Accumulating TSAA");
+        //        RunTSAA(ssVelTexture);
+        //        // We want the prev frame before it has been tonemapped so we take it from the HDR scene bundle
+        //        m_prevFrame = m_direct3D->CopyTexture(m_HDRSceneBundle->GetRenderTarget(0)->GetTexture());
+        //    m_direct3D->EndRenderEvent();
+        //    
+        //    // Finally apply tonemapping and exposure
+        //    m_direct3D->BeginRenderEvent(L"Tonemap");
+        //        Tonemap();
+        //    m_direct3D->EndRenderEvent();
 
-            // BINGO BONGO BANGO: Pass texture to deep G-Buffer shade to have it applied to the scene
-            
-            // HERE ENDS WHERE WE SHALL HAVE GENERATED RADIOSITY
-
-            m_direct3D->BeginRenderEvent(L"Shading G-Buffer");
-                // Shade the GBuffer using generated AO.
-                ShadeGBuffer(bundle);
-            m_direct3D->EndRenderEvent();
-
-            m_direct3D->BeginRenderEvent(L"Accumulating TSAA");
-                RunTSAA(ssVelTexture);
-                // We want the prev frame before it has been tonemapped so we take it from the HDR scene bundle
-                m_prevFrame = m_direct3D->CopyTexture(m_HDRSceneBundle->GetRenderTarget(0)->GetTexture());
-            m_direct3D->EndRenderEvent();
-            
-            // Finally apply tonemapping and exposure
-            m_direct3D->BeginRenderEvent(L"Tonemap");
-                Tonemap();
-            m_direct3D->EndRenderEvent();
-
-            m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
-        }
+        //    m_prevDepth = m_direct3D->CopyTexture(bundle->GetDepthBuffer()->GetTexture());
+        //}
         // Present the rendered scene to the screen.
         m_direct3D->EndScene();
 
@@ -644,7 +655,7 @@ namespace Engine
 
         // Create shader effect
         auto lambertShaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::LambertianOnly);
-        auto lambertOnlyEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), lambertShaderPipeline);
+        auto lambertOnlyEffect = std::make_shared<PostEffect<PostEffectConstants>>(lambertShaderPipeline);
 
         // TODO: When ready upload previous indirect lighting
         const uint32_t radiosityRegister = 6;
@@ -669,7 +680,7 @@ namespace Engine
 
         // Create our effect
         auto radiosityBufferDownsamplePipeline = m_shaderManager->GetShaderPipeline(ShaderName::Minify_Lambertian);
-        auto radiosityBufferDownsampleEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), radiosityBufferDownsamplePipeline);
+        auto radiosityBufferDownsampleEffect = std::make_shared<PostEffect<PostEffectConstants>>(radiosityBufferDownsamplePipeline);
 
         // For each of the targeted mip maps. Render our effect binding the correct RTVs and SRVs
         for (int i = 1; i <= kRadiosityBuffer_MaxMip; i++)
@@ -696,7 +707,7 @@ namespace Engine
 
         // Create post effect
         auto radiosityPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ComputeRadiosity);
-        auto radiosityEffect = std::make_shared<PostEffect<GIConstants>>(m_direct3D->GetDevice(), radiosityPipeline);
+        auto radiosityEffect = std::make_shared<PostEffect<GIConstants>>(radiosityPipeline);
 
         // Upload downsampled maps
         m_lambertianOnlyBundle->SetShaderResources(m_direct3D->GetDeviceContext());
@@ -714,7 +725,7 @@ namespace Engine
     {
         // Apply temporal filter
         auto temoralFilterPipeline = m_shaderManager->GetShaderPipeline(ShaderName::BasicTemporalFilter);
-        auto temporalFilterEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), temoralFilterPipeline);
+        auto temporalFilterEffect = std::make_shared<PostEffect<PostEffectConstants>>(temoralFilterPipeline);
 
         // Upload resources to shader.
         m_radiosityBundle->SetShaderResources(m_direct3D->GetDeviceContext());
@@ -758,10 +769,10 @@ namespace Engine
         m_hiZBundle->SetTargetMip(0);
         // Create post effect
         auto csZCopyPipeline = m_shaderManager->GetShaderPipeline(ShaderName::DeepGBuffer_csZCopy);
-        auto csZCopyEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), csZCopyPipeline);
+        auto csZCopyEffect = std::make_shared<PostEffect<PostEffectConstants>>(csZCopyPipeline);
 
         auto HiZConstruction = m_shaderManager->GetShaderPipeline(ShaderName::Minify_CSZ);
-        auto HiZPost = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), HiZConstruction);
+        auto HiZPost = std::make_shared<PostEffect<PostEffectConstants>>(HiZConstruction);
 
         // From deep G to single texture
         m_postProcessCamera->SetRenderTargetBundle(m_hiZBundle);
@@ -791,7 +802,7 @@ namespace Engine
     {
         // Pass Hierarchical Z to shader to generate AO
         auto aoPipeline = m_shaderManager->GetShaderPipeline(ShaderName::AO);
-        auto aoEffect = std::make_shared<PostEffect<GIConstants>>(m_direct3D->GetDevice(), aoPipeline);
+        auto aoEffect = std::make_shared<PostEffect<GIConstants>>(aoPipeline);
         aoEffect->SetEffectData(m_giConstants);
 
         // Upload hierarchical Z
@@ -816,7 +827,7 @@ namespace Engine
         m_postProcessCamera->SetRenderTargetBundle(m_tempBundle);
         ShaderName shader = csZTexture == nullptr ? ShaderName::BilateralBlurPacked : ShaderName::BilateralBlur;
         auto blurPipeline = m_shaderManager->GetShaderPipeline(shader);
-        auto blurEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), blurPipeline);
+        auto blurEffect = std::make_shared<PostEffect<PostEffectConstants>>(blurPipeline);
 
         if (csZTexture != nullptr)
         {
@@ -854,7 +865,7 @@ namespace Engine
         // Now converge TSAA to back buffer
         m_postProcessCamera->SetRenderTargetBundle(m_HDRSceneBundle);
         auto TSAAPipeline = m_shaderManager->GetShaderPipeline(ShaderName::TSAA);
-        auto TSAAEffect = std::make_shared<PostEffect<TemporalAAConstants>>(m_direct3D->GetDevice(), TSAAPipeline);
+        auto TSAAEffect = std::make_shared<PostEffect<TemporalAAConstants>>(TSAAPipeline);
         TemporalAAConstants TSAAData;
 
         static const float sampleOffsets[9][2]  =
@@ -915,7 +926,7 @@ namespace Engine
 
         // Create tonemap effect
         auto tonemapPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Tonemap);
-        auto tonemapEffect = std::make_shared<PostEffect<PostEffectConstants>>(m_direct3D->GetDevice(), tonemapPipeline);
+        auto tonemapEffect = std::make_shared<PostEffect<PostEffectConstants>>(tonemapPipeline);
 
         tonemapEffect->SetEffectData(m_debugConstants);
 

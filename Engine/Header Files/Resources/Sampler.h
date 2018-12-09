@@ -7,8 +7,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<Sampler>;
-        Sampler(ID3D11Device* device,
-            D3D11_FILTER filterMode,
+        Sampler(D3D11_FILTER filterMode,
             D3D11_TEXTURE_ADDRESS_MODE addressMode,
             float mipLODBias = 0.0f,
             UINT maxAnisotropy = 1,

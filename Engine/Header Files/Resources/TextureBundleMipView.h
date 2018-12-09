@@ -9,7 +9,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<TextureBundleMipView>;
-        TextureBundleMipView(ID3D11Device* device, RenderTargetBundle::Ptr bundle, uint32_t mipLevels = 0);
+        TextureBundleMipView(RenderTargetBundle::Ptr bundle, uint32_t mipLevels = 0);
 
         /*  Uploads the selected mip to the pixel shader. The textures will be uploaded in order starting at index 0 to
             the render target count - 1. An offset can be supplied to select the starting offset the textures are uploaded at*/

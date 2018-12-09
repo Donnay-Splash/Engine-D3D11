@@ -4,16 +4,16 @@
 
 namespace Engine
 {
-    RenderTargetBundle::RenderTargetBundle(ID3D11Device* device, uint32_t width, uint32_t height, uint32_t arraySize/*=1*/, uint32_t mipLevels/* = 1*/, bool depthEnabled /*= true*/)
-        : m_width(width), m_height(height), m_device(device), m_arraySize(arraySize), m_mipLevels(mipLevels)
+    RenderTargetBundle::RenderTargetBundle(uint32_t width, uint32_t height, uint32_t arraySize/*=1*/, uint32_t mipLevels/* = 1*/, bool depthEnabled /*= true*/)
+        : m_width(width), m_height(height), m_arraySize(arraySize), m_mipLevels(mipLevels)
     {
         // Create depth buffer
         if (depthEnabled)
         {
-            m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, m_arraySize, TextureCreationFlags::BindShaderResource, m_device);
+            m_depthBuffer = std::make_shared<DepthBuffer>(m_width, m_height, m_arraySize, TextureCreationFlags::BindShaderResource);
         }
 
-        m_bundleSampler = std::make_shared<Sampler>(device, D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_CLAMP);
+        m_bundleSampler = std::make_shared<Sampler>(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_CLAMP);
 
         if (m_mipLevels < 1) m_mipLevels = 1;
 
@@ -30,7 +30,7 @@ namespace Engine
         if (m_mipLevels > 1) textureFlags |= TextureCreationFlags::GenerateMIPs;
 
         // Create texture resource for render targets
-        auto texture = Texture::CreateTextureArray(nullptr, m_width, m_height, m_arraySize, textureFlags, format, m_device);
+        auto texture = Texture::CreateTextureArray(nullptr, m_width, m_height, m_arraySize, textureFlags, format);
 
         BundleElement newBundleElement;
         newBundleElement.ClearColour = clearColor;
@@ -38,7 +38,7 @@ namespace Engine
         // Generate render targets to draw to each of the mip levels
         for (uint32_t mip = 0; mip < m_mipLevels; mip++)
         {
-            auto newRenderTarget = std::make_shared<RenderTarget>(texture, 0, mip, 0, m_device);
+            auto newRenderTarget = std::make_shared<RenderTarget>(texture, 0, mip, 0);
             // Push this render target into the vector.
             newBundleElement.RenderTargets.push_back(newRenderTarget);
             // Add render target view to array.

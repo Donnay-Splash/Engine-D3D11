@@ -48,7 +48,7 @@ namespace Engine
 
     protected:
         Camera(Component::SceneNodePtr sceneNode);
-        virtual void Initialize(ID3D11Device* device) override;
+        virtual void Initialize() override;
         virtual void CalculateProjectionMatrix();
         // Camera info required for reconstructing camera space Z from Depth 
         Utils::Maths::Vector3 GetClipInfo() const;

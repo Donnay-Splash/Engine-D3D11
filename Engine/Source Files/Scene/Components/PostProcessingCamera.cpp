@@ -9,7 +9,7 @@ namespace Engine
 
     }
 
-    void PostProcessingCamera::Initialize(ID3D11Device* device)
+    void PostProcessingCamera::Initialize()
     {
         // initialise base camera
         Camera::Initialize(device);

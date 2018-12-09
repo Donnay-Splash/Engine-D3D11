@@ -11,7 +11,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<PipelineState>;
-        PipelineState(ID3D11Device* device, BlendMode blendMode, D3D11_CULL_MODE cullMode, bool depthEnabled);
+        PipelineState(BlendMode blendMode, D3D11_CULL_MODE cullMode, bool depthEnabled);
 
         void UploadData(ID3D11DeviceContext* deviceContext);
 

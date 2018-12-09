@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-    TextureMipView::TextureMipView(ID3D11Device* device, Texture::Ptr texture, uint32_t mipLevels /* = 0*/) :
+    TextureMipView::TextureMipView(Texture::Ptr texture, uint32_t mipLevels /* = 0*/) :
         m_mipLevels(mipLevels), m_currentMip(0), m_texture(texture)
     {
         EngineAssert(m_texture != nullptr);

@@ -3,8 +3,7 @@
 
 namespace Engine
 {
-    ShaderPipeline::ShaderPipeline(ID3D11Device* device,
-        InputLayout::Ptr inputLayout,
+    ShaderPipeline::ShaderPipeline(InputLayout::Ptr inputLayout,
         Shader::Ptr vertexShader,
         Shader::Ptr pixelShader /*= nullptr*/,
         Shader::Ptr geometryShader/* = nullptr*/) :

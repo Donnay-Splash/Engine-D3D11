@@ -3,7 +3,7 @@
 
 namespace Engine
 {
-    DepthState::DepthState(ID3D11Device* device, bool depthEnabled /*= true*/)
+    DepthState::DepthState(bool depthEnabled /*= true*/)
     {
         // Set up the description of the stencil state.
         D3D11_DEPTH_STENCIL_DESC depthStencilDesc;

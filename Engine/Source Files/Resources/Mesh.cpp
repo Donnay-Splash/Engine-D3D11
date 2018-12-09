@@ -14,7 +14,7 @@ namespace Engine
     {
     }
 
-    void Mesh::Load(const SceneNodeData& mesh, ID3D11Device* device)
+    void Mesh::Load(const SceneNodeData& mesh)
     {
         // at a minimum we expect the mesh to atleast contain vertex positions
         EngineAssert(mesh.HasPositions);
@@ -37,7 +37,7 @@ namespace Engine
             SetTangents(mesh.Tangents, mesh.Bitangents);
         }
 
-        FinaliseMesh(device);
+        FinaliseMesh();
     }
 
     void Mesh::Render(ID3D11DeviceContext* deviceContext)
@@ -94,7 +94,7 @@ namespace Engine
         return;
     }
 
-    void Mesh::FinaliseMesh(ID3D11Device* device)
+    void Mesh::FinaliseMesh()
     {
         // Cannot finalise the same mesh twice. This function can only be called a single time per mesh.
         EngineAssert(!m_meshFinalised);
@@ -108,7 +108,7 @@ namespace Engine
             // The position buffer should not have been created yet.
             EngineAssert(m_positionBuffer == nullptr);
             // Generate position vertex buffer.
-            m_positionBuffer = std::make_shared<VertexBuffer>(m_positionData.data(), static_cast<uint32_t>(m_positionData.size()), sizeof(PositionType), device);
+            m_positionBuffer = std::make_shared<VertexBuffer>(m_positionData.data(), static_cast<uint32_t>(m_positionData.size()), sizeof(PositionType));
             m_vertexCount = m_positionData.size();
         }
         if (HasNormals())
@@ -121,7 +121,7 @@ namespace Engine
             // The normal buffer should not have been created yet.
             EngineAssert(m_normalBuffer == nullptr);
             // Generate normal vertex buffer
-            m_normalBuffer = std::make_shared<VertexBuffer>(m_normalData.data(), static_cast<uint32_t>(m_normalData.size()), sizeof(NormalType), device);
+            m_normalBuffer = std::make_shared<VertexBuffer>(m_normalData.data(), static_cast<uint32_t>(m_normalData.size()), sizeof(NormalType));
             m_vertexCount = m_normalData.size();
         }
         if (HasUVs())
@@ -134,7 +134,7 @@ namespace Engine
             // The UV buffer should not have been created yet.
             EngineAssert(m_uvBuffer == nullptr);
             // Generate UV vertex buffer
-            m_uvBuffer = std::make_shared<VertexBuffer>(m_uvData.data(), static_cast<uint32_t>(m_uvData.size()), sizeof(UVType), device);
+            m_uvBuffer = std::make_shared<VertexBuffer>(m_uvData.data(), static_cast<uint32_t>(m_uvData.size()), sizeof(UVType));
             m_vertexCount = m_uvData.size();
         }
         if (HasTangents())
@@ -150,12 +150,12 @@ namespace Engine
             // Tangent and bitangent buffers shouldn't have been created yet.
             EngineAssert(m_tangentBuffer == nullptr && m_bitangentBuffer == nullptr);
             // Generate tangent and bitangent vertex buffers
-            m_tangentBuffer = std::make_shared<VertexBuffer>(m_tangentData.data(), static_cast<uint32_t>(m_tangentData.size()), sizeof(TangentType), device);
-            m_bitangentBuffer = std::make_shared<VertexBuffer>(m_bitangentData.data(), static_cast<uint32_t>(m_bitangentData.size()), sizeof(TangentType), device);
+            m_tangentBuffer = std::make_shared<VertexBuffer>(m_tangentData.data(), static_cast<uint32_t>(m_tangentData.size()), sizeof(TangentType));
+            m_bitangentBuffer = std::make_shared<VertexBuffer>(m_bitangentData.data(), static_cast<uint32_t>(m_bitangentData.size()), sizeof(TangentType));
             m_vertexCount = m_tangentData.size();
         }
 
-        m_indexBuffer = std::make_shared<IndexBuffer>(m_indexData.data(), static_cast<uint32_t>(m_indexData.size()), device);
+        m_indexBuffer = std::make_shared<IndexBuffer>(m_indexData.data(), static_cast<uint32_t>(m_indexData.size()));
         m_meshFinalised = true;
     }
 

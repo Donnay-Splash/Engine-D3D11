@@ -25,7 +25,7 @@ namespace Engine
     }
 
 
-    bool Text::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight,
+    bool Text::Initialize(ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight,
         Utils::Maths::Matrix baseViewMatrix)
     {
         bool result;
@@ -46,74 +46,74 @@ namespace Engine
         }
 
         // Initialize the font object.
-        result = m_Font->Initialize(device, "../Engine/data/fontdata.txt", L"../Engine/data/font.dds");
+        result = m_Font->Initialize("../Engine/data/fontdata.txt", L"../Engine/data/font.dds");
         EngineAssert(result);
 
         // Initialize the first sentence.
-        result = InitializeSentence(&m_sentence1, 150, device);
+        result = InitializeSentence(&m_sentence1, 150);
         if (!result)
         {
             return false;
         }
 
         // Initialize the second sentence.
-        result = InitializeSentence(&m_sentence2, 32, device);
+        result = InitializeSentence(&m_sentence2, 32);
         if (!result)
         {
             return false;
         }
 
         // Initialize the third sentence.
-        result = InitializeSentence(&m_sentence3, 16, device);
+        result = InitializeSentence(&m_sentence3, 16);
         if (!result)
         {
             return false;
         }
 
         // Initialize the fourth sentence.
-        result = InitializeSentence(&m_sentence4, 16, device);
+        result = InitializeSentence(&m_sentence4, 16);
         if (!result)
         {
             return false;
         }
 
         // Initialize the fifth sentence.
-        result = InitializeSentence(&m_sentence5, 16, device);
+        result = InitializeSentence(&m_sentence5, 16);
         if (!result)
         {
             return false;
         }
 
         // Initialize the sixth sentence.
-        result = InitializeSentence(&m_sentence6, 16, device);
+        result = InitializeSentence(&m_sentence6, 16);
         if (!result)
         {
             return false;
         }
 
         // Initialize the seventh sentence.
-        result = InitializeSentence(&m_sentence7, 16, device);
+        result = InitializeSentence(&m_sentence7, 16);
         if (!result)
         {
             return false;
         }
 
         // Initialize the eighth sentence.
-        result = InitializeSentence(&m_sentence8, 16, device);
+        result = InitializeSentence(&m_sentence8, 16);
         if (!result)
         {
             return false;
         }
 
         // Initialize the ninth sentence.
-        result = InitializeSentence(&m_sentence9, 16, device);
+        result = InitializeSentence(&m_sentence9, 16);
         if (!result)
         {
             return false;
         }
 
         // Initialize the tenth sentence.
-        result = InitializeSentence(&m_sentence10, 16, device);
+        result = InitializeSentence(&m_sentence10, 16);
         if (!result)
         {
             return false;
@@ -218,7 +218,7 @@ namespace Engine
     }
 
 
-    bool Text::InitializeSentence(SentenceType** sentence, int maxLength, ID3D11Device* device)
+    bool Text::InitializeSentence(SentenceType** sentence, int maxLength)
     {
         VertexType* vertices;
         unsigned long* indices;

@@ -3,7 +3,7 @@
 
 namespace Engine
 {
-    Shader::Shader(Shader::Type type, const BYTE* shaderCode, const SIZE_T shaderLength, ID3D11Device* device)
+    Shader::Shader(Shader::Type type, const BYTE* shaderCode, const SIZE_T shaderLength)
         : m_type(type), m_shaderCode(shaderCode), m_shaderLength(shaderLength)
     {
         switch (m_type)
@@ -38,7 +38,7 @@ namespace Engine
 
     }
 
-    void Shader::ValidateInputSignature(InputLayout::Ptr inputLayout, ID3D11Device* device)
+    void Shader::ValidateInputSignature(InputLayout::Ptr inputLayout)
     {
         // Cannot create an input layout from anything but a vertex shader.
         EngineAssert(m_type == Type::Vertex);

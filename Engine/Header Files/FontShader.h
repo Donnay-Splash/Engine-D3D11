@@ -25,12 +25,12 @@ public:
     FontShader(const FontShader&) = delete;
     ~FontShader();
 
-    bool Initialize(ID3D11Device*, HWND);
+    bool Initialize(HWND);
     void Shutdown();
     bool Render(ID3D11DeviceContext*, int, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, Utils::Maths::Color);
 
 private:
-    bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+    bool InitializeShader(HWND, WCHAR*, WCHAR*);
     void ShutdownShader();
 
     bool SetShaderParameters(ID3D11DeviceContext*, Utils::Maths::Matrix, Utils::Maths::Matrix, Utils::Maths::Matrix, ID3D11ShaderResourceView*, Utils::Maths::Color);

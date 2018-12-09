@@ -183,6 +183,9 @@
     <ClCompile Include="..\Source Files\Scene\Components\ShadowMapCamera.cpp">
       <Filter>Source Files\Scene\Components</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source Files\DX11Impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\d3dclass.h">
@@ -331,6 +334,9 @@
     </ClInclude>
     <ClInclude Include="..\Header Files\Scene\Components\ShadowMapCamera.h">
       <Filter>Header Files\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\DX11Impl.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

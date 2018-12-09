@@ -19,12 +19,12 @@ namespace Engine
             Hull,
             Compute*/
         };
-        Shader(Type type, const BYTE* shaderCode, const SIZE_T shaderLength, ID3D11Device* device);
+        Shader(Type type, const BYTE* shaderCode, const SIZE_T shaderLength);
 
         Type GetType() const { return m_type; }
 
     private:
-        void ValidateInputSignature(InputLayout::Ptr layout, ID3D11Device* device);
+        void ValidateInputSignature(InputLayout::Ptr layout);
         void UploadData(ID3D11DeviceContext* deviceContext);
         static Shader::Ptr CreateNullShader(Type type);
         Shader(Type type);

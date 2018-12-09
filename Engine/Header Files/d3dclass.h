@@ -17,65 +17,35 @@ namespace Engine
         using Ptr = std::shared_ptr<D3DClass>;
         D3DClass();
         D3DClass(const D3DClass&);
-        ~D3DClass();
+        virtual ~D3DClass();
 
-        void Initialize(EngineCreateOptions createOptions);
-        void Shutdown();
+        static void Initialize(EngineCreateOptions createOptions);
+		static D3DClass* Instance();
+        virtual void Shutdown() = 0;
 
-        void ResizeBuffers(uint32_t newWidth, uint32_t newHeight);
+        virtual void ResizeBuffers(uint32_t newWidth, uint32_t newHeight) = 0;
 
-        void BeginScene(float, float, float, float);
-        void EndScene();
+        virtual void BeginScene(float, float, float, float) = 0;
+        virtual void EndScene() = 0;
 
         // Begin and end render event must be called in pairs.
         // They can be nested bu there must be a matching end for every begin
-        void BeginRenderEvent(const std::wstring& eventLabel);
-        void EndRenderEvent();
+        virtual void BeginRenderEvent(const std::wstring& eventLabel) = 0;
+        virtual void EndRenderEvent() = 0;
 
         // Potentially rename FrameBuffer?
-        void SetRenderTarget(RenderTargetBundle::Ptr, Utils::Maths::Vector2 clipOffset = {}) const;
+		virtual void SetRenderTarget(RenderTargetBundle::Ptr, Utils::Maths::Vector2 clipOffset = {}) const = 0;
 
-        ID3D11Device* GetDevice();
-        ID3D11DeviceContext* GetDeviceContext();
+        virtual void GetVideoCardInfo(char*, int&) = 0;
 
-        void GetVideoCardInfo(char*, int&);
+        virtual Texture::Ptr CopyTexture(Texture::Ptr textureToCopy) const = 0;
 
-        Utils::Maths::Vector2 GetScreenSize() const;
+        virtual Texture::Ptr CopyBackBuffer() const = 0;
 
-        Texture::Ptr CopyTexture(Texture::Ptr textureToCopy) const;
+        virtual void UnbindAllRenderTargets() const = 0;
+        virtual void UnbindShaderResourceView(uint32_t slot) const = 0;
 
-        Texture::Ptr CopyBackBuffer() const;
-
-        void UnbindAllRenderTargets() const;
-        void UnbindShaderResourceView(uint32_t slot) const;
-
-    private:
-        void GetAdapterInformation();
-        void CreateDeviceAndSwapChain();
-        void CreateSwapChain_HWND(uint32_t screenWidth, uint32_t screenHeight);
-        void CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight);
-
-        void CreateBackBufferResources(ID3D11Texture2D* backbufferPtr);
-
-        void ClearResources();
-
-    private:
-        bool m_vsync_enabled;
-        int m_videoCardMemory;
-        std::string m_videoCardDescription;
-        Microsoft::WRL::ComPtr<IDXGISwapChain1> m_swapChain;
-        Microsoft::WRL::ComPtr<ID3D11Device1> m_device;
-        Microsoft::WRL::ComPtr<ID3D11Debug> m_debugDevice;
-        Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext;
-        Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation> m_userDefinedAnnotation;
-        Microsoft::WRL::ComPtr<IDXGIFactory2> m_factory;
-        Microsoft::WRL::ComPtr<IDXGIAdapter> m_adapter;
-        RenderTarget::Ptr m_backBufferRT;
-        DepthBuffer::Ptr m_depthBuffer;
-        Utils::Maths::Vector2 m_screenSize;
-
-        // Use a single back buffer for now.
-        static const UINT kBufferCount = 2;
-        EngineCreateOptions m_createOptions;
+	protected:
+		virtual void Initialize_Internal(EngineCreateOptions createOptions) = 0;
     };
 }

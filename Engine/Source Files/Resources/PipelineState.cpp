@@ -3,11 +3,11 @@
 
 namespace Engine
 {
-    PipelineState::PipelineState(ID3D11Device* device, BlendMode blendMode, D3D11_CULL_MODE cullMode, bool depthEnabled)
+    PipelineState::PipelineState(BlendMode blendMode, D3D11_CULL_MODE cullMode, bool depthEnabled)
     {
-        m_blendState = std::make_shared<BlendState>(device, blendMode);
-        m_rasterizerState = std::make_shared<RasterizerState>(device, cullMode);
-        m_depthState = std::make_shared<DepthState>(device, depthEnabled);
+        m_blendState = std::make_shared<BlendState>(blendMode);
+        m_rasterizerState = std::make_shared<RasterizerState>(cullMode);
+        m_depthState = std::make_shared<DepthState>(depthEnabled);
     }
 
     void PipelineState::UploadData(ID3D11DeviceContext* deviceContext)

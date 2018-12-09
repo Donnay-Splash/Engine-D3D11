@@ -11,10 +11,10 @@ namespace Engine
     {
     }
 
-    void MeshInstance::Initialize(ID3D11Device* device)
+    void MeshInstance::Initialize()
     {
         // Initialize object constants buffer
-        m_objectConstants = std::make_shared<ConstantBuffer<ObjectConstants>>(PipelineStage::Vertex, device);
+        m_objectConstants = std::make_shared<ConstantBuffer<ObjectConstants>>(PipelineStage::Vertex);
     }
 
     void MeshInstance::Update(float frameTime)

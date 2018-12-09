@@ -19,7 +19,7 @@ namespace Engine
     protected:
         BoundingBox(SceneNodePtr sceneNode);
         BoundingBox(const Component&) = delete;
-        virtual void Initialize(ID3D11Device* device);
+        virtual void Initialize();
 
     private:
         Utils::Maths::BoundingBox m_aabb;

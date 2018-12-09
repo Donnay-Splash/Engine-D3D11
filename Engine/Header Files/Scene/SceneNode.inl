@@ -14,7 +14,7 @@ inline std::shared_ptr<ComponentType> SceneNode::AddComponent()
     EngineAssert(testComponent == nullptr);
 
     auto newComponent = std::shared_ptr<ComponentType>(new ComponentType(GetSharedThis()));
-    newComponent->Initialize(device->GetDevice());
+    newComponent->Initialize();
     m_components.push_back(newComponent);
     // Add the component as a child of this SceneElement so that it appears in the UI.
     AddChildElement(newComponent);

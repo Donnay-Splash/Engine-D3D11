@@ -13,7 +13,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<ConstantBuffer<T>>;
-        ConstantBuffer(uint32_t pipelineStages, ID3D11Device* device) :
+        ConstantBuffer(uint32_t pipelineStages) :
             m_pipelineStages(pipelineStages)
         {
             // Constant buffer must be bound to atleast one pipeline stage

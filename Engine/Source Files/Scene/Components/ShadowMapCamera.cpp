@@ -10,12 +10,12 @@ namespace Engine
 
     }
 
-    void ShadowMapCamera::Initialize(ID3D11Device* device)
+    void ShadowMapCamera::Initialize()
     {
         // initialise base camera
-        Camera::Initialize(device);
+        Camera::Initialize();
 
-        m_lightViewConstants = std::make_shared<ConstantBuffer<ShadowMapConstants>>(PipelineStage::Vertex, device);
+        m_lightViewConstants = std::make_shared<ConstantBuffer<ShadowMapConstants>>(PipelineStage::Vertex);
 
         // For now we are only dealing with shadows for directional lights
         SetProjectionMode(Camera::ProjectionMode::Orthographic);

@@ -14,7 +14,7 @@ namespace Engine
     }
 
 
-    bool Font::Initialize(ID3D11Device* device, char* fontFilename, WCHAR* textureFilename)
+    bool Font::Initialize(char* fontFilename, WCHAR* textureFilename)
     {
         bool result;
 
@@ -27,7 +27,7 @@ namespace Engine
         }
 
         // Load the texture that has the font characters on it.
-        result = LoadTexture(device, textureFilename);
+        result = LoadTexture(textureFilename);
         if (!result)
         {
             return false;
@@ -82,10 +82,10 @@ namespace Engine
     }
 
 
-    bool Font::LoadTexture(ID3D11Device* device, WCHAR* filename)
+    bool Font::LoadTexture(WCHAR* filename)
     {
         // Create the texture object.
-        m_Texture = Texture::CreateTextureFromFile(filename, device);
+        m_Texture = Texture::CreateTextureFromFile(filename);
 
         return true;
     }

@@ -10,7 +10,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<TextureMipView>;
-        TextureMipView(ID3D11Device* device, Texture::Ptr texture, uint32_t mipLevels = 0);
+        TextureMipView(Texture::Ptr texture, uint32_t mipLevels = 0);
         
         void UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister);
         void SetCurrentMip(uint32_t currentMip) { EngineAssert(currentMip < m_mipLevels); m_currentMip = currentMip; }

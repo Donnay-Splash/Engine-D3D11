@@ -15,7 +15,7 @@ namespace Engine
 
     private:
         ShadowMapCamera(Component::SceneNodePtr sceneNode);
-        virtual void Initialize(ID3D11Device* device) override;
+        virtual void Initialize() override;
 
     private:
         std::shared_ptr<ConstantBuffer<ShadowMapConstants>> m_lightViewConstants;

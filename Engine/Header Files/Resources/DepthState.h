@@ -6,7 +6,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<DepthState>;
-        DepthState(ID3D11Device* device, bool depthEnabled);
+        DepthState(bool depthEnabled);
 
         void UploadData(ID3D11DeviceContext* deviceContext);
 

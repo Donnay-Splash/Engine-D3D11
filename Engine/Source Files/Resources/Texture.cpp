@@ -8,12 +8,12 @@
 namespace Engine
 {
 
-    Texture::Ptr Texture::CreateTexture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device)
+    Texture::Ptr Texture::CreateTexture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format)
     {
-        return CreateTextureArray(data, width, height, 1, flags, format, device);
+        return CreateTextureArray(data, width, height, 1, flags, format);
     }
 
-    Texture::Ptr Texture::CreateTextureArray(void* data, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t flags, DXGI_FORMAT format, ID3D11Device* device)
+    Texture::Ptr Texture::CreateTextureArray(void* data, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t flags, DXGI_FORMAT format)
     {
         EngineAssert(width > 0);
         EngineAssert(height > 0);
@@ -62,10 +62,10 @@ namespace Engine
         }
 
         // Required to use new since constructor is not accessible to std::make_shared
-        return std::shared_ptr<Texture>(new Texture(data, desc, device));
+        return std::shared_ptr<Texture>(new Texture(data, desc));
     }
 
-    Texture::Texture(void* data, D3D11_TEXTURE2D_DESC desc, ID3D11Device* device) :
+    Texture::Texture(void* data, D3D11_TEXTURE2D_DESC desc) :
         m_height(desc.Height), m_width(desc.Width), m_format(desc.Format), m_arraySize(desc.ArraySize), m_mipLevels(desc.MipLevels)
     {
         D3D11_SUBRESOURCE_DATA* initData = nullptr;
@@ -112,13 +112,13 @@ namespace Engine
         }
     }
 
-    Texture::Ptr Texture::CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device)
+    Texture::Ptr Texture::CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags)
     {
-        return std::shared_ptr<Texture>(new Texture(texture, flags, device));
+        return std::shared_ptr<Texture>(new Texture(texture, flags));
     }
 
     // Create texture from D3D11 resource.
-    Texture::Texture(ID3D11Texture2D* texture, uint32_t flags, ID3D11Device* device)
+    Texture::Texture(ID3D11Texture2D* texture, uint32_t flags)
     {
         m_texture = texture;
         D3D11_TEXTURE2D_DESC textureDesc;
@@ -137,13 +137,13 @@ namespace Engine
         }
     }
 
-    Texture::Ptr Texture::CreateTextureFromFile(std::wstring filename, ID3D11Device* device)
+    Texture::Ptr Texture::CreateTextureFromFile(std::wstring filename)
     {
-        return std::shared_ptr<Texture>(new Texture(device, filename.c_str()));
+        return std::shared_ptr<Texture>(new Texture(filename.c_str()));
     }
 
     // Create a texture from a file
-    Texture::Texture(ID3D11Device* device, const wchar_t* filename)
+    Texture::Texture(const wchar_t* filename)
     {
         // Add support for additional file types.
         ID3D11Resource* subresource;
@@ -186,12 +186,12 @@ namespace Engine
         }
     }
 
-    Texture::Ptr Texture::CreateImportedTexture(const Utils::Loader::TextureData& importedTextureData, ID3D11Device* device)
+    Texture::Ptr Texture::CreateImportedTexture(const Utils::Loader::TextureData& importedTextureData)
     {
-        return std::shared_ptr<Texture>(new Texture(device, importedTextureData.data.data(), importedTextureData.dataSize));
+        return std::shared_ptr<Texture>(new Texture(importedTextureData.data.data(), importedTextureData.dataSize));
     }
 
-    Texture::Ptr Texture::CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, D3DClass* d3d, bool generateMips /*= false*/)
+    Texture::Ptr Texture::CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, bool generateMips /*= false*/)
     {
         if (generateMips)
         {
@@ -204,7 +204,7 @@ namespace Engine
     }
 
     // Create a texture from imported texture data
-    Texture::Texture(ID3D11Device* device, const uint8_t* data, uint64_t byteCount)
+    Texture::Texture(const uint8_t* data, uint64_t byteCount)
     {
         ID3D11Resource* subresource;
         Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, data, byteCount, &subresource, m_srv.GetAddressOf()));
@@ -247,7 +247,7 @@ namespace Engine
     }
 
     // Create a texture from imported texture data and auto generate mips
-    Texture::Texture(ID3D11Device* device, ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount)
+    Texture::Texture(ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount)
     {
         ID3D11Resource* subresource;
         Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, context, data, byteCount, &subresource, m_srv.GetAddressOf()));
@@ -289,9 +289,9 @@ namespace Engine
         }
     }
 
-    Texture::Ptr Texture::CreateIdenticalTexture(Texture::Ptr const texture, ID3D11Device* device)
+    Texture::Ptr Texture::CreateIdenticalTexture(Texture::Ptr const texture)
     {
-        return CreateTextureArray(nullptr, texture->m_width, texture->m_height, texture->m_arraySize, TextureCreationFlags::BindShaderResource, texture->m_format, device);
+        return CreateTextureArray(nullptr, texture->m_width, texture->m_height, texture->m_arraySize, TextureCreationFlags::BindShaderResource, texture->m_format);
     }
 
     void Texture::UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister)
