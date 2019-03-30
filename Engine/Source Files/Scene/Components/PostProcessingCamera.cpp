@@ -12,10 +12,10 @@ namespace Engine
     void PostProcessingCamera::Initialize()
     {
         // initialise base camera
-        Camera::Initialize(device);
+        Camera::Initialize();
 
         // Create screen aligned quad.
-        m_screenAlignedQuad = Utils::MeshMaker::CreateFullScreenQuad(device);
+        m_screenAlignedQuad = Utils::MeshMaker::CreateFullScreenQuad();
 
         // Calculate orthogonal projection
         SetProjectionMode(Camera::ProjectionMode::Orthographic);

@@ -23,6 +23,6 @@ namespace Engine
             desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
             desc.Texture2D.MipSlice = 0;
         }
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateDepthStencilView(m_texture->GetTexture().Get(), &desc, m_dsv.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateDepthStencilView(m_texture->GetTexture().Get(), &desc, m_dsv.GetAddressOf()));)
     }
 }

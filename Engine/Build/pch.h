@@ -3,12 +3,18 @@
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 
+#define IMPLEMENT_FOR_DX12(n)
+
 // System includes
+#include <d3d11_4.h>
+#include <d3d12.h>
+#include <d3d12shader.h>
+#include <d3dcommon.h>
+#include <dxgi1_6.h>
+#include <DXHelpers\d3dx12.h>
+
 #include <array>
 #include <ctype.h>
-#include <d3d11_4.h>
-#include <d3dcommon.h>
-#include <dxgi1_3.h>
 #include <float.h>
 #include <limits.h>
 #include <locale.h>

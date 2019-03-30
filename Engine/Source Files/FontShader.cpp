@@ -69,7 +69,7 @@ bool FontShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, Util
 
 bool FontShader::InitializeShader(HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
 {
-    HRESULT result;
+    HRESULT result = S_OK;
     ID3D10Blob* errorMessage;
     ID3D10Blob* vertexShaderBuffer;
     ID3D10Blob* pixelShaderBuffer;
@@ -121,8 +121,8 @@ bool FontShader::InitializeShader(HWND hwnd, WCHAR* vsFilename, WCHAR* psFilenam
     numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
     // Create the vertex input layout.
-    result = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), 
-                                       vertexShaderBuffer->GetBufferSize(), &m_layout);
+	IMPLEMENT_FOR_DX12(result = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(),
+                                       vertexShaderBuffer->GetBufferSize(), &m_layout);)
     if(FAILED(result))
     {
         return false;
@@ -144,7 +144,7 @@ bool FontShader::InitializeShader(HWND hwnd, WCHAR* vsFilename, WCHAR* psFilenam
     constantBufferDesc.StructureByteStride = 0;
 
     // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-    result = device->CreateBuffer(&constantBufferDesc, NULL, &m_constantBuffer);
+	IMPLEMENT_FOR_DX12(result = device->CreateBuffer(&constantBufferDesc, NULL, &m_constantBuffer);)
     if(FAILED(result))
     {
         return false;
@@ -166,7 +166,7 @@ bool FontShader::InitializeShader(HWND hwnd, WCHAR* vsFilename, WCHAR* psFilenam
     samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
     // Create the texture sampler state.
-    result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
+	IMPLEMENT_FOR_DX12(result = device->CreateSamplerState(&samplerDesc, &m_sampleState);)
     if(FAILED(result))
     {
         return false;
@@ -181,7 +181,7 @@ bool FontShader::InitializeShader(HWND hwnd, WCHAR* vsFilename, WCHAR* psFilenam
     pixelBufferDesc.StructureByteStride = 0;
 
     // Create the pixel constant buffer pointer so we can access the pixel shader constant buffer from within this class.
-    result = device->CreateBuffer(&pixelBufferDesc, NULL, &m_pixelBuffer);
+	IMPLEMENT_FOR_DX12(result = device->CreateBuffer(&pixelBufferDesc, NULL, &m_pixelBuffer);)
     if(FAILED(result))
     {
         return false;

@@ -11,7 +11,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<MeshInstance>;
-        virtual void Render(ID3D11DeviceContext* deviceContext, ShaderPipeline::Ptr shaderOverride = nullptr) const override;
+        virtual void Render(ShaderPipeline::Ptr shaderOverride = nullptr) const override;
         virtual void Update(float frameTime) override;
 
         void SetMesh(Mesh::Ptr mesh);

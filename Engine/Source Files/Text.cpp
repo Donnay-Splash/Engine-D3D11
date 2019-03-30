@@ -224,7 +224,7 @@ namespace Engine
         unsigned long* indices;
         D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
         D3D11_SUBRESOURCE_DATA vertexData, indexData;
-        HRESULT result;
+        HRESULT result = S_OK;
         int i;
 
 
@@ -285,7 +285,7 @@ namespace Engine
         vertexData.SysMemSlicePitch = 0;
 
         // Create the vertex buffer.
-        result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &(*sentence)->vertexBuffer);
+		IMPLEMENT_FOR_DX12(result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &(*sentence)->vertexBuffer));
         if (FAILED(result))
         {
             return false;
@@ -305,7 +305,7 @@ namespace Engine
         indexData.SysMemSlicePitch = 0;
 
         // Create the index buffer.
-        result = device->CreateBuffer(&indexBufferDesc, &indexData, &(*sentence)->indexBuffer);
+		IMPLEMENT_FOR_DX12(result = device->CreateBuffer(&indexBufferDesc, &indexData, &(*sentence)->indexBuffer);)
         if (FAILED(result))
         {
             return false;

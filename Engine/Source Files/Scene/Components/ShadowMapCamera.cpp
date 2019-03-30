@@ -32,10 +32,10 @@ namespace Engine
         EngineAssert(shadowMapPipeline != nullptr);
 
         // clear the target before rendering
-        auto device = scene->GetDevice();
+		IMPLEMENT_FOR_DX12(auto device = scene->GetDevice();
         auto deviceContext = device->GetDeviceContext();
         m_renderTargetBundle->Clear(deviceContext);
-        device->SetRenderTarget(m_renderTargetBundle);
+        device->SetRenderTarget(m_renderTargetBundle);)
 
         // We want to place the light outside of the scene bounds so that it includes all visible objects
         auto lightNode = light->GetSceneNode();
@@ -67,7 +67,7 @@ namespace Engine
         ShadowMapConstants constants;
         constants.WorldToProjectedLightSpace = m_worldToProjectedLightSpace;
         m_lightViewConstants->SetData(constants);
-        m_lightViewConstants->UploadData(deviceContext);
+		IMPLEMENT_FOR_DX12(m_lightViewConstants->UploadData(deviceContext);)
 
         scene->Render(shadowMapPipeline);
     }

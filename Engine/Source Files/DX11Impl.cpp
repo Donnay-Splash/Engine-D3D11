@@ -223,13 +223,13 @@ namespace Engine
 	void DX11Impl::CreateBackBufferResources(ID3D11Texture2D* backBufferPtr)
 	{
 		// Create the render target view with the back buffer pointer.
-		m_backBufferRT = std::make_shared<RenderTarget>(backBufferPtr, 0, m_device.Get());
+		m_backBufferRT = std::make_shared<RenderTarget>(backBufferPtr, 0);
 
 		auto backBufferWidth = m_backBufferRT->GetWidth();
 		auto backBufferHeight = m_backBufferRT->GetHeight();
 		m_screenSize = { float(backBufferWidth), float(backBufferHeight) };
 
-		m_depthBuffer = std::make_shared<DepthBuffer>(backBufferWidth, backBufferHeight, 1, 0, m_device.Get());
+		m_depthBuffer = std::make_shared<DepthBuffer>(backBufferWidth, backBufferHeight, 1, 0);
 
 		// Setup the viewport for rendering.
 		D3D11_VIEWPORT viewport;
@@ -414,7 +414,7 @@ namespace Engine
 	Texture::Ptr DX11Impl::CopyTexture(Texture::Ptr textureToCopy) const
 	{
 		EngineAssert(textureToCopy != nullptr);
-		auto newTexture = Texture::CreateIdenticalTexture(textureToCopy, m_device.Get());
+		auto newTexture = Texture::CreateIdenticalTexture(textureToCopy);
 
 		m_deviceContext->CopyResource(newTexture->GetTexture().Get(), textureToCopy->GetTexture().Get());
 

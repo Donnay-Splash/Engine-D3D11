@@ -6,8 +6,6 @@ inline std::shared_ptr<ComponentType> SceneNode::AddComponent()
     // Check that the given template argument is a derived class of Component
     static_assert(std::is_base_of<Component, ComponentType>::value, "A component must be derived from the Component class");
 
-    auto device = m_scene->GetDevice();
-
     // Check to see that there are no other components of ComponentType
     // attached to the SceneNode already.
     auto testComponent = GetComponentOfType<ComponentType>();

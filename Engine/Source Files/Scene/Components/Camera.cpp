@@ -26,7 +26,7 @@ namespace Engine
         m_viewConstants = std::make_shared<ConstantBuffer<ViewConstants>>(PipelineStage::Vertex | PipelineStage::Pixel);
     }
 
-    void Camera::Render(D3DClass::Ptr d3dClass, Scene::Ptr scene)
+    void Camera::Render(Scene::Ptr scene)
     {
         auto sceneNode = GetSceneNode();
         auto transform = sceneNode->GetWorldTransform();
@@ -36,13 +36,13 @@ namespace Engine
         // TODO: Fix this temp hack
         if (m_renderTargetBundle == nullptr)
         {
-            viewSize = d3dClass->GetScreenSize();
+            viewSize = D3DClass::Instance()->GetScreenSize();
             m_aspectRatio = viewSize.x / viewSize.y;
         }
         else
         {
             // Clear render target bundle
-            m_renderTargetBundle->Clear(d3dClass->GetDeviceContext());
+			IMPLEMENT_FOR_DX12(m_renderTargetBundle->Clear(d3dClass->GetDeviceContext());)
             viewSize = { static_cast<float>(m_renderTargetBundle->GetWidth()), static_cast<float>(m_renderTargetBundle->GetHeight()) };
         }
 
@@ -61,8 +61,8 @@ namespace Engine
         viewConstants.projectionScale = GetProjectionScale(viewSize);
 
         m_viewConstants->SetData(viewConstants);
-        m_viewConstants->UploadData(d3dClass->GetDeviceContext());
-        d3dClass->SetRenderTarget(m_renderTargetBundle);
+		IMPLEMENT_FOR_DX12(m_viewConstants->UploadData(d3dClass->GetDeviceContext());)
+        IMPLEMENT_FOR_DX12(d3dClass->SetRenderTarget(m_renderTargetBundle);)
 
         scene->Render();
     }

@@ -5,16 +5,12 @@
 
 namespace Engine
 {
-    // forward declarations
-    class D3DClass;
-
-
     class Scene : public std::enable_shared_from_this<Scene>
     {
     public:
         using Ptr = std::shared_ptr<Scene>;
 
-        Scene(D3DClass* device);
+        Scene();
         Scene(const Scene&) = delete;
         ~Scene() {}
 
@@ -47,8 +43,6 @@ namespace Engine
         // that can contain all of these bounding boxes transformed into world space.
         static Utils::Maths::BoundingBox CalculateBoundingBoxForSceneNode(SceneNode::Ptr sceneNode);
 
-        D3DClass* GetDevice() const { return m_renderDevice; }
-
         Utils::Maths::BoundingBox GetSceneBounds() const { return m_sceneBounds; }
 
         // HACK HACK HACK HACK HACK
@@ -76,8 +70,6 @@ namespace Engine
         Utils::Maths::Matrix m_invCameraTransform;
         Utils::Maths::Matrix m_prevCameraTransform;
         Utils::Maths::Matrix m_prevInvCameraTransform;
-
-        D3DClass* m_renderDevice;
     };
 
 #include "Scene.inl" 

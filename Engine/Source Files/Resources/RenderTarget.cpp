@@ -7,7 +7,7 @@ namespace Engine
     {
         creationFlags |= TextureCreationFlags::BindRenderTarget;
         m_texture = Texture::CreateTextureArray(nullptr, width, height, arraySize, creationFlags, format);
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), NULL, m_renderTargetView.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), NULL, m_renderTargetView.GetAddressOf()));)
         D3D11_RENDER_TARGET_VIEW_DESC desc;
         m_renderTargetView->GetDesc(&desc);
     }
@@ -42,7 +42,7 @@ namespace Engine
             desc.Texture2D.MipSlice = mipSlice;
         }
 
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), &desc, m_renderTargetView.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), &desc, m_renderTargetView.GetAddressOf()));)
     }
 
     RenderTarget::RenderTarget(ID3D11Texture2D* texture, uint32_t creationFlags)
@@ -51,7 +51,7 @@ namespace Engine
         bool useSRGB = (creationFlags & TextureCreationFlags::SRGB) != 0;
         auto format = useSRGB ? Utils::DirectXHelpers::MakeSRGB(m_texture->GetFormat()) : m_texture->GetFormat();
         CD3D11_RENDER_TARGET_VIEW_DESC desc(D3D11_RTV_DIMENSION_TEXTURE2D, format);
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), &desc, m_renderTargetView.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), &desc, m_renderTargetView.GetAddressOf()));)
     }
 
     RenderTarget::~RenderTarget()

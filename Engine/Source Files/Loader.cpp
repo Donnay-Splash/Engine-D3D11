@@ -9,8 +9,8 @@ using namespace Utils::Loader;
 
 namespace Engine
 {
-    Loader::Loader(D3DClass::Ptr d3dClass, Scene::Ptr scene, ShaderPipeline::Ptr shaderPipeline) :
-        m_d3dClass(d3dClass), m_scene(scene), m_shaderPipeline(shaderPipeline)
+    Loader::Loader(Scene::Ptr scene, ShaderPipeline::Ptr shaderPipeline) :
+        m_scene(scene), m_shaderPipeline(shaderPipeline)
     {
     }
 
@@ -95,7 +95,7 @@ namespace Engine
         if (importedNode.VertexCount > 0)
         {
             Mesh::Ptr mesh = std::make_shared<Mesh>();
-            mesh->Load(importedNode, m_d3dClass->GetDevice());
+            mesh->Load(importedNode);
 
             MeshInstance::Ptr meshInstance = sceneNode->AddComponent<MeshInstance>();
             meshInstance->SetMesh(mesh);
@@ -117,7 +117,7 @@ namespace Engine
     {
         for (auto importedMaterial : importedMaterials)
         {
-            auto engineMaterial = std::make_shared<Material>(m_d3dClass->GetDevice(), m_shaderPipeline);
+            auto engineMaterial = std::make_shared<Material>(m_shaderPipeline);
             engineMaterial->SetDiffuseColor(importedMaterial.DiffuseColor);
             engineMaterial->SetOpacity(importedMaterial.DiffuseColor.w);
             engineMaterial->SetSpecularColor(importedMaterial.SpecularColor);
@@ -205,7 +205,7 @@ namespace Engine
         for (auto importedTexture : importedTextures)
         {
             // Need to ensure texture loaded correctly
-            auto engineTexture = Texture::CreateImportedTexture(importedTexture, m_d3dClass->GetDevice());
+            auto engineTexture = Texture::CreateImportedTexture(importedTexture);
             // This value must not exist in the map already
             EngineAssert(m_textureMap.find(importedTexture.ID) == m_textureMap.end());
             m_textureMap[importedTexture.ID] = engineTexture;

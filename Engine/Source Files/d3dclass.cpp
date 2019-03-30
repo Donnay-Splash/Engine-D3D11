@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "pch.h"
 #include "d3dclass.h"
-#include "DX11Impl.h"
+#include "DX12Impl.h"
 
 namespace Engine
 {
@@ -12,7 +12,7 @@ namespace Engine
 	{
 		// TODO: Add platform to create options so that we can dynamically switch
 		EngineAssert(s_Instance == nullptr);
-		s_Instance = new DX11Impl();
+		s_Instance = new DX12Impl();
 		s_Instance->Initialize_Internal(createOptions);
 	}
 

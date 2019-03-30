@@ -80,7 +80,7 @@ namespace Engine
             initData = &subresourceData;
         }
 
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateTexture2D(&desc, initData, m_texture.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateTexture2D(&desc, initData, m_texture.GetAddressOf()));)
 
         if ((desc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0)
         {
@@ -103,11 +103,11 @@ namespace Engine
                     srvDesc.Texture2D.MipLevels = desc.MipLevels;
                     srvDesc.Texture2D.MostDetailedMip = 0;
                 }
-                Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_srv.GetAddressOf()));
+				IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_srv.GetAddressOf()));)
             }
             else
             {
-                Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
+				IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));)
             }
         }
     }
@@ -133,7 +133,7 @@ namespace Engine
 
         if (bindToShader)
         {
-            Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));
+			IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));)
         }
     }
 
@@ -146,8 +146,8 @@ namespace Engine
     Texture::Texture(const wchar_t* filename)
     {
         // Add support for additional file types.
-        ID3D11Resource* subresource;
-        Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, filename, &subresource, m_srv.GetAddressOf()));
+        ID3D11Resource* subresource = nullptr;
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, filename, &subresource, m_srv.GetAddressOf()));)
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
         m_srv->GetDesc(&srvDesc);
         m_format = srvDesc.Format;
@@ -195,19 +195,20 @@ namespace Engine
     {
         if (generateMips)
         {
-            return std::shared_ptr<Texture>(new Texture(d3d->GetDevice(), d3d->GetDeviceContext(), data, byteCount));
+			IMPLEMENT_FOR_DX12(return std::shared_ptr<Texture>(new Texture(d3d->GetDevice(), d3d->GetDeviceContext(), data, byteCount));)
         }
         else
         {
-            return std::shared_ptr<Texture>(new Texture(d3d->GetDevice(), data, byteCount));
+			IMPLEMENT_FOR_DX12(return std::shared_ptr<Texture>(new Texture(d3d->GetDevice(), data, byteCount));)
         }
+		return nullptr;
     }
 
     // Create a texture from imported texture data
     Texture::Texture(const uint8_t* data, uint64_t byteCount)
     {
-        ID3D11Resource* subresource;
-        Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, data, byteCount, &subresource, m_srv.GetAddressOf()));
+        ID3D11Resource* subresource = nullptr;
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, data, byteCount, &subresource, m_srv.GetAddressOf()));)
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
         m_srv->GetDesc(&srvDesc);
         m_format = srvDesc.Format;
@@ -249,8 +250,8 @@ namespace Engine
     // Create a texture from imported texture data and auto generate mips
     Texture::Texture(ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount)
     {
-        ID3D11Resource* subresource;
-        Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, context, data, byteCount, &subresource, m_srv.GetAddressOf()));
+        ID3D11Resource* subresource = nullptr;
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, context, data, byteCount, &subresource, m_srv.GetAddressOf()));)
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
         m_srv->GetDesc(&srvDesc);
         m_format = srvDesc.Format;

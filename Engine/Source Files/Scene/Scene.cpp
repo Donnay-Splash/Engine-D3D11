@@ -5,11 +5,8 @@
 
 namespace Engine
 {
-    Scene::Scene(D3DClass* device) :
-        m_renderDevice(device)
+    Scene::Scene()
     {
-        // Should not be null 
-        EngineAssert(m_renderDevice != nullptr);
     }
 
     void Scene::Initialize()
@@ -50,7 +47,7 @@ namespace Engine
 
     void Scene::Render(ShaderPipeline::Ptr shaderOverride /*= nullptr*/)
     {
-        m_rootNode->Render(m_renderDevice->GetDeviceContext(), shaderOverride);
+        m_rootNode->Render(shaderOverride);
     }
 
     Utils::Maths::BoundingBox Scene::CalculateBoundingBoxForSceneNode(SceneNode::Ptr sceneNode)

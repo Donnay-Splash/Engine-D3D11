@@ -25,7 +25,7 @@ namespace Engine
         indexData.SysMemSlicePitch = 0;
 
         // Create the index buffer.
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&indexBufferDesc, &indexData, m_buffer.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&indexBufferDesc, &indexData, m_buffer.GetAddressOf()));)
     }
 
     void IndexBuffer::UploadData(ID3D11DeviceContext* deviceContext)

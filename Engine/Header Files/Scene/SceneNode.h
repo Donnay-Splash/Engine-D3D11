@@ -22,7 +22,7 @@ namespace Engine
         ~SceneNode();
 
         void Update(float frameTime);
-        void Render(ID3D11DeviceContext* deviceContext, ShaderPipeline::Ptr shaderOverride = nullptr);
+        void Render(ShaderPipeline::Ptr shaderOverride = nullptr);
 
         void RegisterComponentAddedCallback(ComponentAddedDelegate callback);
         void FireComponentAddedCallback(Component::Ptr componentAdded);

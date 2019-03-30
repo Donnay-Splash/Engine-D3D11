@@ -23,7 +23,7 @@
     <ProjectGuid>{06F1D1D5-1FA9-4A5D-A157-E6EDF139FC0A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Engine</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -95,7 +95,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>E:\GitHub\Engine-D3D11\Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <IntrinsicFunctions>false</IntrinsicFunctions>
@@ -121,7 +121,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>E:\GitHub\Engine-D3D11\Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -144,6 +144,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>E:\GitHub\Engine-D3D11\Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>dxgi.lib;d3d11.lib;pdh.lib;winmm.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -161,12 +162,14 @@
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>E:\GitHub\Engine-D3D11\Engine\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Header Files\MeshMaker\MeshMaker.cpp" />
     <ClCompile Include="..\Source Files\d3dclass.cpp" />
     <ClCompile Include="..\Source Files\DX11Impl.cpp" />
+    <ClCompile Include="..\Source Files\DX12Impl.cpp" />
     <ClCompile Include="..\Source Files\Engine.cpp" />
     <ClCompile Include="..\Source Files\Font.cpp" />
     <ClCompile Include="..\Source Files\FontShader.cpp" />
@@ -225,6 +228,8 @@
   <ItemGroup>
     <ClInclude Include="..\Header Files\d3dclass.h" />
     <ClInclude Include="..\Header Files\DX11Impl.h" />
+    <ClInclude Include="..\Header Files\DX12Impl.h" />
+    <ClInclude Include="..\Header Files\DXHelpers\d3dx12.h" />
     <ClInclude Include="..\Header Files\Engine.h" />
     <ClInclude Include="..\Header Files\EngineCreateOptions.h" />
     <ClInclude Include="..\Header Files\Font.h" />

@@ -20,7 +20,7 @@ namespace Engine
         rasterizerDesc.SlopeScaledDepthBias = 0.0f;
 
         // Create the rasterizer state from the description we just filled out.
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateRasterizerState(&rasterizerDesc, m_rasterizerState.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateRasterizerState(&rasterizerDesc, m_rasterizerState.GetAddressOf()));)
     }
 
     void RasterizerState::UploadData(ID3D11DeviceContext* deviceContext)

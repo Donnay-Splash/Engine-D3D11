@@ -10,13 +10,13 @@ namespace Engine
 	// Forward Declarations
 	struct EngineCreateOptions;
 
-	class DX11Impl : public D3DClass
+	class DX12Impl : public D3DClass
 	{
 	public:
-		using Ptr = std::shared_ptr<DX11Impl>;
-		DX11Impl();
-		DX11Impl(const DX11Impl&);
-		virtual ~DX11Impl();
+		using Ptr = std::shared_ptr<DX12Impl>;
+		DX12Impl();
+		DX12Impl(const DX12Impl&);
+		virtual ~DX12Impl();
 
 		void Shutdown() override;
 
@@ -32,10 +32,6 @@ namespace Engine
 
 		// Potentially rename FrameBuffer?
 		void SetRenderTarget(RenderTargetBundle::Ptr, Utils::Maths::Vector2 clipOffset = {}) const override;
-
-		// TODO: Need to get rid of these as they directly expose underlying device types
-		ID3D11Device* GetDevice();
-		ID3D11DeviceContext* GetDeviceContext();
 
 		void GetVideoCardInfo(char*, int&) override;
 
@@ -53,31 +49,47 @@ namespace Engine
 
 	private:
 		void GetAdapterInformation();
-		void CreateDeviceAndSwapChain();
+		void CreateDeviceResourcesAndSwapChain();
+		void CreateDescriptorHeaps();
+		void CreateCommandList();
 		void CreateSwapChain_HWND(uint32_t screenWidth, uint32_t screenHeight);
 		void CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight);
-
-		void CreateBackBufferResources(ID3D11Texture2D* backbufferPtr);
-
+		void CreateBackBufferResources();
 		void ClearResources();
+
+		void WaitForPreviousFrame();
 
 	private:
 		bool m_vsync_enabled;
 		int m_videoCardMemory;
 		std::string m_videoCardDescription;
-		Microsoft::WRL::ComPtr<IDXGISwapChain1> m_swapChain;
-		Microsoft::WRL::ComPtr<ID3D11Device1> m_device;
-		Microsoft::WRL::ComPtr<ID3D11Debug> m_debugDevice;
-		Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext;
-		Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation> m_userDefinedAnnotation;
+		Microsoft::WRL::ComPtr<IDXGISwapChain3> m_swapChain;
+		Microsoft::WRL::ComPtr<ID3D12Device5> m_device;
+		Microsoft::WRL::ComPtr<ID3D12DebugDevice2> m_debugDevice;
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_commandAllocator;
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue> m_commandQueue;
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+		UINT m_rtvDescriptorSize;
+		//Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext;
+		//Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation> m_userDefinedAnnotation;
 		Microsoft::WRL::ComPtr<IDXGIFactory2> m_factory;
 		Microsoft::WRL::ComPtr<IDXGIAdapter> m_adapter;
-		RenderTarget::Ptr m_backBufferRT;
+
+		UINT m_frameIndex;
+		HANDLE m_fenceEvent;
+		Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;
+		UINT64 m_fenceValue;
+
+		// TODO: Eventually put this back into a DX12 compatible class
+		static const UINT kBufferCount = 2;
+		Microsoft::WRL::ComPtr<ID3D12Resource> m_renderTargets[kBufferCount];
+
+		//RenderTarget::Ptr m_backBufferRT;
 		DepthBuffer::Ptr m_depthBuffer;
 		Utils::Maths::Vector2 m_screenSize;
 
 		// Use a single back buffer for now.
-		static const UINT kBufferCount = 2;
 		EngineCreateOptions m_createOptions;
 	};
 }

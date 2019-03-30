@@ -33,6 +33,8 @@ namespace Engine
         virtual void BeginRenderEvent(const std::wstring& eventLabel) = 0;
         virtual void EndRenderEvent() = 0;
 
+		virtual Utils::Maths::Vector2 GetScreenSize() const = 0;
+
         // Potentially rename FrameBuffer?
 		virtual void SetRenderTarget(RenderTargetBundle::Ptr, Utils::Maths::Vector2 clipOffset = {}) const = 0;
 

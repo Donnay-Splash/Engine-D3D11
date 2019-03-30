@@ -30,7 +30,16 @@ namespace Engine
             matrixBufferDesc.StructureByteStride = 0;
 
             // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-            Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&matrixBufferDesc, NULL, &m_buffer));
+			IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&matrixBufferDesc, NULL, &m_buffer));)
+
+			// Creating a constant buffer in DX12
+			// First we will need a descriptor heap to assign all of our CBV_SRV_UAV descriptors, this can be created and managed by the device.
+			// Create a heap for our CBV resource. This can be used for all constant buffers we can again create and manage this on the device level.
+			// Create the CBV. In DX12 we do this via descriptor
+			// When setting the data we need to map the heap that the buffer is on and write the data to it. We can keep the data mapped for as long as we want
+			// Just need to make sure that we don't modify the space in memory once we have sent this data to the GPU. All CBV updates need to be synchronized.
+
+			// If we want to abstract all of this from the code we need to find a way to reference a buffer and its space on the heap.
         }
 
         // TODO Need to find better name for this 

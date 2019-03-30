@@ -25,7 +25,7 @@ namespace Engine
         depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
         depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilState.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilState.GetAddressOf()));)
     }
 
     void DepthState::UploadData(ID3D11DeviceContext * deviceContext)

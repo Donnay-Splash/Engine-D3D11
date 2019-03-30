@@ -29,7 +29,7 @@ namespace Engine
             srvDesc.Texture2D.MipLevels = 1;
             srvDesc.Texture2D.MostDetailedMip = i;
 
-            device->CreateShaderResourceView(d3dTex.Get(), &srvDesc, m_mipSRVs[i].GetAddressOf());
+			IMPLEMENT_FOR_DX12(device->CreateShaderResourceView(d3dTex.Get(), &srvDesc, m_mipSRVs[i].GetAddressOf());)
         }
     }
 

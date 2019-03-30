@@ -38,7 +38,7 @@ namespace Engine
         }
 
         // Create the second blend state using the description.
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateBlendState(&blendStateDescription, m_blendState.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateBlendState(&blendStateDescription, m_blendState.GetAddressOf()));)
     }
 
     void BlendState::SetBlendMode(BlendMode mode)

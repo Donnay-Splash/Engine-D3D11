@@ -33,7 +33,7 @@ namespace Utils
             mesh->SetNormals(normals);
             mesh->SetUVs(uvs);
             mesh->SetIndices(indices);
-            mesh->FinaliseMesh(device);
+			IMPLEMENT_FOR_DX12(mesh->FinaliseMesh(device));
             return mesh;
         }
 
@@ -213,7 +213,7 @@ namespace Utils
             mesh->SetNormals(normals);
             mesh->SetUVs(uvs);
             mesh->SetIndices(indices);
-            mesh->FinaliseMesh(device);
+			IMPLEMENT_FOR_DX12(mesh->FinaliseMesh(device));
             return mesh;
         }
 
@@ -329,7 +329,7 @@ namespace Utils
             mesh->SetPositions(positions);
             mesh->SetNormals(normals);
             mesh->SetIndices(indices);
-            mesh->FinaliseMesh(device);
+			IMPLEMENT_FOR_DX12(mesh->FinaliseMesh(device);)
             return mesh;
         }
 
@@ -430,7 +430,7 @@ namespace Utils
             mesh->SetNormals(normals);
             mesh->SetUVs(uvs);
             mesh->SetIndices(indices);
-            mesh->FinaliseMesh(device);
+			IMPLEMENT_FOR_DX12(mesh->FinaliseMesh(device);)
             return mesh;
         }
 
@@ -469,7 +469,7 @@ namespace Utils
             mesh->SetPositions(positions);
             mesh->SetUVs(uvs);
             mesh->SetIndices(indices);
-            mesh->FinaliseMesh(device);
+			IMPLEMENT_FOR_DX12(mesh->FinaliseMesh(device));
 
             return mesh;
         }

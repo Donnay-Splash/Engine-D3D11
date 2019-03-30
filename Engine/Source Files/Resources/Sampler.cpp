@@ -31,7 +31,7 @@ namespace Engine
         samplerDesc.MaxLOD = maxLOD;
 
         // Create the texture sampler state.
-        Utils::DirectXHelpers::ThrowIfFailed(device->CreateSamplerState(&samplerDesc, m_samplerState.GetAddressOf()));
+		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateSamplerState(&samplerDesc, m_samplerState.GetAddressOf()));)
     }
 
     void Sampler::UploadData(ID3D11DeviceContext* deviceContext, UINT inputSlot)

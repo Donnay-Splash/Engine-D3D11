@@ -45,16 +45,16 @@ namespace Engine
         }
     }
 
-    void SceneNode::Render(ID3D11DeviceContext* deviceContext, ShaderPipeline::Ptr shaderOverride/* = nullptr*/)
+    void SceneNode::Render(ShaderPipeline::Ptr shaderOverride/* = nullptr*/)
     {
         for (auto child : m_childNodes)
         {
-            child->Render(deviceContext, shaderOverride);
+            child->Render(shaderOverride);
         }
 
         for (auto component : m_components)
         {
-            component->Render(deviceContext, shaderOverride);
+            component->Render(shaderOverride);
         }
     }
 

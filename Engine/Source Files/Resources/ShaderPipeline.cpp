@@ -17,7 +17,7 @@ namespace Engine
         EngineAssert(m_vertexShader->GetType() == Shader::Type::Vertex);
 
         // Validate that the input layout for the vertex shader is correct
-        m_vertexShader->ValidateInputSignature(inputLayout, device);
+		IMPLEMENT_FOR_DX12(m_vertexShader->ValidateInputSignature(inputLayout, device);)
 
         if (m_pixelShader != nullptr)
         {

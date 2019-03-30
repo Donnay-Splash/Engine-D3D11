@@ -84,7 +84,6 @@ namespace Engine
 
     private:
         InputManager::Ptr m_inputManager;
-        std::shared_ptr<D3DClass> m_direct3D;
         std::shared_ptr<Light> m_light1;
         std::shared_ptr<TimerClass> m_timer;
         std::shared_ptr<PositionClass> m_position;

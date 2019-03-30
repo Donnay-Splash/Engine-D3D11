@@ -94,13 +94,12 @@ namespace Engine
 
         auto scene = shadowCaster->GetSceneNode()->GetScene();
         
-        auto device = scene->GetDevice();
-        device->BeginRenderEvent(L"Render Shadow maps");
+		D3DClass::Instance()->BeginRenderEvent(L"Render Shadow maps");
             m_shadowMapCamera->SetRenderTargetBundle(m_shadowMapTarget);
             m_shadowMapCamera->Render(scene, shadowCaster, m_shadowMapPipeline);
             // Upload m_shadowMapTargets to shader
             m_shadowMapTarget->SetShaderResources(deviceContext, kShadowMapRegister);
-        device->EndRenderEvent();
+		D3DClass::Instance()->EndRenderEvent();
 
         // Calculate camera to light space transform
         auto worldToLight = m_shadowMapCamera->GetWorldToProjectedLightSpaceTransform();

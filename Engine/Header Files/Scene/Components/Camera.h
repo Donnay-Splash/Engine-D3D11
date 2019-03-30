@@ -23,7 +23,7 @@ namespace Engine
         Camera(const Camera&) = delete;
         virtual ~Camera();
 
-        void Render(D3DClass::Ptr d3dClass, Scene::Ptr scene);
+        void Render(Scene::Ptr scene);
 
         // Sets the vertical field of view for the camera
         void SetFieldOfView(float fov) { m_fov = fov; }

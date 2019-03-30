@@ -11,21 +11,21 @@ namespace Engine
         case Type::Vertex:
         {
             Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-            device->CreateVertexShader(shaderCode, shaderLength, nullptr, vertexShader.GetAddressOf());
+			IMPLEMENT_FOR_DX12(device->CreateVertexShader(shaderCode, shaderLength, nullptr, vertexShader.GetAddressOf());)
             vertexShader.As(&m_shader);
             break;
         }
         case Type::Pixel:
         {
             Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-            device->CreatePixelShader(shaderCode, shaderLength, nullptr, pixelShader.GetAddressOf());
+			IMPLEMENT_FOR_DX12(device->CreatePixelShader(shaderCode, shaderLength, nullptr, pixelShader.GetAddressOf());)
             pixelShader.As(&m_shader);
             break;
         }
         case Type::Geometry:
         {
             Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
-            device->CreateGeometryShader(shaderCode, shaderLength, nullptr, geometryShader.GetAddressOf());
+			IMPLEMENT_FOR_DX12(device->CreateGeometryShader(shaderCode, shaderLength, nullptr, geometryShader.GetAddressOf());)
             geometryShader.As(&m_shader);
             break;
         }
@@ -43,7 +43,7 @@ namespace Engine
         // Cannot create an input layout from anything but a vertex shader.
         EngineAssert(m_type == Type::Vertex);
         UINT numElements = static_cast<UINT>(inputLayout->m_inputElements.size());
-        device->CreateInputLayout(inputLayout->m_inputElements.data(), numElements, m_shaderCode, m_shaderLength, inputLayout->m_inputLayout.GetAddressOf());
+		IMPLEMENT_FOR_DX12(device->CreateInputLayout(inputLayout->m_inputElements.data(), numElements, m_shaderCode, m_shaderLength, inputLayout->m_inputLayout.GetAddressOf());)
     }
 
     void Shader::UploadData(ID3D11DeviceContext* deviceContext)

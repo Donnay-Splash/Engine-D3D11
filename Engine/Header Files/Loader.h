@@ -15,7 +15,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<Loader>;
-        Loader(D3DClass::Ptr d3dClass, Scene::Ptr scene, ShaderPipeline::Ptr shaderPipeline);
+        Loader(Scene::Ptr scene, ShaderPipeline::Ptr shaderPipeline);
         ~Loader();
 
         void LoadFile(const std::string& filePath);
@@ -28,7 +28,6 @@ namespace Engine
         void LoadNode(const Utils::Loader::SceneNodeData& importedNode);
 
     private:
-        D3DClass::Ptr m_d3dClass;
         Scene::Ptr m_scene;
         ShaderPipeline::Ptr m_shaderPipeline;
         std::map<uint32_t, SceneNode::Ptr> m_nodeMap;
