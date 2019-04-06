@@ -14,11 +14,7 @@ namespace Utils
 
         inline void ThrowIfFailed(HRESULT result)
         {
-            if (FAILED(result))
-            {
-                // Throw a breakpoint to catch Win32 errors
-                throw std::exception();
-            }
+			EngineAssert(SUCCEEDED(result));
         }
 
         inline std::wstring GetAssetsPath()

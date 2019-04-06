@@ -76,7 +76,8 @@ namespace Engine
 
     void Material::Render(ID3D11DeviceContext* deviceContext)
     {
-        m_shaderPipeline->UploadData(deviceContext);
+		// TODO DX12: pass through command list
+        //m_shaderPipeline->UploadData(deviceContext);
         m_pipelineState->UploadData(deviceContext);
         m_materialConstants->SetData(m_materialData);
         m_materialConstants->UploadData(deviceContext);

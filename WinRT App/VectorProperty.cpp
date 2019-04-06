@@ -71,16 +71,16 @@ void VectorProperty::OnComponentValueChanged(Platform::Object^ sender, double ne
     auto currentValue = Value;
     if (componentName == m_vectorComponentName_X)
     {
-        currentValue.x = newValue;
+        currentValue.x = (float)newValue;
     }
     else if (componentName == m_vectorComponentName_Y)
     {
-        currentValue.y = newValue;
+        currentValue.y = (float)newValue;
 
     }
     else if (componentName == m_vectorComponentName_Z)
     {
-        currentValue.z = newValue;
+        currentValue.z = (float)newValue;
 
     }
 

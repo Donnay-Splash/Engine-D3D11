@@ -31,7 +31,7 @@ namespace Engine
 
         void Load(const Utils::Loader::SceneNodeData& mesh);
 
-        void Render(ID3D11DeviceContext*);
+        void Render(ID3D12GraphicsCommandList* commandList);
         void FinaliseMesh();
         uint32_t GetIndexCount() const { return static_cast<uint32_t>(m_indexData.size()); };
         uint32_t GetVertexCount() const { return static_cast<uint32_t>(m_vertexCount); }
@@ -54,7 +54,7 @@ namespace Engine
 
 
     private:
-        void RenderBuffers(ID3D11DeviceContext*);
+        void RenderBuffers(ID3D12GraphicsCommandList* commandList);
 
         std::shared_ptr<Texture> m_Texture;
 

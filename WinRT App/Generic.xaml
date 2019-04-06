@@ -94,7 +94,7 @@
                         </VisualStateManager.VisualStateGroups>
                         <Border BorderBrush="DarkGray"
                                 BorderThickness="0.4"
-                                CornerRadius="{TemplateBinding CornerRadius}"
+                                CornerRadius="0.4"
                                 Background="WhiteSmoke"
                                 VerticalAlignment="Stretch"
                                 HorizontalAlignment="Stretch"

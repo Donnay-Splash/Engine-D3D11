@@ -189,6 +189,9 @@
     <ClCompile Include="..\Source Files\DX12Impl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source Files\CommandQueue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\d3dclass.h">
@@ -347,6 +350,12 @@
     <ClInclude Include="..\Header Files\DXHelpers\d3dx12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\GPUResource.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\CommandQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Header Files\Scene\Scene.inl">
@@ -483,6 +492,12 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="..\Shaders\ShadowMap.vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\PassThrough.vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shaders\PassThrough.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

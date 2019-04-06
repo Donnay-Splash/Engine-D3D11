@@ -1,36 +1,43 @@
 #include "pch.h"
 #include <Resources\VertexBuffer.h>
+#include "d3dclass.h"
 
 namespace Engine
 {
     VertexBuffer::VertexBuffer(void* data, uint32_t vertexCount, size_t vertexSizeInBytes)
-        : m_stride(static_cast<UINT>(vertexSizeInBytes))
+        : GPUResource(D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER), m_stride(static_cast<UINT>(vertexSizeInBytes))
     {
         // The vertex must have a size greater than zero
         EngineAssert(m_stride > 0);
         // Why are you making a vertex buffer with no vertices?
         EngineAssert(vertexCount > 0);
 
-        D3D11_BUFFER_DESC vertexBufferDesc;
-        SecureZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
-        vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-        vertexBufferDesc.ByteWidth = m_stride * vertexCount;
-        vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        vertexBufferDesc.CPUAccessFlags = 0;
-        vertexBufferDesc.MiscFlags = 0;
-        vertexBufferDesc.StructureByteStride = 0;
+		uint64_t bufferSize = vertexCount * vertexSizeInBytes;
 
-        D3D11_SUBRESOURCE_DATA vertexData;
-        vertexData.pSysMem = data;
-        vertexData.SysMemPitch = 0;
-        vertexData.SysMemSlicePitch = 0;
+		ID3D12Device* device = D3DClass::Instance()->GetDevice();
+		Utils::DirectXHelpers::ThrowIfFailed(device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			nullptr,
+			IID_PPV_ARGS(m_resource.GetAddressOf())));
 
-		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&vertexBufferDesc, &vertexData, m_buffer.GetAddressOf()));)
+		D3D12_SUBRESOURCE_DATA subresourceData = {};
+		subresourceData.pData = data;
+		subresourceData.RowPitch = bufferSize;
+		subresourceData.SlicePitch = subresourceData.RowPitch;
+
+		D3DClass::Instance()->UploadSubresourceData(bufferSize, &subresourceData, m_resource.Get(), m_usageState);
+
+		m_VBV.BufferLocation = m_resource->GetGPUVirtualAddress();
+		m_VBV.SizeInBytes = (UINT)bufferSize;
+		m_VBV.StrideInBytes = (UINT)vertexSizeInBytes;
     }
 
-    void VertexBuffer::UploadData(ID3D11DeviceContext* deviceContext, UINT inputSlot, UINT offset)
+    void VertexBuffer::UploadData(ID3D12GraphicsCommandList* commandList, UINT inputSlot)
     {
         // Set the vertex buffer to active in the input assembler so it can be rendered.
-        deviceContext->IASetVertexBuffers(inputSlot, 1, m_buffer.GetAddressOf(), &m_stride, &offset);
+		commandList->IASetVertexBuffers(inputSlot, 1, &m_VBV);
     }
 }

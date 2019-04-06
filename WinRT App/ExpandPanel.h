@@ -30,14 +30,6 @@ namespace WinRT_App
             void set(bool isExpanded) { SetValue(m_isExpandedProperty, isExpanded); };
         }
 
-        property WUX::CornerRadius CornerRadius
-        {
-            WUX::CornerRadius get() { return (WUX::CornerRadius)GetValue(m_cornerRadiusProperty); }
-            void set(WUX::CornerRadius radius) { SetValue(m_cornerRadiusProperty, radius); }
-        }
-
-
-
     protected:
         virtual void OnApplyTemplate() override
         {
@@ -101,7 +93,6 @@ namespace WinRT_App
     private:
         static WUX::DependencyProperty^ m_headerContentProperty;
         static WUX::DependencyProperty^ m_isExpandedProperty;
-        static WUX::DependencyProperty^ m_cornerRadiusProperty;
 
         Windows::UI::Xaml::VisualState^ m_collapsedState;
         Windows::UI::Xaml::Controls::Primitives::ToggleButton^ m_toggleButton;

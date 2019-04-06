@@ -40,15 +40,15 @@ namespace Engine
         FinaliseMesh();
     }
 
-    void Mesh::Render(ID3D11DeviceContext* deviceContext)
+    void Mesh::Render(ID3D12GraphicsCommandList* commandList)
     {
         // Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
-        RenderBuffers(deviceContext);
+        RenderBuffers(commandList);
 
         return;
     }
 
-    void Mesh::RenderBuffers(ID3D11DeviceContext* deviceContext)
+    void Mesh::RenderBuffers(ID3D12GraphicsCommandList* commandList)
     {
         UINT index = 0;
         // The mesh must have been finalised before we can begin rendering it.
@@ -57,39 +57,39 @@ namespace Engine
         {
             // If the mesh has been finalised the position buffer should not be empty.
             EngineAssert(m_positionBuffer != nullptr);
-            m_positionBuffer->UploadData(deviceContext, index, 0);
+            m_positionBuffer->UploadData(commandList, index);
             index++;
         }
         if (HasNormals())
         {
             // If the mesh has been finalised the normal buffer should not be empty.
             EngineAssert(m_normalBuffer != nullptr);
-            m_normalBuffer->UploadData(deviceContext, index, 0);
+            m_normalBuffer->UploadData(commandList, index);
             index++;
         }
         if (HasUVs())
         {
             // If the mesh has been finalised the UV buffer should not be empty.
             EngineAssert(m_uvBuffer != nullptr);
-            m_uvBuffer->UploadData(deviceContext, index, 0);
+            m_uvBuffer->UploadData(commandList, index);
             index++;
         }
         if (HasTangents())
         {
             EngineAssert(m_tangentBuffer != nullptr);
             EngineAssert(m_bitangentBuffer != nullptr);
-            m_tangentBuffer->UploadData(deviceContext, index, 0);
+            m_tangentBuffer->UploadData(commandList, index);
             index++;
-            m_bitangentBuffer->UploadData(deviceContext, index, 0);
+            m_bitangentBuffer->UploadData(commandList, index);
             index++;
         }
 
-        m_indexBuffer->UploadData(deviceContext);
+        m_indexBuffer->UploadData(commandList);
 
         // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-        deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		commandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-        deviceContext->DrawIndexed(GetIndexCount(), 0, 0);
+		commandList->DrawInstanced(GetIndexCount(), 1, 0, 0);
 
         return;
     }

@@ -109,7 +109,7 @@ namespace Engine
     {
     }
 
-	static SceneNode* testObject;
+	static Mesh::Ptr testMesh;
     bool Engine::Initialize(EngineCreateOptions createOptions)
     {
         bool result;
@@ -138,38 +138,40 @@ namespace Engine
         }
 
 		
-        // Get the shadow map shader pipeline
-        auto shadowPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ShadowMapping);
-        // Initialize light manager
-        m_lightManager.Initialize(m_scene, shadowPipeline);
+  //      // Get the shadow map shader pipeline
+  //      auto shadowPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ShadowMapping);
+  //      // Initialize light manager
+  //      m_lightManager.Initialize(m_scene, shadowPipeline);
 
-        // Add lights to the scene
-        auto lightNode = m_scene->AddNode();
-        lightNode->SetPosition({ 0.0f, 10.0f, 0.0f });
-        lightNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(0.0f, Utils::Maths::DegreesToRadians(90.0f), 0.0f));
-        auto light = lightNode->AddComponent<Light>();
-        light->SetShadowCastingEnabled(true);
-        light->SetIntensity(2.0f);
-        light->SetColor({ DirectX::Colors::Wheat });
+		testMesh = Utils::MeshMaker::CreateTriangle();
 
-		// Create Mesh object
-		m_mesh = Utils::MeshMaker::CreateCube();
-		auto cubeNode = m_scene->AddNode();
-		cubeNode->SetPosition({ 0.0f, 0.0f, -7.0f });
-		auto meshInstance = cubeNode->AddComponent<MeshInstance>();
-		meshInstance->SetMesh(m_mesh);
-		auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
-		auto material = std::make_shared<Material>(shaderPipeline);
-		material->SetDiffuseColor(DirectX::Colors::CornflowerBlue);
-		material->SetSmoothness(0.25f);
-		meshInstance->SetMaterial(material);
-		auto bounds = cubeNode->AddComponent<BoundingBox>();
-		testObject = cubeNode.get();
+		//// Create Mesh object
+		//m_mesh = Utils::MeshMaker::CreateCube();
+		//auto cubeNode = m_scene->AddNode();
+		//cubeNode->SetPosition({ 0.0f, 0.0f, -7.0f });
+		//auto meshInstance = cubeNode->AddComponent<MeshInstance>();
+		//meshInstance->SetMesh(m_mesh);
+		//auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
+		//auto material = std::make_shared<Material>(shaderPipeline);
+		//material->SetDiffuseColor(DirectX::Colors::CornflowerBlue);
+		//material->SetSmoothness(0.25f);
+		//meshInstance->SetMaterial(material);
+		//auto bounds = cubeNode->AddComponent<BoundingBox>();
 
-        /*lightNode = m_scene->AddNode();
-        lightNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(Utils::Maths::DegreesToRadians(45.0f), Utils::Maths::DegreesToRadians(45.0f), 0.0f));
-        light = lightNode->AddComponent<Light>();
-        light->SetColor({ DirectX::Colors::Wheat });*/
+  //      // Add lights to the scene
+  //      auto lightNode = m_scene->AddNode();
+  //      lightNode->SetPosition({ 0.0f, 10.0f, 0.0f });
+  //      lightNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(0.0f, Utils::Maths::DegreesToRadians(90.0f), 0.0f));
+  //      auto light = lightNode->AddComponent<Light>();
+  //      light->SetShadowCastingEnabled(true);
+  //      light->SetIntensity(2.0f);
+  //      light->SetColor({ DirectX::Colors::Wheat });
+
+
+  //      /*lightNode = m_scene->AddNode();
+  //      lightNode->SetRotation(Utils::Maths::Quaternion::CreateFromYawPitchRoll(Utils::Maths::DegreesToRadians(45.0f), Utils::Maths::DegreesToRadians(45.0f), 0.0f));
+  //      light = lightNode->AddComponent<Light>();
+  //      light->SetColor({ DirectX::Colors::Wheat });*/
 
         // Create the camera object
         auto cameraNode = m_scene->AddNode();
@@ -178,16 +180,16 @@ namespace Engine
         m_camera->SetJitterSequence(kJitterSequence);
         cameraNode->SetPosition({ 0.0f, 0.0f, -10.0f });
 
-        // Create post processing camera
-        auto postCameraNode = m_scene->AddNode();
-        m_postProcessCamera = postCameraNode->AddComponent<PostProcessingCamera>();
+  //      // Create post processing camera
+  //      auto postCameraNode = m_scene->AddNode();
+  //      m_postProcessCamera = postCameraNode->AddComponent<PostProcessingCamera>();
 
-        // Create post effect
-        auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade);
-        m_postEffect = std::make_shared<PostEffect<PostEffectConstants>>(postEffectPipeline);
+  //      // Create post effect
+  //      auto postEffectPipeline = m_shaderManager->GetShaderPipeline(ShaderName::GBuffer_Shade);
+  //      m_postEffect = std::make_shared<PostEffect<PostEffectConstants>>(postEffectPipeline);
 
-        // Create deep G-Buffer constant buffer
-        m_deepGBufferConstant = std::make_shared<ConstantBuffer<DeepGBufferConstants>>(PipelineStage::Pixel);
+  //      // Create deep G-Buffer constant buffer
+  //      m_deepGBufferConstant = std::make_shared<ConstantBuffer<DeepGBufferConstants>>(PipelineStage::Pixel);
 
         // Create the timer object.
         m_timer = std::make_shared<TimerClass>();
@@ -362,8 +364,6 @@ namespace Engine
             return false;
         }
 
-		testObject->SetRotation(Utils::Maths::Quaternion::CreateFromAxisAngle({ 0.0f, 1.0f, 0.0f }, m_elapsedTime));
-
         // Convert ms into seconds
         m_elapsedTime += deltaTime / 1000.0f;
         m_debugConstants.sceneTime = m_elapsedTime;
@@ -383,68 +383,70 @@ namespace Engine
         // Re-create G-Buffer with new dimensions
         // We use G-Buffer data for ao and radiosity so it must be 
         // extended to the guard band width
-        const uint32_t GBufferLayers = 2;
-        RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(newWidth + guardBandWidth, newHeight + guardBandHeight, GBufferLayers);
-        GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
-        GBuffer->CreateRenderTarget(L"Emissive", DXGI_FORMAT_R11G11B10_FLOAT);
-        GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
-        GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT, {1.0f, 1.0f, 1.0f, 1.0f});
-        GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT, {-1.0f, -1.0f, -1.0f, -1.0f });
-        GBuffer->Finalise();
 
-        // Set the G-Buffer for output from camera
-        m_camera->SetRenderTargetBundle(GBuffer);
+		// TODO: Eventually re-create G-Buffer when we are capable
+        //const uint32_t GBufferLayers = 2;
+        //RenderTargetBundle::Ptr GBuffer = std::make_shared<RenderTargetBundle>(newWidth + guardBandWidth, newHeight + guardBandHeight, GBufferLayers);
+        //GBuffer->CreateRenderTarget(L"Main", DXGI_FORMAT_R8G8B8A8_UNORM);
+        //GBuffer->CreateRenderTarget(L"Emissive", DXGI_FORMAT_R11G11B10_FLOAT);
+        //GBuffer->CreateRenderTarget(L"Normal", DXGI_FORMAT_R8G8B8A8_UNORM);
+        //GBuffer->CreateRenderTarget(L"SSVelocity", DXGI_FORMAT_R16G16_FLOAT, {1.0f, 1.0f, 1.0f, 1.0f});
+        //GBuffer->CreateRenderTarget(L"CSZ", DXGI_FORMAT_R32_FLOAT, {-1.0f, -1.0f, -1.0f, -1.0f });
+        //GBuffer->Finalise();
 
-        // Create bundle for hierarchical Z
-        // Used in AO calculation and thus must be extended by guard band
-        m_hiZBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kHiZ_MaxMip + 1, false);
-        m_hiZBundle->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R32G32_FLOAT);
-        m_hiZBundle->Finalise();
+        //// Set the G-Buffer for output from camera
+        //m_camera->SetRenderTargetBundle(GBuffer);
 
-        auto Hi_ZTex = m_hiZBundle->GetRenderTarget(L"Hi-Z")->GetTexture();
-        m_hiZMipView = std::make_shared<TextureMipView>(Hi_ZTex, kHiZ_MaxMip + 1);
+        //// Create bundle for hierarchical Z
+        //// Used in AO calculation and thus must be extended by guard band
+        //m_hiZBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kHiZ_MaxMip + 1, false);
+        //m_hiZBundle->CreateRenderTarget(L"Hi-Z", DXGI_FORMAT_R32G32_FLOAT);
+        //m_hiZBundle->Finalise();
 
-        /*AO needs to store data for the guard band and thus must be extended*/
-        m_aoBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
-        m_aoBundle->CreateRenderTarget(L"AO", DXGI_FORMAT_R8G8B8A8_UNORM);
-        m_aoBundle->Finalise();
+        //auto Hi_ZTex = m_hiZBundle->GetRenderTarget(L"Hi-Z")->GetTexture();
+        //m_hiZMipView = std::make_shared<TextureMipView>(Hi_ZTex, kHiZ_MaxMip + 1);
 
-        // Temporary buffer for post process effects. Used to store temp results. e.g. betweeen seperable blur
-        m_tempBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
-        m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R16G16B16A16_FLOAT);
-        m_tempBundle->Finalise();
+        ///*AO needs to store data for the guard band and thus must be extended*/
+        //m_aoBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        //m_aoBundle->CreateRenderTarget(L"AO", DXGI_FORMAT_R8G8B8A8_UNORM);
+        //m_aoBundle->Finalise();
 
-        // Stores lambertian and packed normals for use in radiosity
-        // Since this is used in radiosity it must be extended by guard band
-        m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kRadiosityBuffer_MaxMip + 1, false);
-        m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian1", DXGI_FORMAT_R11G11B10_FLOAT); //TODO: Eventually make HDR
-        m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian2", DXGI_FORMAT_R11G11B10_FLOAT);
-        m_lambertianOnlyBundle->CreateRenderTarget(L"PackedNormals", DXGI_FORMAT_R8G8B8A8_UNORM);
-        m_lambertianOnlyBundle->Finalise();
+        //// Temporary buffer for post process effects. Used to store temp results. e.g. betweeen seperable blur
+        //m_tempBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        //m_tempBundle->CreateRenderTarget(L"Temp", DXGI_FORMAT_R16G16B16A16_FLOAT);
+        //m_tempBundle->Finalise();
 
-        // Create the mip view for the lambertian only buffer. This is used to generate the custom downsample
-        m_lambertianOnlyBundleMipView = std::make_shared<TextureBundleMipView>(m_lambertianOnlyBundle, kRadiosityBuffer_MaxMip + 1);
+        //// Stores lambertian and packed normals for use in radiosity
+        //// Since this is used in radiosity it must be extended by guard band
+        //m_lambertianOnlyBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, kRadiosityBuffer_MaxMip + 1, false);
+        //m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian1", DXGI_FORMAT_R11G11B10_FLOAT); //TODO: Eventually make HDR
+        //m_lambertianOnlyBundle->CreateRenderTarget(L"Lambertian2", DXGI_FORMAT_R11G11B10_FLOAT);
+        //m_lambertianOnlyBundle->CreateRenderTarget(L"PackedNormals", DXGI_FORMAT_R8G8B8A8_UNORM);
+        //m_lambertianOnlyBundle->Finalise();
 
-        m_radiosityBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
-        m_radiosityBundle->CreateRenderTarget(L"Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
-        m_radiosityBundle->Finalise();
+        //// Create the mip view for the lambertian only buffer. This is used to generate the custom downsample
+        //m_lambertianOnlyBundleMipView = std::make_shared<TextureBundleMipView>(m_lambertianOnlyBundle, kRadiosityBuffer_MaxMip + 1);
 
-        m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
-        m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
-        m_filteredRadiosityBundle->Finalise();
+        //m_radiosityBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        //m_radiosityBundle->CreateRenderTarget(L"Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
+        //m_radiosityBundle->Finalise();
 
-        m_HDRSceneBundle = std::make_shared<RenderTargetBundle>(newWidth, newHeight, 1, 0, false);
-        m_HDRSceneBundle->CreateRenderTarget(L"HDR Scene", DXGI_FORMAT_R16G16B16A16_FLOAT);
-        m_HDRSceneBundle->Finalise();
+        //m_filteredRadiosityBundle = std::make_shared<RenderTargetBundle>(GBuffer->GetWidth(), GBuffer->GetHeight(), 1, 0, false);
+        //m_filteredRadiosityBundle->CreateRenderTarget(L"Filtered Radiosity", DXGI_FORMAT_R16G16B16A16_FLOAT);
+        //m_filteredRadiosityBundle->Finalise();
+
+        //m_HDRSceneBundle = std::make_shared<RenderTargetBundle>(newWidth, newHeight, 1, 0, false);
+        //m_HDRSceneBundle->CreateRenderTarget(L"HDR Scene", DXGI_FORMAT_R16G16B16A16_FLOAT);
+        //m_HDRSceneBundle->Finalise();
     }
 
 
     void Engine::LoadFile(const uint8_t * data, uint64_t byteCount)
     {
-        auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
+        /*auto shaderPipeline = m_shaderManager->GetShaderPipeline(ShaderName::Uber);
         Loader::Ptr loader = std::make_shared<Loader>(m_scene, shaderPipeline);
 
-        loader->LoadFile(data, byteCount);
+        loader->LoadFile(data, byteCount);*/
     }
 
     void Engine::LoadEnvironment(const uint8_t * data, uint64_t byteCount)
@@ -518,10 +520,11 @@ namespace Engine
     bool Engine::RenderGraphics()
     {
         // Clear the scene.
-        D3DClass::Instance()->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
+        D3DClass::Instance()->BeginScene(1.0f, 0.5f, 0.5f, 1.0f);
 
         // Render the deep G-Buffer
 		D3DClass::Instance()->BeginRenderEvent(L"Forward Render");
+		ID3D12GraphicsCommandList* commandList = D3DClass::Instance()->GetCommandList();
 
 		// Render the scene.
 		// This generates our deep G-Buffer
@@ -530,6 +533,12 @@ namespace Engine
 		m_camera->Render(m_scene);
 
 		D3DClass::Instance()->EndRenderEvent();
+
+		// Basic test
+		// Create vertex data and pass it through graphics pipe.
+		m_shaderManager->GetShaderPipeline(ShaderName::PassThrough)->UploadData(commandList);
+		testMesh->Render(commandList);
+
 
         //// Now need to copy depth
         //auto bundle = m_camera->GetRenderTargetBundle();

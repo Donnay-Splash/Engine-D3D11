@@ -33,12 +33,6 @@ using namespace Windows::UI::Xaml::Media;
     ExpandPanel::typeid,
     ref new PropertyMetadata(false));
 
-    DependencyProperty^ ExpandPanel::m_cornerRadiusProperty =
-    DependencyProperty::Register("CornerRadius",
-    WUX::CornerRadius::typeid,
-    ExpandPanel::typeid,
-    nullptr);
-
 ExpandPanel::ExpandPanel()
 {
     InitializeResources();
