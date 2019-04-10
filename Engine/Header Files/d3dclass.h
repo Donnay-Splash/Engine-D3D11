@@ -68,7 +68,7 @@ namespace Engine
 		void CreateCommandList();
 		void CreateSwapChain_HWND(uint32_t screenWidth, uint32_t screenHeight);
 		void CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight);
-		void CreateBackBufferResources();
+		void CreateBackBufferResources(uint32_t screenWidth, uint32_t screenHeight);
 		void ClearResources();
 
 		void WaitForPreviousFrame();
@@ -87,6 +87,9 @@ namespace Engine
 		//Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation> m_userDefinedAnnotation;
 		Microsoft::WRL::ComPtr<IDXGIFactory2> m_factory;
 		Microsoft::WRL::ComPtr<IDXGIAdapter> m_adapter;
+
+		D3D12_VIEWPORT m_viewport;
+		RECT m_scissor;
 
 		// Store all of our command queues
 		std::map<D3D12_COMMAND_LIST_TYPE, std::unique_ptr<CommandQueue>> m_commandQueues;

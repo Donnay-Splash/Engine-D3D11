@@ -38,6 +38,7 @@ namespace Engine
 		psoDesc.GS = CD3DX12_SHADER_BYTECODE(geometryShader.ShaderCode, geometryShader.ShaderLength);
 		// We'll eventually need to make it easier to define and create the permutations of each PSO we want.
 		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+		psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 		psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 		psoDesc.DepthStencilState.DepthEnable = false;
 		psoDesc.DepthStencilState.StencilEnable = false;

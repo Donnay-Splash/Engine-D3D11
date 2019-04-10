@@ -55,8 +55,12 @@ namespace Engine
 		UINT dxgiFactoryFlags = 0;
 #if defined(_DEBUG)
 		Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
+		Microsoft::WRL::ComPtr<ID3D12Debug1> debugController1;
 		Utils::DirectXHelpers::ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 		debugController->EnableDebugLayer();
+
+		Utils::DirectXHelpers::ThrowIfFailed(debugController->QueryInterface(IID_PPV_ARGS(&debugController1)));
+		debugController1->SetEnableGPUBasedValidation(TRUE);
 
 		dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
@@ -191,7 +195,7 @@ namespace Engine
 			swapChainDesc.SampleDesc.Quality = 0;
 
 			// Discard the back buffer contents after presenting.
-			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
 			// Don't set the advanced flags.
 			swapChainDesc.Flags = 0;
@@ -211,7 +215,7 @@ namespace Engine
 			m_swapChain->ResizeBuffers(kBufferCount, screenWidth, screenHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 		}
 
-		CreateBackBufferResources();
+		CreateBackBufferResources(screenWidth, screenHeight);
 	}
 
 	void D3DClass::CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight)
@@ -274,10 +278,10 @@ namespace Engine
 			}
 		}
 
-		CreateBackBufferResources();
+		CreateBackBufferResources(screenWidth, screenHeight);
 	}
 
-	void D3DClass::CreateBackBufferResources()
+	void D3DClass::CreateBackBufferResources(uint32_t screenWidth, uint32_t screenHeight)
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
@@ -295,24 +299,22 @@ namespace Engine
 
 
 		// Eventually come back to this
-
-		//auto backBufferWidth = m_backBufferRT->GetWidth();
-		//auto backBufferHeight = m_backBufferRT->GetHeight();
-		//m_screenSize = { float(backBufferWidth), float(backBufferHeight) };
+		m_screenSize = { float(screenWidth), float(screenHeight) };
 
 		//m_depthBuffer = std::make_shared<DepthBuffer>(backBufferWidth, backBufferHeight, 1, 0, m_device.Get());
 
-		//// Setup the viewport for rendering.
-		//D3D11_VIEWPORT viewport;
-		//viewport.Width = (float)backBufferWidth;
-		//viewport.Height = (float)backBufferHeight;
-		//viewport.MinDepth = 0.0f;
-		//viewport.MaxDepth = 1.0f;
-		//viewport.TopLeftX = 0.0f;
-		//viewport.TopLeftY = 0.0f;
+		// Setup the viewport for rendering.
+		m_viewport.Width = m_screenSize.x;
+		m_viewport.Height = m_screenSize.y;
+		m_viewport.MinDepth = 0.0f;
+		m_viewport.MaxDepth = 1.0f;
+		m_viewport.TopLeftX = 0.0f;
+		m_viewport.TopLeftY = 0.0f;
 
-		//// Create the viewport.
-		//m_deviceContext->RSSetViewports(1, &viewport);
+		// Setup scissor for rendering
+		m_scissor = { 0 };
+		m_scissor.right = screenWidth;
+		m_scissor.bottom = screenHeight;
 	}
 
 	void D3DClass::ClearResources()
@@ -387,6 +389,9 @@ namespace Engine
 		// Clear the back buffer.
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
 		m_commandList->ClearRenderTargetView(rtvHandle, color, 0, nullptr);
+		m_commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+		m_commandList->RSSetViewports(1, &m_viewport);
+		m_commandList->RSSetScissorRects(1, &m_scissor);
 
 		// Clear the depth buffer.
 		//m_commandList->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);

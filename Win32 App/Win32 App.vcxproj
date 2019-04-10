@@ -23,7 +23,7 @@
     <ProjectGuid>{1308DAB2-5449-472C-A305-74D8FC6A14D8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Win32App</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -95,7 +95,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Engine\Built\$(Platform)\$(Configuration)\Engine.lib;$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Engine\Built\$(Platform)\$(Configuration)\Engine.lib;$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;d3d11.lib;d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -111,7 +111,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Engine\Built\$(Platform)\$(Configuration)\Engine.lib;$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Engine\Built\$(Platform)\$(Configuration)\Engine.lib;$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;d3d11.lib;d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -131,7 +131,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Engine\Built\$(Platform)\$(Configuration)\Engine.lib;$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Engine\Built\$(Platform)\$(Configuration)\Engine.lib;$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;d3d11.lib;d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,7 +151,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Engine\Built\$(Platform)\$(Configuration)\Engine.lib;$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Engine\Built\$(Platform)\$(Configuration)\Engine.lib;$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;d3d11.lib;d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

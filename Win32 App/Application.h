@@ -23,9 +23,9 @@ private:
     LPCWSTR m_applicationName;
     HINSTANCE m_hinstance;
     HWND m_hwnd;
-    std::unique_ptr<Engine> m_engine;
+    std::unique_ptr<Engine::Engine> m_engine;
 
-    InputState m_currentInputState;
+    Engine::InputState m_currentInputState;
 };
 
 

@@ -26,12 +26,12 @@ bool Application::Initialize()
     InitializeWindows(screenWidth, screenHeight);
 
     // Create the application wrapper object.
-    m_engine = std::make_unique<Engine>();
+    m_engine = std::make_unique<Engine::Engine>();
 
     // Initialize the application wrapper object.
 
-    EngineCreateOptions createOptions;
-    createOptions.RendererMode = EngineRendererMode::Win32;
+	Engine::EngineCreateOptions createOptions;
+    createOptions.RendererMode = Engine::EngineRendererMode::Win32;
     createOptions.HWND = m_hwnd;
     createOptions.ScreenWidth = screenWidth;
     createOptions.ScreenHeight = screenHeight;
@@ -145,7 +145,7 @@ LRESULT CALLBACK Application::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam
     return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
 
-
+static bool FULL_SCREEN = false;
 void Application::InitializeWindows(int& screenWidth, int& screenHeight)
 {
     WNDCLASSEX wc;
