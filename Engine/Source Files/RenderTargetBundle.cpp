@@ -42,7 +42,7 @@ namespace Engine
             // Push this render target into the vector.
             newBundleElement.RenderTargets.push_back(newRenderTarget);
             // Add render target view to array.
-            m_renderTargetViews[mip][m_count] = newRenderTarget->GetRTV().Get();
+			IMPLEMENT_FOR_DX12(m_renderTargetViews[mip][m_count] = newRenderTarget->GetRTV().Get();)
         }
         m_renderTargets.push_back(newBundleElement);
 
@@ -110,12 +110,12 @@ namespace Engine
         {
             auto texture = pair.RenderTargets[0]->GetTexture(); // Get texture from highest level mip
 
-            texture->UploadData(deviceContext, PipelineStage::Pixel, registerOffset++);
+			IMPLEMENT_FOR_DX12(texture->UploadData(deviceContext, PipelineStage::Pixel, registerOffset++);)
         }
 
         if (m_depthBuffer != nullptr)
         {
-            m_depthBuffer->GetTexture()->UploadData(deviceContext, PipelineStage::Pixel, registerOffset);
+			IMPLEMENT_FOR_DX12(m_depthBuffer->GetTexture()->UploadData(deviceContext, PipelineStage::Pixel, registerOffset);)
         }
         m_bundleSampler->UploadData(deviceContext, 0);
     }

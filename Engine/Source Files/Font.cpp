@@ -92,7 +92,8 @@ namespace Engine
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Font::GetTexture()
     {
-        return m_Texture->GetSRV();
+		IMPLEMENT_FOR_DX12(return m_Texture->GetSRV();)
+		return nullptr;
     }
 
 

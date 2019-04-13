@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <Resources\RenderTarget.h>
+#include "d3dclass.h"
 
 namespace Engine
 {
@@ -7,9 +8,9 @@ namespace Engine
     {
         creationFlags |= TextureCreationFlags::BindRenderTarget;
         m_texture = Texture::CreateTextureArray(nullptr, width, height, arraySize, creationFlags, format);
-		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), NULL, m_renderTargetView.GetAddressOf()));)
-        D3D11_RENDER_TARGET_VIEW_DESC desc;
-        m_renderTargetView->GetDesc(&desc);
+		ID3D12Device* device = D3DClass::Instance()->GetDevice();
+		m_descriptor = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		device->CreateRenderTargetView(m_texture->GetResource(), NULL, m_descriptor->CPUHandle);
     }
 
     RenderTarget::RenderTarget(Texture::Ptr texture, uint32_t creationFlags, uint32_t mipSlice, uint32_t arraySlice)
@@ -18,22 +19,23 @@ namespace Engine
         m_texture = texture;
         bool useSRGB = (creationFlags & TextureCreationFlags::SRGB) != 0;
         auto format = useSRGB ? Utils::DirectXHelpers::MakeSRGB(m_texture->GetFormat()) : m_texture->GetFormat();
-        D3D11_TEXTURE2D_DESC textureDesc;
-        m_texture->GetTexture()->GetDesc(&textureDesc);
+        D3D12_RESOURCE_DESC textureDesc = m_texture->GetResource()->GetDesc();
 
-        EngineAssert(arraySlice < textureDesc.ArraySize);
-        bool isTextureArray = textureDesc.ArraySize > 1;
-        auto rtvDimension = isTextureArray ? D3D11_RTV_DIMENSION_TEXTURE2DARRAY : D3D11_RTV_DIMENSION_TEXTURE2D;
+        EngineAssert(arraySlice < textureDesc.DepthOrArraySize);
+        bool isTextureArray = textureDesc.DepthOrArraySize > 1;
+        D3D12_RTV_DIMENSION rtvDimension = isTextureArray ? D3D12_RTV_DIMENSION_TEXTURE2DARRAY : D3D12_RTV_DIMENSION_TEXTURE2D;
 
         auto maxDimension = std::max(m_texture->GetHeight(), m_texture->GetWidth());
         auto maxMip = textureDesc.MipLevels > 0 ? textureDesc.MipLevels : 1 + static_cast<uint32_t>(log2(maxDimension));
         EngineAssert(mipSlice <= maxMip);
 
-        CD3D11_RENDER_TARGET_VIEW_DESC desc(rtvDimension, format);
+		D3D12_RENDER_TARGET_VIEW_DESC desc = {};
+		desc.ViewDimension = rtvDimension;
+		desc.Format = format;
         
         if (isTextureArray)
         {
-            desc.Texture2DArray.ArraySize = textureDesc.ArraySize;
+            desc.Texture2DArray.ArraySize = textureDesc.DepthOrArraySize;
             desc.Texture2DArray.FirstArraySlice = arraySlice;
             desc.Texture2DArray.MipSlice = mipSlice;
         }
@@ -42,16 +44,24 @@ namespace Engine
             desc.Texture2D.MipSlice = mipSlice;
         }
 
-		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), &desc, m_renderTargetView.GetAddressOf()));)
+		ID3D12Device* device = D3DClass::Instance()->GetDevice();
+		m_descriptor = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		device->CreateRenderTargetView(m_texture->GetResource(), &desc, m_descriptor->CPUHandle);
     }
 
-    RenderTarget::RenderTarget(ID3D11Texture2D* texture, uint32_t creationFlags)
+    RenderTarget::RenderTarget(ID3D12Resource* texture, uint32_t creationFlags)
     {
         m_texture = Texture::CreateTextureFromResource(texture, creationFlags);
-        bool useSRGB = (creationFlags & TextureCreationFlags::SRGB) != 0;
+
+		// TODO: Re-implement SRGB for DX12
+        /*bool useSRGB = (creationFlags & TextureCreationFlags::SRGB) != 0;
         auto format = useSRGB ? Utils::DirectXHelpers::MakeSRGB(m_texture->GetFormat()) : m_texture->GetFormat();
-        CD3D11_RENDER_TARGET_VIEW_DESC desc(D3D11_RTV_DIMENSION_TEXTURE2D, format);
-		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateRenderTargetView(m_texture->GetTexture().Get(), &desc, m_renderTargetView.GetAddressOf()));)
+        D3D12_RENDER_TARGET_VIEW_DESC desc;
+		desc.Format = format;*/
+
+		ID3D12Device* device = D3DClass::Instance()->GetDevice();
+		m_descriptor = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		device->CreateRenderTargetView(m_texture->GetResource(), nullptr, m_descriptor->CPUHandle);
     }
 
     RenderTarget::~RenderTarget()

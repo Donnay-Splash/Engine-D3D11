@@ -6,6 +6,8 @@
 #include "EngineCreateOptions.h"
 #include "RenderTargetBundle.h"
 #include "CommandQueue.h"
+#include "DescriptorAllocator.h"
+#include "Resources\RenderTarget.h"
 
 namespace Engine
 {
@@ -60,6 +62,9 @@ namespace Engine
 		void WaitForFenceCPUBlocking(uint64_t fenceValue) { return GetCommandQueue(D3D12_COMMAND_LIST_TYPE(fenceValue >> 56))->WaitForFenceCPUBlocking(fenceValue); }
 		void WaitForIdle() { for (auto &commandQueue : m_commandQueues) { commandQueue.second->WaitForIdle(); } }
 
+		DescriptorPair* AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type) { return m_DescriptorHeaps[type]->AllocateDescriptor(); }
+		void FreeDescriptor(DescriptorPair* descriptor);
+
 	private:
 		void Initialize_Internal(EngineCreateOptions createOptions);
 		void GetAdapterInformation();
@@ -81,9 +86,6 @@ namespace Engine
 		Microsoft::WRL::ComPtr<ID3D12Device4> m_device;
 		Microsoft::WRL::ComPtr<ID3D12DebugDevice1> m_debugDevice;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-		UINT m_rtvDescriptorSize;
-		//Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deviceContext;
 		//Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation> m_userDefinedAnnotation;
 		Microsoft::WRL::ComPtr<IDXGIFactory2> m_factory;
 		Microsoft::WRL::ComPtr<IDXGIAdapter> m_adapter;
@@ -94,6 +96,9 @@ namespace Engine
 		// Store all of our command queues
 		std::map<D3D12_COMMAND_LIST_TYPE, std::unique_ptr<CommandQueue>> m_commandQueues;
 
+		// Store all descriptor heaps.
+		std::map<D3D12_DESCRIPTOR_HEAP_TYPE, std::unique_ptr<DescriptorAllocator>> m_DescriptorHeaps;
+
 		UINT m_frameIndex;
 		HANDLE m_fenceEvent;
 		Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;
@@ -101,7 +106,7 @@ namespace Engine
 
 		// TODO: Eventually put this back into a DX12 compatible class
 		static const UINT kBufferCount = 2;
-		Microsoft::WRL::ComPtr<ID3D12Resource> m_renderTargets[kBufferCount];
+		std::unique_ptr<RenderTarget> m_renderTargets[kBufferCount];
 
 		//RenderTarget::Ptr m_backBufferRT;
 		DepthBuffer::Ptr m_depthBuffer;

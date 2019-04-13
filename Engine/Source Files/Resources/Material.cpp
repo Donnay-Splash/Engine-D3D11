@@ -87,7 +87,7 @@ namespace Engine
             auto texture = m_textures[i];
             if (texture)
             {
-                texture->UploadData(deviceContext, PipelineStage::Pixel, i);
+				IMPLEMENT_FOR_DX12(texture->UploadData(deviceContext, PipelineStage::Pixel, i);)
             }
         }
     }

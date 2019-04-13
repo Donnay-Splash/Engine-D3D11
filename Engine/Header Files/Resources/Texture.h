@@ -1,6 +1,7 @@
 #pragma once
 #include <Utils\Loader\Data.h>
 #include <Engine\Build\pch.h>
+#include "ShaderResource.h"
 
 namespace Engine
 {
@@ -18,16 +19,15 @@ namespace Engine
     }
 
     // Texture class. Currently only supports 2D textures and arrays.
-    class Texture
+    class Texture : public ShaderResource, GPUResource
     {
     public:
-
         using Ptr = std::shared_ptr<Texture>;
 
         static Texture::Ptr CreateTexture(void* data, uint32_t width, uint32_t height, uint32_t flags, DXGI_FORMAT format);
         static Texture::Ptr CreateTextureArray(void* data, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t flags, DXGI_FORMAT format);
         // static Texture::Ptr CreateCubeMapTexture(); // Not yet implemented
-        static Texture::Ptr CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags);
+        static Texture::Ptr CreateTextureFromResource(ID3D12Resource* texture, uint32_t flags);
         static Texture::Ptr CreateTextureFromFile(std::wstring filename);
         static Texture::Ptr CreateImportedTexture(const Utils::Loader::TextureData& importedData);
         static Texture::Ptr CreateTextureFromMemory(const uint8_t* data, uint64_t byteCount, bool generateMips = false);
@@ -35,12 +35,9 @@ namespace Engine
         // Creates a new texture with exactly the same layout as the given texture
         static Texture::Ptr CreateIdenticalTexture(Texture::Ptr const texture);
 
-        void UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister);
+        void UploadData(ID3D12GraphicsCommandList* commandList, uint32_t textureRegister);
 
         DXGI_FORMAT GetFormat() const { return m_format; }
-
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> GetTexture() { return m_texture; }
-        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV() { return m_srv; }
 
         uint32_t GetHeight() const { return m_height; }
         uint32_t GetWidth() const { return m_width; }
@@ -54,20 +51,18 @@ namespace Engine
         // static methods. Thus the constructors are kept protected.
 
         // Create a texture from set of parameters
-        Texture(void* data, D3D11_TEXTURE2D_DESC desc);
+        Texture(void* data, D3D12_RESOURCE_DESC desc);
         // Create texture from D3D11 resource.
-        Texture(ID3D11Texture2D* texture, uint32_t flags);
+        Texture(ID3D12Resource* texture, uint32_t flags);
         // Create a texture from a file
         Texture(const wchar_t* filename);
         // Create a texture from memory
         Texture(const uint8_t* data, uint64_t byteCount);
         // Create a texture from memory and generates mips. Mirrors what is done in DirectXTK
-        Texture(ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount);
+        Texture(ID3D12GraphicsCommandList* context, const uint8_t* data, uint64_t byteCount);
         Texture(const Texture&) = delete;
 
     private:
-        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_srv;
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> m_texture;
         DXGI_FORMAT m_format;
 
         uint32_t m_height;

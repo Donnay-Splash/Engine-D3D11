@@ -70,7 +70,7 @@ namespace Engine
         if (m_environmentMap != nullptr)
         {
             lightBuffer.envMapMipLevels = static_cast<float>(m_environmentMap->GetMipLevels());
-            m_environmentMap->UploadData(deviceContext, PipelineStage::Pixel, kEnvironmentMapRegister);
+            IMPLEMENT_FOR_DX12(m_environmentMap->UploadData(deviceContext, PipelineStage::Pixel, kEnvironmentMapRegister);)
             lightBuffer.envMapEnabled = 1.0f;
         }
         // Render and submit shadow map data

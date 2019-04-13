@@ -192,6 +192,12 @@
     <ClCompile Include="..\Source Files\CommandQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source Files\DescriptorAllocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source Files\Resources\ShaderResource.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Header Files\d3dclass.h">
@@ -355,6 +361,12 @@
     </ClInclude>
     <ClInclude Include="..\Header Files\CommandQueue.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\DescriptorAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Header Files\Resources\ShaderResource.h">
+      <Filter>Header Files\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

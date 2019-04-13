@@ -140,14 +140,26 @@ namespace Engine
 
 	void D3DClass::CreateDescriptorHeaps()
 	{
-		// Will need to extend the count of descriptors for allocation of other render targets.
-		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-		rtvHeapDesc.NumDescriptors = kBufferCount;
-		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		Utils::DirectXHelpers::ThrowIfFailed(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
+		// Size's are likely too small or big for these. Need to find more suitable values
+		m_DescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV] = std::make_unique<DescriptorAllocator>(20, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		m_DescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_RTV] = std::make_unique<DescriptorAllocator>(20, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		m_DescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_DSV] = std::make_unique<DescriptorAllocator>(20, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	}
 
-		m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	void D3DClass::FreeDescriptor(DescriptorPair* descriptor)
+	{
+		bool freedDescriptor = false;
+		for (auto& heap : m_DescriptorHeaps)
+		{
+			if (heap.second->BelongsToHeap(descriptor))
+			{
+				heap.second->FreeDescriptor(descriptor);
+				freedDescriptor = true;
+				break;
+			}
+		}
+
+		EngineAssert(freedDescriptor);
 	}
 
 	void D3DClass::CreateCommandList()
@@ -283,20 +295,17 @@ namespace Engine
 
 	void D3DClass::CreateBackBufferResources(uint32_t screenWidth, uint32_t screenHeight)
 	{
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
-
 		// Create an RTV for each frame
 		for (int n = 0; n < kBufferCount; ++n)
 		{
-			Utils::DirectXHelpers::ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_renderTargets[n])));
+			Microsoft::WRL::ComPtr<ID3D12Resource> backBuffer;
+			Utils::DirectXHelpers::ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&backBuffer)));
 			std::wstring name = L"BackBuffer:" + std::to_wstring(n);
-			m_renderTargets[n]->SetName(name.c_str());
-			m_device->CreateRenderTargetView(m_renderTargets[n].Get(), nullptr, rtvHandle);
-			rtvHandle.Offset(1, m_rtvDescriptorSize);
+			backBuffer->SetName(name.c_str());
+			m_renderTargets[n] = std::make_unique<RenderTarget>(backBuffer.Get(), 0);
 		}
 
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-
 
 		// Eventually come back to this
 		m_screenSize = { float(screenWidth), float(screenHeight) };
@@ -377,7 +386,7 @@ namespace Engine
 		m_commandList = GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandList();
 
 		// Transition the back buffer back to render target
-		m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+		m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex]->GetTexture()->GetResource(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 		float color[4];
 		// Setup the color to clear the buffer to.
@@ -387,9 +396,8 @@ namespace Engine
 		color[3] = alpha;
 
 		// Clear the back buffer.
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-		m_commandList->ClearRenderTargetView(rtvHandle, color, 0, nullptr);
-		m_commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+		m_commandList->ClearRenderTargetView(m_renderTargets[m_frameIndex]->GetCPUHandle(), color, 0, nullptr);
+		m_commandList->OMSetRenderTargets(1, &m_renderTargets[m_frameIndex]->GetCPUHandle(), false, nullptr);
 		m_commandList->RSSetViewports(1, &m_viewport);
 		m_commandList->RSSetScissorRects(1, &m_scissor);
 
@@ -401,7 +409,7 @@ namespace Engine
 	void D3DClass::EndScene()
 	{
 		// Transition the back-buffer to present 
-		m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+		m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex]->GetTexture()->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
 		// Execute our command list
 		GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->ExecuteCommandList(m_commandList);

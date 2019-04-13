@@ -169,6 +169,7 @@
     <ClCompile Include="..\Header Files\MeshMaker\MeshMaker.cpp" />
     <ClCompile Include="..\Source Files\CommandQueue.cpp" />
     <ClCompile Include="..\Source Files\d3dclass.cpp" />
+    <ClCompile Include="..\Source Files\DescriptorAllocator.cpp" />
     <ClCompile Include="..\Source Files\DX11Impl.cpp" />
     <ClCompile Include="..\Source Files\DX12Impl.cpp" />
     <ClCompile Include="..\Source Files\Engine.cpp" />
@@ -201,6 +202,7 @@
     <ClCompile Include="..\Source Files\Resources\Sampler.cpp" />
     <ClCompile Include="..\Source Files\Resources\Shader.cpp" />
     <ClCompile Include="..\Source Files\Resources\ShaderPipeline.cpp" />
+    <ClCompile Include="..\Source Files\Resources\ShaderResource.cpp" />
     <ClCompile Include="..\Source Files\Resources\Texture.cpp" />
     <ClCompile Include="..\Source Files\Resources\TextureBundleMipView.cpp" />
     <ClCompile Include="..\Source Files\Resources\TextureMipView.cpp" />
@@ -237,6 +239,7 @@
     <ClInclude Include="..\Header Files\Font.h" />
     <ClInclude Include="..\Header Files\FontShader.h" />
     <ClInclude Include="..\Header Files\fpsclass.h" />
+    <ClInclude Include="..\Header Files\DescriptorAllocator.h" />
     <ClInclude Include="..\Header Files\InputManager.h" />
     <ClInclude Include="..\Header Files\KeyCodes.h" />
     <ClInclude Include="..\Header Files\LightManager.h" />
@@ -267,6 +270,7 @@
     <ClInclude Include="..\Header Files\Resources\Sampler.h" />
     <ClInclude Include="..\Header Files\Resources\Shader.h" />
     <ClInclude Include="..\Header Files\Resources\ShaderPipeline.h" />
+    <ClInclude Include="..\Header Files\Resources\ShaderResource.h" />
     <ClInclude Include="..\Header Files\Resources\Texture.h" />
     <ClInclude Include="..\Header Files\Resources\TextureBundleMipView.h" />
     <ClInclude Include="..\Header Files\Resources\TextureMipView.h" />

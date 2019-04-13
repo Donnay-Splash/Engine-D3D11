@@ -35,105 +35,115 @@ namespace Engine
             format = DXGI_FORMAT_R24G8_TYPELESS;
         }
 
-        D3D11_TEXTURE2D_DESC desc;
+        D3D12_RESOURCE_DESC desc;
         SecureZeroMemory(&desc, sizeof(desc));
-        desc.Height = height;
+		desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		desc.Height = height;
         desc.Width = width;
         desc.MipLevels = mipLevels;
-        desc.ArraySize = arraySize;
+        desc.DepthOrArraySize = arraySize;
         desc.Format = format;
         desc.SampleDesc.Count = 1;
         desc.SampleDesc.Quality = 0;
-        desc.Usage = D3D11_USAGE_DEFAULT;
-        desc.MiscFlags = 0;
-        desc.BindFlags = 0;
 
-        if (bindToShader)
+        if (!bindToShader)
         {
-            desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+			// Do we want this?
+            desc.Flags |= D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
         }
         if (bindToRenderTarget)
         {
-            desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+            desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
         }
         if (bindDepthStencil)
         {
-            desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
+            desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
         }
 
         // Required to use new since constructor is not accessible to std::make_shared
         return std::shared_ptr<Texture>(new Texture(data, desc));
     }
 
-    Texture::Texture(void* data, D3D11_TEXTURE2D_DESC desc) :
-        m_height(desc.Height), m_width(desc.Width), m_format(desc.Format), m_arraySize(desc.ArraySize), m_mipLevels(desc.MipLevels)
+    Texture::Texture(void* data, D3D12_RESOURCE_DESC desc) : GPUResource(D3D12_RESOURCE_STATE_COMMON),
+        m_height(desc.Height), m_width(desc.Width), m_format(desc.Format), m_arraySize(desc.DepthOrArraySize), m_mipLevels(desc.MipLevels)
     {
-        D3D11_SUBRESOURCE_DATA* initData = nullptr;
-        // Initialization data passed in
+
+		ID3D12Device* device = D3DClass::Instance()->GetDevice();
+		Utils::DirectXHelpers::ThrowIfFailed(device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&desc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(m_resource.GetAddressOf())));
+
         if (data != nullptr)
         {
             uint32_t bytesPerPixel = static_cast<uint32_t>(Utils::DirectXHelpers::BitsPerPixel(m_format)) / 8;
-            D3D11_SUBRESOURCE_DATA subresourceData;
-            subresourceData.pSysMem = data;
-            subresourceData.SysMemPitch = m_width * bytesPerPixel;
-            subresourceData.SysMemSlicePitch = m_width * m_height * bytesPerPixel;
-            initData = &subresourceData;
+			D3D12_SUBRESOURCE_DATA subresourceData;
+			subresourceData.pData = data;
+			subresourceData.RowPitch = m_width * bytesPerPixel;
+			subresourceData.SlicePitch = subresourceData.RowPitch * m_height;
+
+			D3DClass::Instance()->UploadSubresourceData(GetRequiredIntermediateSize(m_resource.Get(), 0, 1), &subresourceData, m_resource.Get(), m_usageState);
         }
 
-		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateTexture2D(&desc, initData, m_texture.GetAddressOf()));)
-
-        if ((desc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0)
+		// If not denying shader acces then create SRV
+        if ((desc.Flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE) == 0)
         {
+			m_descriptor = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
             if (desc.Format == DXGI_FORMAT_R24G8_TYPELESS)
             {
                 // Need to use separate format when binding depth for reading in shader
-                D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+                D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
                 srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-                if (desc.ArraySize > 1)
+                if (desc.DepthOrArraySize > 1)
                 {
-                    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-                    srvDesc.Texture2DArray.ArraySize = desc.ArraySize;
+                    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+                    srvDesc.Texture2DArray.ArraySize = desc.DepthOrArraySize;
                     srvDesc.Texture2DArray.FirstArraySlice = 0;
                     srvDesc.Texture2DArray.MipLevels = desc.MipLevels;
                     srvDesc.Texture2DArray.MostDetailedMip = 0;
                 }
                 else
                 {
-                    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+                    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
                     srvDesc.Texture2D.MipLevels = desc.MipLevels;
                     srvDesc.Texture2D.MostDetailedMip = 0;
                 }
-				IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_srv.GetAddressOf()));)
+				device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_descriptor->CPUHandle);
             }
             else
             {
-				IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));)
+				device->CreateShaderResourceView(m_resource.Get(), nullptr, m_descriptor->CPUHandle);
             }
         }
     }
 
-    Texture::Ptr Texture::CreateTextureFromResource(ID3D11Texture2D* texture, uint32_t flags)
+    Texture::Ptr Texture::CreateTextureFromResource(ID3D12Resource* texture, uint32_t flags)
     {
         return std::shared_ptr<Texture>(new Texture(texture, flags));
     }
 
     // Create texture from D3D11 resource.
-    Texture::Texture(ID3D11Texture2D* texture, uint32_t flags)
+    Texture::Texture(ID3D12Resource* texture, uint32_t flags) : GPUResource(D3D12_RESOURCE_STATE_COMMON)
     {
-        m_texture = texture;
-        D3D11_TEXTURE2D_DESC textureDesc;
-        m_texture->GetDesc(&textureDesc);
+        m_resource = texture;
+		D3D12_RESOURCE_DESC textureDesc = m_resource->GetDesc();
 
         m_height = textureDesc.Height;
         m_width = textureDesc.Width;
         m_format = textureDesc.Format;
-        m_arraySize = textureDesc.ArraySize;
+        m_arraySize = textureDesc.DepthOrArraySize;
         m_mipLevels = textureDesc.MipLevels;
-        bool bindToShader = (textureDesc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0;
+        bool bindToShader = (textureDesc.Flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE) == 0;
 
         if (bindToShader)
         {
-			IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateShaderResourceView(m_texture.Get(), nullptr, m_srv.GetAddressOf()));)
+			ID3D12Device* device = D3DClass::Instance()->GetDevice();
+			m_descriptor = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			device->CreateShaderResourceView(m_resource.Get(), nullptr, m_descriptor->CPUHandle);
         }
     }
 
@@ -143,47 +153,51 @@ namespace Engine
     }
 
     // Create a texture from a file
-    Texture::Texture(const wchar_t* filename)
+    Texture::Texture(const wchar_t* filename) : GPUResource(D3D12_RESOURCE_STATE_COMMON)
     {
-        // Add support for additional file types.
-        ID3D11Resource* subresource = nullptr;
-		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, filename, &subresource, m_srv.GetAddressOf()));)
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-        m_srv->GetDesc(&srvDesc);
-        m_format = srvDesc.Format;
+		// Implement for Texture TK 12
+		EngineAssert(false);
 
-        switch (srvDesc.ViewDimension)
-        {
-        case D3D11_SRV_DIMENSION_TEXTURE2D:
-        {
-            Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
-            Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
-            D3D11_TEXTURE2D_DESC texDesc;
-            tex2D->GetDesc(&texDesc);
-            m_height = texDesc.Height;
-            m_width = texDesc.Width;
-            m_arraySize = texDesc.ArraySize;
-            m_mipLevels = texDesc.MipLevels;
-            break;
-        }
-        case D3D11_SRV_DIMENSION_TEXTURECUBE:
-        {
-            Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
-            Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
-            D3D11_TEXTURE2D_DESC texDesc;
-            tex2D->GetDesc(&texDesc);
-            m_height = texDesc.Height;
-            m_width = texDesc.Width;
-            m_arraySize = texDesc.ArraySize;
-            m_mipLevels = texDesc.MipLevels;
-            m_isCube = true;
-            break;
-        }
-        default:
-            // Unexpected view dimension received
-            EngineAssert(false);
-            break;
-        }
+
+        // Add support for additional file types.
+  //      ID3D11Resource* subresource = nullptr;
+		//IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, filename, &subresource, m_srv.GetAddressOf()));)
+  //      D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+  //      m_srv->GetDesc(&srvDesc);
+  //      m_format = srvDesc.Format;
+
+  //      switch (srvDesc.ViewDimension)
+  //      {
+  //      case D3D11_SRV_DIMENSION_TEXTURE2D:
+  //      {
+  //          Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+  //          Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+		//	D3D12_RESOURCE_DESC texDesc;
+  //          tex2D->GetDesc(&texDesc);
+  //          m_height = texDesc.Height;
+  //          m_width = texDesc.Width;
+  //          m_arraySize = texDesc.DepthOrArraySize;
+  //          m_mipLevels = texDesc.MipLevels;
+  //          break;
+  //      }
+  //      case D3D11_SRV_DIMENSION_TEXTURECUBE:
+  //      {
+  //          Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+  //          Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+		//	D3D12_RESOURCE_DESC texDesc;
+  //          tex2D->GetDesc(&texDesc);
+  //          m_height = texDesc.Height;
+  //          m_width = texDesc.Width;
+  //          m_arraySize = texDesc.DepthOrArraySize;
+  //          m_mipLevels = texDesc.MipLevels;
+  //          m_isCube = true;
+  //          break;
+  //      }
+  //      default:
+  //          // Unexpected view dimension received
+  //          EngineAssert(false);
+  //          break;
+  //      }
     }
 
     Texture::Ptr Texture::CreateImportedTexture(const Utils::Loader::TextureData& importedTextureData)
@@ -195,99 +209,107 @@ namespace Engine
     {
         if (generateMips)
         {
-			IMPLEMENT_FOR_DX12(return std::shared_ptr<Texture>(new Texture(d3d->GetDevice(), d3d->GetDeviceContext(), data, byteCount));)
+			// TODO: RE-implement for Dx12
+			EngineAssert(false);
+			//return std::shared_ptr<Texture>(new Texture(d3d->GetDeviceContext(), data, byteCount));
         }
         else
         {
-			IMPLEMENT_FOR_DX12(return std::shared_ptr<Texture>(new Texture(d3d->GetDevice(), data, byteCount));)
+			return std::shared_ptr<Texture>(new Texture(data, byteCount));
         }
 		return nullptr;
     }
 
     // Create a texture from imported texture data
-    Texture::Texture(const uint8_t* data, uint64_t byteCount)
+    Texture::Texture(const uint8_t* data, uint64_t byteCount) : GPUResource(D3D12_RESOURCE_STATE_COMMON)
     {
-        ID3D11Resource* subresource = nullptr;
-		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, data, byteCount, &subresource, m_srv.GetAddressOf()));)
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-        m_srv->GetDesc(&srvDesc);
-        m_format = srvDesc.Format;
+		// Implement for Texture TK 12
+		EngineAssert(false);
 
-        switch (srvDesc.ViewDimension)
-        {
-        case D3D11_SRV_DIMENSION_TEXTURE2D:
-        {
-            Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
-            Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
-            D3D11_TEXTURE2D_DESC texDesc;
-            tex2D->GetDesc(&texDesc);
-            m_height = texDesc.Height;
-            m_width = texDesc.Width;
-            m_arraySize = texDesc.ArraySize;
-            m_mipLevels = texDesc.MipLevels;
-            break;
-        }
-        case D3D11_SRV_DIMENSION_TEXTURECUBE:
-        {
-            Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
-            Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
-            D3D11_TEXTURE2D_DESC texDesc;
-            tex2D->GetDesc(&texDesc);
-            m_height = texDesc.Height;
-            m_width = texDesc.Width;
-            m_arraySize = texDesc.ArraySize;
-            m_mipLevels = texDesc.MipLevels;
-            m_isCube = true;
-            break;
-        }
-        default:
-            // Unexpected view dimension received
-            EngineAssert(false);
-            break;
-        }
+  //      ID3D11Resource* subresource = nullptr;
+		//IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, data, byteCount, &subresource, m_srv.GetAddressOf()));)
+  //      D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+  //      m_srv->GetDesc(&srvDesc);
+  //      m_format = srvDesc.Format;
+
+  //      switch (srvDesc.ViewDimension)
+  //      {
+  //      case D3D11_SRV_DIMENSION_TEXTURE2D:
+  //      {
+  //          Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+  //          Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+		//	D3D12_RESOURCE_DESC texDesc;
+  //          tex2D->GetDesc(&texDesc);
+  //          m_height = texDesc.Height;
+  //          m_width = texDesc.Width;
+  //          m_arraySize = texDesc.DepthOrArraySize;
+  //          m_mipLevels = texDesc.MipLevels;
+  //          break;
+  //      }
+  //      case D3D11_SRV_DIMENSION_TEXTURECUBE:
+  //      {
+  //          Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+  //          Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+		//	D3D12_RESOURCE_DESC texDesc;
+  //          tex2D->GetDesc(&texDesc);
+  //          m_height = texDesc.Height;
+  //          m_width = texDesc.Width;
+  //          m_arraySize = texDesc.DepthOrArraySize;
+  //          m_mipLevels = texDesc.MipLevels;
+  //          m_isCube = true;
+  //          break;
+  //      }
+  //      default:
+  //          // Unexpected view dimension received
+  //          EngineAssert(false);
+  //          break;
+  //      }
     }
 
     // Create a texture from imported texture data and auto generate mips
-    Texture::Texture(ID3D11DeviceContext* context, const uint8_t* data, uint64_t byteCount)
+    Texture::Texture(ID3D12GraphicsCommandList* commandLsit, const uint8_t* data, uint64_t byteCount) : GPUResource(D3D12_RESOURCE_STATE_COMMON)
     {
-        ID3D11Resource* subresource = nullptr;
-		IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, context, data, byteCount, &subresource, m_srv.GetAddressOf()));)
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-        m_srv->GetDesc(&srvDesc);
-        m_format = srvDesc.Format;
+		// Implement for Texture TK 12
+		EngineAssert(false);
 
-        switch (srvDesc.ViewDimension)
-        {
-        case D3D11_SRV_DIMENSION_TEXTURE2D:
-        {
-            Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
-            Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
-            D3D11_TEXTURE2D_DESC texDesc;
-            tex2D->GetDesc(&texDesc);
-            m_height = texDesc.Height;
-            m_width = texDesc.Width;
-            m_arraySize = texDesc.ArraySize;
-            m_mipLevels = texDesc.MipLevels;
-            break;
-        }
-        case D3D11_SRV_DIMENSION_TEXTURECUBE:
-        {
-            Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
-            Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
-            D3D11_TEXTURE2D_DESC texDesc;
-            tex2D->GetDesc(&texDesc);
-            m_height = texDesc.Height;
-            m_width = texDesc.Width;
-            m_arraySize = texDesc.ArraySize;
-            m_mipLevels = texDesc.MipLevels;
-            m_isCube = true;
-            break;
-        }
-        default:
-            // Unexpected view dimension received
-            EngineAssert(false);
-            break;
-        }
+  //      ID3D11Resource* subresource = nullptr;
+		//IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromMemory(device, context, data, byteCount, &subresource, m_srv.GetAddressOf()));)
+  //      D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+  //      m_srv->GetDesc(&srvDesc);
+  //      m_format = srvDesc.Format;
+
+  //      switch (srvDesc.ViewDimension)
+  //      {
+  //      case D3D11_SRV_DIMENSION_TEXTURE2D:
+  //      {
+  //          Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+  //          Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+		//	D3D12_RESOURCE_DESC texDesc;
+  //          tex2D->GetDesc(&texDesc);
+  //          m_height = texDesc.Height;
+  //          m_width = texDesc.Width;
+  //          m_arraySize = texDesc.DepthOrArraySize;
+  //          m_mipLevels = texDesc.MipLevels;
+  //          break;
+  //      }
+  //      case D3D11_SRV_DIMENSION_TEXTURECUBE:
+  //      {
+  //          Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2D;
+  //          Utils::DirectXHelpers::ThrowIfFailed(subresource->QueryInterface(tex2D.GetAddressOf()));
+		//	D3D12_RESOURCE_DESC texDesc;
+  //          tex2D->GetDesc(&texDesc);
+  //          m_height = texDesc.Height;
+  //          m_width = texDesc.Width;
+  //          m_arraySize = texDesc.DepthOrArraySize;
+  //          m_mipLevels = texDesc.MipLevels;
+  //          m_isCube = true;
+  //          break;
+  //      }
+  //      default:
+  //          // Unexpected view dimension received
+  //          EngineAssert(false);
+  //          break;
+  //      }
     }
 
     Texture::Ptr Texture::CreateIdenticalTexture(Texture::Ptr const texture)
@@ -295,16 +317,8 @@ namespace Engine
         return CreateTextureArray(nullptr, texture->m_width, texture->m_height, texture->m_arraySize, TextureCreationFlags::BindShaderResource, texture->m_format);
     }
 
-    void Texture::UploadData(ID3D11DeviceContext* deviceContext, uint32_t pipelineStage, uint32_t textureRegister)
+    void Texture::UploadData(ID3D12GraphicsCommandList* commandList, uint32_t textureRegister)
     {
-        if (pipelineStage & PipelineStage::Pixel)
-        {
-            deviceContext->PSSetShaderResources(textureRegister, 1, m_srv.GetAddressOf());
-        }
-
-        if (pipelineStage & PipelineStage::Vertex)
-        {
-            deviceContext->VSSetShaderResources(textureRegister, 1, m_srv.GetAddressOf());
-        }
+		commandList->SetGraphicsRootShaderResourceView(textureRegister, m_resource->GetGPUVirtualAddress());
     }
 }
