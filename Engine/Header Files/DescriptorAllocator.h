@@ -13,7 +13,7 @@ namespace Engine
 	{
 	public:
 		DescriptorAllocator(UINT descriptorCount, D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
-		~DescriptorAllocator();
+		~DescriptorAllocator() {}
 
 		DescriptorPair* AllocateDescriptor();
 		void FreeDescriptor(DescriptorPair*);

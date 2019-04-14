@@ -19,7 +19,7 @@ namespace Engine
     }
 
     // Texture class. Currently only supports 2D textures and arrays.
-    class Texture : public ShaderResource, GPUResource
+    class Texture : public ShaderResource, public GPUResource
     {
     public:
         using Ptr = std::shared_ptr<Texture>;
@@ -57,9 +57,7 @@ namespace Engine
         // Create a texture from a file
         Texture(const wchar_t* filename);
         // Create a texture from memory
-        Texture(const uint8_t* data, uint64_t byteCount);
-        // Create a texture from memory and generates mips. Mirrors what is done in DirectXTK
-        Texture(ID3D12GraphicsCommandList* context, const uint8_t* data, uint64_t byteCount);
+        Texture(const uint8_t* data, uint64_t byteCount, bool generateMips = false);
         Texture(const Texture&) = delete;
 
     private:

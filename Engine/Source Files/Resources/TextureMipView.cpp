@@ -8,9 +8,8 @@ namespace Engine
         m_mipLevels(mipLevels), m_currentMip(0), m_texture(texture)
     {
         EngineAssert(m_texture != nullptr);
-        auto d3dTex = m_texture->GetTexture();
-        D3D11_TEXTURE2D_DESC texDesc;
-        d3dTex->GetDesc(&texDesc);
+        auto d3dTex = m_texture->GetResource();
+        D3D12_RESOURCE_DESC texDesc = d3dTex->GetDesc();
 
         uint32_t textureMipCount = texDesc.MipLevels;
         EngineAssert(m_mipLevels <= textureMipCount);
