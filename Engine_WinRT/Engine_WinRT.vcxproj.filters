@@ -19,9 +19,9 @@
     <ClInclude Include="SceneElementCX.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Page Include="EngineComponent.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="EngineComponent.xaml" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

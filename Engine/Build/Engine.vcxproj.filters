@@ -400,7 +400,6 @@
     <None Include="..\Shaders\texture.vs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="packages.config" />
     <None Include="..\Shaders\Globals_ps.hlsl">
       <Filter>Shader Files</Filter>
     </None>
@@ -444,6 +443,7 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="..\Shaders\EnvironmentLighting.hlsl" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shaders\Uber.ps.hlsl">
