@@ -10,7 +10,7 @@ namespace Engine
         using Ptr = std::shared_ptr<ShadowMapCamera>;
         ShadowMapCamera(const ShadowMapCamera&) = delete;
 
-        void Render(Scene::Ptr scene, Light::Ptr light, ShaderPipeline::Ptr shadowMapPipeline);
+        void Render(ID3D12GraphicsCommandList* commandList, Scene::Ptr scene, Light::Ptr light, ShaderPipeline::Ptr shadowMapPipeline);
         Utils::Maths::Matrix GetWorldToProjectedLightSpaceTransform() const { return m_worldToProjectedLightSpace; }
 
     private:

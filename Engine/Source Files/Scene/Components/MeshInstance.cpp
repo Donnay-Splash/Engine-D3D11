@@ -47,7 +47,7 @@ namespace Engine
         }
     }
 
-    void MeshInstance::Render(ShaderPipeline::Ptr shaderOverride /*= nullptr*/) const
+    void MeshInstance::Render(ID3D12GraphicsCommandList* commandList, ShaderPipeline::Ptr shaderOverride /*= nullptr*/) const
     {
         auto sceneNode = GetSceneNode();
         auto transform = sceneNode->GetWorldTransform();
@@ -56,15 +56,15 @@ namespace Engine
 
         m_objectConstants->SetData({ transform, transform * worldToCameraTransform, m_prevTransform * prevWorldToCameraTransform});
 		IMPLEMENT_FOR_DX12(m_objectConstants->UploadData(deviceContext);)
-        IMPLEMENT_FOR_DX12(m_material->Render(deviceContext);)
+        m_material->Render(commandList);
         if (shaderOverride != nullptr)
         {
-			IMPLEMENT_FOR_DX12(shaderOverride->UploadData(deviceContext);)
+			shaderOverride->UploadData(commandList);
         }
 
         m_prevTransform = transform;
 
-		IMPLEMENT_FOR_DX12(m_mesh->Render(deviceContext);)
+		m_mesh->Render(commandList);
     }
 
     void MeshInstance::SetMaterial(Material::Ptr material)

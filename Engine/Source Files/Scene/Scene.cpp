@@ -45,9 +45,9 @@ namespace Engine
         }
     }
 
-    void Scene::Render(ShaderPipeline::Ptr shaderOverride /*= nullptr*/)
+    void Scene::Render(ID3D12GraphicsCommandList* commandList, ShaderPipeline::Ptr shaderOverride /*= nullptr*/)
     {
-        m_rootNode->Render(shaderOverride);
+        m_rootNode->Render(commandList, shaderOverride);
     }
 
     Utils::Maths::BoundingBox Scene::CalculateBoundingBoxForSceneNode(SceneNode::Ptr sceneNode)

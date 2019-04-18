@@ -74,20 +74,21 @@ namespace Engine
         m_materialData.specularColorAndSmoothness.z = color.z;
     }
 
-    void Material::Render(ID3D11DeviceContext* deviceContext)
+    void Material::Render(ID3D12GraphicsCommandList* commandList)
     {
-		// TODO DX12: pass through command list
-        //m_shaderPipeline->UploadData(deviceContext);
-        m_pipelineState->UploadData(deviceContext);
+        m_shaderPipeline->UploadData(commandList);
+		// I think we can set the pipeline state on the shader pipeline or use it when uploading the data to select the correct PSO.
+		// If one's not found then we can compile a new PSO and store it in the cache.
+		IMPLEMENT_FOR_DX12(m_pipelineState->UploadData(commandList);)
         m_materialConstants->SetData(m_materialData);
-        m_materialConstants->UploadData(deviceContext);
-        m_sampler->UploadData(deviceContext, 0);
+        IMPLEMENT_FOR_DX12(m_materialConstants->UploadData(deviceContext);)
+		IMPLEMENT_FOR_DX12(m_sampler->UploadData(deviceContext, 0);)
         for (uint32_t i = 0; i < static_cast<uint32_t>(TextureType::Count); i++)
         {
             auto texture = m_textures[i];
             if (texture)
             {
-				IMPLEMENT_FOR_DX12(texture->UploadData(deviceContext, PipelineStage::Pixel, i);)
+				texture->UploadData(commandList, i);
             }
         }
     }

@@ -530,7 +530,7 @@ namespace Engine
 		// This generates our deep G-Buffer
 		m_camera->SetRenderTargetBundle(nullptr);
 		IMPLEMENT_FOR_DX12(m_lightManager.GatherLights(m_scene, m_direct3D->GetDeviceContext(), LightSpaceModifier::Camera);)
-		m_camera->Render(m_scene);
+		m_camera->Render(commandList, m_scene);
 
 		D3DClass::Instance()->EndRenderEvent();
 

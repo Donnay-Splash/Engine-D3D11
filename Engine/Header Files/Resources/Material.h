@@ -29,7 +29,7 @@ namespace Engine
         using Ptr = std::shared_ptr<Material>;
         Material(ShaderPipeline::Ptr shaderPipeline);// , BlendState blendState = BlendState());
 
-        void Render(ID3D11DeviceContext* deviceContext);
+        void Render(ID3D12GraphicsCommandList* commandList);
 
         Texture::Ptr GetTexture(TextureType type) const;
         void SetTexture(TextureType type, Texture::Ptr texture);

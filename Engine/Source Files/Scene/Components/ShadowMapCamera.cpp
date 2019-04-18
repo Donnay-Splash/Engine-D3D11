@@ -24,7 +24,7 @@ namespace Engine
         SetNearClip(0.0f);
     }
 
-    void ShadowMapCamera::Render(Scene::Ptr scene, Light::Ptr light, ShaderPipeline::Ptr shadowMapPipeline)
+    void ShadowMapCamera::Render(ID3D12GraphicsCommandList* commandList, Scene::Ptr scene, Light::Ptr light, ShaderPipeline::Ptr shadowMapPipeline)
     {
         // We aren't rendering shadows to the backbuffer
         // so render target is required to be non null
@@ -32,10 +32,8 @@ namespace Engine
         EngineAssert(shadowMapPipeline != nullptr);
 
         // clear the target before rendering
-		IMPLEMENT_FOR_DX12(auto device = scene->GetDevice();
-        auto deviceContext = device->GetDeviceContext();
-        m_renderTargetBundle->Clear(deviceContext);
-        device->SetRenderTarget(m_renderTargetBundle);)
+        m_renderTargetBundle->Clear(commandList);
+        D3DClass::Instance()->SetRenderTarget(m_renderTargetBundle);
 
         // We want to place the light outside of the scene bounds so that it includes all visible objects
         auto lightNode = light->GetSceneNode();
@@ -69,7 +67,7 @@ namespace Engine
         m_lightViewConstants->SetData(constants);
 		IMPLEMENT_FOR_DX12(m_lightViewConstants->UploadData(deviceContext);)
 
-        scene->Render(shadowMapPipeline);
+        scene->Render(commandList, shadowMapPipeline);
     }
 
 }// end namespace Engine

@@ -40,7 +40,7 @@ namespace Engine
         m_environmentMap = envMap;
     }
 
-    void LightManager::GatherLights(Scene::Ptr scene, ID3D11DeviceContext* deviceContext, LightSpaceModifier space /*= LightSpaceModifier::World*/)
+    void LightManager::GatherLights(Scene::Ptr scene, ID3D12GraphicsCommandList* commandList, LightSpaceModifier space /*= LightSpaceModifier::World*/)
     {
         auto lights = scene->GetAllComponentsOfType<Light>();
         uint32_t lightCount = std::min(kMaxLightCount, static_cast<uint32_t>(lights.size()));
@@ -70,7 +70,7 @@ namespace Engine
         if (m_environmentMap != nullptr)
         {
             lightBuffer.envMapMipLevels = static_cast<float>(m_environmentMap->GetMipLevels());
-            IMPLEMENT_FOR_DX12(m_environmentMap->UploadData(deviceContext, PipelineStage::Pixel, kEnvironmentMapRegister);)
+            m_environmentMap->UploadData(commandList, kEnvironmentMapRegister);
             lightBuffer.envMapEnabled = 1.0f;
         }
         // Render and submit shadow map data
@@ -78,16 +78,16 @@ namespace Engine
         {
             lightBuffer.shadowMapEnabled = 1.0f;
             // Concatenate matrices to convert from camera to projected light space
-            lightBuffer.shadowMapTransform = RenderShadowMap(shadowCaster, deviceContext);
+            lightBuffer.shadowMapTransform = RenderShadowMap(shadowCaster, commandList);
             lightBuffer.shadowMapDimensions = { float(kShadowMapWidth), float(kShadowMapWidth) };
         }
 
-        m_environmentSampler->UploadData(deviceContext, kEnvironmentMapRegister);
+        IMPLEMENT_FOR_DX12(m_environmentSampler->UploadData(deviceContext, kEnvironmentMapRegister);)
         m_lightBuffer->SetData(lightBuffer);
-        m_lightBuffer->UploadData(deviceContext);
+		IMPLEMENT_FOR_DX12(m_lightBuffer->UploadData(commandList);)
     }
 
-    Utils::Maths::Matrix LightManager::RenderShadowMap(Light::Ptr shadowCaster, ID3D11DeviceContext* deviceContext)
+    Utils::Maths::Matrix LightManager::RenderShadowMap(Light::Ptr shadowCaster, ID3D12GraphicsCommandList* commandList)
     {
         // No need to render shadows if there are no shadow casters
         EngineAssert(shadowCaster != nullptr);
@@ -96,9 +96,9 @@ namespace Engine
         
 		D3DClass::Instance()->BeginRenderEvent(L"Render Shadow maps");
             m_shadowMapCamera->SetRenderTargetBundle(m_shadowMapTarget);
-            m_shadowMapCamera->Render(scene, shadowCaster, m_shadowMapPipeline);
+            m_shadowMapCamera->Render(commandList, scene, shadowCaster, m_shadowMapPipeline);
             // Upload m_shadowMapTargets to shader
-            m_shadowMapTarget->SetShaderResources(deviceContext, kShadowMapRegister);
+            m_shadowMapTarget->SetShaderResources(commandList, kShadowMapRegister);
 		D3DClass::Instance()->EndRenderEvent();
 
         // Calculate camera to light space transform

@@ -22,7 +22,7 @@ namespace Engine
 
     void RenderTargetBundle::CreateRenderTarget(std::wstring name, DXGI_FORMAT format, const Utils::Maths::Color& clearColor /*= {}*/)
     {
-        // Not allowed to create bundles greated than max size
+        // Not allowed to create bundles greater than max size
         EngineAssert(m_count < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT);
         EngineAssert(!m_finalised);
 
@@ -42,7 +42,7 @@ namespace Engine
             // Push this render target into the vector.
             newBundleElement.RenderTargets.push_back(newRenderTarget);
             // Add render target view to array.
-			IMPLEMENT_FOR_DX12(m_renderTargetViews[mip][m_count] = newRenderTarget->GetRTV().Get();)
+			m_renderTargetViews[mip][m_count] = newRenderTarget->GetCPUHandle();
         }
         m_renderTargets.push_back(newBundleElement);
 
@@ -71,7 +71,7 @@ namespace Engine
         return m_renderTargets[index].RenderTargets[0];
     }
 
-    void RenderTargetBundle::Clear(ID3D11DeviceContext* deviceContext)
+    void RenderTargetBundle::Clear(ID3D12GraphicsCommandList* commandList)
     {
         EngineAssert(m_finalised);
 
@@ -81,12 +81,12 @@ namespace Engine
         {
             auto c = m_renderTargets[i].ClearColour;
             float color[4]{ c.x , c.y, c.z, c.w };
-            deviceContext->ClearRenderTargetView(m_renderTargetViews[0][i], color);
+			commandList->ClearRenderTargetView(m_renderTargetViews[0][i], color, 0, nullptr);
         }
 
         if (m_depthBuffer != nullptr)
         {
-            deviceContext->ClearDepthStencilView(m_depthBuffer->GetDSV().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+			commandList->ClearDepthStencilView(m_depthBuffer->GetCPUHandle(),  D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
         }
     }
 
@@ -100,24 +100,25 @@ namespace Engine
         m_finalised = true;
     }
 
-    void RenderTargetBundle::SetShaderResources(ID3D11DeviceContext* deviceContext, uint32_t registerOffset /*= 0*/)
+    void RenderTargetBundle::SetShaderResources(ID3D12GraphicsCommandList* commandList, uint32_t registerOffset /*= 0*/)
     {
         // Clear render target state
-        ID3D11RenderTargetView* nullViews[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
-        deviceContext->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, nullViews, nullptr);
+        CD3DX12_CPU_DESCRIPTOR_HANDLE nullViews[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
+		commandList->OMSetRenderTargets(D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT, nullViews, false, nullptr);
 
         for (auto pair : m_renderTargets)
         {
             auto texture = pair.RenderTargets[0]->GetTexture(); // Get texture from highest level mip
 
-			IMPLEMENT_FOR_DX12(texture->UploadData(deviceContext, PipelineStage::Pixel, registerOffset++);)
+			texture->UploadData(commandList, registerOffset++);
         }
 
         if (m_depthBuffer != nullptr)
         {
-			IMPLEMENT_FOR_DX12(m_depthBuffer->GetTexture()->UploadData(deviceContext, PipelineStage::Pixel, registerOffset);)
+			m_depthBuffer->GetTexture()->UploadData(commandList, registerOffset);
         }
-        m_bundleSampler->UploadData(deviceContext, 0);
+        
+		IMPLEMENT_FOR_DX12(m_bundleSampler->UploadData(commandList, 0);)
     }
 
     void RenderTargetBundle::SetTargetMip(uint32_t targetMip)
@@ -126,7 +127,7 @@ namespace Engine
         m_targetMip = targetMip;
     }
 
-    ID3D11RenderTargetView* const* RenderTargetBundle::GetRenderTargetViews()
+	CD3DX12_CPU_DESCRIPTOR_HANDLE const* RenderTargetBundle::GetRenderTargetViews()
     {
         // The layout of the bundle must have been finalised already
         EngineAssert(m_finalised);

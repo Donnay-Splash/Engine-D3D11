@@ -45,16 +45,16 @@ namespace Engine
         }
     }
 
-    void SceneNode::Render(ShaderPipeline::Ptr shaderOverride/* = nullptr*/)
+    void SceneNode::Render(ID3D12GraphicsCommandList* commandList, ShaderPipeline::Ptr shaderOverride/* = nullptr*/)
     {
         for (auto child : m_childNodes)
         {
-            child->Render(shaderOverride);
+            child->Render(commandList, shaderOverride);
         }
 
         for (auto component : m_components)
         {
-            component->Render(shaderOverride);
+            component->Render(commandList, shaderOverride);
         }
     }
 

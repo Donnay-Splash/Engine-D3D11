@@ -23,7 +23,7 @@ namespace Engine
         virtual void Update(float frameTime) {};
 
         // Not required to be overriden by child classes. Can be hooked into if needed.
-        virtual void Render(ShaderPipeline::Ptr shaderOverride = nullptr) const {};
+        virtual void Render(ID3D12GraphicsCommandList* commandList, ShaderPipeline::Ptr shaderOverride = nullptr) const {};
 
         virtual ~Component() {}
 

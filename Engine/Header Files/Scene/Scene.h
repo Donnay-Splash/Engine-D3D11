@@ -24,7 +24,7 @@ namespace Engine
         SceneNode::Ptr GetRootNode() const { return m_rootNode; }
 
         void Update(float frameTime);
-        void Render(ShaderPipeline::Ptr shaderOverride = nullptr);
+        void Render(ID3D12GraphicsCommandList* commandList, ShaderPipeline::Ptr shaderOverride = nullptr);
 
         // Returns a vector containing all instances of ComponentType in the scene.
         template <class ComponentType>

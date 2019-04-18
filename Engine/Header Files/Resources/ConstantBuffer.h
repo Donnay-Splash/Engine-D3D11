@@ -1,4 +1,5 @@
 #pragma once
+#include "ShaderResource.h"
 
 namespace Engine
 {
@@ -9,10 +10,11 @@ namespace Engine
     }
 
     template <class T>
-    class ConstantBuffer
+    class ConstantBuffer : public ShaderResource, public GPUResource
     {
     public:
         using Ptr = std::shared_ptr<ConstantBuffer<T>>;
+
         ConstantBuffer(uint32_t pipelineStages) :
             m_pipelineStages(pipelineStages)
         {
@@ -32,6 +34,8 @@ namespace Engine
             // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 			IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&matrixBufferDesc, NULL, &m_buffer));)
 
+
+				// TODO: Look at implementing some sort of memory allocator so that we don't have to double buffer constant buffers. Yuck.
 			// Creating a constant buffer in DX12
 			// First we will need a descriptor heap to assign all of our CBV_SRV_UAV descriptors, this can be created and managed by the device.
 			// Create a heap for our CBV resource. This can be used for all constant buffers we can again create and manage this on the device level.
@@ -74,7 +78,7 @@ namespace Engine
                 m_dataChanged = false;
             }
 
-            if (m_pipelineStages & PipelineStage::Vertex)
+            /*if (m_pipelineStages & PipelineStage::Vertex)
             {
                 deviceContext->VSSetConstantBuffers(T::kRegister, 1, m_buffer.GetAddressOf());
             }
@@ -82,14 +86,12 @@ namespace Engine
             if (m_pipelineStages & PipelineStage::Pixel)
             {
                 deviceContext->PSSetConstantBuffers(T::kRegister, 1, m_buffer.GetAddressOf());
-            }
+            }*/
         }
 
     private:
         __declspec(align(16))
             T m_data;
-        Microsoft::WRL::ComPtr<ID3D11Buffer> m_buffer;
-        const uint32_t m_pipelineStages;
         bool m_dataChanged = true;
     };
 }

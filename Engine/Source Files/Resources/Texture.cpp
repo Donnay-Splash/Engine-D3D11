@@ -159,15 +159,13 @@ namespace Engine
 		ID3D12Device* device = D3DClass::Instance()->GetDevice();
 		ResourceUploadBatch uploadBatch(device);
 		// Add support for additional file types.
-		Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, uploadBatch, filename, &m_resource));
+		Utils::DirectXHelpers::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(device, uploadBatch, filename, &m_resource, false, 0, nullptr, &m_isCube));
         D3D12_RESOURCE_DESC desc = m_resource->GetDesc();
         m_format = desc.Format;
 		m_width = (uint32_t)desc.Width;
 		m_height = desc.Height;
 		m_arraySize = desc.DepthOrArraySize;
 		m_mipLevels = desc.MipLevels;
-
-        IMPLEMENT_FOR_DX12(_isCube = true;)
 
 		// Create SRV
 		m_descriptor = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);

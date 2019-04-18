@@ -39,14 +39,14 @@ namespace Engine
 
         void Finalise();
 
-        void Clear(ID3D11DeviceContext* deviceContext);
+        void Clear(ID3D12GraphicsCommandList* commandList);
 
         // Uploads all render targets as SRV's. User must ensure that the 
         // render targets are not bound for output.
-        void SetShaderResources(ID3D11DeviceContext* deviceContext, uint32_t registerOffset = 0);
+        void SetShaderResources(ID3D12GraphicsCommandList* commandList, uint32_t registerOffset = 0);
 
         // Returns a pointer to the array or render targets
-        ID3D11RenderTargetView * const* GetRenderTargetViews();
+		CD3DX12_CPU_DESCRIPTOR_HANDLE const* GetRenderTargetViews();
 
         uint32_t RenderTargetCount() const { return m_count; }
         uint32_t GetWidth() const { return m_width; }
@@ -68,7 +68,7 @@ namespace Engine
         DepthBuffer::Ptr m_depthBuffer;
         Sampler::Ptr m_bundleSampler;
         // Stores a vector of render target arrays for rendering to each mip level of the texture resource
-        std::vector<std::array<ID3D11RenderTargetView*, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT>> m_renderTargetViews;
+        std::vector<std::array<CD3DX12_CPU_DESCRIPTOR_HANDLE, D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT>> m_renderTargetViews;
 
         // Number of render targets stored in this bundle
         uint32_t m_count = 0;
