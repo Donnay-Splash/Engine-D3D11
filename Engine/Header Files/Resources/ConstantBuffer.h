@@ -15,8 +15,7 @@ namespace Engine
     public:
         using Ptr = std::shared_ptr<ConstantBuffer<T>>;
 
-        ConstantBuffer(uint32_t pipelineStages) :
-            m_pipelineStages(pipelineStages)
+        ConstantBuffer(uint32_t pipelineStages) : GPUResource(D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER)
         {
             // Constant buffer must be bound to atleast one pipeline stage
             EngineAssert(pipelineStages > 0);

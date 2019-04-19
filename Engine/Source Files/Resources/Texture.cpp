@@ -139,6 +139,7 @@ namespace Engine
         m_arraySize = textureDesc.DepthOrArraySize;
         m_mipLevels = textureDesc.MipLevels;
         bool bindToShader = (textureDesc.Flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE) == 0;
+		bindToShader &= (flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE) == 0;
 
         if (bindToShader)
         {

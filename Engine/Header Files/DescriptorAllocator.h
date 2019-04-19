@@ -18,6 +18,7 @@ namespace Engine
 		DescriptorPair* AllocateDescriptor();
 		void FreeDescriptor(DescriptorPair*);
 		bool BelongsToHeap(DescriptorPair*);
+		ID3D12DescriptorHeap* GetHeap() const { return m_descriptorHeap.Get(); }
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_descriptorHeap;

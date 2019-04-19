@@ -1,4 +1,9 @@
-#define RS "RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)"
+#define RS "RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT), DescriptorTable(CBV(b0))" 
+
+cbuffer SceneConstantBuffer : register(b0)
+{
+	float4 offset;
+};
 
 struct PSInput
 {

@@ -1,4 +1,9 @@
-#define RS "RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)"
+#define RS "RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT), DescriptorTable(CBV(b0))" 
+
+cbuffer SceneConstantBuffer : register(b0)
+{
+	float4 offset;
+};
 
 struct PSInput
 {
@@ -9,5 +14,5 @@ struct PSInput
 [RootSignature(RS)]
 float4 PSMain( PSInput input ) : SV_TARGET
 {
-	return input.colour;
+	return offset;
 }

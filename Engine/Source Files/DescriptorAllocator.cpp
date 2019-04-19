@@ -34,8 +34,8 @@ namespace Engine
 	DescriptorPair* DescriptorAllocator::AllocateDescriptor()
 	{
 		EngineAssert(!m_freeDescriptors.empty());
-		DescriptorPair* descriptor = m_freeDescriptors.back();
-		m_freeDescriptors.pop_back();
+		DescriptorPair* descriptor = m_freeDescriptors.front();
+		m_freeDescriptors.erase(m_freeDescriptors.begin());
 
 		return descriptor;
 	}

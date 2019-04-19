@@ -100,7 +100,15 @@ namespace Engine
             // Why not just pass post effect camera a shader pipeline and we can set effect data here.
     // TODO: Something seems up with ssVel calculation. Check to make sure it is correct.
     // TODO: Apply basic temporal filtering to AO. as it is flickering
-    Engine::Engine()
+	struct SceneConstantBuffer
+	{
+		XMFLOAT4 offset;
+	};
+	static uint8_t* s_CBVDataBegin;
+	static SceneConstantBuffer s_constantBufferData;
+	static Microsoft::WRL::ComPtr<ID3D12Resource> s_constantBuffer;
+	static DescriptorPair* s_CBV;
+	Engine::Engine()
     {
     }
 
@@ -113,6 +121,10 @@ namespace Engine
     bool Engine::Initialize(EngineCreateOptions createOptions)
     {
         bool result;
+
+		// Update constant buffer data.
+		s_constantBufferData.offset.x = s_constantBufferData.offset.w = 1.0f;
+		s_constantBufferData.offset.y = s_constantBufferData.offset.z = 0.0;
 
 		// Initialise the global D3D class
 		D3DClass::Initialize(createOptions);
@@ -516,7 +528,6 @@ namespace Engine
         return true;
     }
 
-
     bool Engine::RenderGraphics()
     {
         // Clear the scene.
@@ -534,9 +545,39 @@ namespace Engine
 
 		D3DClass::Instance()->EndRenderEvent();
 
+		// Setup most basic constant buffer and check we can set it on the pipeline
+		if (s_constantBuffer == nullptr)
+		{
+			auto device = D3DClass::Instance()->GetDevice();
+			// Create constant buffer
+			Utils::DirectXHelpers::ThrowIfFailed(device->CreateCommittedResource(
+				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+				D3D12_HEAP_FLAG_NONE,
+				&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64),
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&s_constantBuffer)));
+
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+			cbvDesc.BufferLocation = s_constantBuffer->GetGPUVirtualAddress();
+			cbvDesc.SizeInBytes = (sizeof(SceneConstantBuffer) + 255) & ~255; // Align up 256 bytes
+			s_CBV = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			device->CreateConstantBufferView(&cbvDesc, s_CBV->CPUHandle);
+
+			// Map and initialize constant buffer
+			CD3DX12_RANGE readRange(0, 0); // We're not reading this resources
+			Utils::DirectXHelpers::ThrowIfFailed(s_constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&s_CBVDataBegin)));
+		}
+
+		// Must be in this order.
+		// Root Sig -> DescriptorHeap -> DescriptorTable
+		m_shaderManager->GetShaderPipeline(ShaderName::PassThrough)->UploadData(commandList);
+		D3DClass::Instance()->SetShaderVisibleDescriptorHeaps();
+		commandList->SetGraphicsRootDescriptorTable(0, s_CBV->GPUHandle);
+
+		memcpy(s_CBVDataBegin, &s_constantBufferData, sizeof(s_constantBufferData));
 		// Basic test
 		// Create vertex data and pass it through graphics pipe.
-		m_shaderManager->GetShaderPipeline(ShaderName::PassThrough)->UploadData(commandList);
 		testMesh->Render(commandList);
 
 

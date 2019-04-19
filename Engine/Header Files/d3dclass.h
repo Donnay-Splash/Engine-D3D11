@@ -52,6 +52,8 @@ namespace Engine
 		void UnbindAllRenderTargets() const;
 		void UnbindShaderResourceView(uint32_t slot) const;
 
+		void SetShaderVisibleDescriptorHeaps();
+
 		// Probably a better place to eventually put this.
 		void UploadSubresourceData(uint64_t bufferSize, D3D12_SUBRESOURCE_DATA* data, ID3D12Resource* destinationResource, D3D12_RESOURCE_STATES intendedState);
 
@@ -96,6 +98,7 @@ namespace Engine
 		// Store all of our command queues
 		std::map<D3D12_COMMAND_LIST_TYPE, std::unique_ptr<CommandQueue>> m_commandQueues;
 
+		// TODO: Put these in some sort of manager class to simplify things
 		// Store all descriptor heaps.
 		std::map<D3D12_DESCRIPTOR_HEAP_TYPE, std::unique_ptr<DescriptorAllocator>> m_DescriptorHeaps;
 

@@ -141,7 +141,7 @@ namespace Engine
 	void D3DClass::CreateDescriptorHeaps()
 	{
 		// Size's are likely too small or big for these. Need to find more suitable values
-		m_DescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV] = std::make_unique<DescriptorAllocator>(20, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		m_DescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV] = std::make_unique<DescriptorAllocator>(20, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 		m_DescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_RTV] = std::make_unique<DescriptorAllocator>(20, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		m_DescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_DSV] = std::make_unique<DescriptorAllocator>(20, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	}
@@ -302,7 +302,7 @@ namespace Engine
 			Utils::DirectXHelpers::ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&backBuffer)));
 			std::wstring name = L"BackBuffer:" + std::to_wstring(n);
 			backBuffer->SetName(name.c_str());
-			m_renderTargets[n] = std::make_unique<RenderTarget>(backBuffer.Get(), 0);
+			m_renderTargets[n] = std::make_unique<RenderTarget>(backBuffer.Get(), D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE);
 		}
 
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
@@ -453,6 +453,15 @@ namespace Engine
 		ID3D11ShaderResourceView* nullView[1] = {};
 		m_deviceContext->VSSetShaderResources(slot, 1, nullView);
 		m_deviceContext->PSSetShaderResources(slot, 1, nullView);*/
+	}
+
+	void D3DClass::SetShaderVisibleDescriptorHeaps()
+	{
+		EngineAssert(m_commandList);
+		// Upload descriptor heaps.
+		// TODO: Move to descriptor heap manager/allocator class.
+		ID3D12DescriptorHeap* heaps[] = { m_DescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->GetHeap() };
+		m_commandList->SetDescriptorHeaps(1, heaps);
 	}
 
 	void D3DClass::UploadSubresourceData(uint64_t bufferSize, D3D12_SUBRESOURCE_DATA* subresourceData, ID3D12Resource* destination, D3D12_RESOURCE_STATES intendedState)
