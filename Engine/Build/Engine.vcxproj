@@ -23,7 +23,7 @@
     <ProjectGuid>{06F1D1D5-1FA9-4A5D-A157-E6EDF139FC0A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Engine</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -31,22 +31,22 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -600,17 +600,17 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <FxCompile Include="..\Shaders\ShadowMap.vs.hlsl">
-        <FileType>Document</FileType>
-        <EntryPointName>VSMain</EntryPointName>
-        <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
-        <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
-        <ShaderType>Vertex</ShaderType>
-        <ShaderModel>5.0</ShaderModel>
-        <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
-        <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
-        <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
-        <ObjectFileOutput>
-        </ObjectFileOutput>
+      <FileType>Document</FileType>
+      <EntryPointName>VSMain</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)'=='Debug'">true</DisableOptimizations>
+      <DisableOptimizations Condition="'$(Configuration)'=='Release'">false</DisableOptimizations>
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Debug'">true</EnableDebuggingInformation>
+      <EnableDebuggingInformation Condition="'$(Configuration)'=='Release'">false</EnableDebuggingInformation>
+      <HeaderFileOutput>$(SolutionDir)Engine\Shaders\Compiled shaders\%(Filename)%(Extension).h</HeaderFileOutput>
+      <ObjectFileOutput>
+      </ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\Shaders\Uber.gs.hlsl">
       <FileType>Document</FileType>
