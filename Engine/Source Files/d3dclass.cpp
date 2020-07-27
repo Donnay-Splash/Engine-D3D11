@@ -4,6 +4,9 @@
 #include "pch.h"
 #include "d3dclass.h"
 #include "DX12Impl.h"
+#include <locale>
+#include <codecvt>
+#include <iomanip>
 
 namespace Engine
 {
@@ -91,7 +94,8 @@ namespace Engine
 
 		// Convert the name of the video card from wide to standard character length.
 		std::wstring wideAdapterDescription(adapterDesc.Description);
-		m_videoCardDescription = std::string(wideAdapterDescription.begin(), wideAdapterDescription.end());
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		m_videoCardDescription = converter.to_bytes(wideAdapterDescription);
 	}
 
 	void D3DClass::CreateDeviceResourcesAndSwapChain()

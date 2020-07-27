@@ -1267,15 +1267,15 @@ namespace Utils
                 m_pitch = RadiansToDegrees(kPI * 0.5f * sp);
 
                 // Compute Yaw and set roll to 0
-                m_yaw = RadiansToDegrees(atan2(-quat.x*quat.z + quat.w*quat.y, 0.5f - quat.y*quat.y - quat.z*quat.z));
+                m_yaw = RadiansToDegrees(atan2f(-quat.x*quat.z + quat.w*quat.y, 0.5f - quat.y*quat.y - quat.z*quat.z));
                 m_roll = 0.0f;
             }
             else
             {
                 // compute angles
-                m_pitch = RadiansToDegrees(asin(sp));
-                m_yaw = RadiansToDegrees(atan2(quat.x*quat.z + quat.w*quat.y, 0.5f - quat.x*quat.x - quat.y*quat.y));
-                m_roll = RadiansToDegrees(atan2(quat.x*quat.y + quat.w*quat.z, 0.5f - quat.x*quat.x - quat.z*quat.z));
+                m_pitch = RadiansToDegrees(asinf(sp));
+                m_yaw = RadiansToDegrees(atan2f(quat.x*quat.z + quat.w*quat.y, 0.5f - quat.x*quat.x - quat.y*quat.y));
+                m_roll = RadiansToDegrees(atan2f(quat.x*quat.y + quat.w*quat.z, 0.5f - quat.x*quat.x - quat.z*quat.z));
             }
         }
 

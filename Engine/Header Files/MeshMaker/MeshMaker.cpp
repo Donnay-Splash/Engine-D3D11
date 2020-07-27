@@ -236,10 +236,10 @@ namespace Utils
             auto CalcVertex = [=](float internalAngle, float externalAngle)->Utils::Maths::Vector3
             {
                 Utils::Maths::Vector3 vert;
-                const float internalPos = (internalRadius + externalRadius*cos(externalAngle));
-                vert.x = internalPos * cos(internalAngle);
-                vert.y = internalPos * sin(internalAngle);
-                vert.z = externalRadius * sin(externalAngle);
+                const float internalPos = (internalRadius + externalRadius*cosf(externalAngle));
+                vert.x = internalPos * cosf(internalAngle);
+                vert.y = internalPos * sinf(internalAngle);
+                vert.z = externalRadius * sinf(externalAngle);
 
                 return vert;
             };
@@ -267,8 +267,8 @@ namespace Utils
                 uint32_t baseIndex = i * angleIterations * 4u;
                 
                 // Minor circle centre pos.
-                Utils::Maths::Vector3 minorCircleCentreLeft = { internalRadius * cos(internalAngle), internalRadius * sin(internalAngle), 0.0f };
-                Utils::Maths::Vector3 minorCircleCentreRight = { internalRadius * cos(internalAngle + angleDelta), internalRadius * sin(internalAngle + angleDelta), 0.0f };
+                Utils::Maths::Vector3 minorCircleCentreLeft = { internalRadius * cosf(internalAngle), internalRadius * sinf(internalAngle), 0.0f };
+                Utils::Maths::Vector3 minorCircleCentreRight = { internalRadius * cosf(internalAngle + angleDelta), internalRadius * sinf(internalAngle + angleDelta), 0.0f };
 
                 float externalAngle = 0.0f;
                 for (uint32_t j = 0; j < angleIterations; j++)

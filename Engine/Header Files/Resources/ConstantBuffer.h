@@ -1,5 +1,6 @@
 #pragma once
 #include "ShaderResource.h"
+#include "d3dclass.h"
 
 namespace Engine
 {
@@ -7,6 +8,7 @@ namespace Engine
     {
         static const uint32_t Vertex = 0x0001;
         static const uint32_t Pixel = 0x0002;
+        static const uint32_t All = Vertex | Pixel;
     }
 
     template <class T>
@@ -15,24 +17,31 @@ namespace Engine
     public:
         using Ptr = std::shared_ptr<ConstantBuffer<T>>;
 
-        ConstantBuffer(uint32_t pipelineStages) : GPUResource(D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER)
+        ConstantBuffer(uint32_t pipelineStages = PipelineStage::All) : GPUResource(D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER)
         {
+            // Create constant buffer
+            auto device = D3DClass::Instance()->GetDevice();
+            Utils::DirectXHelpers::ThrowIfFailed(device->CreateCommittedResource(
+                &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+                D3D12_HEAP_FLAG_NONE,
+                &CD3DX12_RESOURCE_DESC::Buffer(1024 * 64),
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                nullptr,
+                IID_PPV_ARGS(&m_Buffer)));
+
+            D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+            cbvDesc.BufferLocation = m_Buffer->GetGPUVirtualAddress();
+            cbvDesc.SizeInBytes = (sizeof(T) + 255) & ~255; // Align up 256 bytes
+            m_CBV = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+            device->CreateConstantBufferView(&cbvDesc, m_CBV->CPUHandle);
+
+            // Map and initialize constant buffer
+            CD3DX12_RANGE readRange(0, 0); // We're not reading this resources
+            Utils::DirectXHelpers::ThrowIfFailed(m_Buffer->Map(0, &readRange, reinterpret_cast<void**>(&m_DataPtr)));
+
             // Constant buffer must be bound to atleast one pipeline stage
+            // Note: Dunno if that is still useful for DX12
             EngineAssert(pipelineStages > 0);
-            // Constant buffer creation should be kept to no more than two lines.
-            // Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
-            D3D11_BUFFER_DESC matrixBufferDesc;
-            SecureZeroMemory(&matrixBufferDesc, sizeof(matrixBufferDesc));
-            matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-            matrixBufferDesc.ByteWidth = sizeof(T);
-            matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-            matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-            matrixBufferDesc.MiscFlags = 0;
-            matrixBufferDesc.StructureByteStride = 0;
-
-            // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-			IMPLEMENT_FOR_DX12(Utils::DirectXHelpers::ThrowIfFailed(device->CreateBuffer(&matrixBufferDesc, NULL, &m_buffer));)
-
 
 				// TODO: Look at implementing some sort of memory allocator so that we don't have to double buffer constant buffers. Yuck.
 			// Creating a constant buffer in DX12
@@ -43,6 +52,11 @@ namespace Engine
 			// Just need to make sure that we don't modify the space in memory once we have sent this data to the GPU. All CBV updates need to be synchronized.
 
 			// If we want to abstract all of this from the code we need to find a way to reference a buffer and its space on the heap.
+        }
+
+        ~ConstantBuffer()
+        {
+            m_CBV = D3DClass::Instance()->FreeDescriptor(m_CBV);
         }
 
         // TODO Need to find better name for this 
@@ -57,22 +71,12 @@ namespace Engine
 
         T GetData() const { return m_data; }
 
-        void UploadData(ID3D11DeviceContext* deviceContext)
+        void UploadData()
         {
             if (m_dataChanged)
             {
-                D3D11_MAPPED_SUBRESOURCE mappedResource;
-                // Lock the constant buffer so it can be written to.
-                deviceContext->Map(m_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-                // Get a pointer to the data in the constant buffer.
-                auto dataPtr = (T*)mappedResource.pData;
-
                 // Copy the data into the constant buffer.
-                memcpy(dataPtr, &m_data, sizeof(T));
-
-                // Unlock the constant buffer.
-                deviceContext->Unmap(m_buffer.Get(), 0);
+                memcpy(m_DataPtr, &m_data, sizeof(T));
 
                 m_dataChanged = false;
             }
@@ -88,9 +92,16 @@ namespace Engine
             }*/
         }
 
+        CD3DX12_CPU_DESCRIPTOR_HANDLE GetCPUHandle() { return m_CBV->CPUHandle; }
+
+        CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() { return m_CBV->GPUHandle; }
+
     private:
         __declspec(align(16))
             T m_data;
         bool m_dataChanged = true;
+        Microsoft::WRL::ComPtr<ID3D12Resource> m_Buffer;
+        DescriptorPair* m_CBV;
+        uint8_t* m_DataPtr;
     };
 }

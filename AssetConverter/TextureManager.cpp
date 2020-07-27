@@ -143,16 +143,18 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
     case aiTextureType_DIFFUSE:
     {
         // Convert to premultiplied alpha
-        DWORD flags = 0;
+        DirectX::TEX_PMALPHA_FLAGS flags = DirectX::TEX_PMALPHA_DEFAULT;
         DirectX::ScratchImage preMultipliedImage;
         DirectX::PremultiplyAlpha(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, preMultipliedImage);
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
-        DirectX::GenerateMipMaps(preMultipliedImage.GetImages(), preMultipliedImage.GetImageCount(), preMultipliedImage.GetMetadata(), flags, 0, mipMapImage);
+        DirectX::TEX_FILTER_FLAGS filter = TEX_FILTER_DEFAULT;
+        DirectX::GenerateMipMaps(preMultipliedImage.GetImages(), preMultipliedImage.GetImageCount(), preMultipliedImage.GetMetadata(), filter, 0, mipMapImage);
         if (compressable)
         {
             // Compress BC3
-            DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
+            DirectX::TEX_COMPRESS_FLAGS compressFlags = TEX_COMPRESS_DEFAULT;
+            DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
         }
         else
         {
@@ -171,14 +173,15 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
     case aiTextureType_SPECULAR:
     case aiTextureType_EMISSIVE:
     {
-        DWORD flags = 0;
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
-        DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, 0, mipMapImage);
+        DirectX::TEX_FILTER_FLAGS filter = TEX_FILTER_DEFAULT;
+        DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), filter, 0, mipMapImage);
         if (compressable)
         {
             // Compress BC3
-            DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, flags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
+            DirectX::TEX_COMPRESS_FLAGS compressFlags = TEX_COMPRESS_DEFAULT;
+            DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM_SRGB, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
         }
         else
         {
@@ -196,14 +199,14 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
     }
     case aiTextureType_NORMALS:
     {
-        DWORD flags = 0;
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
-        DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, 0, mipMapImage);
+        DirectX::TEX_FILTER_FLAGS filter = TEX_FILTER_DEFAULT;
+        DirectX::GenerateMipMaps(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), filter, 0, mipMapImage);
         if (compressable)
         {
             // Compress Bc3
-            DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
+            DirectX::TEX_COMPRESS_FLAGS compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
             DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
         }
         else
@@ -214,18 +217,19 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
     }
     case aiTextureType_HEIGHT:
     {
-        DWORD flags = 0;
+        DirectX::CNMAP_FLAGS flags = CNMAP_DEFAULT;
         // We want to first convert our height map to a tangent space normal map
         DirectX::ScratchImage normalMapImage;
         const float normalAmplitude = 2.0f;
         Utils::DirectXHelpers::ThrowIfFailed(DirectX::ComputeNormalMap(rawImage.GetImages(), rawImage.GetImageCount(), rawImage.GetMetadata(), flags, normalAmplitude, DXGI_FORMAT_R8G8B8A8_UNORM, normalMapImage));
         // Generate MipMaps
         DirectX::ScratchImage mipMapImage;
-        DirectX::GenerateMipMaps(normalMapImage.GetImages(), normalMapImage.GetImageCount(), normalMapImage.GetMetadata(), flags, 0, mipMapImage);
+        DirectX::TEX_FILTER_FLAGS filter = TEX_FILTER_DEFAULT;
+        DirectX::GenerateMipMaps(normalMapImage.GetImages(), normalMapImage.GetImageCount(), normalMapImage.GetMetadata(), filter, 0, mipMapImage);
         if (compressable)
         {
             // Compress Bc3
-            DWORD compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
+            DirectX::TEX_COMPRESS_FLAGS compressFlags = DirectX::TEX_COMPRESS_UNIFORM;
             DirectX::Compress(mipMapImage.GetImages(), mipMapImage.GetImageCount(), mipMapImage.GetMetadata(), DXGI_FORMAT_BC3_UNORM, compressFlags, DirectX::TEX_THRESHOLD_DEFAULT, finalImage);
         }
         else
@@ -237,7 +241,7 @@ bool TextureManager::PostProcessTexture(DirectX::ScratchImage& rawImage, const I
     }
 
     // Now we have processed the data we will save it to DDS memory for storage in the .mike.
-    DWORD flags = 0;
+    DirectX::DDS_FLAGS flags = DDS_FLAGS_NONE;
     DirectX::Blob fileData;
     DirectX::SaveToDDSMemory(finalImage.GetImages(), finalImage.GetImageCount(), finalImage.GetMetadata(), flags, fileData);
 
@@ -319,7 +323,7 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
 
     if (extension == L"DDS")
     {
-        DWORD flags = 0;
+        DirectX::DDS_FLAGS flags = DDS_FLAGS_NONE;
         auto hr = DirectX::LoadFromDDSFile(path.c_str(), flags, nullptr, image);
         if (hr != S_OK)
         {
@@ -329,7 +333,6 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
     }
     else if (extension == L"TGA")
     {
-        DWORD flags = 0;
         auto hr = DirectX::LoadFromTGAFile(path.c_str(), nullptr, image);
         if (hr != S_OK)
         {
@@ -339,7 +342,7 @@ bool TextureManager::GetImageFromFile(const std::wstring& path, DirectX::Scratch
     }
     else // Presume WIC supported format
     {
-        DWORD flags = 0;
+        DirectX::WIC_FLAGS flags = WIC_FLAGS_NONE;
         auto hr = DirectX::LoadFromWICFile(path.c_str(), flags, nullptr, image);
         if (hr != S_OK)
         {
@@ -368,7 +371,7 @@ bool TextureManager::GetImageFromMemory(const aiTexture* texture, DirectX::Scrat
 
     if (extension == "DDS")
     {
-        DWORD flags = 0;
+        DirectX::DDS_FLAGS flags = DDS_FLAGS_NONE;
         auto hr = DirectX::LoadFromDDSMemory(texture->pcData, texture->mWidth, flags, nullptr, image);
         if (hr != S_OK)
         {
@@ -387,7 +390,7 @@ bool TextureManager::GetImageFromMemory(const aiTexture* texture, DirectX::Scrat
     }
     else // Presume WIC supported format
     {
-        DWORD flags = 0;
+        DirectX::WIC_FLAGS flags = WIC_FLAGS_NONE;
         auto hr = DirectX::LoadFromWICMemory(texture->pcData, texture->mWidth, flags, nullptr, image);
         if (hr != S_OK)
         {
