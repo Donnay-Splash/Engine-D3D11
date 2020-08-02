@@ -111,6 +111,12 @@ namespace Engine
 		#include "Shaders\Compiled shaders\PassThrough.ps.hlsl.h"
 	}
 
+    namespace ImGuiShaders
+    {
+        #include "Shaders/Compiled shaders/ImGui.vs.hlsl.h"
+        #include "Shaders/Compiled shaders/ImGui.ps.hlsl.h"
+    }
+
     ShaderManager::ShaderManager()
     {
         LoadCoreShaders();
@@ -130,6 +136,16 @@ namespace Engine
 
 			m_shaderMap.insert(ShaderMapObject(ShaderName::PassThrough, shaderPipeline));
 		}
+
+        // Initialise the ImGui shader/material
+        {
+            uint32_t inputFlags = (InputElement::Position | InputElement::Colour | InputElement::TexCoord0);
+            Shader vertexShader = { ShaderType::Vertex, ImGuiShaders::g_VSMain, sizeof(ImGuiShaders::g_VSMain) };
+            Shader pixelShader = { ShaderType::Pixel, ImGuiShaders::g_PSMain, sizeof(ImGuiShaders::g_PSMain) };
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(inputFlags, vertexShader, pixelShader);
+
+            m_shaderMap.insert(ShaderMapObject(ShaderName::ImGui, shaderPipeline));
+        }
 
 
 		// TODO: Eventually re-add all of these 

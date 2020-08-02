@@ -22,7 +22,8 @@ namespace Engine
         BasicTemporalFilter = 12,
         Tonemap = 13,
         ShadowMapping = 14,
-		PassThrough = 15
+		PassThrough = 15,
+        ImGui = 16
     };
 
     class ShaderManager

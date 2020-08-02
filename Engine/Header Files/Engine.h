@@ -10,6 +10,7 @@
 #include "positionclass.h"
 #include "ShaderManager.h"
 #include "LightManager.h"
+#include "ImGuiRenderer.h"
 #include "EngineCreateOptions.h"
 #include <Scene\Components\PostProcessingCamera.h>
 #include <Scene\Components\Light.h>
@@ -92,6 +93,7 @@ namespace Engine
         ShaderManager::Ptr m_shaderManager;
         Scene::Ptr m_scene;
         LightManager m_lightManager;
+        ImGuiRenderer::Ptr m_ImGuiRenderer;
         EngineCreateOptions m_createOptions;
 
         // These can be moved to a more specific application class

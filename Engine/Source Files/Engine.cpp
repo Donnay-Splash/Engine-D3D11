@@ -8,6 +8,8 @@
 #include <DDSTextureLoader.h>
 #include <DX11Impl.h>
 
+#include "imgui.h"
+
 namespace Engine
 {
     // Taken from DeepGBuffer paper : http://graphics.cs.williams.edu/papers/DeepGBuffer16/
@@ -104,7 +106,7 @@ namespace Engine
 	{
 		XMFLOAT4 offset;
 	};
-    static ConstantBuffer<SceneConstantBuffer> s_constantBuffer;
+    static ConstantBuffer<SceneConstantBuffer>::Ptr s_constantBuffer;
 	Engine::Engine()
     {
     }
@@ -119,14 +121,15 @@ namespace Engine
     {
         bool result;
 
+        // Initialise the global D3D class
+        D3DClass::Initialize(createOptions);
+
         SceneConstantBuffer constantBufferData;
 		// Update constant buffer data.
         constantBufferData.offset.x = constantBufferData.offset.w = 1.0f;
         constantBufferData.offset.y = constantBufferData.offset.z = 0.0;
-        s_constantBuffer.SetData(constantBufferData);
-
-		// Initialise the global D3D class
-		D3DClass::Initialize(createOptions);
+        s_constantBuffer = std::make_shared<ConstantBuffer<SceneConstantBuffer>>();
+        s_constantBuffer->SetData(constantBufferData);
 
         // Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
         m_inputManager = std::make_shared<InputManager>();
@@ -148,6 +151,46 @@ namespace Engine
             m_scene->GetRootNode()->SetChildAddedCallback(createOptions.RootSceneElementAddedCallback);
         }
 
+        // Initialise ImGui
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        // Dunno why we do this but the demo does. Maybe so we can inspect IO?
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGui::StyleColorsDark(); // Cool colours
+
+        // Windows init
+        io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+        io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+        io.BackendPlatformName = "imgui_win32";
+        io.ImeWindowHandle = createOptions.HWND;
+
+        // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array that we will update during the application lifetime.
+        io.KeyMap[ImGuiKey_Tab] = VK_TAB;
+        io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
+        io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
+        io.KeyMap[ImGuiKey_UpArrow] = VK_UP;
+        io.KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
+        io.KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
+        io.KeyMap[ImGuiKey_PageDown] = VK_NEXT;
+        io.KeyMap[ImGuiKey_Home] = VK_HOME;
+        io.KeyMap[ImGuiKey_End] = VK_END;
+        io.KeyMap[ImGuiKey_Insert] = VK_INSERT;
+        io.KeyMap[ImGuiKey_Delete] = VK_DELETE;
+        io.KeyMap[ImGuiKey_Backspace] = VK_BACK;
+        io.KeyMap[ImGuiKey_Space] = VK_SPACE;
+        io.KeyMap[ImGuiKey_Enter] = VK_RETURN;
+        io.KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
+        io.KeyMap[ImGuiKey_KeyPadEnter] = VK_RETURN;
+        io.KeyMap[ImGuiKey_A] = 'A';
+        io.KeyMap[ImGuiKey_C] = 'C';
+        io.KeyMap[ImGuiKey_V] = 'V';
+        io.KeyMap[ImGuiKey_X] = 'X';
+        io.KeyMap[ImGuiKey_Y] = 'Y';
+        io.KeyMap[ImGuiKey_Z] = 'Z';
+
+        m_ImGuiRenderer = std::make_shared<ImGuiRenderer>();
+        m_ImGuiRenderer->Init(createOptions.ScreenWidth, createOptions.ScreenHeight, m_shaderManager->GetShaderPipeline(ShaderName::ImGui), 2);
+       
 		
   //      // Get the shadow map shader pipeline
   //      auto shadowPipeline = m_shaderManager->GetShaderPipeline(ShaderName::ShadowMapping);
@@ -364,6 +407,8 @@ namespace Engine
             return false;
         }
 
+        m_ImGuiRenderer->BeginFrame();
+
         // Update the scene
         m_scene->Update(deltaTime);
         m_scene->SetCameraTransform(m_camera->GetSceneNode()->GetWorldTransform());
@@ -390,6 +435,9 @@ namespace Engine
         uint32_t guardBandWidth = static_cast<uint32_t>(newWidth * kGuardBandPercentage.x * 2.0f);
         uint32_t guardBandHeight = static_cast<uint32_t>(newHeight * kGuardBandPercentage.y * 2.0f);
         m_guardBandSizePixels = { guardBandWidth/2.0f, guardBandHeight/2.0f };
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.DisplaySize = ImVec2((float)newWidth, (float)newHeight);
 
         // Re-create G-Buffer with new dimensions
         // We use G-Buffer data for ao and radiosity so it must be 
@@ -549,14 +597,17 @@ namespace Engine
 		m_shaderManager->GetShaderPipeline(ShaderName::PassThrough)->UploadData(commandList);
 		D3DClass::Instance()->SetShaderVisibleDescriptorHeaps();
 
-		commandList->SetGraphicsRootDescriptorTable(0, s_constantBuffer.GetGPUHandle());
-        s_constantBuffer.UploadData();
+		commandList->SetGraphicsRootDescriptorTable(0, s_constantBuffer->GetGPUHandle());
+        s_constantBuffer->UploadData();
 
 
 		// Basic test
 		// Create vertex data and pass it through graphics pipe.
 		testMesh->Render(commandList);
 
+        // Here we can try render debug UI
+        m_ImGuiRenderer->Render(commandList);
+        m_ImGuiRenderer->EndFrame();
 
         //// Now need to copy depth
         //auto bundle = m_camera->GetRenderTargetBundle();

@@ -56,13 +56,15 @@ namespace Engine
 
         ~ConstantBuffer()
         {
-            m_CBV = D3DClass::Instance()->FreeDescriptor(m_CBV);
+            D3DClass::Instance()->FreeDescriptor(m_CBV);
         }
 
         // TODO Need to find better name for this 
         void SetData(T data)
         {
-            if (m_data != data)
+            // TODO: Find a better way to auto define comparison operators.
+            // Also is it even worth adding?
+            //if (m_data != data)
             {
                 m_data = data;
                 m_dataChanged = true;

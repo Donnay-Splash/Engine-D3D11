@@ -19,26 +19,8 @@ namespace Engine
 
 		// Create empty root signature for now.
 		{
-			// TODO: Pass this in constructor
-			// Create constant buffer root parameter
-			CD3DX12_DESCRIPTOR_RANGE ranges[1];
-			CD3DX12_ROOT_PARAMETER rootParameters[1];
-			ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0);
-			rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
-
-			D3D12_ROOT_SIGNATURE_FLAGS flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-				D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-				D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-				D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-				D3D12_ROOT_SIGNATURE_FLAG_DENY_VERTEX_SHADER_ROOT_ACCESS;
-
-			CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-			rootSignatureDesc.Init(_countof(rootParameters), rootParameters, 0, nullptr, flags);
-
-			Microsoft::WRL::ComPtr<ID3DBlob> signature;
-			Microsoft::WRL::ComPtr<ID3DBlob> error;
-			Utils::DirectXHelpers::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-			Utils::DirectXHelpers::ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
+			// Try and create the root signature from vertex shader blob
+			Utils::DirectXHelpers::ThrowIfFailed(device->CreateRootSignature(0, vertexShader.ShaderCode, vertexShader.ShaderLength, IID_PPV_ARGS(&m_rootSignature)));
 		}
 
 		// Create pipeline state;
