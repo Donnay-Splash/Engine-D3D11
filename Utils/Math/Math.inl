@@ -105,6 +105,13 @@ namespace Utils
             return ConvertFromXMMATRIX(projectionMatrix);
         }
 
+        inline Matrix Matrix::CreateOrthographicProjectionMatrix(float viewLeft, float viewHRight, float viewBottom, float viewTop, float nearClip, float farClip)
+        {
+            XMMATRIX projectionMatrix = XMMatrixOrthographicOffCenterLH(viewLeft, viewHRight, viewBottom, viewTop, nearClip, farClip);
+
+            return ConvertFromXMMATRIX(projectionMatrix);
+        }
+
         inline Vector3 Matrix::TransformNormal(const Vector3& normal) const
         {
             FXMMATRIX matrix = XMLoadFloat4x4A(this);
@@ -1304,12 +1311,10 @@ namespace Utils
         ****************************************************************************/
         inline Color::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255U)
         {
-            float red = static_cast<float>(r) / 255.0f;
-            float green = static_cast<float>(g) / 255.0f;
-            float blue = static_cast<float>(b) / 255.0f;
-            float alpha = static_cast<float>(a) / 255.0f;
-
-            ::XMFLOAT4A(red, green, blue, alpha);
+            x = static_cast<float>(r) / 255.0f;
+            y = static_cast<float>(g) / 255.0f;
+            z = static_cast<float>(b) / 255.0f;
+            w = static_cast<float>(a) / 255.0f;
         }
 
         inline Color Color::FromRGBA(uint32_t rgba)
@@ -1378,16 +1383,16 @@ namespace Utils
 
         inline bool Color::operator == (const Color& rhs) const
         {
-            XMVECTOR thisVector = XMLoadFloat4A(this);
-            XMVECTOR rhsVector = XMLoadFloat4A(&rhs);
+            XMVECTOR thisVector = XMLoadFloat4(this);
+            XMVECTOR rhsVector = XMLoadFloat4(&rhs);
 
             return XMVector4Equal(thisVector, rhsVector);
         }
 
         inline bool Color::operator != (const Color& rhs) const
         {
-            XMVECTOR thisVector = XMLoadFloat4A(this);
-            XMVECTOR rhsVector = XMLoadFloat4A(&rhs);
+            XMVECTOR thisVector = XMLoadFloat4(this);
+            XMVECTOR rhsVector = XMLoadFloat4(&rhs);
 
             return XMVector4NotEqual(thisVector, rhsVector);
         }

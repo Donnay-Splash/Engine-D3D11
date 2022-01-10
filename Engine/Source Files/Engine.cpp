@@ -189,7 +189,7 @@ namespace Engine
         io.KeyMap[ImGuiKey_Z] = 'Z';
 
         m_ImGuiRenderer = std::make_shared<ImGuiRenderer>();
-        m_ImGuiRenderer->Init(createOptions.ScreenWidth, createOptions.ScreenHeight, m_shaderManager->GetShaderPipeline(ShaderName::ImGui), 2);
+        m_ImGuiRenderer->Init(createOptions.ScreenWidth, createOptions.ScreenHeight, m_shaderManager->GetShaderPipeline(ShaderName::ImGui), 5);
        
 		
   //      // Get the shadow map shader pipeline
@@ -389,6 +389,8 @@ namespace Engine
     void Engine::SetFrameInput(InputState newInputState)
     {
         m_inputManager->Update(newInputState);
+
+        ImGuiIO& IO = ImGui::GetIO();
     }
 
     // TODO: Remove all of these returned bools

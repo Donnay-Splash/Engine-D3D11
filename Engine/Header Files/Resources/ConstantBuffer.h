@@ -27,17 +27,17 @@ namespace Engine
                 &CD3DX12_RESOURCE_DESC::Buffer(1024 * 64),
                 D3D12_RESOURCE_STATE_GENERIC_READ,
                 nullptr,
-                IID_PPV_ARGS(&m_Buffer)));
+                IID_PPV_ARGS(&m_resource)));
 
             D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-            cbvDesc.BufferLocation = m_Buffer->GetGPUVirtualAddress();
+            cbvDesc.BufferLocation = m_resource->GetGPUVirtualAddress();
             cbvDesc.SizeInBytes = (sizeof(T) + 255) & ~255; // Align up 256 bytes
             m_CBV = D3DClass::Instance()->AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
             device->CreateConstantBufferView(&cbvDesc, m_CBV->CPUHandle);
 
             // Map and initialize constant buffer
             CD3DX12_RANGE readRange(0, 0); // We're not reading this resources
-            Utils::DirectXHelpers::ThrowIfFailed(m_Buffer->Map(0, &readRange, reinterpret_cast<void**>(&m_DataPtr)));
+            Utils::DirectXHelpers::ThrowIfFailed(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_DataPtr)));
 
             // Constant buffer must be bound to atleast one pipeline stage
             // Note: Dunno if that is still useful for DX12
@@ -102,7 +102,6 @@ namespace Engine
         __declspec(align(16))
             T m_data;
         bool m_dataChanged = true;
-        Microsoft::WRL::ComPtr<ID3D12Resource> m_Buffer;
         DescriptorPair* m_CBV;
         uint8_t* m_DataPtr;
     };

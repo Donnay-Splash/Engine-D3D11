@@ -100,16 +100,16 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);E:\GitHub\AssImp\include;E:\GitHub\DirectXTex\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)packages\Assimp\build\native\include;$(SolutionDir)packages\directxtex_desktop_win10.2021.11.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\Assimp\build\native\lib\$(Platform)\assimp.lib;$(SolutionDir)packages\directxtex_desktop_win10.2021.11.8.1\native\lib\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>XCOPY "$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\*.DLL" "$(TargetDir)" /D /K /Y</Command>
+      <Command>XCOPY "$(SolutionDir)packages\Assimp.redist.3.0.0\build\native\bin\$(Platform)\*.DLL" "$(TargetDir)" /D /K /Y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy DLLs to target directory</Message>
@@ -122,16 +122,16 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);E:\GitHub\AssImp\include;E:\GitHub\DirectXTex\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)packages\Assimp\build\native\include;$(SolutionDir)packages\directxtex_desktop_win10.2021.11.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\irrXML.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\zlibstatic.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\Assimp\build\native\lib\$(Platform)\assimp.lib;$(SolutionDir)packages\directxtex_desktop_win10.2021.11.8.1\native\lib\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>XCOPY "$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\*.DLL" "$(TargetDir)" /D /K /Y</Command>
+      <Command>XCOPY "$(SolutionDir)packages\Assimp.redist.3.0.0\build\native\bin\$(Platform)\*.DLL" "$(TargetDir)" /D /K /Y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy DLLs to target directory</Message>
@@ -146,18 +146,18 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);E:\GitHub\AssImp\include;E:\GitHub\DirectXTex\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)packages\Assimp\build\native\include;$(SolutionDir)packages\directxtex_desktop_win10.2021.11.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\Assimp\build\native\lib\$(Platform)\assimp.lib;$(SolutionDir)packages\directxtex_desktop_win10.2021.11.8.1\native\lib\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>XCOPY "$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\*.DLL" "$(TargetDir)" /D /K /Y</Command>
+      <Command>XCOPY "$(SolutionDir)packages\Assimp.redist.3.0.0\build\native\bin\$(Platform)\*.DLL" "$(TargetDir)" /D /K /Y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy DLLs to target directory</Message>
@@ -172,18 +172,18 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir);E:\GitHub\AssImp\include;E:\GitHub\DirectXTex\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)packages\Assimp\build\native\include;$(SolutionDir)packages\directxtex_desktop_win10.2021.11.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\IrrXML.lib;$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\zlibstatic.lib;$(SolutionDir)packages\DirectXTex\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)Utils\Built\$(Platform)\$(Configuration)\Utils.lib;$(SolutionDir)packages\Assimp\build\native\lib\$(Platform)\assimp.lib;$(SolutionDir)packages\directxtex_desktop_win10.2021.11.8.1\native\lib\$(Platform)\$(Configuration)\DirectXTex.lib;Shlwapi.lib;Ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\assimp\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>XCOPY "$(SolutionDir)packages\assimp\$(Platform)\$(Configuration)\*.DLL" "$(TargetDir)" /D /K /Y</Command>
+      <Command>XCOPY "$(SolutionDir)packages\Assimp.redist.3.0.0\build\native\bin\$(Platform)\*.DLL" "$(TargetDir)" /D /K /Y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy DLLs to target directory</Message>
@@ -205,6 +205,17 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextureManager.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\directxtex_desktop_win10.2021.11.8.1\build\native\directxtex_desktop_win10.targets" Condition="Exists('..\packages\directxtex_desktop_win10.2021.11.8.1\build\native\directxtex_desktop_win10.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\directxtex_desktop_win10.2021.11.8.1\build\native\directxtex_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_win10.2021.11.8.1\build\native\directxtex_desktop_win10.targets'))" />
+  </Target>
 </Project>

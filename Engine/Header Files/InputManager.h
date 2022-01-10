@@ -16,6 +16,7 @@ namespace Engine
     {
         Utils::Maths::Vector2 PointerPosition;
         uint32_t MouseButtonPressed;
+        float WheelDelta;
         std::set<uint32_t> KeysPressed;
         std::set<uint32_t> KeysReleased;
     };
@@ -36,7 +37,11 @@ namespace Engine
         bool IsKeyDown(uint32_t keyCode);
         bool IsKeyPressed(uint32_t keyCode);
         bool IsKeyReleased(uint32_t keyCode);
+
         bool IsMouseButtonDown(uint32_t mouseButton);
+        bool IsMouseButtonPressed(uint32_t mouseButtons);
+        bool IsMouseButtonReleased(uint32_t mouseButtons);
+        
 
     private:
         void ProcessInput();

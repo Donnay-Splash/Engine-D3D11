@@ -142,7 +142,7 @@ namespace Engine
             uint32_t inputFlags = (InputElement::Position | InputElement::Colour | InputElement::TexCoord0);
             Shader vertexShader = { ShaderType::Vertex, ImGuiShaders::g_VSMain, sizeof(ImGuiShaders::g_VSMain) };
             Shader pixelShader = { ShaderType::Pixel, ImGuiShaders::g_PSMain, sizeof(ImGuiShaders::g_PSMain) };
-            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(inputFlags, vertexShader, pixelShader);
+            ShaderPipeline::Ptr shaderPipeline = std::make_shared<ShaderPipeline>(inputFlags, vertexShader, pixelShader, Shader(), true);
 
             m_shaderMap.insert(ShaderMapObject(ShaderName::ImGui, shaderPipeline));
         }

@@ -21,7 +21,8 @@ namespace Engine
         ShaderPipeline(uint32_t inputFlags,
             Shader vertexShader,
             Shader pixelShader = Shader(),
-            Shader geometryShader = Shader());
+            Shader geometryShader = Shader(),
+			bool transparent = false);
 
         void UploadData(ID3D12GraphicsCommandList* commandList);
 

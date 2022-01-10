@@ -75,6 +75,7 @@ namespace Engine
 		void CreateCommandList();
 		void CreateSwapChain_HWND(uint32_t screenWidth, uint32_t screenHeight);
 		void CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight);
+		void CreateSwapChain_UWP(uint32_t screenWidth, uint32_t screenHeight);
 		void CreateBackBufferResources(uint32_t screenWidth, uint32_t screenHeight);
 		void ClearResources();
 

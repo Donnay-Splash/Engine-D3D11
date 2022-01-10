@@ -7,13 +7,15 @@ namespace Engine
     enum class EngineRendererMode
     {
         Win32,
-        XAML
+        XAML,
+        UWP
     };
 
     struct EngineCreateOptions
     {
         EngineRendererMode RendererMode = EngineRendererMode::XAML;
         HWND HWND = NULL;
+        IUnknown* CoreWindow = nullptr;
         bool FullScreen = false;
         bool VSyncEnabled = true;
         uint32_t ScreenWidth;

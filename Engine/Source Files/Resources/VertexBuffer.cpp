@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-	VertexBuffer::VertexBuffer(void* data, uint32_t vertexCount, size_t vertexSizeInBytes)
+	VertexBuffer::VertexBuffer(void* data, uint64_t vertexCount, size_t vertexSizeInBytes)
 		: GPUResource(D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER), m_stride(static_cast<UINT>(vertexSizeInBytes)), m_DynamicBuffer(data == nullptr)
 	{
 		// The vertex must have a size greater than zero

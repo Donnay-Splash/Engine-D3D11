@@ -7,7 +7,8 @@ namespace Engine
 	ShaderPipeline::ShaderPipeline(uint32_t inputFlags,
 		Shader vertexShader,
 		Shader pixelShader /*= empty*/,
-		Shader geometryShader/* = empty*/)
+		Shader geometryShader/* = empty*/,
+		bool transparent)
 	{
 		// Vailidate input
 		EngineAssert(vertexShader.ShaderCode != nullptr || vertexShader.Type == ShaderType::Vertex);
@@ -42,6 +43,17 @@ namespace Engine
 		psoDesc.NumRenderTargets = 1;
 		psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		psoDesc.SampleDesc.Count = 1;
+
+		if (transparent)
+		{
+			psoDesc.BlendState.RenderTarget[0].BlendEnable = TRUE;
+			psoDesc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+			psoDesc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+			psoDesc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+			psoDesc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+			psoDesc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+			psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+		}
 
 		Utils::DirectXHelpers::ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 	}

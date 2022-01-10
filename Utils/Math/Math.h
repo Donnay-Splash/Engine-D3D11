@@ -59,6 +59,7 @@ namespace Utils
             // Aspect ratio of viewspace x:y how many units in x per every y unit (x/y)
             static Matrix CreatePerspectiveProjectionMatrix(float fovY, float aspectHByW, float nearClip, float farClip);
             static Matrix CreateOrthographicProjectionMatrix(float viewWidth, float viewHeight, float nearClip, float farClip);
+            static Matrix CreateOrthographicProjectionMatrix(float viewLeft, float viewHRight, float viewBottom, float viewTop, float nearClip, float farClip);
 
             Vector3 TransformNormal(const Vector3& normal) const;
 
@@ -302,13 +303,13 @@ namespace Utils
         * Color
         *
         ****************************************************************************/
-        class Color : public DirectX::XMFLOAT4A
+        class Color : public DirectX::XMFLOAT4
         {
         public:
-            Color() : XMFLOAT4A(0.0f, 0.0f, 0.0f, 1.0f) {}
+            Color() : XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) {}
             Color(float r, float g, float b, float a = 1.0f)
-                : XMFLOAT4A(r, g, b, a) {}
-            Color(DirectX::XMVECTORF32 color) : XMFLOAT4A(color.f) {}
+                : XMFLOAT4(r, g, b, a) {}
+            Color(DirectX::XMVECTORF32 color) : XMFLOAT4(color.f) {}
             inline Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
             static Color FromRGBA(uint32_t rgba);

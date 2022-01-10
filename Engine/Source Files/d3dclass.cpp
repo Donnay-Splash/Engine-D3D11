@@ -115,6 +115,12 @@ namespace Engine
 		// Query the debug device from the device
 		Utils::DirectXHelpers::ThrowIfFailed(m_device.As(&m_debugDevice));
 
+        Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue;
+        Utils::DirectXHelpers::ThrowIfFailed(m_device.As(&infoQueue));
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+
+
 		// Create the command queue, allocator and list
 		CreateCommandList();
 
@@ -128,6 +134,9 @@ namespace Engine
 			break;
 		case EngineRendererMode::XAML:
 			CreateSwapChain_XAML(m_createOptions.ScreenWidth, m_createOptions.ScreenHeight);
+			break;
+		case EngineRendererMode::UWP:
+                CreateSwapChain_UWP(m_createOptions.ScreenWidth, m_createOptions.ScreenHeight);
 			break;
 		default:
 			// Incorrect enum value passed in
@@ -233,6 +242,50 @@ namespace Engine
 
 		CreateBackBufferResources(screenWidth, screenHeight);
 	}
+
+    void D3DClass::CreateSwapChain_UWP(uint32_t screenWidth, uint32_t screenHeight)
+    {
+        if (m_swapChain == nullptr)
+        {
+            DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+            SecureZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+
+            // Set to a single back buffer.
+            swapChainDesc.BufferCount = kBufferCount;
+            swapChainDesc.Width = screenWidth;
+            swapChainDesc.Height = screenHeight;
+            swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+            // Set the usage of the back buffer.
+            swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+            // Turn multisampling off.
+            swapChainDesc.SampleDesc.Count = 1;
+            swapChainDesc.SampleDesc.Quality = 0;
+
+            // Discard the back buffer contents after presenting.
+            swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+            // Don't set the advanced flags.
+            swapChainDesc.Flags = 0;
+
+            // Create the swap chain
+            Microsoft::WRL::ComPtr<IDXGISwapChain1> tempSwapChain;
+            auto hr = m_factory->CreateSwapChainForCoreWindow(GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue(), m_createOptions.CoreWindow, &swapChainDesc, NULL, tempSwapChain.GetAddressOf());
+            Utils::DirectXHelpers::ThrowIfFailed(hr);
+
+            // Convert to SwapChain3
+            Utils::DirectXHelpers::ThrowIfFailed(tempSwapChain.As(&m_swapChain));
+        }
+        else
+        {
+            // Resize swap chain
+            // TODO: Need to remember to release back buffers.
+            m_swapChain->ResizeBuffers(kBufferCount, screenWidth, screenHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+        }
+
+        CreateBackBufferResources(screenWidth, screenHeight);
+    }
 
 	void D3DClass::CreateSwapChain_XAML(uint32_t screenWidth, uint32_t screenHeight)
 	{
@@ -374,6 +427,9 @@ namespace Engine
 			case EngineRendererMode::XAML:
 				CreateSwapChain_XAML(newWidth, newHeight);
 				break;
+			case EngineRendererMode::UWP:
+                CreateSwapChain_UWP(newWidth, newHeight);
+                break;
 			default:
 				// Incorrect enum value passed in
 				EngineAssert(false);

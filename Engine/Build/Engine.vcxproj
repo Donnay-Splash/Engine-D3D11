@@ -632,6 +632,7 @@
       <ObjectFileOutput>
       </ObjectFileOutput>
       <EntryPointName>PSMain</EntryPointName>
+      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</EnableDebuggingInformation>
     </FxCompile>
     <FxCompile Include="..\Shaders\ImGui.vs.hlsl">
       <ShaderType>Vertex</ShaderType>
@@ -641,6 +642,7 @@
       <ObjectFileOutput>
       </ObjectFileOutput>
       <EntryPointName>VSMain</EntryPointName>
+      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</EnableDebuggingInformation>
     </FxCompile>
     <FxCompile Include="..\Shaders\PassThrough.ps.hlsl">
       <ShaderType>Pixel</ShaderType>
@@ -715,12 +717,12 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\packages\directxtk12_desktop_2015.2019.2.7.1\build\native\directxtk12_desktop_2015.targets" Condition="Exists('..\..\packages\directxtk12_desktop_2015.2019.2.7.1\build\native\directxtk12_desktop_2015.targets')" />
+    <Import Project="..\..\packages\directxtk12_desktop_2017.2021.11.8.1\build\native\directxtk12_desktop_2017.targets" Condition="Exists('..\..\packages\directxtk12_desktop_2017.2021.11.8.1\build\native\directxtk12_desktop_2017.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\directxtk12_desktop_2015.2019.2.7.1\build\native\directxtk12_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\directxtk12_desktop_2015.2019.2.7.1\build\native\directxtk12_desktop_2015.targets'))" />
+    <Error Condition="!Exists('..\..\packages\directxtk12_desktop_2017.2021.11.8.1\build\native\directxtk12_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\directxtk12_desktop_2017.2021.11.8.1\build\native\directxtk12_desktop_2017.targets'))" />
   </Target>
 </Project>

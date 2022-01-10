@@ -4,6 +4,68 @@
 
 namespace Engine
 {
+    ImGuiDrawData::ImGuiDrawData(int vertexCount, int indexCount)
+    {
+        m_PositionBuffer = std::make_shared<VertexBuffer>(nullptr, vertexCount, sizeof(ImVec2));
+        m_UVBuffer = std::make_shared<VertexBuffer>(nullptr, vertexCount, sizeof(ImVec2));
+        m_ColorBuffer = std::make_shared<VertexBuffer>(nullptr, vertexCount, sizeof(Utils::Maths::Color));
+
+        m_IndexBuffer = std::make_shared<IndexBuffer>(nullptr, indexCount, false);
+
+        m_VertexCount = vertexCount;
+        m_IndexCount = indexCount;
+    }
+
+    void ImGuiDrawData::ResizeBuffers(uint64_t vertexCount, uint32_t indexCount)
+    {
+        if (vertexCount > m_VertexCount)
+        {
+            m_PositionBuffer = std::make_shared<VertexBuffer>(nullptr, vertexCount + 5000, sizeof(ImVec2));
+            m_UVBuffer = std::make_shared<VertexBuffer>(nullptr, vertexCount + 5000, sizeof(ImVec2));
+            m_ColorBuffer = std::make_shared<VertexBuffer>(nullptr, vertexCount + 5000, sizeof(Utils::Maths::Color));
+
+            m_VertexCount = vertexCount + 5000;
+        }
+
+        if (indexCount > m_IndexCount)
+        {
+            m_IndexBuffer = std::make_shared<IndexBuffer>(nullptr, indexCount + 5000, false);
+
+            m_IndexCount = indexCount + 5000;
+        }
+    }
+
+    void ImGuiDrawData::SetVertexData(std::vector<ImDrawVert> verts)
+    {
+        std::vector<ImVec2> positions(verts.size());
+        std::vector<ImVec2> uvs(verts.size());
+        std::vector<Utils::Maths::Color> colors(verts.size());
+        for (size_t idx = 0; idx < verts.size(); idx++)
+        {
+            positions[idx] = verts[idx].pos;
+            uvs[idx] = verts[idx].uv;
+            colors[idx] = Utils::Maths::Color::FromARGB(verts[idx].col);
+        }
+
+        m_PositionBuffer->SetNewData(positions.data(), positions.size() * sizeof(ImVec2));
+        m_UVBuffer->SetNewData(uvs.data(), uvs.size() * sizeof(ImVec2));
+        m_ColorBuffer->SetNewData(colors.data(), colors.size() * sizeof(Utils::Maths::Color));
+    }
+
+    void ImGuiDrawData::SetIndexData(std::vector<unsigned short> indices)
+    {
+        m_IndexBuffer->SetNewData(indices.data(), indices.size());
+    }
+
+    void ImGuiDrawData::UploadData(ID3D12GraphicsCommandList* cmdlist) const
+    {
+        m_PositionBuffer->UploadData(cmdlist, 0);
+        m_UVBuffer->UploadData(cmdlist, 1);
+        m_ColorBuffer->UploadData(cmdlist, 2);
+
+        m_IndexBuffer->UploadData(cmdlist);
+    }
+
     ImGuiRenderer::ImGuiRenderer()
     {
 
@@ -18,16 +80,14 @@ namespace Engine
     {
         m_ShaderPipeline = shaderPipeline;
 
-        m_VertexBuffers.resize(frameCount, nullptr);
-        m_IndexBuffers.resize(frameCount, nullptr);
+        m_DrawBuffers.clear();
         m_CurrentFrameIndex = 0;
         m_FrameCount = frameCount;
 
         // Init buffers
         for (int i = 0; i < m_FrameCount; ++i)
         {
-            m_VertexBuffers[i] = std::make_shared<VertexBuffer>(nullptr, c_DefaultBufferSize, sizeof(ImDrawVert));
-            m_IndexBuffers[i] = std::make_shared<IndexBuffer>(nullptr, c_DefaultBufferSize, false);
+            m_DrawBuffers.emplace_back(c_DefaultBufferSize, c_DefaultBufferSize);
         }
 
         ImGuiIO& io = ImGui::GetIO();
@@ -51,6 +111,7 @@ namespace Engine
         // Kick off new ImGui frame just before updating scene
         ImGui::NewFrame();
 
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
         // As a test show the demo window
         ImGui::ShowDemoWindow();
     }
@@ -67,24 +128,13 @@ namespace Engine
         // Only frame for valid display sizes
         if (drawData->DisplaySize.x > 0.0f && drawData->DisplaySize.y > 0.0f)
         {
-            Utils::Maths::Matrix projectionMatrix = Utils::Maths::Matrix::CreateOrthographicProjectionMatrix(drawData->DisplaySize.x, drawData->DisplaySize.y, -1.0f, 1.0f);
+            Utils::Maths::Matrix projectionMatrix = Utils::Maths::Matrix::CreateOrthographicProjectionMatrix(0, drawData->DisplaySize.x, drawData->DisplaySize.y, 0, 0, 1.0f);
 
-            uint64_t vertexBufferSize = drawData->TotalVtxCount * sizeof(ImDrawVert);
+            uint64_t vertexCount = drawData->TotalVtxCount;
             uint32_t indexCount = drawData->TotalIdxCount;
 
-            VertexBuffer::Ptr currentFrameVerts = m_VertexBuffers[m_CurrentFrameIndex];
-            IndexBuffer::Ptr currentFrameIndices = m_IndexBuffers[m_CurrentFrameIndex];
-
-            if (vertexBufferSize > currentFrameVerts->GetBufferSize())
-            {
-                m_VertexBuffers[m_CurrentFrameIndex] = std::make_shared<VertexBuffer>(nullptr, drawData->TotalVtxCount + 5000, sizeof(ImDrawVert));
-                currentFrameVerts = m_VertexBuffers[m_CurrentFrameIndex];
-            }
-            if (indexCount > currentFrameIndices->GetIndexCount())
-            {
-                m_IndexBuffers[m_CurrentFrameIndex] = std::make_shared<IndexBuffer>(nullptr, indexCount + 5000, false);
-                currentFrameIndices = m_IndexBuffers[m_CurrentFrameIndex];
-            }
+            ImGuiDrawData currentFrameData = m_DrawBuffers[m_CurrentFrameIndex];
+            currentFrameData.ResizeBuffers(vertexCount, indexCount);
 
             std::vector<ImDrawVert> imVerts(drawData->TotalVtxCount);
             std::vector<ImDrawIdx> imIndices(drawData->TotalIdxCount);
@@ -101,11 +151,10 @@ namespace Engine
                 indxDst += cmdList->IdxBuffer.size();
             }
 
-            currentFrameVerts->SetNewData(imVerts.data(), imVerts.size() * sizeof(ImDrawVert));
-            currentFrameIndices->SetNewData(imIndices.data(), (uint32_t)imIndices.size());
+            currentFrameData.SetVertexData(imVerts);
+            currentFrameData.SetIndexData(imIndices);
 
-            currentFrameVerts->UploadData(commandList, 0);
-            currentFrameIndices->UploadData(commandList);
+            currentFrameData.UploadData(commandList);
 
             // Setup render state. We might as well just create a material for UI rendering
             m_ShaderPipeline->UploadData(commandList);

@@ -7,7 +7,7 @@ namespace Engine
     {
     public:
         using Ptr = std::shared_ptr<VertexBuffer>;
-        VertexBuffer(void* data, uint32_t vertexCount, size_t vertexSizeInBytes);
+        VertexBuffer(void* data, uint64_t vertexCount, size_t vertexSizeInBytes);
 
         void UploadData(ID3D12GraphicsCommandList* commandList, UINT inputSlot);
         void SetNewData(void* data, uint64_t dataSize);

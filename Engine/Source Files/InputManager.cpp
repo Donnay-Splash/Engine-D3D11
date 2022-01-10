@@ -46,13 +46,40 @@ namespace Engine
 
         // Here we can update ImGui input
         ImGuiIO& io = ImGui::GetIO();
-        io.KeyCtrl = IsKeyDown(VK_CONTROL);
-        io.KeyAlt = IsKeyDown(VK_MENU);
-        io.KeyShift = IsKeyDown(VK_SHIFT);
+        io.KeyCtrl = IsKeyDown(KeyCodes::CONTROL);
+        io.KeyAlt = IsKeyDown(KeyCodes::ALT);
+        io.KeyShift = IsKeyDown(KeyCodes::SHIFT);
         io.KeySuper = false;
+
+        for (auto key : m_keysPressedThisFrame)
+        {
+            io.KeysDown[key] = true;
+        }
+
+        for (auto key : m_currentState.KeysReleased)
+        {
+            io.KeysDown[key] = false;
+        }
+
+
         // TODO: Find a way to get ImGui to use out Math::Vector types
         io.MousePos = ImVec2(m_currentState.PointerPosition.x, m_currentState.PointerPosition.y);
+        io.MouseDown[0] = IsMouseButtonDown(MouseButtons::Left);
+        io.MouseDown[1] = IsMouseButtonDown(MouseButtons::Right);
+        io.MouseDown[2] = IsMouseButtonDown(MouseButtons::Middle);
+
+        io.MouseClicked[0] = IsMouseButtonPressed(MouseButtons::Left);
+        io.MouseClicked[1] = IsMouseButtonPressed(MouseButtons::Right);
+        io.MouseClicked[2] = IsMouseButtonPressed(MouseButtons::Middle);
+
+        io.MouseReleased[0] = IsMouseButtonReleased(MouseButtons::Left);
+        io.MouseReleased[1] = IsMouseButtonReleased(MouseButtons::Right);
+        io.MouseReleased[2] = IsMouseButtonReleased(MouseButtons::Middle);
+
+        io.MouseWheel = m_currentState.WheelDelta;
+
         ImGuiMouseCursor cursor = io.MouseDrawCursor ? ImGuiMouseCursor_None : ImGui::GetMouseCursor();
+
 
         // This isn't very platform agnostic. But at this point I feel like we're killing all other platforms and instead opting for a single Win32 platform
         // Maybe Console if we can be bothered
@@ -101,4 +128,14 @@ namespace Engine
     {
         return (m_currentState.MouseButtonPressed & mouseButton) != 0;
     }
+
+    bool InputManager::IsMouseButtonPressed(uint32_t mouseButtons)
+    {
+        return IsMouseButtonDown(mouseButtons) && (m_previousState.MouseButtonPressed & mouseButtons) == 0;
+    }
+
+    bool InputManager::IsMouseButtonReleased(uint32_t mouseButtons)
+    {
+        return !IsMouseButtonDown(mouseButtons) && (m_previousState.MouseButtonPressed & mouseButtons) != 0;
+    } 
 }

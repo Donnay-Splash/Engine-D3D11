@@ -15,7 +15,6 @@ namespace Engine
 
 		virtual ~GPUResource() 
 		{
-			m_resource->Release();
 			m_resource = nullptr;
 		}
 
