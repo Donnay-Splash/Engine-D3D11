@@ -36,13 +36,13 @@ make -C macOS
 
 The build output is ignored by Git. A successful bootstrap build verifies only that this standalone executable compiles and runs on macOS; it is not evidence that the engine links or that rendering works there.
 
-## Work still required to link the engine on macOS
+## Work still required to run the engine on macOS
 
-Before a macOS project can link the existing engine, platform-dependent engine interfaces and implementation need to be separated from portable engine code. At minimum, this entails:
+The current macOS target is only a command-line bootstrap. Getting to a native app that displays engine-rendered output requires a macOS host and a portable engine core; the existing D3D11 engine cannot simply be linked unchanged. At minimum, this entails:
 
 1. Isolating the Windows application host, Windows APIs, and platform-specific timing/input facilities from the engine code intended for macOS.
-2. Defining a renderer boundary and providing a macOS renderer implementation (for example, Metal), while retaining the existing D3D11 renderer for Windows.
+2. Defining a thin graphics API interface and implementing a Metal renderer behind it. Metal is the initial target; the existing D3D11 code is migration reference to selectively preserve from, not a promised active Windows backend.
 3. Replacing DirectXMath dependencies in shared engine-facing types with a platform-independent math layer, or another implementation that can be used by both platform targets.
-4. Updating build/link configuration and validating the engine target independently on macOS.
+4. Adding a CMake build for the macOS host and portable engine components, then validating the engine target independently of Visual Studio project files.
 
 None of those engine, math, or renderer ports are part of the bootstrap target.
