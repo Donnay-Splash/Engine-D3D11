@@ -2,17 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch macOS command-line executable",
+            "name": "Launch macOS app",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/macOS/build/engine-macos",
+            "program": "${workspaceFolder}/build/macos/engine-macos.app/Contents/MacOS/engine-macos",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "Build macOS executable"
+            "preLaunchTask": "Build macOS app"
         }
     ]
 }

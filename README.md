@@ -10,11 +10,11 @@ Some GIFs below demonstrate some of the features included in the framework.
 
 To be continued...
 
-## macOS build setup
+## macOS app setup
 
-The first macOS CMake target is a standalone bootstrap executable; it does not compile or link the Windows/D3D11 engine, open a window, or render. Building the existing engine itself on macOS requires the platform and renderer ports described in the [macOS Metal engine roadmap](docs/macos-metal-engine-roadmap.md).
+The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit view. It does not compile or link the Windows/D3D11 engine or render a Metal frame. If a usable Metal device is unavailable, the app displays an error and exits. AppKit and MetalKit integration is confined to a small Objective-C++ host file; engine integration and rendering are later milestones in the [macOS Metal engine roadmap](docs/macos-metal-engine-roadmap.md).
 
-Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit; the current bootstrap does not link those frameworks. Verify the toolchain with:
+Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
 ```sh
 xcode-select -p
@@ -34,10 +34,10 @@ cmake -S . -B build/macos -G "Unix Makefiles" \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=13.1
 cmake --build build/macos --target engine-macos
-./build/macos/engine-macos
+open build/macos/engine-macos.app
 ```
 
-The architecture and deployment target default to arm64 and macOS 13.1 in CMake and can be overridden for another supported setup. In VS Code, select **Launch macOS engine bootstrap** to configure and build the `engine-macos` target before launching it with LLDB. **Build macOS engine** is also available as the default build task. The existing `make -C macOS` bootstrap remains available separately.
+The architecture and deployment target default to arm64 and macOS 13.1 in CMake and can be overridden for another supported setup. The macOS 13.1 deployment floor remains provisional and has not been runtime-tested here. In VS Code, select **Launch macOS app** to configure and build the `engine-macos` target before launching it with LLDB. **Build macOS app** is also available as the default build task. The existing `make -C macOS` command remains available as a separate command-line bootstrap.
 
 ## Build status and platform dependencies
 
@@ -54,7 +54,7 @@ These dependencies are distinct:
 
 ## macOS command-line bootstrap
 
-The standalone command-line bootstrap is available through both the CMake `engine-macos` target and the original Makefile. Neither path compiles or links the engine or utilities, creates a window, or renders anything. They do not change the Visual Studio projects.
+The original Makefile still builds a standalone command-line bootstrap. It does not compile or link the engine or utilities, create a window, or render. The CMake target is now the native GUI app described above; it creates a window and `MTKView` but does not render a frame or use engine code. Neither path changes the Visual Studio projects.
 
 To use the original Makefile path, build and run it from the repository root:
 
@@ -63,15 +63,15 @@ make -C macOS
 ./macOS/build/engine-macos
 ```
 
-The build output is ignored by Git. A successful bootstrap build verifies only that this standalone executable compiles and runs on macOS; it is not evidence that the engine links or that rendering works there.
+The Makefile build output is ignored by Git. A successful bootstrap build verifies only that this standalone executable compiles and runs on macOS; it is not evidence that the engine links or that rendering works there.
 
 ## Work still required to run the engine on macOS
 
-The current macOS target is only a command-line bootstrap. Getting to a native app that displays engine-rendered output requires a macOS host and a portable engine core; the existing D3D11 engine cannot simply be linked unchanged. At minimum, this entails:
+The current CMake app is a native window and `MTKView` host, but it does not display engine-rendered output. The existing D3D11 engine cannot simply be linked unchanged. At minimum, completing the engine port entails:
 
 1. Isolating the Windows application host, Windows APIs, and platform-specific timing/input facilities from the engine code intended for macOS.
 2. Defining a thin graphics API interface and implementing a Metal renderer behind it. Metal is the initial target; the existing D3D11 code is migration reference to selectively preserve from, not a promised active Windows backend.
 3. Replacing DirectXMath dependencies in shared engine-facing types with a platform-independent math layer, or another implementation that can be used by both platform targets.
-4. Adding a CMake build for the macOS host and portable engine components, then validating the engine target independently of Visual Studio project files.
+4. Adding a CMake target for the portable engine components and connecting them to the macOS host, then validating the engine target independently of Visual Studio project files.
 
-None of those engine, math, or renderer ports are part of the bootstrap target.
+None of those engine, math, or renderer ports are part of the Feature 2 host.

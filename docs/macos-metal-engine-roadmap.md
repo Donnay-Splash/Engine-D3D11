@@ -111,28 +111,28 @@ Do not delete legacy source as a shortcut to a clean macOS build. Keep it availa
 
 1. **Add the top-level CMake project.** Set the C++ standard explicitly and declare supported deployment target/architectures in a clear, overridable way.
 2. **Create a minimal macOS executable target.** Initially compile only the existing bootstrap/host entry point; do not pull in legacy engine source lists wholesale.
-3. **Avoid Objective-C++ where possible.** We should keep everything standard C++ as much as we can, we should use apples Metal-CPP to do all of the metial interfacing. If any objective C is required it should be brought up and explained before implementation.
-4. **Add an explicit portable-core target.** Start with a small source list that has no Windows, D3D11, DXGI, DirectXMath, or Visual Studio precompiled-header dependency.
-5. **Link Apple frameworks through CMake.** Add AppKit and MetalKit/Metal only to the target that needs them.
-6. **Keep or retire the Make bootstrap deliberately.** Preserve it until the CMake executable builds equivalently; then either remove it or make its continued role explicit.
+3. **Avoid Objective-C++ where possible.** Use Metal-CPP for Metal APIs where relevant. AppKit and MetalKit host APIs require a small Objective-C++ boundary, which is implemented in Feature 2; keep other code in C++.
+4. **Keep or retire the Make bootstrap deliberately.** Keep the Makefile as a separate command-line bootstrap alongside the CMake GUI target.
 
 **Acceptance:** The documented CMake configure/build succeeds from a clean checkout and does not use `.sln` or `.vcxproj` files.
 
-**Progress:** The CMake bootstrap executable and VS Code configure/build/launch workflow are in place. This target builds only `macOS/main.cpp`; adding a portable-core target and sources remains future work. The native macOS host and Metal integration are covered by later features.
+**Status:** Complete. A clean CMake configure/build/run succeeds without Visual Studio project files. The portable-core target is tracked in Feature 4, and Apple framework linkage is added to the Feature 2 host that needs it. The Makefile remains a separate command-line bootstrap.
 
 ### Feature 2 - Display an empty native macOS window
 
-1. **Add the AppKit application lifecycle.** Start an `NSApplication`, create/own the application delegate, and terminate cleanly when the window closes.
-2. **Create a resizable `NSWindow`.** Establish a clear initial size/title and handle close and resize without involving engine rendering.
-3. **Host a MetalKit view.** Add an `MTKView` as the window content view, initially without engine dependencies.
-4. **Exercise the host lifecycle.** Verify launch, resize, close, and repeat launch; handle the absence of a usable Metal device explicitly when creating the view.
-5. **Document app packaging needs.** Decide whether the first target is a command-line-launched executable or a `.app` bundle; add bundle metadata/signing only when required by the selected run/debug workflow.
+1. **Add the AppKit application lifecycle.** Start an `NSApplication`, own the application delegate, and terminate cleanly when the window closes.
+2. **Create a resizable `NSWindow`.** Use the title "Engine" and an initial 800×600-point content size; center the window and handle resize without engine rendering.
+3. **Host a MetalKit view.** Add an `MTKView` as the window content view. Select the system default Metal device to initialize it; if unavailable, show an actionable native alert and terminate with failure rather than displaying a blank fallback.
+4. **Keep the host boundary narrow.** Use a small Objective-C++ file for AppKit/MetalKit lifecycle and view setup. Keep other code in C++; use Metal-CPP for Metal APIs where relevant.
+5. **Package and exercise the app.** Build a `.app` bundle without adding code signing unless the local run/debug workflow requires it. Verify launch, resize, close, and repeat launch.
 
 **Acceptance:** Running the CMake-built app opens a native, resizable window and exits cleanly. The host has no dependency on the D3D11 engine.
 
+**Status:** Complete. The CMake `.app` configures and builds, and the window was launched, resized, closed, and relaunched on the documented Apple Silicon host. The no-device error path is explicit but was not runtime-exercised because this host has an Apple M1 Metal device; macOS 13.1 remains a provisional deployment floor and was not runtime-tested.
+
 ### Feature 3 - Present a minimal Metal frame
 
-1. **Create the Metal device.** Select the system default device and report device-unavailable or initialization failures as actionable errors.
+1. **Reuse the host's Metal device.** Feature 2 selects the system default device for `MTKView`; report any later initialization failures as actionable errors.
 2. **Create the command queue and view delegate.** Tie one frame's work to the `MTKView` draw lifecycle and avoid rendering when there is no drawable.
 3. **Present a clear-only frame.** Configure drawable sizing and color format, encode a clear pass, submit the command buffer, and let the view present the drawable.
 4. **Handle resize and shutdown.** Verify drawable size changes, view/window teardown, and repeated launch/close.

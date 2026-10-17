@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Configure macOS engine",
+            "label": "Configure macOS app",
             "type": "shell",
             "command": "cmake",
             "args": [
@@ -19,7 +19,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Build macOS executable",
+            "label": "Build macOS app",
             "type": "shell",
             "command": "cmake",
             "args": [
