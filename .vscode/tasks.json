@@ -2,18 +2,39 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build macOS executable",
+            "label": "Configure macOS engine",
             "type": "shell",
-            "command": "make",
+            "command": "cmake",
             "args": [
-                "-C",
-                "macOS"
+                "-S",
+                "${workspaceFolder}",
+                "-B",
+                "${workspaceFolder}/build/macos",
+                "-G",
+                "Unix Makefiles"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": false
+            "options": {
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Build macOS executable",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build/macos",
+                "--target",
+                "engine-macos"
+            ],
+            "dependsOn": "Configure macOS engine",
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc"
         }
     ]
 }

@@ -96,7 +96,7 @@ Do not delete legacy source as a shortcut to a clean macOS build. Keep it availa
 
 ## Phased features and bite-sized tasks
 
-### Feature 0 - Confirm the macOS build baseline
+### Feature 0 - Confirm the macOS build baseline (Complete)
 
 1. **Record the host toolchain.** Capture available Apple Clang, CMake, Xcode Command Line Tools/Xcode, SDK version, Metal Toolchain, and `xcrun` availability. Current verified baseline: Apple Silicon M1/arm64, macOS 26.6.1, Xcode 26.6, SDK 26.5, CMake 4.4.4, GNU Make 3.81, and Metal Toolchain 17F109.
 2. **Choose supported hardware and minimum OS.** For first bring-up, target arm64 and provisionally set macOS 13.1 as the deployment floor. This reflects the available Apple Silicon test machine, not a promise of release support; revisit if additional test machines or Intel support are required.
@@ -105,16 +105,20 @@ Do not delete legacy source as a shortcut to a clean macOS build. Keep it availa
 
 **Acceptance:** A new contributor can verify the required tools and SDK using documented commands, with no unrecorded dependency installation.
 
+**Status:** Complete. The toolchain versions, SDK frameworks, Metal tools, architecture, and deployment floor have been checked on the documented Apple Silicon host. The CMake configure/build/run commands are now documented in the README.
+
 ### Feature 1 - Create a CMake build without Visual Studio dependencies
 
 1. **Add the top-level CMake project.** Set the C++ standard explicitly and declare supported deployment target/architectures in a clear, overridable way.
 2. **Create a minimal macOS executable target.** Initially compile only the existing bootstrap/host entry point; do not pull in legacy engine source lists wholesale.
-3. **Introduce Objective-C++ only where required.** Enable OBJCXX for the native app and Metal host files while keeping portable engine code standard C++.
+3. **Avoid Objective-C++ where possible.** We should keep everything standard C++ as much as we can, we should use apples Metal-CPP to do all of the metial interfacing. If any objective C is required it should be brought up and explained before implementation.
 4. **Add an explicit portable-core target.** Start with a small source list that has no Windows, D3D11, DXGI, DirectXMath, or Visual Studio precompiled-header dependency.
 5. **Link Apple frameworks through CMake.** Add AppKit and MetalKit/Metal only to the target that needs them.
 6. **Keep or retire the Make bootstrap deliberately.** Preserve it until the CMake executable builds equivalently; then either remove it or make its continued role explicit.
 
 **Acceptance:** The documented CMake configure/build succeeds from a clean checkout and does not use `.sln` or `.vcxproj` files.
+
+**Progress:** The CMake bootstrap executable and VS Code configure/build/launch workflow are in place. This target builds only `macOS/main.cpp`; adding a portable-core target and sources remains future work. The native macOS host and Metal integration are covered by later features.
 
 ### Feature 2 - Display an empty native macOS window
 

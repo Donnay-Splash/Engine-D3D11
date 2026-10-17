@@ -10,6 +10,35 @@ Some GIFs below demonstrate some of the features included in the framework.
 
 To be continued...
 
+## macOS build setup
+
+The first macOS CMake target is a standalone bootstrap executable; it does not compile or link the Windows/D3D11 engine, open a window, or render. Building the existing engine itself on macOS requires the platform and renderer ports described in the [macOS Metal engine roadmap](docs/macos-metal-engine-roadmap.md).
+
+Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit; the current bootstrap does not link those frameworks. Verify the toolchain with:
+
+```sh
+xcode-select -p
+xcodebuild -version
+xcrun --sdk macosx --show-sdk-path
+clang --version
+cmake --version
+make --version
+xcrun --find metal
+xcrun --find metallib
+```
+
+Configure, build, and run from the repository root:
+
+```sh
+cmake -S . -B build/macos -G "Unix Makefiles" \
+  -DCMAKE_OSX_ARCHITECTURES=arm64 \
+  -DCMAKE_OSX_DEPLOYMENT_TARGET=13.1
+cmake --build build/macos --target engine-macos
+./build/macos/engine-macos
+```
+
+The architecture and deployment target default to arm64 and macOS 13.1 in CMake and can be overridden for another supported setup. In VS Code, select **Launch macOS engine bootstrap** to configure and build the `engine-macos` target before launching it with LLDB. **Build macOS engine** is also available as the default build task. The existing `make -C macOS` bootstrap remains available separately.
+
 ## Build status and platform dependencies
 
 The original projects use Visual Studio/MSBuild (`Engine.sln` and `.vcxproj` files), Visual C++ toolset v142, and the Windows 10 SDK. They use precompiled headers and do not declare an explicit C++ language standard in the project files. The solution contains Win32 and x64 projects as well as WinRT projects (including ARM configurations); it has no existing macOS target.
@@ -25,9 +54,9 @@ These dependencies are distinct:
 
 ## macOS command-line bootstrap
 
-The first macOS target is deliberately a standalone command-line executable. It establishes a native Clang/Make build and entry point to build from, but does not compile or link the engine or utilities and does not create a window or render anything. It does not change the Visual Studio projects.
+The standalone command-line bootstrap is available through both the CMake `engine-macos` target and the original Makefile. Neither path compiles or links the engine or utilities, creates a window, or renders anything. They do not change the Visual Studio projects.
 
-With Apple Clang and Make available (for example, from the Xcode Command Line Tools), build and run it from the repository root:
+To use the original Makefile path, build and run it from the repository root:
 
 ```sh
 make -C macOS
