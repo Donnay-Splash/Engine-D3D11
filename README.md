@@ -12,7 +12,7 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit view. It does not compile or link the Windows/D3D11 engine or render a Metal frame. If a usable Metal device is unavailable, the app displays an error and exits. AppKit and MetalKit integration is confined to a small Objective-C++ host file; engine integration and rendering are later milestones in the [macOS Metal engine roadmap](docs/macos-metal-engine-roadmap.md).
+The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit view that continuously renders a simple MSL triangle over a clear background. It does not compile or link the Windows/D3D11 engine; this is a host-level rendering proof. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. AppKit and MetalKit integration is confined to a small Objective-C++ host file; engine integration is a later milestone in the [macOS Metal engine roadmap](docs/macos-metal-engine-roadmap.md).
 
 Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
@@ -54,7 +54,7 @@ These dependencies are distinct:
 
 ## macOS command-line bootstrap
 
-The original Makefile still builds a standalone command-line bootstrap. It does not compile or link the engine or utilities, create a window, or render. The CMake target is now the native GUI app described above; it creates a window and `MTKView` but does not render a frame or use engine code. Neither path changes the Visual Studio projects.
+The original Makefile still builds a standalone command-line bootstrap. It does not compile or link the engine or utilities, create a window, or render. The CMake target is the native GUI app described above; it renders a simple Metal triangle but does not use engine code. Neither path changes the Visual Studio projects.
 
 To use the original Makefile path, build and run it from the repository root:
 

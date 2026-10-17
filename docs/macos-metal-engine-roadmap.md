@@ -134,11 +134,13 @@ Do not delete legacy source as a shortcut to a clean macOS build. Keep it availa
 
 1. **Reuse the host's Metal device.** Feature 2 selects the system default device for `MTKView`; report any later initialization failures as actionable errors.
 2. **Create the command queue and view delegate.** Tie one frame's work to the `MTKView` draw lifecycle and avoid rendering when there is no drawable.
-3. **Present a clear-only frame.** Configure drawable sizing and color format, encode a clear pass, submit the command buffer, and let the view present the drawable.
+3. **Present a clear frame and primitive.** Configure drawable sizing and color format, clear the render target, submit the command buffer, and let the view present the drawable.
 4. **Handle resize and shutdown.** Verify drawable size changes, view/window teardown, and repeated launch/close.
 5. **Add a first shader pipeline.** Prove shader compilation, pipeline creation, command encoding, and presentation end to end with a minimal visible primitive. Use MSL directly for the first proof unless the HLSL cross-compilation investigation is already validated.
 
 **Acceptance:** The window repeatedly displays a Metal-rendered frame and primitive, and errors in device, shader, or pipeline creation are visible rather than silently falling back to a blank success state.
+
+**Status:** The CMake app builds and packages a native MSL triangle shader; the host creates a Metal pipeline and submits frames through the `MTKView` draw lifecycle. Shader rebuilds update the bundled library. An offscreen Metal check loaded the packaged shader, rendered the triangle, and confirmed the center pixel differs from the clear background. The app has also been visually confirmed working on Apple Silicon, and an initial native-app launch/resize/close/relaunch smoke check succeeded.
 
 ### Feature 4 - Extract a portable engine core
 

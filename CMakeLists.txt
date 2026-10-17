@@ -21,6 +21,7 @@ set(CMAKE_OBJCXX_EXTENSIONS OFF)
 find_library(APPKIT_FRAMEWORK AppKit REQUIRED)
 find_library(METAL_FRAMEWORK Metal REQUIRED)
 find_library(METALKIT_FRAMEWORK MetalKit REQUIRED)
+find_program(XCRUN_EXECUTABLE xcrun REQUIRED)
 
 add_executable(engine-macos MACOSX_BUNDLE macOS/main.mm)
 set_target_properties(engine-macos PROPERTIES
@@ -38,3 +39,26 @@ target_link_libraries(engine-macos PRIVATE
     ${METAL_FRAMEWORK}
     ${METALKIT_FRAMEWORK}
 )
+
+set(METAL_SHADER "${CMAKE_CURRENT_SOURCE_DIR}/macOS/Triangle.metal")
+set(METAL_AIR "${CMAKE_CURRENT_BINARY_DIR}/Triangle.air")
+set(METAL_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/default.metallib")
+
+add_custom_command(
+    OUTPUT "${METAL_AIR}"
+    COMMAND "${XCRUN_EXECUTABLE}" -sdk macosx metal -c "${METAL_SHADER}" -o "${METAL_AIR}"
+    DEPENDS "${METAL_SHADER}"
+    VERBATIM
+)
+add_custom_command(
+    OUTPUT "${METAL_LIBRARY}"
+    COMMAND "${XCRUN_EXECUTABLE}" -sdk macosx metallib "${METAL_AIR}" -o "${METAL_LIBRARY}"
+    DEPENDS "${METAL_AIR}"
+    VERBATIM
+)
+set_source_files_properties("${METAL_LIBRARY}" PROPERTIES
+    GENERATED TRUE
+    HEADER_FILE_ONLY TRUE
+    MACOSX_PACKAGE_LOCATION Resources
+)
+target_sources(engine-macos PRIVATE "${METAL_LIBRARY}")
