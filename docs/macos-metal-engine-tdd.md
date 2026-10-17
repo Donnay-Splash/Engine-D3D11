@@ -155,7 +155,7 @@ Each stage should be turned into a focused implementation spec with its own file
 
 ### 4. Select and migrate original rendering features
 
-- Complete the feature-by-feature inventory: algorithm, data inputs/outputs, D3D11 assumptions, prerequisites, disposition, and visible/testable result.
+- Complete the feature-by-feature inventory: algorithm, data inputs/outputs, D3D11 assumptions, prerequisites, disposition, and visible/testable result. The current source-level inventory and first-effect recommendation are in [Legacy Engine Feature Inventory](legacy-feature-inventory.md).
 - Stabilize basic mesh shading, materials, textures, depth, and render-target/resource lifetime first.
 - Prototype shader authoring/conversion using representative vertex, fragment, and compute/stage needs; measure correctness and tooling before adopting it.
 - Add render-target, compute, synchronization, and multi-pass capabilities only when a selected effect needs them.
