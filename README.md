@@ -12,7 +12,7 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit view that continuously renders a simple MSL triangle over a clear background. It does not compile or link the Windows/D3D11 engine; this is a host-level rendering proof. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. AppKit and MetalKit integration is confined to a small Objective-C++ host file; engine integration is a later milestone in the [macOS Metal engine roadmap](docs/macos-metal-engine-roadmap.md).
+The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit view that continuously renders a simple MSL triangle over a clear background. It does not compile or link the Windows/D3D11 engine; this is a host-level rendering proof. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. AppKit and MetalKit integration is confined to a small Objective-C++ host file; the planned engine/library architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md).
 
 Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
@@ -65,13 +65,10 @@ make -C macOS
 
 The Makefile build output is ignored by Git. A successful bootstrap build verifies only that this standalone executable compiles and runs on macOS; it is not evidence that the engine links or that rendering works there.
 
-## Work still required to run the engine on macOS
+## Engine migration direction
 
-The current CMake app is a native window and `MTKView` host, but it does not display engine-rendered output. The existing D3D11 engine cannot simply be linked unchanged. At minimum, completing the engine port entails:
+The current CMake app is a native window and `MTKView` host, but it does not display engine-rendered output. The existing D3D11 engine cannot simply be linked unchanged. The agreed direction is a portable C++ engine core built as a static library, with a backend-neutral renderer seam and isolated macOS/Metal implementation. The app owns the native window and event loop, supplies its render surface to the engine, and remains a thin host; the engine owns graphics setup and rendering.
 
-1. Isolating the Windows application host, Windows APIs, and platform-specific timing/input facilities from the engine code intended for macOS.
-2. Defining a thin graphics API interface and implementing a Metal renderer behind it. Metal is the initial target; the existing D3D11 code is migration reference to selectively preserve from, not a promised active Windows backend.
-3. Replacing DirectXMath dependencies in shared engine-facing types with a platform-independent math layer, or another implementation that can be used by both platform targets.
-4. Adding a CMake target for the portable engine components and connecting them to the macOS host, then validating the engine target independently of Visual Studio project files.
+The first library-backed slice will move the existing triangle behind the engine interface. Later stages will inventory the original engine features and migrate selected scene and rendering behavior, prioritizing dissertation-critical work without assuming one-to-one parity. DirectXMath and Windows services must be separated or replaced where needed. D3D11 will not be ported: its existing projects remain temporary migration reference and will be retired after a review of migrated behavior and Windows-project impact. D3D12 and Vulkan are future evaluation targets, not current implementation commitments.
 
-None of those engine, math, or renderer ports are part of the Feature 2 host.
+See the [Technical Design](docs/macos-metal-engine-tdd.md) for the module structure, feature disposition, migration stages, and acceptance criteria.
