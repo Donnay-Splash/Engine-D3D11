@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The macOS target currently builds an Objective-C++ host that creates an AppKit window, a MetalKit view, and a Metal triangle renderer in one executable. The original Windows engine is a D3D11-specific static library. This document defines the intended engine/app split and a staged route from the triangle proof to selected original rendering features on a new Metal backend.
+The initial macOS prototype combined the AppKit host, MetalKit surface, and triangle renderer in one Objective-C++ executable. Issue #2 establishes the first library-backed slice: a separate AppKit host links a static engine implementation, with a portable C++ lifecycle core and an isolated Metal surface adapter. The original Windows engine remains a D3D11-specific static library. This document defines the intended engine/app split and a staged route from the triangle proof to selected original rendering features on a new Metal backend.
 
 This is the architecture source of truth for the migration. It supersedes the former macOS Metal engine roadmap. It is a design and migration plan, not an implementation specification for every stage; each stage should get its own implementation spec before work begins.
 
@@ -76,9 +76,11 @@ Input can be added later as platform-neutral engine input values populated by a 
 
 ### App-facing interface qualities
 
-The app-facing interface should stay small: configure/create the engine, attach the platform surface through its adapter, shut down, and receive explicit initialization/runtime failures. Exact names, parameter types, and whether construction returns a result or uses a factory are intentionally left for the first implementation spec.
+The app-facing interface should stay small: configure/create the engine, attach the platform surface through its adapter, shut down, and receive explicit initialization/runtime failures. Issue #2 implements this as `createEngine()`, `Engine::initialize(Surface&, ErrorHandler, Error&)`, and `Engine::shutdown()`; future platform adapters should preserve the same ownership and lifecycle guarantees.
 
 The interface must state lifecycle ordering, surface ownership, resize behavior, frame scheduling, and failure reporting; a C++ type declaration alone is not the whole interface. Initialization failures (for example, unavailable device or invalid shader/pipeline) must be visible to the host rather than producing a success-shaped blank window.
+
+For the first library-backed slice, the host creates an `MTKView` without a device and wraps it with the macOS surface adapter. `Engine::initialize` initializes the renderer before starting the surface callbacks; callbacks drive engine rendering, resize, and runtime failure reporting. The host retains ownership of the view and adapter, and the surface must outlive the engine because the engine keeps a non-owning attachment. `Engine::shutdown` stops surface callbacks before releasing renderer resources, and the host calls it before closing the surface.
 
 ## Build and platform structure
 
@@ -89,7 +91,7 @@ The interface must state lifecycle ordering, surface ownership, resize behavior,
 - Keep the existing command-line bootstrap distinct from the GUI app unless a later decision deliberately removes it.
 - Do not include legacy D3D11 sources or Windows libraries in the new CMake target source/link lists.
 
-The current validated local baseline is Apple Silicon arm64, macOS 26.6.1, Xcode 26.6, macOS SDK 26.5, CMake 4.4.4, GNU Make 3.81, and Metal Toolchain 17F109. macOS 13.1 is the current provisional deployment floor, not a support promise; revalidate the baseline and deployment target when implementation starts. The current CMake setup uses:
+The validated baseline is Apple Silicon arm64, macOS 26.6.1, Xcode 26.6, macOS SDK 26.5, CMake 4.4.4, GNU Make 3.81, and Metal Toolchain 17F109. macOS 13.1 is the current provisional deployment floor, not a support promise; revalidate the baseline and deployment target before publishing support claims. The current CMake setup uses:
 
 ```sh
 cmake -S . -B build/macos -G "Unix Makefiles" \
@@ -98,7 +100,7 @@ cmake -S . -B build/macos -G "Unix Makefiles" \
 cmake --build build/macos
 ```
 
-AppKit, Metal, and MetalKit come from the Apple SDK. The local workstation has already built and run the host-level MSL triangle; a packaged-shader offscreen check confirmed rendered pixels differ from the clear color. These checks validate the host/shader path only, not engine integration. See the README for current configure/build/run instructions.
+AppKit, Metal, and MetalKit come from the Apple SDK. Issue #2 builds the static engine implementation, packages the existing MSL shader, and links the separate GUI host. The CTest lifecycle check exercises attach, initialize, draw, resize, shutdown, and a simulated surface failure through the C++ seam; it does not replace GUI runtime checks on hardware. See the README for current configure/build/run instructions.
 
 ## Legacy feature inventory and disposition
 
@@ -194,7 +196,7 @@ Each stage should be turned into a focused implementation spec with its own file
 ## Risks and decisions to make in implementation specs
 
 - The exact public C++ lifecycle/result types and the exact macOS adapter signature remain open; keep the public surface small and specify ordering, ownership, resize, and errors.
-- Choose whether the host supplies an `MTKView` or a simpler AppKit view/surface that the adapter configures. Preserve host ownership of the window while keeping Metal device and render state in the engine layer.
+- The first slice uses a host-created `MTKView` behind an Objective-C++ surface adapter. Preserve host ownership of the window and view while keeping Metal device and render state in the engine layer.
 - Renderer coupling is broad: scene nodes, components, resources, pass ordering, and shader binding currently include D3D11 concepts. Do not mistake swapping `D3DClass` for a completed port.
 - Matrix conventions and shader-facing layouts can change visible results. Test them before moving complex rendering passes.
 - HLSL conversion may be lossy or have stage/resource limitations. Keep the workflow provisional until representative shaders compile and match behavior.

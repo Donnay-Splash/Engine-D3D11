@@ -12,7 +12,7 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit view that continuously renders a simple MSL triangle over a clear background. It does not compile or link the Windows/D3D11 engine; this is a host-level rendering proof. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. AppKit and MetalKit integration is confined to a small Objective-C++ host file; the planned engine/library architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md).
+The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit surface that continuously renders a simple MSL triangle over a clear background. The app links a static `engine` implementation library; the independently buildable `engine-core` contains the portable C++ lifecycle interface. The AppKit host owns the window, surface, and event loop, while the engine library owns Metal device setup and rendering. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md).
 
 Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
@@ -35,6 +35,20 @@ cmake -S . -B build/macos -G "Unix Makefiles" \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=13.1
 cmake --build build/macos --target engine-macos
 open build/macos/engine-macos.app
+```
+
+Run the app-to-engine lifecycle tests with:
+
+```sh
+ctest --test-dir build/macos --output-on-failure
+```
+
+The portable engine core and lifecycle tests can also be configured and built without the macOS GUI target:
+
+```sh
+cmake -S . -B build/portable -DBUILD_TESTING=ON
+cmake --build build/portable --target engine-core engine-lifecycle-tests
+ctest --test-dir build/portable --output-on-failure
 ```
 
 The architecture and deployment target default to arm64 and macOS 13.1 in CMake and can be overridden for another supported setup. The macOS 13.1 deployment floor remains provisional and has not been runtime-tested here. In VS Code, select **Launch macOS app** to configure and build the `engine-macos` target before launching it with LLDB. **Build macOS app** is also available as the default build task. The existing `make -C macOS` command remains available as a separate command-line bootstrap.
