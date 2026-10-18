@@ -2,6 +2,7 @@
 #define ENGINE_MACOS_ENGINE_BACKEND_H
 
 #include "Engine.h"
+#include "Core/SceneData.h"
 
 namespace engine {
 namespace detail {
@@ -13,6 +14,8 @@ public:
     virtual bool initialize(
         void *surface,
         Size size,
+        const core::SceneData &scene,
+        const core::CameraData &camera,
         const ErrorHandler &errorHandler,
         Error &error) = 0;
     virtual bool render(void *frame, Error &error) = 0;

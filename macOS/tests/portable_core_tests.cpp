@@ -60,6 +60,30 @@ void rowVectorTransformsAndProjectionUseDocumentedConventions()
         "public matrices must have contiguous row-major float storage");
 }
 
+void cameraProjectionUsesPortablePerspectiveAndDepthConventions()
+{
+    using namespace engine::core;
+
+    CameraData camera;
+    camera.verticalFieldOfViewRadians = 1.57079632679f;
+    camera.nearClip = 1.0f;
+    camera.farClip = 11.0f;
+    camera.viewTransform = Matrix4::translation({0.0f, 0.0f, -3.0f});
+    const Vector4 cameraSpacePoint =
+        camera.viewTransform.transform({0.0f, 0.0f, 3.0f, 1.0f});
+    check(close(cameraSpacePoint.z, 0.0f),
+        "camera view transform must map world coordinates into camera space");
+
+    const Matrix4 projection = camera.projection(2.0f);
+    const Vector4 nearPoint = projection.transform({0.0f, 0.0f, 1.0f, 1.0f});
+    const Vector4 farPoint = projection.transform({0.0f, 0.0f, 11.0f, 1.0f});
+    check(close(nearPoint.z / nearPoint.w, 0.0f)
+            && close(farPoint.z / farPoint.w, 1.0f),
+        "camera projection must retain the portable zero-to-one depth range");
+    check(close(projection.at(0, 0) * 2.0f, projection.at(1, 1)),
+        "camera projection must incorporate the drawable aspect ratio");
+}
+
 void sceneDataIsRendererIndependentAndValidatesMeshReferences()
 {
     using namespace engine::core;
@@ -89,6 +113,12 @@ void sceneDataIsRendererIndependentAndValidatesMeshReferences()
 
     std::string error;
     check(scene.validate(error), "valid CPU scene data must be accepted");
+    check(std::is_standard_layout<Vector3>::value
+            && sizeof(Vector3) == sizeof(float) * 3
+            && offsetof(Vector3, x) == 0
+            && offsetof(Vector3, y) == sizeof(float)
+            && offsetof(Vector3, z) == sizeof(float) * 2,
+        "mesh position and normal arrays must have a contiguous float3 vertex layout");
     check(close(scene.materials[0].diffuseColor.y, 0.5f)
             && close(scene.materials[0].opacity, 0.5f)
             && close(scene.materials[0].smoothness, 0.75f),
@@ -119,5 +149,6 @@ void sceneDataIsRendererIndependentAndValidatesMeshReferences()
 int main()
 {
     rowVectorTransformsAndProjectionUseDocumentedConventions();
+    cameraProjectionUsesPortablePerspectiveAndDepthConventions();
     sceneDataIsRendererIndependentAndValidatesMeshReferences();
 }

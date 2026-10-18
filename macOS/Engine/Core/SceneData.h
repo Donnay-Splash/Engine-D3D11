@@ -36,6 +36,17 @@ struct MaterialData
     MaterialData();
 };
 
+struct CameraData
+{
+    Matrix4 viewTransform;
+    float verticalFieldOfViewRadians;
+    float nearClip;
+    float farClip;
+
+    CameraData();
+    Matrix4 projection(float widthOverHeight) const;
+};
+
 struct SceneNodeData
 {
     std::uint32_t parentIndex;

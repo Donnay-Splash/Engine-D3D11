@@ -56,6 +56,20 @@ MaterialData::MaterialData()
 {
 }
 
+CameraData::CameraData()
+    : viewTransform(Matrix4::identity()),
+      verticalFieldOfViewRadians(1.0471975512f),
+      nearClip(0.1f),
+      farClip(100.0f)
+{
+}
+
+Matrix4 CameraData::projection(float widthOverHeight) const
+{
+    return Matrix4::perspectiveLeftHanded(
+        verticalFieldOfViewRadians, widthOverHeight, nearClip, farClip);
+}
+
 SceneNodeData::SceneNodeData()
     : parentIndex(InvalidIndex),
       meshIndex(InvalidIndex),
