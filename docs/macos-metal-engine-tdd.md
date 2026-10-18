@@ -146,6 +146,17 @@ Each stage should be turned into a focused implementation spec with its own file
 
 **Acceptance:** the core builds on macOS without Apple graphics frameworks, Windows/D3D headers, DXGI, or DirectXMath; migrated math and data behavior has focused tests.
 
+The first portable-core slice exposes `Core/Math.h` and `Core/SceneData.h` from
+`engine-core`. Its matrices use row-major storage and row-vector multiplication;
+the perspective helper preserves the legacy left-handed, zero-to-one depth
+convention. CPU scene nodes refer to mesh/material value data, meshes retain
+vertex attributes and 32-bit indices, and bounds can be calculated and
+transformed without renderer handles. This does not establish a portable file
+format, GPU constant-buffer layout, editor property system, or complete scene
+graph; those remain subject to the inventory and later migration specs. The
+core target is constrained to C++ sources with no linked platform/backend
+libraries, and can be built directly as `engine-core`.
+
 ### 3. Render engine-owned scene content
 
 - Define the first engine-owned CPU mesh/material/camera data contract and the minimum renderer operations it needs.
