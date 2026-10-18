@@ -159,7 +159,7 @@ Each stage should be turned into a focused implementation spec with its own file
 
 - Complete the feature-by-feature inventory: algorithm, data inputs/outputs, D3D11 assumptions, prerequisites, disposition, and visible/testable result. The current source-level inventory and first-effect recommendation are in [Legacy Engine Feature Inventory](legacy-feature-inventory.md).
 - Stabilize basic mesh shading, materials, textures, depth, and render-target/resource lifetime first.
-- Prototype shader authoring/conversion using representative vertex, fragment, and compute/stage needs; measure correctness and tooling before adopting it.
+- Prototype shader authoring/conversion using representative stages supported by the source inventory; see the [shader workflow evaluation](shader-workflow-evaluation.md) for the compiler evidence, provisional direct-MSL recommendation, and conversion constraints. Reassess when a concrete migrated feature or additional backend requires it.
 - Add render-target, compute, synchronization, and multi-pass capabilities only when a selected effect needs them.
 - Port Deep G-Buffer and screen-space effects as separate vertical slices, prioritizing dissertation-critical results. Compare representative output with the legacy renderer where meaningful.
 - Keep font/text/UI, asset conversion, and other legacy features deferred unless explicitly re-prioritized.
