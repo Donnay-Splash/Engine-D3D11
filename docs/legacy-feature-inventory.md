@@ -157,8 +157,9 @@ in anticipation of an unvalidated future.
 - The Metal strategy for two-layer G-Buffer generation must replace the legacy
   geometry-shader expansion and define deterministic first-frame/history reset
   behavior.
-- MSL authoring versus HLSL conversion, and the feasibility of converting the
-  geometry-stage algorithm, remain unselected.
+- Direct MSL is the provisional choice for Metal bring-up; HLSL conversion
+  remains unvalidated, and the geometry-stage algorithm still needs a Metal
+  redesign rather than source conversion.
 - The old `.vs`/`.ps` shader and font/text paths have unclear live status.
 - There is no validated reference capture or agreed numeric image tolerance for
   D3D11-to-Metal feature parity.
