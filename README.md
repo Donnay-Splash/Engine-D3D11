@@ -12,7 +12,7 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit surface that continuously renders a simple MSL triangle over a clear background. The app links a static `engine` implementation library; the independently buildable `engine-core` contains the portable C++ lifecycle interface. The AppKit host owns the window, surface, and event loop, while the engine library owns Metal device setup and rendering. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md).
+The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit surface that continuously renders a simple MSL triangle over a clear background. The app links a static `engine` implementation library; the independently buildable `engine-core` contains the portable C++ lifecycle interface, row-major math, and CPU scene/mesh/material data. The AppKit host owns the window, surface, and event loop, while the engine library owns Metal device setup and rendering. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md).
 
 Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
@@ -43,11 +43,11 @@ Run the app-to-engine lifecycle tests with:
 ctest --test-dir build/macos --output-on-failure
 ```
 
-The portable engine core and lifecycle tests can also be configured and built without the macOS GUI target:
+The portable engine core, math/data behavior tests, and lifecycle tests can also be built directly without building the macOS GUI target:
 
 ```sh
 cmake -S . -B build/portable -DBUILD_TESTING=ON
-cmake --build build/portable --target engine-core engine-lifecycle-tests
+cmake --build build/portable --target engine-core engine-lifecycle-tests portable-core-tests
 ctest --test-dir build/portable --output-on-failure
 ```
 
@@ -68,7 +68,7 @@ These dependencies are distinct:
 
 ## macOS command-line bootstrap
 
-The original Makefile still builds a standalone command-line bootstrap. It does not compile or link the engine or utilities, create a window, or render. The CMake target is the native GUI app described above; it renders a simple Metal triangle but does not use engine code. Neither path changes the Visual Studio projects.
+The original Makefile still builds a standalone command-line bootstrap. It does not compile or link the engine or utilities, create a window, or render. The CMake target is the native GUI app described above; its Metal triangle is rendered through the engine library. Neither path changes the Visual Studio projects.
 
 To use the original Makefile path, build and run it from the repository root:
 
@@ -81,8 +81,8 @@ The Makefile build output is ignored by Git. A successful bootstrap build verifi
 
 ## Engine migration direction
 
-The current CMake app is a native window and `MTKView` host, but it does not display engine-rendered output. The existing D3D11 engine cannot simply be linked unchanged. The agreed direction is a portable C++ engine core built as a static library, with a backend-neutral renderer seam and isolated macOS/Metal implementation. The app owns the native window and event loop, supplies its render surface to the engine, and remains a thin host; the engine owns graphics setup and rendering.
+The current CMake app is a native window and `MTKView` host. Its triangle is rendered through the engine library, but it does not yet render content from the portable scene/mesh data. The existing D3D11 engine cannot simply be linked unchanged. The agreed direction is a portable C++ engine core built as a static library, with a backend-neutral renderer seam and isolated macOS/Metal implementation. The app owns the native window and event loop, supplies its render surface to the engine, and remains a thin host; the engine owns graphics setup and rendering.
 
-The first library-backed slice will move the existing triangle behind the engine interface. Later stages will inventory the original engine features and migrate selected scene and rendering behavior, prioritizing dissertation-critical work without assuming one-to-one parity. DirectXMath and Windows services must be separated or replaced where needed. D3D11 will not be ported: its existing projects remain temporary migration reference and will be retired after a review of migrated behavior and Windows-project impact. D3D12 and Vulkan are future evaluation targets, not current implementation commitments.
+The first library-backed slice moved the existing triangle behind the engine interface. The portable-core slice adds public math and CPU scene/mesh/material data, but does not migrate legacy serialization, property/editor bindings, GPU layouts/resources, or a complete scene graph. Later stages will inventory the original engine features and migrate selected scene and rendering behavior, prioritizing dissertation-critical work without assuming one-to-one parity. DirectXMath and Windows services must be separated or replaced where needed. D3D11 will not be ported: its existing projects remain temporary migration reference and will be retired after a review of migrated behavior and Windows-project impact. D3D12 and Vulkan are future evaluation targets, not current implementation commitments.
 
 See the [Technical Design](docs/macos-metal-engine-tdd.md) for the module structure, feature disposition, migration stages, and acceptance criteria.
