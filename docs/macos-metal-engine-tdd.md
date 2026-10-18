@@ -166,6 +166,19 @@ libraries, and can be built directly as `engine-core`.
 
 **Acceptance:** engine-owned scene data, not hard-coded host geometry, produces a visible Metal-rendered mesh.
 
+The first scene slice keeps the existing portable structure-of-arrays mesh contract
+(`positions`, optional vertex attributes, and 32-bit indices), adds a portable
+camera view transform and left-handed perspective parameters, and builds one
+engine-owned cube scene. The app-facing lifecycle remains unchanged. The engine
+passes its CPU scene and camera into the internal renderer; Metal owns the
+vertex/normal/index buffers, shader pipeline, depth state, and depth texture.
+The shader consumes the portable row-major matrices as their matching Metal
+column-major interpretation, and compile-time layout checks pin the uniform
+offsets. Drawable resize recreates the renderer-owned depth texture and updates
+the projection aspect ratio. This slice intentionally renders one scene object;
+multi-object/material pipelines and a general scene traversal contract remain
+future work.
+
 ### 4. Select and migrate original rendering features
 
 - Complete the feature-by-feature inventory: algorithm, data inputs/outputs, D3D11 assumptions, prerequisites, disposition, and visible/testable result. The current source-level inventory and first-effect recommendation are in [Legacy Engine Feature Inventory](legacy-feature-inventory.md).
@@ -198,7 +211,7 @@ libraries, and can be built directly as `engine-core`.
 
 - **Build separation:** configure/build the portable core independently; audit its source and linked dependencies for Apple, Windows, D3D, DXGI, and DirectXMath leakage.
 - **Library integration:** build the static engine implementation and a separate host executable that links it.
-- **Runtime lifecycle:** verify app launch/close, resize, surface/drawable availability, device creation, clear/pipeline setup, triangle and mesh presentation, and repeated launch.
+- **Runtime lifecycle:** verify app launch/close, resize, surface/drawable availability, device creation, clear/pipeline setup, triangle and mesh presentation, and repeated launch. For the first scene slice, confirm the transformed, depth-tested engine mesh remains visible after resizing and relaunching.
 - **Failure paths:** exercise or simulate missing device, shader compilation/load failure, pipeline/resource allocation failure, and surface loss; ensure errors reach the host.
 - **Math/data tests:** cover transforms, projection, coordinate conventions, matrix layout, and CPU-to-shader structures before dependent rendering work.
 - **Feature tests:** validate each selected pass/effect independently and compare representative results to D3D11 where meaningful.

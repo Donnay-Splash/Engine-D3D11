@@ -73,11 +73,24 @@ public:
     bool initialize(
         void *surface,
         engine::Size size,
+        const engine::core::SceneData &scene,
+        const engine::core::CameraData &camera,
         const engine::ErrorHandler &errorHandler,
         engine::Error &error) override
     {
         errorHandler_ = errorHandler;
         (void)error;
+        std::string sceneError;
+        check(scene.validate(sceneError));
+        check(scene.meshes.size() == 1 && scene.nodes.size() == 1);
+        check(scene.nodes[0].meshIndex == 0 && scene.nodes[0].materialIndex == 0);
+        check(scene.meshes[0].positions.size() == 24
+            && scene.meshes[0].normals.size() == 24
+            && scene.meshes[0].indices.size() == 36);
+        check(scene.nodes[0].localTransform.at(3, 2) == 4.0f);
+        check(scene.materials[0].diffuseColor.x == 0.88f);
+        check(camera.nearClip > 0.0f && camera.farClip > camera.nearClip);
+        check(camera.viewTransform.at(0, 0) == 1.0f);
         check(surface != nullptr);
         check(size.width == 800 && size.height == 600);
         events.push_back("renderer.initialize");

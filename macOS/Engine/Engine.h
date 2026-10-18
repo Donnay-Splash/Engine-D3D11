@@ -1,6 +1,8 @@
 #ifndef ENGINE_MACOS_ENGINE_H
 #define ENGINE_MACOS_ENGINE_H
 
+#include "Core/SceneData.h"
+
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -72,6 +74,8 @@ private:
     bool reportFailure(const Error &error);
 
     std::unique_ptr<detail::Renderer> renderer_;
+    core::SceneData scene_;
+    core::CameraData camera_;
     Surface *surface_;
     std::shared_ptr<ErrorRelay> errorRelay_;
     bool initialized_;

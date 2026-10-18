@@ -84,8 +84,8 @@ if(APPLE)
     )
     target_link_libraries(engine-macos PRIVATE engine ${APPKIT_FRAMEWORK})
 
-    set(METAL_SHADER "${CMAKE_CURRENT_SOURCE_DIR}/macOS/Triangle.metal")
-    set(METAL_AIR "${CMAKE_CURRENT_BINARY_DIR}/Triangle.air")
+    set(METAL_SHADER "${CMAKE_CURRENT_SOURCE_DIR}/macOS/Scene.metal")
+    set(METAL_AIR "${CMAKE_CURRENT_BINARY_DIR}/Scene.air")
     set(METAL_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/default.metallib")
 
     add_custom_command(

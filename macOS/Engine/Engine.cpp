@@ -5,6 +5,72 @@
 #include <utility>
 
 namespace engine {
+namespace {
+
+void appendFace(
+    core::MeshData &mesh,
+    core::Vector3 normal,
+    core::Vector3 first,
+    core::Vector3 second,
+    core::Vector3 third,
+    core::Vector3 fourth)
+{
+    const std::uint32_t firstIndex = static_cast<std::uint32_t>(mesh.positions.size());
+    mesh.positions.push_back(first);
+    mesh.positions.push_back(second);
+    mesh.positions.push_back(third);
+    mesh.positions.push_back(fourth);
+    for (unsigned int vertex = 0; vertex < 4; ++vertex) {
+        mesh.normals.push_back(normal);
+    }
+    mesh.indices.push_back(firstIndex);
+    mesh.indices.push_back(firstIndex + 1);
+    mesh.indices.push_back(firstIndex + 2);
+    mesh.indices.push_back(firstIndex);
+    mesh.indices.push_back(firstIndex + 2);
+    mesh.indices.push_back(firstIndex + 3);
+}
+
+core::SceneData createInitialScene()
+{
+    core::SceneData scene;
+    core::MeshData cube;
+    appendFace(cube, {0.0f, 0.0f, -1.0f},
+        {-1.0f, -1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f},
+        {1.0f, 1.0f, -1.0f}, {1.0f, -1.0f, -1.0f});
+    appendFace(cube, {0.0f, 0.0f, 1.0f},
+        {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f},
+        {1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, 1.0f});
+    appendFace(cube, {0.0f, -1.0f, 0.0f},
+        {-1.0f, -1.0f, -1.0f}, {1.0f, -1.0f, -1.0f},
+        {1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f});
+    appendFace(cube, {0.0f, 1.0f, 0.0f},
+        {-1.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, 1.0f},
+        {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, -1.0f});
+    appendFace(cube, {-1.0f, 0.0f, 0.0f},
+        {-1.0f, -1.0f, -1.0f}, {-1.0f, -1.0f, 1.0f},
+        {-1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, -1.0f});
+    appendFace(cube, {1.0f, 0.0f, 0.0f},
+        {1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, -1.0f},
+        {1.0f, 1.0f, 1.0f}, {1.0f, -1.0f, 1.0f});
+    scene.meshes.push_back(cube);
+
+    core::MaterialData material;
+    material.diffuseColor = core::Vector4(0.88f, 0.36f, 0.12f, 1.0f);
+    scene.materials.push_back(material);
+
+    core::SceneNodeData object;
+    object.meshIndex = 0;
+    object.materialIndex = 0;
+    object.localTransform =
+        core::Matrix4::rotation(core::Quaternion::axisAngle({0.0f, 1.0f, 0.0f}, 0.62f))
+        * core::Matrix4::rotation(core::Quaternion::axisAngle({1.0f, 0.0f, 0.0f}, 0.38f))
+        * core::Matrix4::translation({0.0f, 0.0f, 4.0f});
+    scene.nodes.push_back(object);
+    return scene;
+}
+
+} // namespace
 
 struct Engine::ErrorRelay
 {
@@ -50,6 +116,8 @@ struct Engine::ErrorRelay
 
 Engine::Engine(std::unique_ptr<detail::Renderer> renderer)
     : renderer_(std::move(renderer)),
+      scene_(createInitialScene()),
+      camera_(),
       surface_(nullptr),
       errorRelay_(),
       initialized_(false),
@@ -83,7 +151,12 @@ bool Engine::initialize(Surface &surface, ErrorHandler errorHandler, Error &erro
     };
     rendererStarted_ = true;
     if (!renderer_->initialize(
-            surface.nativeHandle(), surface.drawableSize(), rendererErrorHandler, error)) {
+            surface.nativeHandle(),
+            surface.drawableSize(),
+            scene_,
+            camera_,
+            rendererErrorHandler,
+            error)) {
         if (error.message.empty()) {
             error.message = "The renderer failed to initialize.";
         }

@@ -5,8 +5,8 @@ carry forward into the Metal-first engine. It is a source-level migration
 record, not a claim that any listed feature has been ported or runtime-validated.
 The target architecture and migration constraints are in the
 [macOS Metal engine technical design](macos-metal-engine-tdd.md); the current
-macOS executable remains a host-level triangle proof, as described in the
-[README](../README.md#macos-app-setup).
+macOS executable now renders a starter mesh from engine-owned portable scene
+data, as described in the [README](../README.md#macos-app-setup).
 
 ## Disposition key
 
