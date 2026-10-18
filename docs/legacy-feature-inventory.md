@@ -114,10 +114,13 @@ AA, and broad asset importing out of this slice.
   strategy), not a mechanical source conversion.
 - Matrix/depth conventions, MRT formats, texture-array interpretation, sampler
   behavior, constant packing, synchronization, and temporal history are all
-  observable constraints. No HLSL-to-MSL conversion tool or compatibility
-  workflow is selected by the existing source or the technical design. Evaluate
-  representative vertex, fragment, resource, and layered-generation cases
-  before committing to conversion tooling.
+  observable constraints. The current Metal slice has a verified direct-MSL
+  vertex/fragment build and package path; no local HLSL-to-MSL or
+  HLSL-to-SPIR-V conversion path is available. The [shader workflow
+  evaluation](shader-workflow-evaluation.md) records tool availability,
+  representative shader findings, compiler diagnostics, and the provisional
+  recommendation. Keep conversion unselected until representative shader
+  output and semantics are validated.
 
 ## Windows project and D3D11 retirement impact
 
@@ -154,8 +157,9 @@ in anticipation of an unvalidated future.
 - The Metal strategy for two-layer G-Buffer generation must replace the legacy
   geometry-shader expansion and define deterministic first-frame/history reset
   behavior.
-- MSL authoring versus HLSL conversion, and the feasibility of converting the
-  geometry-stage algorithm, remain unselected.
+- Direct MSL is the provisional choice for Metal bring-up; HLSL conversion
+  remains unvalidated, and the geometry-stage algorithm still needs a Metal
+  redesign rather than source conversion.
 - The old `.vs`/`.ps` shader and font/text paths have unclear live status.
 - There is no validated reference capture or agreed numeric image tolerance for
   D3D11-to-Metal feature parity.
