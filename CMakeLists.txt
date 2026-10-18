@@ -11,13 +11,32 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(CTest)
 
-add_library(engine-core STATIC macOS/Engine/Engine.cpp)
+add_library(engine-core STATIC
+    macOS/Engine/Engine.cpp
+    macOS/Engine/Core/Math.cpp
+    macOS/Engine/Core/SceneData.cpp
+    macOS/Engine/Engine.h
+    macOS/Engine/Core/Math.h
+    macOS/Engine/Core/SceneData.h
+)
 target_include_directories(engine-core PUBLIC macOS/Engine)
 target_compile_options(engine-core PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Werror>
 )
+
+get_target_property(ENGINE_CORE_SOURCES engine-core SOURCES)
+get_target_property(ENGINE_CORE_LINK_LIBRARIES engine-core LINK_LIBRARIES)
+get_target_property(ENGINE_CORE_INTERFACE_LINK_LIBRARIES engine-core INTERFACE_LINK_LIBRARIES)
+foreach(ENGINE_CORE_SOURCE IN LISTS ENGINE_CORE_SOURCES)
+    if(ENGINE_CORE_SOURCE MATCHES "\\.(mm|m)$")
+        message(FATAL_ERROR "engine-core must contain only portable C++ sources: ${ENGINE_CORE_SOURCE}")
+    endif()
+endforeach()
+if(ENGINE_CORE_LINK_LIBRARIES OR ENGINE_CORE_INTERFACE_LINK_LIBRARIES)
+    message(FATAL_ERROR "engine-core must not link platform or renderer libraries.")
+endif()
 
 if(BUILD_TESTING)
     add_subdirectory(macOS/tests)
