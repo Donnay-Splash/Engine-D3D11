@@ -1,89 +1,125 @@
 #import <AppKit/AppKit.h>
 #import <MetalKit/MetalKit.h>
 
-#include "Engine.h"
+#include "MacEngine.h"
 #include "MetalSurfaceAdapter.h"
 
 #include <cstdlib>
 #include <memory>
 
 @interface EngineAppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate>
-{
-@private
-    std::unique_ptr<engine::Surface> surface_;
-    std::unique_ptr<engine::Engine> engine_;
-}
-
 @property(nonatomic, strong) NSWindow *window;
 @property(nonatomic) int exitStatus;
 
+- (instancetype)init;
 - (void)showMetalError:(NSString *)message;
 - (void)shutdownEngine;
 
 @end
 
-@implementation EngineAppDelegate
+@implementation EngineAppDelegate {
+    std::unique_ptr<Engine::Surface> m_Surface;
+    std::unique_ptr<Engine::Engine> m_Engine;
+}
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self == nil) {
+        return nil;
+    }
+
+    _exitStatus = EXIT_SUCCESS;
+    return self;
+}
 
 - (void)shutdownEngine
 {
-    if (engine_ != nullptr) {
-        engine_->shutdown();
+    if (m_Engine != nullptr) {
+        m_Engine->Shutdown();
     }
 }
 
 - (void)showMetalError:(NSString *)message
 {
     [self shutdownEngine];
+
     NSAlert *alert = [[NSAlert alloc] init];
     alert.messageText = @"Metal rendering failed";
-    alert.informativeText = message;
+    alert.informativeText = message ?: @"An unknown rendering error occurred.";
     [alert addButtonWithTitle:@"Quit"];
+
     self.exitStatus = EXIT_FAILURE;
     [alert runModal];
     [NSApp terminate:nil];
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)notification
+- (BOOL)configureWindowWithFrame:(NSRect)frame
 {
-    (void)notification;
-
-    NSRect frame = NSMakeRect(0.0, 0.0, 800.0, 600.0);
     NSWindowStyleMask style = NSWindowStyleMaskTitled
         | NSWindowStyleMaskClosable
         | NSWindowStyleMaskMiniaturizable
         | NSWindowStyleMaskResizable;
+
     self.window = [[NSWindow alloc] initWithContentRect:frame
                                               styleMask:style
                                                 backing:NSBackingStoreBuffered
                                                   defer:NO];
     if (self.window == nil) {
         [self showMetalError:@"Failed to create the Engine window."];
-        return;
+        return NO;
     }
 
-    MTKView *view = [[MTKView alloc] initWithFrame:frame device:nil];
-    view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-    surface_ = engine::macos::createMetalSurface(view);
-    engine_ = engine::createEngine();
-    if (surface_ == nullptr || engine_ == nullptr) {
+    return YES;
+}
+
+- (BOOL)initializeEngineWithView:(MTKView *)view
+{
+    m_Surface = Engine::Metal::CreateMetalSurface(view);
+    m_Engine = Engine::Metal::CreateEngine();
+    if (m_Surface == nullptr || m_Engine == nullptr) {
         [self showMetalError:@"Failed to create the engine or render surface."];
-        return;
+        return NO;
     }
 
     __weak EngineAppDelegate *weakSelf = self;
-    engine::Error error;
-    const bool initialized = engine_->initialize(
-        *surface_,
-        [weakSelf](const engine::Error &runtimeError) {
+    Engine::Error error = {};
+    const bool initialized = m_Engine->Initialize(
+        *m_Surface,
+        [weakSelf](const Engine::Error &runtimeError) {
+            EngineAppDelegate *strongSelf = weakSelf;
+            if (strongSelf == nil) {
+                return;
+            }
+
             NSString *message = [NSString stringWithUTF8String:runtimeError.message.c_str()];
             dispatch_async(dispatch_get_main_queue(), ^{
-                [weakSelf showMetalError:message ?: @"The engine encountered a runtime failure."];
+                [strongSelf showMetalError:message ?: @"The engine encountered a runtime failure."];
             });
         },
         error);
     if (!initialized) {
         NSString *message = [NSString stringWithUTF8String:error.message.c_str()];
         [self showMetalError:message ?: @"Failed to initialize the engine."];
+        return NO;
+    }
+
+    return YES;
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)notification
+{
+    (void)notification;
+
+    const NSRect frame = NSMakeRect(0.0, 0.0, 800.0, 600.0);
+    if (![self configureWindowWithFrame:frame]) {
+        return;
+    }
+
+    MTKView *view = [[MTKView alloc] initWithFrame:frame device:nil];
+    view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+
+    if (![self initializeEngineWithView:view]) {
         return;
     }
 

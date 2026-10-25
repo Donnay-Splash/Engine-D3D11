@@ -5,7 +5,8 @@
 @interface MetalSurfaceDelegate : NSObject <MTKViewDelegate>
 {
 @public
-    engine::Surface::Callbacks callbacks;
+    Engine
+::Surface::Callbacks callbacks;
 }
 @end
 
@@ -14,44 +15,48 @@
 - (void)drawInMTKView:(MTKView *)view
 {
     if (view.device == nil) {
-        if (callbacks.failure != nullptr) {
-            engine::Error error;
+        if (callbacks.Failure != nullptr) {
+            Engine
+        ::Error error;
             error.message = "The Metal render surface lost its device.";
-            callbacks.failure(callbacks.context, error);
+            callbacks.Failure(callbacks.context, error);
         }
         return;
     }
 
     id<CAMetalDrawable> drawable = view.currentDrawable;
     MTLRenderPassDescriptor *renderPass = view.currentRenderPassDescriptor;
-    if (drawable == nil || renderPass == nil || callbacks.draw == nullptr) {
+    if (drawable == nil || renderPass == nil || callbacks.Draw == nullptr) {
         return;
     }
 
     MetalFrame frame = {drawable, renderPass};
-    engine::Error error;
-    callbacks.draw(callbacks.context, &frame, error);
+    Engine
+::Error error;
+    callbacks.Draw(callbacks.context, &frame, error);
 }
 
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size
 {
     (void)view;
-    if (callbacks.resize == nullptr) {
+    if (callbacks.Resize == nullptr) {
         return;
     }
 
-    const engine::Size drawableSize = {
+    const Engine
+::Size drawableSize = {
         static_cast<std::uint32_t>(size.width > 0 ? size.width : 0),
         static_cast<std::uint32_t>(size.height > 0 ? size.height : 0),
     };
-    engine::Error error;
-    callbacks.resize(callbacks.context, drawableSize, error);
+    Engine
+::Error error;
+    callbacks.Resize(callbacks.context, drawableSize, error);
 }
 
 @end
 
-namespace engine {
-namespace macos {
+namespace Engine {
+namespace Metal {
 namespace {
 
 class MetalSurface final : public Surface
@@ -63,15 +68,15 @@ public:
 
     ~MetalSurface() override
     {
-        stop();
+        Stop();
     }
 
-    void *nativeHandle() noexcept override
+    void *NativeHandle() noexcept override
     {
         return (__bridge void *)view_;
     }
 
-    Size drawableSize() const noexcept override
+    Size DrawableSize() const noexcept override
     {
         const CGSize size = view_.drawableSize;
         return {
@@ -80,7 +85,7 @@ public:
         };
     }
 
-    bool start(const Callbacks &surfaceCallbacks, Error &error) override
+    bool Start(const Callbacks &surfaceCallbacks, Error &error) override
     {
         (void)error;
         delegate_->callbacks = surfaceCallbacks;
@@ -90,7 +95,7 @@ public:
         return YES;
     }
 
-    void stop() noexcept override
+    void Stop() noexcept override
     {
         view_.paused = YES;
         if (view_.delegate == delegate_) {
@@ -106,7 +111,7 @@ private:
 
 } // namespace
 
-std::unique_ptr<Surface> createMetalSurface(MTKView *view)
+std::unique_ptr<Surface> CreateMetalSurface(MTKView *view)
 {
     if (view == nil) {
         return std::unique_ptr<Surface>();
@@ -114,5 +119,5 @@ std::unique_ptr<Surface> createMetalSurface(MTKView *view)
     return std::unique_ptr<Surface>(new MetalSurface(view));
 }
 
-} // namespace macos
-} // namespace engine
+} // namespace Metal
+} // namespace Engine

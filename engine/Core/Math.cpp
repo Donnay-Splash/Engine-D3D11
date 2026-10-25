@@ -4,8 +4,8 @@
 #include <limits>
 #include <stdexcept>
 
-namespace engine {
-namespace core {
+namespace Engine {
+namespace Maths {
 namespace {
 
 float length(Vector3 value)
@@ -293,5 +293,5 @@ Bounds Bounds::transformed(const Matrix4 &matrix) const
     return result;
 }
 
-} // namespace core
+} // namespace Maths
 } // namespace engine

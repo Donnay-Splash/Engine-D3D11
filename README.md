@@ -12,7 +12,7 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit surface that renders an engine-owned, transformed cube from portable scene/mesh/material and camera data. The renderer owns Metal vertex/index buffers, pipeline and depth state, and a resize-aware depth texture. The app links a static `engine` implementation library; the independently buildable `engine-core` contains the portable C++ lifecycle interface, row-major math, CPU scene/mesh/material data, and camera projection conventions. The AppKit host owns the window, surface, and event loop, while the engine library owns Metal device setup and rendering. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md).
+The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit surface that renders an engine-owned, transformed cube from portable scene/mesh/material and camera data. The portable C++ lifecycle interface, row-major math, CPU scene/mesh/material data, and camera projection conventions build as the static `engine` library. Metal rendering and the Metal surface adapter build separately as the `engine-backend-metal` library, which links to `engine`; the AppKit host owns the window and event loop and links the backend it uses. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md).
 
 Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
@@ -32,7 +32,7 @@ Configure, build, and run from the repository root:
 ```sh
 cmake -S . -B build/macos -G "Unix Makefiles" \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=13.1
+  -DCMAKE_OSX_DEPLOYMENT_TARGET=26
 cmake --build build/macos --target engine-macos
 open build/macos/engine-macos.app
 ```
@@ -43,15 +43,15 @@ Run the app-to-engine lifecycle tests with:
 ctest --test-dir build/macos --output-on-failure
 ```
 
-The portable engine core, math/data behavior tests, and lifecycle tests can also be built directly without building the macOS GUI target:
+The portable engine library, math/data behavior tests, and lifecycle tests can also be built directly without building the macOS GUI target:
 
 ```sh
 cmake -S . -B build/portable -DBUILD_TESTING=ON
-cmake --build build/portable --target engine-core engine-lifecycle-tests portable-core-tests
+cmake --build build/portable --target engine engine-lifecycle-tests portable-core-tests
 ctest --test-dir build/portable --output-on-failure
 ```
 
-The architecture and deployment target default to arm64 and macOS 13.1 in CMake and can be overridden for another supported setup. The macOS 13.1 deployment floor remains provisional and has not been runtime-tested here. In VS Code, select **Launch macOS app** to configure and build the `engine-macos` target before launching it with LLDB. **Build macOS app** is also available as the default build task. The existing `make -C macOS` command remains available as a separate command-line bootstrap.
+The architecture and minimum deployment target default to arm64 and macOS 26 in CMake and can be overridden for another supported setup. In VS Code, **Build macOS app** configures and builds the `engine-macos` target.
 
 ## Build status and platform dependencies
 
@@ -66,22 +66,9 @@ These dependencies are distinct:
 - **Other Windows libraries:** the engine also links `pdh.lib`, `winmm.lib`, `dinput8.lib`, and `dxguid.lib`; these are not replacements for the D3D renderer.
 - **Shared math and asset tools:** DirectXMath is exposed through the utility math types. The AssetConverter uses DirectXTex and Windows libraries such as Shlwapi and Ole32. DirectXTK is listed as a NuGet dependency in the desktop projects.
 
-## macOS command-line bootstrap
-
-The original Makefile still builds a standalone command-line bootstrap. It does not compile or link the engine or utilities, create a window, or render. The CMake target is the native GUI app described above; its Metal triangle is rendered through the engine library. Neither path changes the Visual Studio projects.
-
-To use the original Makefile path, build and run it from the repository root:
-
-```sh
-make -C macOS
-./macOS/build/engine-macos
-```
-
-The Makefile build output is ignored by Git. A successful bootstrap build verifies only that this standalone executable compiles and runs on macOS; it is not evidence that the engine links or that rendering works there.
-
 ## Engine migration direction
 
-The current CMake app is a native window and `MTKView` host. Its engine-owned cube is rendered from portable scene/mesh data through the engine library; the host does not define geometry or create GPU resources. The existing D3D11 engine cannot simply be linked unchanged. The agreed direction is a portable C++ engine core built as a static library, with a backend-neutral renderer seam and isolated macOS/Metal implementation. The app owns the native window and event loop, supplies its render surface to the engine, and remains a thin host; the engine owns graphics setup and rendering.
+The current CMake app is a native window and `MTKView` host. Its engine-owned cube is rendered from portable scene/mesh data through the `engine` static library and the separate `engine-backend-metal` static library; the host does not define geometry or create GPU resources. The existing D3D11 engine cannot simply be linked unchanged. The agreed direction is a portable C++ engine with a backend-neutral renderer seam and isolated graphics backend libraries. The app owns the native window and event loop, supplies its render surface to the engine, and remains a thin host.
 
 The first library-backed slice moved the triangle behind the engine interface. The portable-core slice adds public math, CPU scene/mesh/material data, and camera projection. This scene-rendering slice passes engine-owned scene values to the Metal renderer, which uploads mesh data, applies the node and camera transforms, and depth-tests the result. It does not migrate legacy serialization, property/editor bindings, or a complete scene graph. Later stages will inventory the original engine features and migrate selected scene and rendering behavior, prioritizing dissertation-critical work without assuming one-to-one parity. DirectXMath and Windows services must be separated or replaced where needed. D3D11 will not be ported: its existing projects remain temporary migration reference and will be retired after a review of migrated behavior and Windows-project impact. D3D12 and Vulkan are future evaluation targets, not current implementation commitments.
 

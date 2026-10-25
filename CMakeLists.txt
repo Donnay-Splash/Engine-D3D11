@@ -1,45 +1,43 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "macOS architectures")
-set(CMAKE_OSX_DEPLOYMENT_TARGET "13.1" CACHE STRING "Minimum macOS deployment target")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "26" CACHE STRING "Minimum macOS deployment target")
 
 project(EngineMacOS LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(CTest)
 
-add_library(engine-core STATIC
-    macOS/Engine/Engine.cpp
-    macOS/Engine/Core/Math.cpp
-    macOS/Engine/Core/SceneData.cpp
-    macOS/Engine/Engine.h
-    macOS/Engine/Core/Math.h
-    macOS/Engine/Core/SceneData.h
+file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/engine/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/engine/*.h"
 )
-target_include_directories(engine-core PUBLIC macOS/Engine)
-target_compile_options(engine-core PRIVATE
+list(FILTER ENGINE_SOURCES EXCLUDE REGEX "/engine/tests/")
+add_library(engine STATIC ${ENGINE_SOURCES})
+target_include_directories(engine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/engine")
+target_compile_options(engine PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Werror>
 )
 
-get_target_property(ENGINE_CORE_SOURCES engine-core SOURCES)
-get_target_property(ENGINE_CORE_LINK_LIBRARIES engine-core LINK_LIBRARIES)
-get_target_property(ENGINE_CORE_INTERFACE_LINK_LIBRARIES engine-core INTERFACE_LINK_LIBRARIES)
-foreach(ENGINE_CORE_SOURCE IN LISTS ENGINE_CORE_SOURCES)
-    if(ENGINE_CORE_SOURCE MATCHES "\\.(mm|m)$")
-        message(FATAL_ERROR "engine-core must contain only portable C++ sources: ${ENGINE_CORE_SOURCE}")
+get_target_property(ENGINE_SOURCES engine SOURCES)
+get_target_property(ENGINE_LINK_LIBRARIES engine LINK_LIBRARIES)
+get_target_property(ENGINE_INTERFACE_LINK_LIBRARIES engine INTERFACE_LINK_LIBRARIES)
+foreach(ENGINE_SOURCE IN LISTS ENGINE_SOURCES)
+    if(ENGINE_SOURCE MATCHES "\\.(mm|m)$")
+        message(FATAL_ERROR "The engine library must contain only portable C++ sources: ${ENGINE_SOURCE}")
     endif()
 endforeach()
-if(ENGINE_CORE_LINK_LIBRARIES OR ENGINE_CORE_INTERFACE_LINK_LIBRARIES)
-    message(FATAL_ERROR "engine-core must not link platform or renderer libraries.")
+if(ENGINE_LINK_LIBRARIES OR ENGINE_INTERFACE_LINK_LIBRARIES)
+    message(FATAL_ERROR "The engine library must not link platform or renderer libraries.")
 endif()
 
 if(BUILD_TESTING)
-    add_subdirectory(macOS/tests)
+    add_subdirectory(engine/tests)
 endif()
 
 if(APPLE)
@@ -53,22 +51,23 @@ if(APPLE)
     find_library(METALKIT_FRAMEWORK MetalKit REQUIRED)
     find_program(XCRUN_EXECUTABLE xcrun REQUIRED)
 
-    add_library(engine STATIC
-        macOS/Engine/MacEngine.mm
-        macOS/Engine/MetalSurfaceAdapter.mm
-        macOS/Engine/MetalRenderer.mm
+    file(GLOB_RECURSE METAL_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.mm"
     )
-    target_include_directories(engine PRIVATE macOS/Engine)
-    target_compile_options(engine PRIVATE
+    add_library(engine-backend-metal STATIC ${METAL_SOURCES})
+    
+    target_include_directories(engine-backend-metal PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal"
+    )
+    target_compile_options(engine-backend-metal PRIVATE
         -Wall
         -Wextra
         -Werror
         "$<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>"
     )
-    target_link_libraries(engine PUBLIC engine-core PRIVATE
-        ${APPKIT_FRAMEWORK}
-        ${METAL_FRAMEWORK}
-        ${METALKIT_FRAMEWORK}
+    target_link_libraries(engine-backend-metal
+        PUBLIC engine ${METALKIT_FRAMEWORK}
+        PRIVATE ${APPKIT_FRAMEWORK} ${METAL_FRAMEWORK}
     )
 
     add_executable(engine-macos MACOSX_BUNDLE macOS/main.mm)
@@ -82,9 +81,9 @@ if(APPLE)
         -Werror
         "$<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>"
     )
-    target_link_libraries(engine-macos PRIVATE engine ${APPKIT_FRAMEWORK})
+    target_link_libraries(engine-macos PRIVATE engine-backend-metal ${APPKIT_FRAMEWORK})
 
-    set(METAL_SHADER "${CMAKE_CURRENT_SOURCE_DIR}/macOS/Scene.metal")
+    set(METAL_SHADER "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/Scene.metal")
     set(METAL_AIR "${CMAKE_CURRENT_BINARY_DIR}/Scene.air")
     set(METAL_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/default.metallib")
 
@@ -107,5 +106,5 @@ if(APPLE)
     )
     target_sources(engine-macos PRIVATE "${METAL_LIBRARY}")
 else()
-    message(STATUS "Building the portable engine core only; the Metal host requires macOS.")
+    message(STATUS "Building the portable engine library only; the Metal host requires macOS.")
 endif()

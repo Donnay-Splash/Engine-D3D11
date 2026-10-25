@@ -1,10 +1,11 @@
-#import "MetalRenderer.h"
+#import "MetalDevice.h"
 
-namespace engine {
-
-std::unique_ptr<Engine> createEngine()
+namespace Engine {
+namespace Metal {
+std::unique_ptr<Engine> CreateEngine()
 {
-    return detail::EngineFactory::create(createMetalRenderer());
+    return EngineFactory::create(CreateMetalDevice());
 }
 
-} // namespace engine
+} // namespace Metal
+} // namespace Engine

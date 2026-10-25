@@ -23,9 +23,9 @@ bool close(float actual, float expected)
 
 void rowVectorTransformsAndProjectionUseDocumentedConventions()
 {
-    using engine::core::Matrix4;
-    using engine::core::Quaternion;
-    using engine::core::Vector4;
+    using Engine::Maths::Matrix4;
+    using Engine::Maths::Quaternion;
+    using Engine::Maths::Vector4;
 
     const Vector4 translated =
         Matrix4::translation({10.0f, -2.0f, 4.0f}).transform({1.0f, 2.0f, 3.0f, 1.0f});
@@ -62,7 +62,7 @@ void rowVectorTransformsAndProjectionUseDocumentedConventions()
 
 void cameraProjectionUsesPortablePerspectiveAndDepthConventions()
 {
-    using namespace engine::core;
+    using namespace Engine::Maths;
 
     CameraData camera;
     camera.verticalFieldOfViewRadians = 1.57079632679f;
@@ -86,7 +86,7 @@ void cameraProjectionUsesPortablePerspectiveAndDepthConventions()
 
 void sceneDataIsRendererIndependentAndValidatesMeshReferences()
 {
-    using namespace engine::core;
+    using namespace Engine::Maths;
 
     SceneData scene;
     MeshData mesh;

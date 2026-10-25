@@ -1,5 +1,5 @@
 #include "Engine.h"
-#include "EngineBackend.h"
+#include "Device.h"
 
 #include <memory>
 #include <stdexcept>
@@ -15,7 +15,7 @@ void check(bool condition)
     }
 }
 
-class FakeSurface final : public engine::Surface
+class FakeSurface final : public Engine::Surface
 {
 public:
     explicit FakeSurface(std::vector<std::string> &events, bool canStart = true)
@@ -23,10 +23,10 @@ public:
     {
     }
 
-    void *nativeHandle() noexcept override { return this; }
-    engine::Size drawableSize() const noexcept override { return {800, 600}; }
+    void *NativeHandle() noexcept override { return this; }
+    Engine::Size DrawableSize() const noexcept override { return {800, 600}; }
 
-    bool start(const Callbacks &callbacks, engine::Error &error) override
+    bool Start(const Callbacks &callbacks, Engine::Error &error) override
     {
         (void)error;
         events.push_back("surface.start");
@@ -38,21 +38,21 @@ public:
         return true;
     }
 
-    void stop() noexcept override { events.push_back("surface.stop"); }
+    void Stop() noexcept override { events.push_back("surface.stop"); }
 
-    bool draw(engine::Error &error)
+    bool Draw(Engine::Error &error)
     {
-        return callbacks_.draw(callbacks_.context, this, error);
+        return callbacks_.Draw(callbacks_.context, this, error);
     }
 
-    bool resize(engine::Size size, engine::Error &error)
+    bool Resize(Engine::Size size, Engine::Error &error)
     {
-        return callbacks_.resize(callbacks_.context, size, error);
+        return callbacks_.Resize(callbacks_.context, size, error);
     }
 
-    void fail(const engine::Error &error)
+    void fail(const Engine::Error &error)
     {
-        callbacks_.failure(callbacks_.context, error);
+        callbacks_.Failure(callbacks_.context, error);
     }
 
     std::vector<std::string> &events;
@@ -62,7 +62,7 @@ private:
     Callbacks callbacks_{};
 };
 
-class FakeRenderer final : public engine::detail::Renderer
+class FakeRenderer final : public Engine::Device
 {
 public:
     explicit FakeRenderer(std::vector<std::string> &events, bool canInitialize = true)
@@ -70,27 +70,15 @@ public:
     {
     }
 
-    bool initialize(
+    bool Initialize(
         void *surface,
-        engine::Size size,
-        const engine::core::SceneData &scene,
-        const engine::core::CameraData &camera,
-        const engine::ErrorHandler &errorHandler,
-        engine::Error &error) override
+        Engine::Size size,
+        const Engine::ErrorHandler &errorHandler,
+        Engine::Error &error) override
     {
         errorHandler_ = errorHandler;
         (void)error;
         std::string sceneError;
-        check(scene.validate(sceneError));
-        check(scene.meshes.size() == 1 && scene.nodes.size() == 1);
-        check(scene.nodes[0].meshIndex == 0 && scene.nodes[0].materialIndex == 0);
-        check(scene.meshes[0].positions.size() == 24
-            && scene.meshes[0].normals.size() == 24
-            && scene.meshes[0].indices.size() == 36);
-        check(scene.nodes[0].localTransform.at(3, 2) == 4.0f);
-        check(scene.materials[0].diffuseColor.x == 0.88f);
-        check(camera.nearClip > 0.0f && camera.farClip > camera.nearClip);
-        check(camera.viewTransform.at(0, 0) == 1.0f);
         check(surface != nullptr);
         check(size.width == 800 && size.height == 600);
         events.push_back("renderer.initialize");
@@ -101,15 +89,7 @@ public:
         return true;
     }
 
-    bool render(void *frame, engine::Error &error) override
-    {
-        (void)error;
-        check(frame != nullptr);
-        events.push_back("renderer.render");
-        return true;
-    }
-
-    bool resize(engine::Size size, engine::Error &error) override
+    bool Resize(Engine::Size size, Engine::Error &error) override
     {
         (void)error;
         check(size.width == 1024 && size.height == 768);
@@ -117,9 +97,9 @@ public:
         return true;
     }
 
-    void shutdown() noexcept override { events.push_back("renderer.shutdown"); }
+    void Shutdown() noexcept override { events.push_back("renderer.shutdown"); }
 
-    void emitFailure(const engine::Error &error)
+    void emitFailure(const Engine::Error &error)
     {
         if (errorHandler_) {
             errorHandler_(error);
@@ -130,22 +110,22 @@ public:
     bool canInitialize;
 
 private:
-    engine::ErrorHandler errorHandler_;
+    Engine::ErrorHandler errorHandler_;
 };
 
 void hostCanAttachRenderResizeAndShutDownInOrder()
 {
     std::vector<std::string> events;
     std::unique_ptr<FakeRenderer> renderer(new FakeRenderer(events));
-    std::unique_ptr<engine::Engine> instance =
-        engine::detail::EngineFactory::create(std::move(renderer));
+    std::unique_ptr<Engine::Engine> instance =
+        Engine::EngineFactory::create(std::move(renderer));
     FakeSurface surface(events);
-    engine::Error error;
+    Engine::Error error;
 
-    check(instance->initialize(surface, [](const engine::Error &) {}, error));
-    check(surface.draw(error));
-    check(surface.resize({1024, 768}, error));
-    instance->shutdown();
+    check(instance->Initialize(surface, [](const Engine::Error &) {}, error));
+    check(surface.Draw(error));
+    check(surface.Resize({1024, 768}, error));
+    instance->Shutdown();
 
     const std::vector<std::string> expected = {
         "renderer.initialize",
@@ -162,14 +142,14 @@ void startupFailureIsVisibleAndCleansUpInOrder()
 {
     std::vector<std::string> events;
     std::unique_ptr<FakeRenderer> renderer(new FakeRenderer(events));
-    std::unique_ptr<engine::Engine> instance =
-        engine::detail::EngineFactory::create(std::move(renderer));
+    std::unique_ptr<Engine::Engine> instance =
+        Engine::EngineFactory::create(std::move(renderer));
     FakeSurface surface(events, false);
-    engine::Error error;
+    Engine::Error error;
 
-    check(!instance->initialize(surface, [](const engine::Error &) {}, error));
+    check(!instance->Initialize(surface, [](const Engine::Error &) {}, error));
     check(error.message == "surface startup failed");
-    instance->shutdown();
+    instance->Shutdown();
     check(events == std::vector<std::string>({
         "renderer.initialize", "surface.start", "surface.stop", "renderer.shutdown"
     }));
@@ -178,14 +158,14 @@ void startupFailureIsVisibleAndCleansUpInOrder()
 void rendererInitializationFailureIsVisibleAndDoesNotStartSurface()
 {
     std::vector<std::string> events;
-    std::unique_ptr<engine::Engine> instance = engine::detail::EngineFactory::create(
+    std::unique_ptr<Engine::Engine> instance = Engine::EngineFactory::create(
         std::unique_ptr<FakeRenderer>(new FakeRenderer(events, false)));
     FakeSurface surface(events);
-    engine::Error error;
+    Engine::Error error;
 
-    check(!instance->initialize(surface, [](const engine::Error &) {}, error));
+    check(!instance->Initialize(surface, [](const Engine::Error &) {}, error));
     check(error.message == "renderer initialization failed");
-    instance->shutdown();
+    instance->Shutdown();
     check(events == std::vector<std::string>({
         "renderer.initialize", "renderer.shutdown"
     }));
@@ -196,14 +176,14 @@ void runtimeSurfaceFailureReachesHostOnlyOnce()
     std::vector<std::string> events;
     std::unique_ptr<FakeRenderer> renderer(new FakeRenderer(events));
     FakeRenderer *rendererEvents = renderer.get();
-    std::unique_ptr<engine::Engine> instance =
-        engine::detail::EngineFactory::create(std::move(renderer));
+    std::unique_ptr<Engine::Engine> instance =
+        Engine::EngineFactory::create(std::move(renderer));
     FakeSurface surface(events);
-    engine::Error error;
+    Engine::Error error;
     int reports = 0;
     std::string reportedMessage;
 
-    check(instance->initialize(surface, [&reports, &reportedMessage](const engine::Error &runtimeError) {
+    check(instance->Initialize(surface, [&reports, &reportedMessage](const Engine::Error &runtimeError) {
         ++reports;
         reportedMessage = runtimeError.message;
     }, error));
@@ -212,9 +192,9 @@ void runtimeSurfaceFailureReachesHostOnlyOnce()
     check(reportedMessage == "surface was lost");
     rendererEvents->emitFailure({"late renderer failure"});
     check(reports == 1);
-    check(!surface.draw(error));
+    check(!surface.Draw(error));
     check(reports == 1);
-    instance->shutdown();
+    instance->Shutdown();
     rendererEvents->emitFailure({"failure after shutdown"});
     check(reports == 1);
     check(events == std::vector<std::string>({

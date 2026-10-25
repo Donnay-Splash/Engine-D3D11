@@ -1,8 +1,8 @@
 #ifndef ENGINE_CORE_MATH_H
 #define ENGINE_CORE_MATH_H
 
-namespace engine {
-namespace core {
+namespace Engine {
+namespace Maths {
 
 struct Vector2
 {
@@ -92,7 +92,7 @@ private:
     bool empty_;
 };
 
-} // namespace core
-} // namespace engine
+} // namespace Maths
+} // namespace Engine
 
 #endif

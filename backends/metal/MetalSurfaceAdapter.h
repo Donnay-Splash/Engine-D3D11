@@ -5,12 +5,12 @@
 
 #include "Engine.h"
 
-namespace engine {
-namespace macos {
+namespace Engine {
+namespace Metal {
 
-std::unique_ptr<Surface> createMetalSurface(MTKView *view);
+std::unique_ptr<Surface> CreateMetalSurface(MTKView *view);
 
-} // namespace macos
-} // namespace engine
+} // namespace Metal
+} // namespace Engine
 
 #endif
