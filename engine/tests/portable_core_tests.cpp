@@ -1,19 +1,84 @@
 #include "Core/Math.h"
-#include "Core/SceneData.h"
+#include "Core/Mesh.h"
+#include "Core/Types.h"
+#include "Graphics/Buffer.h"
 
+#include <cstdint>
 #include <cstddef>
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 
 namespace {
 
+class TestBuffer final : public Engine::Graphics::Buffer
+{
+public:
+    explicit TestBuffer(const Engine::Graphics::BufferDesc &description)
+        : description_(description)
+    {
+    }
+
+    const Engine::Graphics::BufferDesc &Description() const noexcept override
+    {
+        return description_;
+    }
+
+    bool Map(void *&data, Engine::Error &) override
+    {
+        data = nullptr;
+        return false;
+    }
+
+    void Unmap() noexcept override {}
+
+private:
+    Engine::Graphics::BufferDesc description_;
+};
+
 void check(bool condition, const char *message)
 {
     if (!condition) {
         throw std::runtime_error(message);
     }
+}
+
+void meshRequiresValidMatchingVertexStreams()
+{
+    using namespace Engine::Graphics;
+    Engine::Error error;
+    Engine::Mesh mesh;
+
+    BufferDesc positionDescription;
+    positionDescription.size = sizeof(float) * 9;
+    positionDescription.usage = BufferUsage::Vertex;
+    Engine::VertexStream positions;
+    positions.slot = 0;
+    positions.format = VertexFormat::Float3;
+    positions.stride = sizeof(float) * 3;
+    positions.vertexCount = 3;
+    positions.buffer = std::make_shared<TestBuffer>(positionDescription);
+    check(mesh.AddVertexStream(positions, error), "valid position stream should be accepted");
+
+    BufferDesc uvDescription;
+    uvDescription.size = sizeof(float) * 4;
+    uvDescription.usage = BufferUsage::Vertex;
+    Engine::VertexStream uvs;
+    uvs.slot = 1;
+    uvs.format = VertexFormat::Float2;
+    uvs.stride = sizeof(float) * 2;
+    uvs.vertexCount = 2;
+    uvs.buffer = std::make_shared<TestBuffer>(uvDescription);
+    check(!mesh.AddVertexStream(uvs, error), "mismatched stream count should be rejected");
+
+    error.message.clear();
+    uvs.vertexCount = 3;
+    uvDescription.size = sizeof(float) * 6;
+    uvs.buffer = std::make_shared<TestBuffer>(uvDescription);
+    check(mesh.AddVertexStream(uvs, error), "matching UV stream should be accepted");
+    check(mesh.VertexCount() == 3, "mesh count should follow its synchronized streams");
 }
 
 bool close(float actual, float expected)
@@ -60,95 +125,10 @@ void rowVectorTransformsAndProjectionUseDocumentedConventions()
         "public matrices must have contiguous row-major float storage");
 }
 
-void cameraProjectionUsesPortablePerspectiveAndDepthConventions()
-{
-    using namespace Engine::Maths;
-
-    CameraData camera;
-    camera.verticalFieldOfViewRadians = 1.57079632679f;
-    camera.nearClip = 1.0f;
-    camera.farClip = 11.0f;
-    camera.viewTransform = Matrix4::translation({0.0f, 0.0f, -3.0f});
-    const Vector4 cameraSpacePoint =
-        camera.viewTransform.transform({0.0f, 0.0f, 3.0f, 1.0f});
-    check(close(cameraSpacePoint.z, 0.0f),
-        "camera view transform must map world coordinates into camera space");
-
-    const Matrix4 projection = camera.projection(2.0f);
-    const Vector4 nearPoint = projection.transform({0.0f, 0.0f, 1.0f, 1.0f});
-    const Vector4 farPoint = projection.transform({0.0f, 0.0f, 11.0f, 1.0f});
-    check(close(nearPoint.z / nearPoint.w, 0.0f)
-            && close(farPoint.z / farPoint.w, 1.0f),
-        "camera projection must retain the portable zero-to-one depth range");
-    check(close(projection.at(0, 0) * 2.0f, projection.at(1, 1)),
-        "camera projection must incorporate the drawable aspect ratio");
-}
-
-void sceneDataIsRendererIndependentAndValidatesMeshReferences()
-{
-    using namespace Engine::Maths;
-
-    SceneData scene;
-    MeshData mesh;
-    mesh.positions = {{-1.0f, -2.0f, 0.0f}, {3.0f, 2.0f, 0.0f}, {1.0f, 0.0f, 4.0f}};
-    mesh.normals = {{0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}};
-    mesh.texCoords = {{0.0f, 0.0f}, {1.0f, 0.0f}, {0.5f, 1.0f}};
-    mesh.indices = {0, 1, 2};
-    scene.meshes.push_back(mesh);
-
-    MaterialData material;
-    material.diffuseColor = {0.25f, 0.5f, 0.75f, 1.0f};
-    material.opacity = 0.5f;
-    material.smoothness = 0.75f;
-    scene.materials.push_back(material);
-
-    SceneNodeData root;
-    scene.nodes.push_back(root);
-    SceneNodeData model;
-    model.parentIndex = 0;
-    model.meshIndex = 0;
-    model.materialIndex = 0;
-    model.localTransform = Matrix4::translation({5.0f, 0.0f, -1.0f});
-    scene.nodes.push_back(model);
-
-    std::string error;
-    check(scene.validate(error), "valid CPU scene data must be accepted");
-    check(std::is_standard_layout<Vector3>::value
-            && sizeof(Vector3) == sizeof(float) * 3
-            && offsetof(Vector3, x) == 0
-            && offsetof(Vector3, y) == sizeof(float)
-            && offsetof(Vector3, z) == sizeof(float) * 2,
-        "mesh position and normal arrays must have a contiguous float3 vertex layout");
-    check(close(scene.materials[0].diffuseColor.y, 0.5f)
-            && close(scene.materials[0].opacity, 0.5f)
-            && close(scene.materials[0].smoothness, 0.75f),
-        "material values must remain editable CPU-side values");
-
-    const Bounds bounds = scene.meshes[0].bounds();
-    check(close(bounds.minimum().x, -1.0f) && close(bounds.minimum().y, -2.0f)
-            && close(bounds.minimum().z, 0.0f)
-            && close(bounds.maximum().x, 3.0f) && close(bounds.maximum().y, 2.0f)
-            && close(bounds.maximum().z, 4.0f),
-        "mesh bounds must enclose all CPU positions");
-
-    const Bounds worldBounds = bounds.transformed(
-        Matrix4::scaling({-2.0f, 1.0f, 0.5f})
-            * Matrix4::translation({5.0f, 0.0f, -1.0f}));
-    check(close(worldBounds.minimum().x, -1.0f) && close(worldBounds.maximum().x, 7.0f)
-            && close(worldBounds.minimum().z, -1.0f)
-            && close(worldBounds.maximum().z, 1.0f),
-        "transformed bounds must enclose mesh corners under negative scale");
-
-    scene.meshes[0].indices[2] = 3;
-    check(!scene.validate(error) && !error.empty(),
-        "scene validation must reject indices outside the mesh vertex array");
-}
-
 } // namespace
 
 int main()
 {
+    meshRequiresValidMatchingVertexStreams();
     rowVectorTransformsAndProjectionUseDocumentedConventions();
-    cameraProjectionUsesPortablePerspectiveAndDepthConventions();
-    sceneDataIsRendererIndependentAndValidatesMeshReferences();
 }

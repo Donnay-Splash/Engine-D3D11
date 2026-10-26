@@ -1,4 +1,4 @@
-#import "MetalDevice.h"
+#import "MetalRenderer.h"
 
 #import "MetalFrame.h"
 
@@ -28,11 +28,10 @@ static_assert(offsetof(RenderUniforms, diffuseColor) == sizeof(float) * 32,
 static_assert(sizeof(RenderUniforms) == sizeof(float) * 36,
     "Metal uniform size must match the shader structure.");
 
-class MetalDevice final : public Device
+class MetalRenderer final : public Renderer
 {
 public:
-    MetalDevice
-()
+    MetalRenderer()
         : device_(nil),
           commandQueue_(nil),
           pipelineState_(nil),
@@ -145,10 +144,9 @@ private:
 
 } // namespace
 
-std::unique_ptr<Device> CreateMetalDevice()
+std::unique_ptr<Renderer> CreateMetalRenderer()
 {
-    return std::unique_ptr<Device>(new MetalDevice
-());
+    return std::unique_ptr<Renderer>(new MetalRenderer());
 }
 
 } // namespace Engine

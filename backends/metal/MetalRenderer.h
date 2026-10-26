@@ -1,11 +1,11 @@
 #pragma once
 #include "Engine.h"
-#include "Device.h"
+#include "Renderer.h"
 
 #include <memory>
 
 namespace Engine {
 
-std::unique_ptr<Device> CreateMetalDevice();
+std::unique_ptr<Renderer> CreateMetalRenderer();
 
 } // namespace Engine

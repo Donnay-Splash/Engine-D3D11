@@ -10,7 +10,7 @@ This is the architecture source of truth for the migration. It supersedes the fo
 
 - Build the engine as a C++ static library that an application links against.
 - Keep a genuinely portable C++ engine core that builds without Apple frameworks, Windows headers, D3D, or graphics-backend types.
-- Keep renderer-specific implementation behind a small engine-level renderer interface. Metal is the first and only implemented backend.
+- Build a portable graphics interface for device, resources, command submission, pipelines, and presentation; keep backend implementations isolated. Metal is the first and only implemented backend.
 - Let the host own the native window and event loop while the engine owns graphics setup, engine-side rendering, and frame scheduling.
 - Migrate original engine behavior selectively, prioritizing the dissertation-critical scene and rendering features, including Deep G-Buffer effects where feasible.
 - Make future D3D12 and Vulkan evaluation possible without designing or implementing all backends in advance.
@@ -47,17 +47,19 @@ Portable engine core (C++; independently buildable)
   - engine state, portable scene/data, math and frame-level behavior
               |
               v
-Backend-neutral renderer interface
+Portable graphics API (C++)
+  - GraphicsInstance, Adapter, Graphics::Device, Resource, commands,
+    resources, bindings, pipelines, and presentation contracts
               ^
               |
-Metal renderer adapter (.mm/C++ and MSL; internal implementation)
+Metal backend (.mm/C++ and MSL; implementation in progress)
   - Metal device, queue, resources, shader/pipeline state, command encoding,
     render targets, and presentation
 ```
 
 The exact CMake target names and whether the Metal implementation is a transitive static target or part of a final static engine target are implementation details. The required property is that the portable core can be built independently, while the macOS application links the engine implementation it needs. Keep Objective-C/Objective-C++, AppKit, Metal, and MetalKit out of the portable core and its public headers.
 
-The renderer interface should describe engine-level rendering work and the capabilities actually needed by migrated features. It should not expose Metal or D3D types, require every Metal concept to have a one-to-one generic wrapper, or expose backend resource handles through the core. Keep internal seams inside the renderer implementation when they help tests; do not enlarge the app-facing interface for those seams.
+The portable graphics API describes shared rendering intent and required capabilities without exposing Metal or D3D types or backend resource handles. It should not force every native concept into a one-to-one wrapper. The former `Engine::Device` renderer-lifecycle interface is retired, and `Engine` no longer depends on the temporary `Engine::Renderer` bridge. The new GPU-facing type is `Engine::Graphics::Device`; the legacy renderer and Metal implementation remain unintegrated until the Metal backend adopts the component API.
 
 The interface should be reviewed against likely D3D12/Vulkan concerns as implementation choices arise, especially resource lifetime, command submission, synchronization, shader stages, and render-target formats. That review is a constraint on avoidable coupling, not a requirement to invent a multi-backend framework before a second backend exists.
 
@@ -65,9 +67,9 @@ The interface should be reviewed against likely D3D12/Vulkan concerns as impleme
 
 1. The host creates the AppKit application, window, and native render surface/view.
 2. The host calls the macOS-specific adapter to connect that surface to the engine. This is the platform-specific initialization seam; the portable engine interface remains C++ and backend-neutral.
-3. The engine/Metal implementation creates and owns the Metal device-side rendering state, shaders, resources, and presentation work. Surface attachment must not move GPU resource ownership into the app.
+3. Engine obtains a `GraphicsInstance` and placeholder shader library from its factory, selects a graphics-capable adapter, creates its `Graphics::Device`, and owns the swapchain. A backend will supply the actual implementations later.
 4. The host runs the native AppKit event loop. The engine layer owns frame rendering/scheduling through the attached surface; the app does not call a D3D-style `Frame()` method every iteration.
-5. Surface resize/drawable lifecycle is translated by the macOS adapter and delivered to the engine renderer. The exact host view type and resize callback contract are implementation decisions for the first library-backed rendering slice.
+5. Surface resize is delivered through the host adapter; draw callbacks are notifications only. Engine acquires/presents swapchain images through the graphics API.
 6. Shutdown stops rendering and releases engine resources before the host tears down its window and surface.
 
 Do not copy the old swap-chain-created callback mechanically. The new handshake is host-created surface into engine initialization/attachment. If the selected surface technology requires callbacks for resize, drawable acquisition, or errors, keep those callbacks in the macOS adapter rather than the portable core.
@@ -76,11 +78,13 @@ Input can be added later as platform-neutral engine input values populated by a 
 
 ### App-facing interface qualities
 
-The app-facing interface should stay small: configure/create the engine, attach the platform surface through its adapter, shut down, and receive explicit initialization/runtime failures. Issue #2 implements this as `createEngine()`, `Engine::initialize(Surface&, ErrorHandler, Error&)`, and `Engine::shutdown()`; future platform adapters should preserve the same ownership and lifecycle guarantees.
+The app-facing interface should stay small: configure/create the engine, attach the platform surface through its adapter, shut down, and receive explicit initialization/runtime failures. The `createEngine()`, `Engine::Initialize(Surface&, ErrorHandler, Error&)`, and `Engine::Shutdown()` lifecycle remains. `EngineFactory` injects a `GraphicsInstance` and placeholder shader-library service; Engine selects a graphics-capable adapter, creates its device, and owns the swapchain.
 
 The interface must state lifecycle ordering, surface ownership, resize behavior, frame scheduling, and failure reporting; a C++ type declaration alone is not the whole interface. Initialization failures (for example, unavailable device or invalid shader/pipeline) must be visible to the host rather than producing a success-shaped blank window.
 
-For the first library-backed slice, the host creates an `MTKView` without a device and wraps it with the macOS surface adapter. `Engine::initialize` initializes the renderer before starting the surface callbacks; callbacks drive engine rendering, resize, and runtime failure reporting. The host retains ownership of the view and adapter, and the surface must outlive the engine because the engine keeps a non-owning attachment. `Engine::shutdown` stops surface callbacks before releasing renderer resources, and the host calls it before closing the surface.
+The host surface implements the typed `Graphics::PresentationSurface` contract and sends frame notifications; it does not acquire or pass a native drawable to portable Engine code. Engine owns swapchain acquisition, render-pass recording, submission, and presentation. The host retains ownership of the view and adapter, and the surface must outlive the engine because the engine keeps a non-owning attachment. `Engine::Shutdown` stops surface callbacks before releasing graphics resources.
+
+The current single-mesh frontend path creates a three-vertex equilateral mesh with separate position and UV buffers, requests a shader pair by program type/name, writes identity world/view/projection matrices to a uniform buffer, and records a draw of three vertices. Upload uses staging buffers and an explicit submission dependency. Portable fake graphics objects exercise this path; no graphics backend implements the contracts yet. The macOS factory currently provides no `GraphicsInstance` or shader library, so Engine initialization fails explicitly until the Metal backend is migrated. This does not claim a visible triangle.
 
 ## Build and platform structure
 
@@ -100,7 +104,7 @@ cmake -S . -B build/macos -G "Unix Makefiles" \
 cmake --build build/macos
 ```
 
-AppKit, Metal, and MetalKit come from the Apple SDK. Issue #2 builds the static engine implementation, packages the existing MSL shader, and links the separate GUI host. The CTest lifecycle check exercises attach, initialize, draw, resize, shutdown, and a simulated surface failure through the C++ seam; it does not replace GUI runtime checks on hardware. See the README for current configure/build/run instructions.
+AppKit, Metal, and MetalKit come from the Apple SDK. The CMake build packages the existing MSL shader and links the separate GUI host. CTest includes lifecycle failure handling and a fake-driven graphics test for mesh streams, draw recording, upload dependencies, resize, and presentation errors. These tests validate the portable frontend only; they do not replace GPU runtime checks on hardware. See the README for current configure/build/run instructions.
 
 ## Legacy feature inventory and disposition
 
@@ -128,14 +132,13 @@ The current monolithic `Engine::Engine` coordinates input, scene state, and a D3
 
 Each stage should be turned into a focused implementation spec with its own files, scope, tests, and completion criteria.
 
-### 1. Move the triangle behind the engine library
+### 1. Establish the host and surface lifecycle
 
 - Add the static engine/core and macOS/Metal adapter build separation.
-- Move Metal device-side setup, shader/pipeline ownership, frame encoding, and presentation out of the app host.
 - Let the host create the window/surface, attach it through the macOS adapter, and run AppKit.
-- Prove library initialization, explicit failure reporting, resize, render scheduling, and shutdown.
+- Keep initialization, explicit failure reporting, resize, and shutdown independent of rendering work.
 
-**Acceptance:** the separate app links the engine library and displays the existing triangle; host source contains no shader, pipeline, command-encoding, or engine-resource implementation.
+**Acceptance:** the separate app links the engine library and handles surface startup, resize, failure, and shutdown; rendering is not required at this stage.
 
 ### 2. Establish the portable core and math
 
@@ -157,29 +160,38 @@ graph; those remain subject to the inventory and later migration specs. The
 core target is constrained to C++ sources with no linked platform/backend
 libraries, and can be built directly as `engine-core`.
 
-### 3. Render engine-owned scene content
+### 3. Establish the modular graphics interfaces
 
-- Define the first engine-owned CPU mesh/material/camera data contract and the minimum renderer operations it needs.
-- Create Metal buffers, texture resources, and pipeline state only in the Metal implementation.
+- Define backend-neutral interfaces for instance/adapter/device, resources/views, queues/command recording/submission, shaders/bindings/pipelines, allocation, barriers, and presentation.
+- Use shared CPU ownership for GPU resources and require completion-based native retirement after final GPU use.
+- Keep `Engine` on the graphics component interfaces; do not add backend handles to portable headers.
+- Compile all public headers and test shared ownership without introducing a rendering dependency.
+
+**Acceptance:** portable interfaces compile and remain independent of platform graphics libraries; a fake-driven frontend draw path validates the contracts, but no backend implementation or on-screen rendering is required.
+
+### 4. Implement the first Metal backend and render engine-owned scene content
+
+- Define the first engine-owned CPU mesh/material/camera data contract and map it to the portable graphics interfaces.
+- Implement the Metal-specific device, queue, resource, shader, binding, pipeline, and presentation components incrementally.
 - Render a mesh selected/created through the engine scene path, with camera transforms and depth.
 - Make shader compilation/loading an explicit CMake/runtime path with useful diagnostics.
 
-**Acceptance:** engine-owned scene data, not hard-coded host geometry, produces a visible Metal-rendered mesh.
+**Acceptance:** engine-owned scene data, not hard-coded host geometry, produces a visible Metal-rendered mesh. This is a later milestone, not current behavior.
 
-The first scene slice keeps the existing portable structure-of-arrays mesh contract
+The target first scene slice keeps the portable structure-of-arrays mesh contract
 (`positions`, optional vertex attributes, and 32-bit indices), adds a portable
 camera view transform and left-handed perspective parameters, and builds one
-engine-owned cube scene. The app-facing lifecycle remains unchanged. The engine
-passes its CPU scene and camera into the internal renderer; Metal owns the
-vertex/normal/index buffers, shader pipeline, depth state, and depth texture.
-The shader consumes the portable row-major matrices as their matching Metal
-column-major interpretation, and compile-time layout checks pin the uniform
-offsets. Drawable resize recreates the renderer-owned depth texture and updates
-the projection aspect ratio. This slice intentionally renders one scene object;
-multi-object/material pipelines and a general scene traversal contract remain
-future work.
+engine-owned cube scene. The app-facing lifecycle already uses graphics-component
+initialization and presentation; a backend must implement those components before
+the existing app can render. The engine passes its CPU scene and camera into the
+internal backend; Metal owns the vertex/normal/index
+buffers, shader pipeline, depth state, and depth texture. The Engine facade now
+uses graphics-component initialization and presentation instead of the former
+renderer lifecycle bridge, but the frontend contract still has no working GPU
+backend. This slice intentionally renders one scene object; multi-object/material
+pipelines and a general scene traversal contract remain future work.
 
-### 4. Select and migrate original rendering features
+### 5. Select and migrate original rendering features
 
 - Complete the feature-by-feature inventory: algorithm, data inputs/outputs, D3D11 assumptions, prerequisites, disposition, and visible/testable result. The current source-level inventory and first-effect recommendation are in [Legacy Engine Feature Inventory](legacy-feature-inventory.md).
 - Stabilize basic mesh shading, materials, textures, depth, and render-target/resource lifetime first.
@@ -190,15 +202,15 @@ future work.
 
 **Acceptance:** every migrated feature has a specific visible or testable outcome, and every unported feature is recorded as deferred or dropped rather than implied to work.
 
-### 5. Add host services and assess additional backends
+### 6. Add host services and assess additional backends
 
 - Add input forwarding only when the rendering/scene milestone needs it; pass platform-neutral values, not AppKit events.
 - Reassess clock, file, and diagnostics adapters as actual migrated features require them.
-- After the Metal renderer is established, evaluate whether D3D12 or Vulkan is a real requirement and whether the renderer interface needs a deliberate revision.
+- After the Metal backend is established, evaluate whether D3D12 or Vulkan is a real requirement and whether the portable graphics interfaces need a deliberate revision.
 
 **Acceptance:** no host-specific event or OS type leaks into the portable core; future backend work starts from an explicit requirement and validated interface changes.
 
-### 6. Retire D3D11 deliberately
+### 7. Retire D3D11 deliberately
 
 - Compare the source-level reuse inventory against migrated, intentionally dropped, and still-needed reference behavior.
 - Identify the Win32, WinRT, and utility projects that stop building if D3D11 source/projects are removed.

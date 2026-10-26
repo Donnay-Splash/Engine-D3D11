@@ -12,7 +12,7 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit surface that renders an engine-owned, transformed cube from portable scene/mesh/material and camera data. The portable C++ lifecycle interface, row-major math, CPU scene/mesh/material data, and camera projection conventions build as the static `engine` library. Metal rendering and the Metal surface adapter build separately as the `engine-backend-metal` library, which links to `engine`; the AppKit host owns the window and event loop and links the backend it uses. If a usable Metal device or the shader/pipeline is unavailable, the app displays an error and exits. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md).
+The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit surface. Rendering is not currently implemented. The portable C++ engine builds as the static `engine` library and contains graphics interfaces plus a fake-tested single-mesh draw-recording path; no GPU backend implements those contracts yet. The macOS factory currently has no graphics instance or shader library, so Engine initialization fails explicitly until Metal is migrated. The AppKit host owns the window and event loop. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md) and the [graphics-core abstraction proposal](docs/graphics-core-abstraction-proposal.md).
 
 Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
@@ -47,7 +47,7 @@ The portable engine library, math/data behavior tests, and lifecycle tests can a
 
 ```sh
 cmake -S . -B build/portable -DBUILD_TESTING=ON
-cmake --build build/portable --target engine engine-lifecycle-tests portable-core-tests
+cmake --build build/portable --target engine engine-lifecycle-tests engine-draw-tests portable-core-tests graphics-api-tests
 ctest --test-dir build/portable --output-on-failure
 ```
 
@@ -68,8 +68,8 @@ These dependencies are distinct:
 
 ## Engine migration direction
 
-The current CMake app is a native window and `MTKView` host. Its engine-owned cube is rendered from portable scene/mesh data through the `engine` static library and the separate `engine-backend-metal` static library; the host does not define geometry or create GPU resources. The existing D3D11 engine cannot simply be linked unchanged. The agreed direction is a portable C++ engine with a backend-neutral renderer seam and isolated graphics backend libraries. The app owns the native window and event loop, supplies its render surface to the engine, and remains a thin host.
+The current CMake app is a native window and `MTKView` host; rendering is not currently implemented. The existing D3D11 engine cannot simply be linked unchanged. The agreed direction is a portable C++ engine with backend-neutral graphics interfaces and isolated graphics backend libraries. The app owns the native window and event loop, supplies its render surface to the engine, and remains a thin host.
 
-The first library-backed slice moved the triangle behind the engine interface. The portable-core slice adds public math, CPU scene/mesh/material data, and camera projection. This scene-rendering slice passes engine-owned scene values to the Metal renderer, which uploads mesh data, applies the node and camera transforms, and depth-tests the result. It does not migrate legacy serialization, property/editor bindings, or a complete scene graph. Later stages will inventory the original engine features and migrate selected scene and rendering behavior, prioritizing dissertation-critical work without assuming one-to-one parity. DirectXMath and Windows services must be separated or replaced where needed. D3D11 will not be ported: its existing projects remain temporary migration reference and will be retired after a review of migrated behavior and Windows-project impact. D3D12 and Vulkan are future evaluation targets, not current implementation commitments.
+The portable core includes public math and CPU scene/mesh/material data. Engine now uses the graphics API to initialize a device/swapchain and record a single UV-triangle draw, exercised with fake graphics objects; this path has not been wired to the Metal library or used to render pixels. It does not migrate legacy serialization, property/editor bindings, or a complete scene graph. Later stages will inventory the original engine features and migrate selected scene and rendering behavior, prioritizing dissertation-critical work without assuming one-to-one parity. DirectXMath and Windows services must be separated or replaced where needed. D3D11 will not be ported: its existing projects remain temporary migration reference and will be retired after a review of migrated behavior and Windows-project impact. D3D12 and Vulkan are future evaluation targets, not current implementation commitments.
 
 See the [Technical Design](docs/macos-metal-engine-tdd.md) for the module structure, feature disposition, migration stages, and acceptance criteria.

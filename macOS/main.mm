@@ -12,7 +12,7 @@
 @property(nonatomic) int exitStatus;
 
 - (instancetype)init;
-- (void)showMetalError:(NSString *)message;
+- (void)showEngineError:(NSString *)message;
 - (void)shutdownEngine;
 
 @end
@@ -40,12 +40,12 @@
     }
 }
 
-- (void)showMetalError:(NSString *)message
+- (void)showEngineError:(NSString *)message
 {
     [self shutdownEngine];
 
     NSAlert *alert = [[NSAlert alloc] init];
-    alert.messageText = @"Metal rendering failed";
+    alert.messageText = @"Engine initialization failed";
     alert.informativeText = message ?: @"An unknown rendering error occurred.";
     [alert addButtonWithTitle:@"Quit"];
 
@@ -66,7 +66,7 @@
                                                 backing:NSBackingStoreBuffered
                                                   defer:NO];
     if (self.window == nil) {
-        [self showMetalError:@"Failed to create the Engine window."];
+        [self showEngineError:@"Failed to create the Engine window."];
         return NO;
     }
 
@@ -78,7 +78,7 @@
     m_Surface = Engine::Metal::CreateMetalSurface(view);
     m_Engine = Engine::Metal::CreateEngine();
     if (m_Surface == nullptr || m_Engine == nullptr) {
-        [self showMetalError:@"Failed to create the engine or render surface."];
+        [self showEngineError:@"Failed to create the engine or render surface."];
         return NO;
     }
 
@@ -94,13 +94,13 @@
 
             NSString *message = [NSString stringWithUTF8String:runtimeError.message.c_str()];
             dispatch_async(dispatch_get_main_queue(), ^{
-                [strongSelf showMetalError:message ?: @"The engine encountered a runtime failure."];
+                [strongSelf showEngineError:message ?: @"The engine encountered a runtime failure."];
             });
         },
         error);
     if (!initialized) {
         NSString *message = [NSString stringWithUTF8String:error.message.c_str()];
-        [self showMetalError:message ?: @"Failed to initialize the engine."];
+        [self showEngineError:message ?: @"Failed to initialize the engine."];
         return NO;
     }
 

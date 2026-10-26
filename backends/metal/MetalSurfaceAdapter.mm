@@ -1,7 +1,5 @@
 #import "MetalSurfaceAdapter.h"
 
-#import "MetalFrame.h"
-
 @interface MetalSurfaceDelegate : NSObject <MTKViewDelegate>
 {
 @public
@@ -14,26 +12,16 @@
 
 - (void)drawInMTKView:(MTKView *)view
 {
-    if (view.device == nil) {
-        if (callbacks.Failure != nullptr) {
-            Engine
-        ::Error error;
-            error.message = "The Metal render surface lost its device.";
-            callbacks.Failure(callbacks.context, error);
-        }
+    (void)view;
+    if (callbacks.Draw == nullptr) {
         return;
     }
 
-    id<CAMetalDrawable> drawable = view.currentDrawable;
-    MTLRenderPassDescriptor *renderPass = view.currentRenderPassDescriptor;
-    if (drawable == nil || renderPass == nil || callbacks.Draw == nullptr) {
-        return;
-    }
-
-    MetalFrame frame = {drawable, renderPass};
     Engine
 ::Error error;
-    callbacks.Draw(callbacks.context, &frame, error);
+    if (!callbacks.Draw(callbacks.context, error) && callbacks.Failure != nullptr) {
+        callbacks.Failure(callbacks.context, error);
+    }
 }
 
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size
@@ -69,11 +57,6 @@ public:
     ~MetalSurface() override
     {
         Stop();
-    }
-
-    void *NativeHandle() noexcept override
-    {
-        return (__bridge void *)view_;
     }
 
     Size DrawableSize() const noexcept override
