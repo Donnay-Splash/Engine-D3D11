@@ -14,7 +14,7 @@ Recommended first principles:
 4. Separate resource storage from resource views, shader artifacts from pipeline state, and the host `Surface` from image acquisition and presentation.
 5. Keep feature availability, allocation intent, and synchronization scope explicit. No single common feature set or one-to-one native handle abstraction is assumed.
 
-This proposal fits the repository's established split: portable C++ in `engine/`, backend code in separate libraries, and a thin OS host. The current Metal backend still contains legacy device, queue, and shader setup in [MetalRenderer.mm](../backends/metal/MetalRenderer.mm); it does not implement the new contracts. `Engine` now depends on injected graphics-instance and shader-library interfaces, but the macOS factory deliberately supplies neither until a backend adopts them. The existing [macOS Metal engine design](./macos-metal-engine-tdd.md) says D3D12 and Vulkan are future evaluation targets and warns against recreating D3D11's immediate-context/resource API.
+This proposal fits the repository's established split: portable C++ in `engine/`, backend code in separate libraries, and a thin OS host. The current Metal backend still contains legacy device and queue setup in [MetalRenderer.mm](../backends/metal/MetalRenderer.mm); it does not implement the new contracts. The macOS factory injects a Metal shader library, which loads the bundled `default.metallib` and creates the current mesh shader pair, but does not yet provide a graphics instance. The existing [macOS Metal engine design](./macos-metal-engine-tdd.md) says D3D12 and Vulkan are future evaluation targets and warns against recreating D3D11's immediate-context/resource API.
 
 ## What the APIs actually expose
 
