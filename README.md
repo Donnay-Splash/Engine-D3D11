@@ -12,7 +12,7 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with an AppKit window and a Metal presentation surface. The portable C++ engine builds as the static `engine` library. The Metal backend is implemented in C++ with Apple's vendored metal-cpp headers; Objective-C++ remains in the macOS frontend for AppKit integration. Metal shaders are native MSL compiled to a bundled metallib. The backend enumerates Metal adapters and creates the device used by Engine. Hardware-backed Metal integration tests are available on macOS with a Metal-capable device. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md) and the [graphics-core abstraction proposal](docs/graphics-core-abstraction-proposal.md).
+The CMake `engine-macos` target builds a native `.app` with an AppKit window and a Metal presentation surface. The portable C++ engine builds as the static `engine` library. The Metal backend is implemented in C++ with Apple's vendored metal-cpp headers; Objective-C++ remains in the macOS frontend for AppKit integration. Shaders are authored in HLSL (`engine/shaders`) and built by the standalone [shader-compiler](tools/ShaderCompiler/README.md) tool (HLSL to DXIL with `dxc`, then DXIL to metallib with Apple's `metal-shaderconverter`); CMake does not build shaders. The backend enumerates Metal adapters and creates the device used by Engine. Hardware-backed Metal integration tests are available on macOS with a Metal-capable device. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md) and the [graphics-core abstraction proposal](docs/graphics-core-abstraction-proposal.md).
 
 Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
@@ -24,10 +24,11 @@ clang --version
 cmake --version
 make --version
 xcrun --find metal
-xcrun --find metallib
+xcrun --find metal-shaderconverter
+dxc --version
 ```
 
-Configure with the Xcode generator, then build and open the project from the repository root:
+Build the shaders first (see the shader-compiler README), then configure with the Xcode generator, then build and open the project from the repository root:
 
 ```sh
 cmake -S . -B build/macos -G Xcode \

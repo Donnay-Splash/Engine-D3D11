@@ -23,6 +23,10 @@ public:
 
     const std::vector<BindingValue> *Values(std::uint32_t binding) const;
 
+    bool EncodeArgumentBuffer(MTL::Device *device,
+                              const std::vector<std::shared_ptr<MetalShader>> &shaders,
+                              NS::SharedPtr<MTL::Buffer> &argumentBuffer, Error &error) const;
+
 private:
     const BindingDesc *Find(std::uint32_t binding, std::uint32_t arrayElement, Error &error) const;
 

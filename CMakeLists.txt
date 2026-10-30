@@ -40,6 +40,8 @@ if(BUILD_TESTING)
     add_subdirectory(engine/tests)
 endif()
 
+add_subdirectory(tools/ShaderCompiler)
+
 if(APPLE)
     if(CMAKE_VERSION VERSION_LESS 3.25)
         message(FATAL_ERROR "The Metal development scheme requires CMake 3.25 or newer to enable Metal API Validation.")
@@ -55,7 +57,6 @@ if(APPLE)
     find_library(METAL_FRAMEWORK Metal REQUIRED)
     find_library(METALKIT_FRAMEWORK MetalKit REQUIRED)
     find_library(QUARTZCORE_FRAMEWORK QuartzCore REQUIRED)
-    find_program(XCRUN_EXECUTABLE xcrun REQUIRED)
 
     file(GLOB_RECURSE METAL_SOURCES CONFIGURE_DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.cpp"
@@ -102,28 +103,17 @@ if(APPLE)
         PRIVATE engine-backend-metal ${APPKIT_FRAMEWORK} ${METALKIT_FRAMEWORK}
     )
 
-    set(METAL_SHADER "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/Scene.metal")
-    set(METAL_AIR "${CMAKE_CURRENT_BINARY_DIR}/Scene.air")
-    set(METAL_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/default.metallib")
-
-    add_custom_command(
-        OUTPUT "${METAL_AIR}"
-        COMMAND "${XCRUN_EXECUTABLE}" -sdk macosx metal -c "${METAL_SHADER}" -o "${METAL_AIR}"
-        DEPENDS "${METAL_SHADER}"
+    # Shaders are built by the shader-compiler tool (see tools/ShaderCompiler), not by CMake.
+    # Run it before building; its metallibs are packaged into the app bundle and used by tests.
+    set(SHADER_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/shaders" CACHE PATH
+        "Directory the shader-compiler tool writes its output to")
+    file(MAKE_DIRECTORY "${SHADER_OUTPUT_DIR}/metal")
+    add_custom_command(TARGET engine-macos POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory
+            "${SHADER_OUTPUT_DIR}/metal"
+            "$<TARGET_BUNDLE_CONTENT_DIR:engine-macos>/Resources/shaders"
         VERBATIM
     )
-    add_custom_command(
-        OUTPUT "${METAL_LIBRARY}"
-        COMMAND "${XCRUN_EXECUTABLE}" -sdk macosx metallib "${METAL_AIR}" -o "${METAL_LIBRARY}"
-        DEPENDS "${METAL_AIR}"
-        VERBATIM
-    )
-    set_source_files_properties("${METAL_LIBRARY}" PROPERTIES
-        GENERATED TRUE
-        HEADER_FILE_ONLY TRUE
-        MACOSX_PACKAGE_LOCATION Resources
-    )
-    target_sources(engine-macos PRIVATE "${METAL_LIBRARY}")
 
     if(BUILD_TESTING)
         add_executable(engine-metal-integration-tests backends/metal/tests/metal_backend_tests.cpp)
@@ -131,7 +121,7 @@ if(APPLE)
         add_dependencies(engine-metal-integration-tests engine-macos)
         target_compile_options(engine-metal-integration-tests PRIVATE -Wall -Wextra -Werror)
         target_compile_definitions(engine-metal-integration-tests PRIVATE
-            METAL_SHADER_LIBRARY_PATH="${METAL_LIBRARY}"
+            METAL_SHADER_DIRECTORY="${SHADER_OUTPUT_DIR}/metal"
         )
         set_target_properties(engine-metal-integration-tests PROPERTIES
             XCODE_GENERATE_SCHEME YES

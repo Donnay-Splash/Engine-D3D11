@@ -3,6 +3,7 @@
 #include "ShaderLibrary.h"
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace Engine {
@@ -19,9 +20,8 @@ public:
         Error &error) override;
 
 private:
-    bool Load(Error &error);
-
-    std::vector<std::uint8_t> m_ShaderBytecode;
+    static bool Load(const std::string &entryPoint, const std::string &extension,
+                     std::vector<std::uint8_t> &data, Error &error);
 };
 
 } // namespace Metal

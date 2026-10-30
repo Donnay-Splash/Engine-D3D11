@@ -224,6 +224,7 @@ struct ShaderDesc
     std::string entryPoint;
     std::string format;
     std::vector<std::uint8_t> bytecode;
+    std::vector<std::uint8_t> reflection;
 };
 
 struct SamplerDesc

@@ -53,6 +53,7 @@ using namespace Graphics;
 // uses index kVertexBufferBase + N.
 constexpr std::uint32_t kVertexBufferBase = 16;
 constexpr std::uint32_t kMaxVertexBufferSlots = 31 - kVertexBufferBase;
+constexpr std::uint32_t kIRArgumentBufferBindPoint = 2;
 
 constexpr std::uint32_t VertexBufferIndex(std::uint32_t slot)
 {

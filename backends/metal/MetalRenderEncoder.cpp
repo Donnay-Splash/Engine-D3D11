@@ -78,6 +78,23 @@ bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
         SetError(error, "The binding set is not owned by the Metal backend.");
         return false;
     }
+    std::vector<std::shared_ptr<MetalShader>> shaders;
+    for (const std::shared_ptr<Shader> &shader : pipeline_->Description().shaders) {
+        auto metalShader = std::dynamic_pointer_cast<MetalShader>(shader);
+        if (metalShader == nullptr) {
+            SetError(error, "The render pipeline contains a non-Metal shader.");
+            return false;
+        }
+        shaders.push_back(std::move(metalShader));
+    }
+    NS::SharedPtr<MTL::Buffer> argumentBuffer;
+    if (!metalSet->EncodeArgumentBuffer(context_->Device(), shaders, argumentBuffer, error)) {
+        return false;
+    }
+    encoder_->setVertexBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
+    encoder_->setFragmentBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
+    context_->KeepNativeResource(argumentBuffer.get());
+
     for (const BindingDesc &binding : metalLayout->Bindings()) {
         if ((static_cast<std::uint32_t>(binding.visibility) &
              static_cast<std::uint32_t>(ShaderStage::Vertex | ShaderStage::Fragment)) == 0) {
@@ -90,11 +107,7 @@ bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
         }
         for (std::uint32_t element = 0; element < binding.arrayCount; ++element) {
             const BindingValue &value = (*values)[element];
-            const std::uint32_t slot = binding.binding + element;
-            if (slot >= kVertexBufferBase) {
-                SetError(error, "A render binding overlaps the Metal vertex buffer index range.");
-                return false;
-            }
+            MTL::ResourceUsage usage = MTL::ResourceUsageRead;
             if (binding.type == BindingType::UniformBuffer ||
                 binding.type == BindingType::StorageBuffer) {
                 auto view = std::dynamic_pointer_cast<MetalBufferView>(value.buffer);
@@ -102,13 +115,18 @@ bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
                     SetError(error, "A required render buffer binding is unset.");
                     return false;
                 }
+                if (binding.type == BindingType::StorageBuffer) {
+                    usage = static_cast<MTL::ResourceUsage>(MTL::ResourceUsageRead |
+                                                            MTL::ResourceUsageWrite);
+                }
                 const std::uint32_t visibility = static_cast<std::uint32_t>(binding.visibility);
                 if ((visibility & static_cast<std::uint32_t>(ShaderStage::Vertex)) != 0) {
-                    encoder_->setVertexBuffer(view->NativeBuffer()->Native(), view->Offset(), slot);
+                    encoder_->useResource(view->NativeBuffer()->Native(), usage,
+                                          MTL::RenderStageVertex);
                 }
                 if ((visibility & static_cast<std::uint32_t>(ShaderStage::Fragment)) != 0) {
-                    encoder_->setFragmentBuffer(view->NativeBuffer()->Native(), view->Offset(),
-                                                slot);
+                    encoder_->useResource(view->NativeBuffer()->Native(), usage,
+                                          MTL::RenderStageFragment);
                 }
                 context_->Keep(value.buffer);
             } else if (binding.type == BindingType::SampledTexture ||
@@ -118,12 +136,16 @@ bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
                     SetError(error, "A required render texture binding is unset.");
                     return false;
                 }
+                if (binding.type == BindingType::StorageTexture) {
+                    usage = static_cast<MTL::ResourceUsage>(MTL::ResourceUsageRead |
+                                                            MTL::ResourceUsageWrite);
+                }
                 const std::uint32_t visibility = static_cast<std::uint32_t>(binding.visibility);
                 if ((visibility & static_cast<std::uint32_t>(ShaderStage::Vertex)) != 0) {
-                    encoder_->setVertexTexture(view->Native(), slot);
+                    encoder_->useResource(view->Native(), usage, MTL::RenderStageVertex);
                 }
                 if ((visibility & static_cast<std::uint32_t>(ShaderStage::Fragment)) != 0) {
-                    encoder_->setFragmentTexture(view->Native(), slot);
+                    encoder_->useResource(view->Native(), usage, MTL::RenderStageFragment);
                 }
                 context_->Keep(value.texture);
             } else {
@@ -131,13 +153,6 @@ bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
                 if (sampler == nullptr) {
                     SetError(error, "A required render sampler binding is unset.");
                     return false;
-                }
-                const std::uint32_t visibility = static_cast<std::uint32_t>(binding.visibility);
-                if ((visibility & static_cast<std::uint32_t>(ShaderStage::Vertex)) != 0) {
-                    encoder_->setVertexSamplerState(sampler->Native(), slot);
-                }
-                if ((visibility & static_cast<std::uint32_t>(ShaderStage::Fragment)) != 0) {
-                    encoder_->setFragmentSamplerState(sampler->Native(), slot);
                 }
                 context_->Keep(value.sampler);
             }

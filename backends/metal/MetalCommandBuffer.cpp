@@ -52,6 +52,13 @@ void MetalCommandBuffer::AddResource(const std::shared_ptr<Resource> &resource)
     }
 }
 
+void MetalCommandBuffer::AddNativeResource(MTL::Buffer *buffer)
+{
+    if (buffer != nullptr) {
+        nativeResources_.push_back(NS::RetainPtr(buffer));
+    }
+}
+
 void MetalCommandBuffer::AddDrawable(CA::MetalDrawable *drawable)
 {
     if (drawable == nullptr) {
@@ -114,6 +121,7 @@ void MetalCommandBuffer::Complete(NS::Error *nativeError)
         state_->completed = true;
     }
     resources_.clear();
+    nativeResources_.clear();
     drawables_.clear();
 }
 
@@ -141,6 +149,7 @@ bool MetalCommandBuffer::Reset(Error &error)
     state_ = std::make_shared<SubmissionState>();
     state_->commandBuffer = commandBuffer_;
     resources_.clear();
+    nativeResources_.clear();
     drawables_.clear();
     presentedDrawables_.clear();
     finished_ = false;

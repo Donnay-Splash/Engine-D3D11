@@ -62,6 +62,11 @@ void MetalCommandContext::Keep(const std::shared_ptr<Resource> &resource)
     }
 }
 
+void MetalCommandContext::KeepNativeResource(MTL::Buffer *buffer)
+{
+    commandBuffer_->AddNativeResource(buffer);
+}
+
 void MetalCommandContext::DeferError(const char *message)
 {
     if (deferredError_.empty()) {
