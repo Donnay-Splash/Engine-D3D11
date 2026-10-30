@@ -45,6 +45,13 @@ std::vector<std::uint8_t> LoadShaderBytecode(const std::string &entryPoint)
     return {std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
 }
 
+std::vector<std::uint8_t> LoadShaderReflection(const std::string &entryPoint)
+{
+    std::ifstream file(std::string(METAL_SHADER_DIRECTORY) + "/Scene_" + entryPoint + ".json",
+                       std::ios::binary);
+    return {std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
+}
+
 bool Check(bool condition, const char *operation, const Engine::Error &error)
 {
     if (condition) {
@@ -96,7 +103,11 @@ bool RunMetalIntegrationTests()
     vertexShaderDescription.entryPoint = "mesh_vertex";
     vertexShaderDescription.format = "metallib";
     vertexShaderDescription.bytecode = LoadShaderBytecode("mesh_vertex");
+    vertexShaderDescription.reflection = LoadShaderReflection("mesh_vertex");
     if (!Check(!vertexShaderDescription.bytecode.empty(), "Load the mesh_vertex metallib")) {
+        return false;
+    }
+    if (!Check(!vertexShaderDescription.reflection.empty(), "Load mesh_vertex reflection")) {
         return false;
     }
     const std::shared_ptr<Shader> vertexShader =
@@ -110,7 +121,11 @@ bool RunMetalIntegrationTests()
     fragmentShaderDescription.entryPoint = "mesh_fragment";
     fragmentShaderDescription.format = "metallib";
     fragmentShaderDescription.bytecode = LoadShaderBytecode("mesh_fragment");
+    fragmentShaderDescription.reflection = LoadShaderReflection("mesh_fragment");
     if (!Check(!fragmentShaderDescription.bytecode.empty(), "Load the mesh_fragment metallib")) {
+        return false;
+    }
+    if (!Check(!fragmentShaderDescription.reflection.empty(), "Load mesh_fragment reflection")) {
         return false;
     }
     const std::shared_ptr<Shader> fragmentShader =
@@ -124,7 +139,11 @@ bool RunMetalIntegrationTests()
     computeShaderDescription.entryPoint = "fill_values";
     computeShaderDescription.format = "metallib";
     computeShaderDescription.bytecode = LoadShaderBytecode("fill_values");
+    computeShaderDescription.reflection = LoadShaderReflection("fill_values");
     if (!Check(!computeShaderDescription.bytecode.empty(), "Load the fill_values metallib")) {
+        return false;
+    }
+    if (!Check(!computeShaderDescription.reflection.empty(), "Load fill_values reflection")) {
         return false;
     }
     const std::shared_ptr<Shader> computeShader =

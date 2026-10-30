@@ -1,10 +1,122 @@
 #include "MetalBackendInternal.h"
 #include "MetalSurfaceAdapter.h"
 
+#include <charconv>
+#include <string_view>
+
 namespace Engine {
 namespace Metal {
 
 using namespace Graphics;
+
+namespace {
+
+template <typename T>
+bool JsonNumber(std::string_view object, const char *name, T &value)
+{
+    const std::string key = std::string("\"") + name + "\"";
+    const std::size_t keyPosition = object.find(key);
+    if (keyPosition == std::string_view::npos) {
+        return false;
+    }
+    const std::size_t colon = object.find(':', keyPosition + key.size());
+    if (colon == std::string_view::npos) {
+        return false;
+    }
+    std::size_t begin = colon + 1;
+    while (begin < object.size() &&
+           (object[begin] == ' ' || object[begin] == '\t' || object[begin] == '\r' ||
+            object[begin] == '\n')) {
+        ++begin;
+    }
+    std::size_t end = begin;
+    while (end < object.size() && object[end] >= '0' && object[end] <= '9') {
+        ++end;
+    }
+    return end != begin &&
+           std::from_chars(object.data() + begin, object.data() + end, value).ec ==
+               std::errc{};
+}
+
+bool JsonString(std::string_view object, const char *name, std::string &value)
+{
+    const std::string key = std::string("\"") + name + "\"";
+    const std::size_t keyPosition = object.find(key);
+    if (keyPosition == std::string_view::npos) {
+        return false;
+    }
+    const std::size_t colon = object.find(':', keyPosition + key.size());
+    if (colon == std::string_view::npos) {
+        return false;
+    }
+    const std::size_t begin = object.find('"', colon + 1);
+    if (begin == std::string_view::npos) {
+        return false;
+    }
+    const std::size_t end = object.find('"', begin + 1);
+    if (end == std::string_view::npos) {
+        return false;
+    }
+    value.assign(object.substr(begin + 1, end - begin - 1));
+    return true;
+}
+
+bool ParseBindingLocations(const std::vector<std::uint8_t> &reflection,
+                           std::vector<MetalBindingLocation> &locations, Error &error)
+{
+    if (reflection.empty()) {
+        return true;
+    }
+    const std::string_view json(reinterpret_cast<const char *>(reflection.data()),
+                                reflection.size());
+    const std::string_view property = "\"TopLevelArgumentBuffer\"";
+    const std::size_t propertyPosition = json.find(property);
+    if (propertyPosition == std::string_view::npos) {
+        return true;
+    }
+    const std::size_t arrayBegin = json.find('[', propertyPosition + property.size());
+    if (arrayBegin == std::string_view::npos) {
+        SetError(error, "The Metal shader reflection has an invalid argument-buffer layout.");
+        return false;
+    }
+
+    std::size_t position = arrayBegin + 1;
+    while (position < json.size()) {
+        const std::size_t objectBegin = json.find('{', position);
+        const std::size_t arrayEnd = json.find(']', position);
+        if (arrayEnd == std::string_view::npos ||
+            (objectBegin != std::string_view::npos && objectBegin > arrayEnd)) {
+            return true;
+        }
+        const std::size_t objectEnd = json.find('}', objectBegin + 1);
+        if (objectEnd == std::string_view::npos || objectEnd > arrayEnd) {
+            SetError(error, "The Metal shader reflection has an invalid argument-buffer entry.");
+            return false;
+        }
+
+        const std::string_view object = json.substr(objectBegin, objectEnd - objectBegin + 1);
+        MetalBindingLocation location;
+        if (!JsonNumber(object, "Slot", location.slot) ||
+            !JsonNumber(object, "Space", location.space) ||
+            !JsonNumber(object, "EltOffset", location.offset) ||
+            !JsonNumber(object, "Size", location.size) ||
+            !JsonString(object, "Type", location.type)) {
+            SetError(error, "The Metal shader reflection has an incomplete argument-buffer entry.");
+            return false;
+        }
+        if (location.size == 0 || location.offset > std::numeric_limits<std::size_t>::max() -
+                                                       location.size) {
+            SetError(error, "The Metal shader reflection contains an invalid argument-buffer range.");
+            return false;
+        }
+        locations.push_back(std::move(location));
+        position = objectEnd + 1;
+    }
+    SetError(error, "The Metal shader reflection has an unterminated argument-buffer layout.");
+    return false;
+}
+
+} // namespace
 
 MetalDevice::MetalDevice(NS::SharedPtr<MTL::Device> device)
     : device_(std::move(device)), allocator_(std::make_shared<MetalMemoryAllocator>(device_))
@@ -114,6 +226,10 @@ std::shared_ptr<Shader> MetalDevice::CreateShader(const ShaderDesc &description,
         SetError(error, "Metal shaders require a valid stage, entry point, and metallib bytecode.");
         return nullptr;
     }
+    std::vector<MetalBindingLocation> bindingLocations;
+    if (!ParseBindingLocations(description.reflection, bindingLocations, error)) {
+        return nullptr;
+    }
     void *ownedBytes = std::malloc(description.bytecode.size());
     if (ownedBytes == nullptr) {
         SetError(error, "Metal could not allocate shader bytecode storage.");
@@ -145,7 +261,8 @@ std::shared_ptr<Shader> MetalDevice::CreateShader(const ShaderDesc &description,
         return nullptr;
     }
     return std::make_shared<MetalShader>(description.stage, description.entryPoint,
-                                         retainedLibrary.get(), function);
+                                         retainedLibrary.get(), function,
+                                         std::move(bindingLocations));
 }
 
 std::shared_ptr<BufferView> MetalDevice::CreateBufferView(const std::shared_ptr<Buffer> &buffer,

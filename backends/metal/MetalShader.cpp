@@ -6,9 +6,10 @@ namespace Metal {
 using namespace Graphics;
 
 MetalShader::MetalShader(ShaderStage stage, std::string entryPoint, MTL::Library *library,
-                         MTL::Function *function)
+                         MTL::Function *function,
+                         std::vector<MetalBindingLocation> bindingLocations)
     : stage_(stage), entryPoint_(std::move(entryPoint)), library_(NS::RetainPtr(library)),
-      function_(NS::RetainPtr(function))
+      function_(NS::RetainPtr(function)), bindingLocations_(std::move(bindingLocations))
 {
 }
 
@@ -25,6 +26,11 @@ const std::string &MetalShader::EntryPoint() const noexcept
 MTL::Function *MetalShader::Native() const noexcept
 {
     return function_.get();
+}
+
+const std::vector<MetalBindingLocation> &MetalShader::BindingLocations() const noexcept
+{
+    return bindingLocations_;
 }
 
 } // namespace Metal

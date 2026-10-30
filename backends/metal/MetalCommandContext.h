@@ -27,6 +27,8 @@ public:
 
     void Keep(const std::shared_ptr<Resource> &resource);
 
+    void KeepNativeResource(MTL::Buffer *buffer);
+
     void DeferError(const char *message);
 
     MTL::Device *Device() const noexcept;

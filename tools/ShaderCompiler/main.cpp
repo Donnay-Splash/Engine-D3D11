@@ -119,6 +119,8 @@ int main(int argc, char **argv)
                 config->metalShaderConverter,
                 dxilPath.string(),
                 "-o", (metalDirectory / (baseName + ".metallib")).string(),
+                "--output-reflection-file",
+                (metalDirectory / (baseName + ".json")).string(),
             };
             converter.insert(converter.end(), config->metalArgs.begin(), config->metalArgs.end());
             converter.insert(converter.end(), entry.metalArgs.begin(), entry.metalArgs.end());

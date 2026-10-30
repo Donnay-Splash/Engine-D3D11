@@ -57,6 +57,18 @@ bool MetalComputeEncoder::SetBindingSet(std::uint32_t index,
         SetError(error, "The compute binding set is not owned by Metal.");
         return false;
     }
+    auto shader = std::dynamic_pointer_cast<MetalShader>(pipeline_->Description().shader);
+    if (shader == nullptr) {
+        SetError(error, "The compute pipeline contains a non-Metal shader.");
+        return false;
+    }
+    NS::SharedPtr<MTL::Buffer> argumentBuffer;
+    if (!set->EncodeArgumentBuffer(context_->Device(), {shader}, argumentBuffer, error)) {
+        return false;
+    }
+    encoder_->setBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
+    context_->KeepNativeResource(argumentBuffer.get());
+
     for (const BindingDesc &binding : layout->Bindings()) {
         if ((static_cast<std::uint32_t>(binding.visibility) &
              static_cast<std::uint32_t>(ShaderStage::Compute)) == 0) {
@@ -69,7 +81,7 @@ bool MetalComputeEncoder::SetBindingSet(std::uint32_t index,
         }
         for (std::uint32_t element = 0; element < binding.arrayCount; ++element) {
             const BindingValue &value = (*values)[element];
-            const std::uint32_t slot = binding.binding + element;
+            MTL::ResourceUsage usage = MTL::ResourceUsageRead;
             if (binding.type == BindingType::UniformBuffer ||
                 binding.type == BindingType::StorageBuffer) {
                 auto view = std::dynamic_pointer_cast<MetalBufferView>(value.buffer);
@@ -77,7 +89,11 @@ bool MetalComputeEncoder::SetBindingSet(std::uint32_t index,
                     SetError(error, "A required compute buffer binding is unset.");
                     return false;
                 }
-                encoder_->setBuffer(view->NativeBuffer()->Native(), view->Offset(), slot);
+                if (binding.type == BindingType::StorageBuffer) {
+                    usage = static_cast<MTL::ResourceUsage>(MTL::ResourceUsageRead |
+                                                            MTL::ResourceUsageWrite);
+                }
+                encoder_->useResource(view->NativeBuffer()->Native(), usage);
                 context_->Keep(value.buffer);
             } else if (binding.type == BindingType::SampledTexture ||
                        binding.type == BindingType::StorageTexture) {
@@ -86,7 +102,11 @@ bool MetalComputeEncoder::SetBindingSet(std::uint32_t index,
                     SetError(error, "A required compute texture binding is unset.");
                     return false;
                 }
-                encoder_->setTexture(view->Native(), slot);
+                if (binding.type == BindingType::StorageTexture) {
+                    usage = static_cast<MTL::ResourceUsage>(MTL::ResourceUsageRead |
+                                                            MTL::ResourceUsageWrite);
+                }
+                encoder_->useResource(view->Native(), usage);
                 context_->Keep(value.texture);
             } else {
                 auto sampler = std::dynamic_pointer_cast<MetalSampler>(value.sampler);
@@ -94,7 +114,6 @@ bool MetalComputeEncoder::SetBindingSet(std::uint32_t index,
                     SetError(error, "A required compute sampler binding is unset.");
                     return false;
                 }
-                encoder_->setSamplerState(sampler->Native(), slot);
                 context_->Keep(value.sampler);
             }
         }

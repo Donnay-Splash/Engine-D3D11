@@ -12,22 +12,22 @@
 namespace Engine {
 namespace Metal {
 
-bool MetalShaderLibrary::Load(const std::string &entryPoint, std::vector<std::uint8_t> &bytecode,
-                              Error &error)
+bool MetalShaderLibrary::Load(const std::string &entryPoint, const std::string &extension,
+                              std::vector<std::uint8_t> &data, Error &error)
 {
-    // File names follow the shader-compiler output convention: <Shader>_<entry>.metallib.
+    // Files follow the shader-compiler output convention: <Shader>_<entry>.<extension>.
     const std::string fileName = "Scene_" + entryPoint;
     NS::SharedPtr<NS::String> name =
         NS::RetainPtr(NS::String::string(fileName.c_str(), NS::UTF8StringEncoding));
-    NS::SharedPtr<NS::String> extension =
-        NS::RetainPtr(NS::String::string("metallib", NS::UTF8StringEncoding));
+    NS::SharedPtr<NS::String> nativeExtension =
+        NS::RetainPtr(NS::String::string(extension.c_str(), NS::UTF8StringEncoding));
     NS::SharedPtr<NS::String> subdirectory =
         NS::RetainPtr(NS::String::string("shaders", NS::UTF8StringEncoding));
     NS::SharedPtr<NS::Bundle> bundle = NS::RetainPtr(NS::Bundle::mainBundle());
     NS::SharedPtr<NS::URL> libraryURL = NS::RetainPtr(
-        bundle->URLForResource(name.get(), extension.get(), subdirectory.get()));
+        bundle->URLForResource(name.get(), nativeExtension.get(), subdirectory.get()));
     if (!libraryURL) {
-        error.message = "A bundled Metal shader library is missing; run shader-compiler.";
+        error.message = "A bundled Metal shader artifact is missing; run shader-compiler.";
         return false;
     }
 
@@ -37,11 +37,11 @@ bool MetalShaderLibrary::Load(const std::string &entryPoint, std::vector<std::ui
         return false;
     }
 
-    bytecode.assign(
+    data.assign(
         std::istreambuf_iterator<char>(libraryFile),
         std::istreambuf_iterator<char>());
-    if (bytecode.empty()) {
-        error.message = "The bundled Metal shader library is empty.";
+    if (data.empty()) {
+        error.message = "The bundled Metal shader artifact is empty.";
         return false;
     }
     return true;
@@ -61,8 +61,12 @@ bool MetalShaderLibrary::RequestGraphicsShaders(
 
     std::vector<std::uint8_t> vertexBytecode;
     std::vector<std::uint8_t> fragmentBytecode;
-    if (!Load("mesh_vertex", vertexBytecode, error) ||
-        !Load("mesh_fragment", fragmentBytecode, error)) {
+    std::vector<std::uint8_t> vertexReflection;
+    std::vector<std::uint8_t> fragmentReflection;
+    if (!Load("mesh_vertex", "metallib", vertexBytecode, error) ||
+        !Load("mesh_vertex", "json", vertexReflection, error) ||
+        !Load("mesh_fragment", "metallib", fragmentBytecode, error) ||
+        !Load("mesh_fragment", "json", fragmentReflection, error)) {
         return false;
     }
 
@@ -71,6 +75,7 @@ bool MetalShaderLibrary::RequestGraphicsShaders(
     vertexDescription.entryPoint = "mesh_vertex";
     vertexDescription.format = "metallib";
     vertexDescription.bytecode = std::move(vertexBytecode);
+    vertexDescription.reflection = std::move(vertexReflection);
     std::shared_ptr<Graphics::Shader> vertex =
         device.CreateShader(vertexDescription, error);
     if (vertex == nullptr) {
@@ -85,6 +90,7 @@ bool MetalShaderLibrary::RequestGraphicsShaders(
     fragmentDescription.entryPoint = "mesh_fragment";
     fragmentDescription.format = "metallib";
     fragmentDescription.bytecode = std::move(fragmentBytecode);
+    fragmentDescription.reflection = std::move(fragmentReflection);
     std::shared_ptr<Graphics::Shader> fragment =
         device.CreateShader(fragmentDescription, error);
     if (fragment == nullptr) {

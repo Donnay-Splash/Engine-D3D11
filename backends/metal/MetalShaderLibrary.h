@@ -20,8 +20,8 @@ public:
         Error &error) override;
 
 private:
-    static bool Load(const std::string &entryPoint, std::vector<std::uint8_t> &bytecode,
-                     Error &error);
+    static bool Load(const std::string &entryPoint, const std::string &extension,
+                     std::vector<std::uint8_t> &data, Error &error);
 };
 
 } // namespace Metal

@@ -24,6 +24,8 @@ public:
 
     void AddResource(const std::shared_ptr<Resource> &resource);
 
+    void AddNativeResource(MTL::Buffer *buffer);
+
     void AddDrawable(CA::MetalDrawable *drawable);
 
     void MarkPresented(CA::MetalDrawable *drawable);
@@ -45,6 +47,7 @@ private:
     NS::SharedPtr<MTL::CommandBuffer> commandBuffer_;
     std::shared_ptr<SubmissionState> state_;
     std::vector<std::shared_ptr<Resource>> resources_;
+    std::vector<NS::SharedPtr<MTL::Buffer>> nativeResources_;
     std::vector<NS::SharedPtr<CA::MetalDrawable>> drawables_;
     std::vector<NS::SharedPtr<CA::MetalDrawable>> presentedDrawables_;
     bool finished_ = false;

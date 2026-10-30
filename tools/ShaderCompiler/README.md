@@ -11,8 +11,9 @@ build/macos/tools/ShaderCompiler/shader-compiler --config tools/ShaderCompiler/s
 Options: `--target dxil|metal|all` (default `all`) and `--dry-run` (print commands only).
 
 Output (see `outputDirectory` in the config, default `build/shaders`):
-`dxil/<Shader>_<entry>.dxil` and `metal/<Shader>_<entry>.metallib`. The macOS app bundles
-`metal/` into `Resources/shaders`; the Metal integration tests read it from the same directory.
+`dxil/<Shader>_<entry>.dxil`, `metal/<Shader>_<entry>.metallib`, and the converter reflection JSON
+used by the Metal backend to encode shader resources. The macOS app bundles `metal/` into
+`Resources/shaders`; the Metal integration tests read it from the same directory.
 
 `shaders.cfg` lists the tool paths, shader model, directories and, per `[shader]`, the source and its
 `entry = <vs|ps|cs> <name> [extra metal-shaderconverter args]` lines. Paths are relative to the config file.
