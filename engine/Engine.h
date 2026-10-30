@@ -53,7 +53,7 @@ public:
 class Engine
 {
 public:
-    using ErrorHandler = ErrorHandler;
+    using ErrorHandler = ::Engine::ErrorHandler;
 
     ~Engine();
 

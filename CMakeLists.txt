@@ -63,6 +63,7 @@ if(APPLE)
         "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.mm"
         "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.m"
     )
+    list(FILTER METAL_SOURCES EXCLUDE REGEX "/backends/metal/tests/")
     add_library(engine-backend-metal STATIC ${METAL_SOURCES})
 
     target_include_directories(engine-backend-metal PUBLIC
@@ -125,7 +126,7 @@ if(APPLE)
     target_sources(engine-macos PRIVATE "${METAL_LIBRARY}")
 
     if(BUILD_TESTING)
-        add_executable(engine-metal-integration-tests engine/tests/metal_backend_tests.cpp)
+        add_executable(engine-metal-integration-tests backends/metal/tests/metal_backend_tests.cpp)
         target_link_libraries(engine-metal-integration-tests PRIVATE engine-backend-metal)
         add_dependencies(engine-metal-integration-tests engine-macos)
         target_compile_options(engine-metal-integration-tests PRIVATE -Wall -Wextra -Werror)
