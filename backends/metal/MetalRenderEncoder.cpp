@@ -91,6 +91,10 @@ bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
         for (std::uint32_t element = 0; element < binding.arrayCount; ++element) {
             const BindingValue &value = (*values)[element];
             const std::uint32_t slot = binding.binding + element;
+            if (slot >= kVertexBufferBase) {
+                SetError(error, "A render binding overlaps the Metal vertex buffer index range.");
+                return false;
+            }
             if (binding.type == BindingType::UniformBuffer ||
                 binding.type == BindingType::StorageBuffer) {
                 auto view = std::dynamic_pointer_cast<MetalBufferView>(value.buffer);
@@ -165,11 +169,11 @@ bool MetalRenderEncoder::SetVertexBuffer(std::uint32_t slot, const std::shared_p
     if (ended_ || metalBuffer == nullptr ||
         !HasBits(static_cast<std::uint32_t>(metalBuffer->Description().usage),
                  static_cast<std::uint32_t>(BufferUsage::Vertex)) ||
-        offset >= metalBuffer->Description().size) {
-        SetError(error, "The vertex buffer or offset is invalid.");
+        slot >= kMaxVertexBufferSlots || offset >= metalBuffer->Description().size) {
+        SetError(error, "The vertex buffer, slot, or offset is invalid.");
         return false;
     }
-    encoder_->setVertexBuffer(metalBuffer->Native(), offset, slot);
+    encoder_->setVertexBuffer(metalBuffer->Native(), offset, VertexBufferIndex(slot));
     context_->Keep(buffer);
     return true;
 }

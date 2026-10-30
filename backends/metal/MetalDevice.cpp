@@ -331,7 +331,7 @@ MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Err
     pipelineDescriptor->setDepthAttachmentPixelFormat(ToMetal(description.depthStencilFormat));
     MTL::VertexDescriptor *vertexDescriptor = MTL::VertexDescriptor::vertexDescriptor();
     std::array<bool, 31> vertexAttributeLocations{};
-    std::array<const VertexBufferLayoutDesc *, 31> vertexBufferLayouts{};
+    std::array<const VertexBufferLayoutDesc *, kMaxVertexBufferSlots> vertexBufferLayouts{};
     for (const VertexBufferLayoutDesc &buffer : description.vertexBuffers) {
         if (buffer.bufferSlot >= vertexBufferLayouts.size() || buffer.stride == 0 ||
             vertexBufferLayouts[buffer.bufferSlot] != nullptr) {
@@ -340,7 +340,7 @@ MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Err
         }
         vertexBufferLayouts[buffer.bufferSlot] = &buffer;
         MTL::VertexBufferLayoutDescriptor *nativeLayout =
-            vertexDescriptor->layouts()->object(buffer.bufferSlot);
+            vertexDescriptor->layouts()->object(VertexBufferIndex(buffer.bufferSlot));
         nativeLayout->setStride(buffer.stride);
         nativeLayout->setStepFunction(MTL::VertexStepFunctionPerVertex);
         nativeLayout->setStepRate(1);
@@ -365,7 +365,7 @@ MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Err
         MTL::VertexAttributeDescriptor *nativeAttribute =
             vertexDescriptor->attributes()->object(attribute.location);
         nativeAttribute->setFormat(ToMetal(attribute.format));
-        nativeAttribute->setBufferIndex(attribute.bufferSlot);
+        nativeAttribute->setBufferIndex(VertexBufferIndex(attribute.bufferSlot));
         nativeAttribute->setOffset(attribute.offset);
     }
     pipelineDescriptor->setVertexDescriptor(vertexDescriptor);

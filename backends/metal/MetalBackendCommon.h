@@ -48,6 +48,17 @@ namespace Metal {
 
 using namespace Graphics;
 
+// Metal shares one 31-entry buffer argument table between resource bindings and
+// vertex streams. Bindings use indices [0, kVertexBufferBase); vertex stream slot N
+// uses index kVertexBufferBase + N.
+constexpr std::uint32_t kVertexBufferBase = 16;
+constexpr std::uint32_t kMaxVertexBufferSlots = 31 - kVertexBufferBase;
+
+constexpr std::uint32_t VertexBufferIndex(std::uint32_t slot)
+{
+    return kVertexBufferBase + slot;
+}
+
 class AutoreleasePool final
 {
 public:
