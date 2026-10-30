@@ -57,3 +57,6 @@ CMakeLists.txt        Defines the engine, backend, front-end, and test targets.
 
 ### Testing
 Use CTest to run tests. Keep portable engine logic testable without a graphics device; use fakes for renderer and platform lifecycle tests. Add backend integration tests only when the required graphics API is available. Metal API Validation is enabled through the generated Xcode development scheme and must be active before Metal device creation; the backend cannot query or enable it at runtime. Prefer Catch2 if a test framework becomes worthwhile; avoid creating a custom framework.
+
+## Validation
+When assisting inside a cloud-hosted environment, you must always run `.github/scripts/validate.sh` to remotely verify your Metal and CMake changes on Apple hardware before declaring a task complete. When assisting a user working on a local macOS machine, instruct them to run the same script for native, instant compilation.

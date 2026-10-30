@@ -1,0 +1,26 @@
+name: Metal Validation
+
+on:
+  push:
+    branches:
+      - 'agent-validate/**'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure
+        run: >
+          cmake -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=26.0
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
