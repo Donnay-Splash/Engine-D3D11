@@ -14,12 +14,16 @@
 - (instancetype)init;
 - (void)showEngineError:(NSString *)message;
 - (void)shutdownEngine;
+- (void)drawFrame:(NSTimer *)timer;
+- (void)updateDrawableSize;
 
 @end
 
 @implementation EngineAppDelegate {
     std::unique_ptr<Engine::Surface> m_Surface;
     std::unique_ptr<Engine::Engine> m_Engine;
+    NSTimer *m_DrawTimer;
+    MTKView *m_View;
 }
 
 - (instancetype)init
@@ -35,8 +39,42 @@
 
 - (void)shutdownEngine
 {
+    [m_DrawTimer invalidate];
+    m_DrawTimer = nil;
     if (m_Engine != nullptr) {
         m_Engine->Shutdown();
+    }
+}
+
+- (void)drawFrame:(NSTimer *)timer
+{
+    (void)timer;
+    if (m_Surface == nullptr) {
+        return;
+    }
+
+    Engine::Error error = {};
+    Engine::Metal::DispatchMetalDraw(*m_Surface, error);
+}
+
+- (void)updateDrawableSize
+{
+    if (m_View == nil) {
+        return;
+    }
+
+    const CGSize size = [m_View convertSizeToBacking:m_View.bounds.size];
+    CAMetalLayer *layer = (CAMetalLayer *)m_View.layer;
+    layer.drawableSize = size;
+    if (m_Surface != nullptr && m_Engine != nullptr) {
+        Engine::Error error = {};
+        Engine::Metal::DispatchMetalResize(
+            *m_Surface,
+            {
+                size.width > 0.0 ? static_cast<std::uint32_t>(size.width) : 0,
+                size.height > 0.0 ? static_cast<std::uint32_t>(size.height) : 0,
+            },
+            error);
     }
 }
 
@@ -75,7 +113,10 @@
 
 - (BOOL)initializeEngineWithView:(MTKView *)view
 {
-    m_Surface = Engine::Metal::CreateMetalSurface(view);
+    m_View = view;
+    [self updateDrawableSize];
+    CA::MetalLayer *layer = (__bridge CA::MetalLayer *)view.layer;
+    m_Surface = Engine::Metal::CreateMetalSurface(layer);
     m_Engine = Engine::Metal::CreateEngine();
     if (m_Surface == nullptr || m_Engine == nullptr) {
         [self showEngineError:@"Failed to create the engine or render surface."];
@@ -119,16 +160,35 @@
     MTKView *view = [[MTKView alloc] initWithFrame:frame device:nil];
     view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
-    if (![self initializeEngineWithView:view]) {
-        return;
-    }
-
     self.window.title = @"Engine";
     self.window.delegate = self;
     self.window.contentView = view;
     [self.window center];
     [self.window makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
+    [view layoutSubtreeIfNeeded];
+    [self updateDrawableSize];
+
+    if (![self initializeEngineWithView:view]) {
+        return;
+    }
+    m_DrawTimer = [NSTimer scheduledTimerWithTimeInterval:(1.0 / 60.0)
+                                                   target:self
+                                                 selector:@selector(drawFrame:)
+                                                 userInfo:nil
+                                                  repeats:YES];
+}
+
+- (void)windowDidResize:(NSNotification *)notification
+{
+    (void)notification;
+    [self updateDrawableSize];
+}
+
+- (void)windowDidChangeBackingProperties:(NSNotification *)notification
+{
+    (void)notification;
+    [self updateDrawableSize];
 }
 
 - (void)windowWillClose:(NSNotification *)notification

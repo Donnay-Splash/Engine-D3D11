@@ -12,7 +12,7 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with a centered, resizable 800×600-point AppKit window and a MetalKit surface. Rendering is not currently implemented. The portable C++ engine builds as the static `engine` library and contains graphics interfaces plus a fake-tested single-mesh draw-recording path; no GPU backend implements those contracts yet. The macOS factory currently has no graphics instance or shader library, so Engine initialization fails explicitly until Metal is migrated. The AppKit host owns the window and event loop. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md) and the [graphics-core abstraction proposal](docs/graphics-core-abstraction-proposal.md).
+The CMake `engine-macos` target builds a native `.app` with an AppKit window and a Metal presentation surface. The portable C++ engine builds as the static `engine` library. The Metal backend is implemented in C++ with Apple's vendored metal-cpp headers; Objective-C++ remains in the macOS frontend for AppKit integration. Metal shaders are native MSL compiled to a bundled metallib. The backend enumerates Metal adapters and creates the device used by Engine. Hardware-backed Metal integration tests are available on macOS with a Metal-capable device. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md) and the [graphics-core abstraction proposal](docs/graphics-core-abstraction-proposal.md).
 
 Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
@@ -27,15 +27,17 @@ xcrun --find metal
 xcrun --find metallib
 ```
 
-Configure, build, and run from the repository root:
+Configure with the Xcode generator, then build and open the project from the repository root:
 
 ```sh
-cmake -S . -B build/macos -G "Unix Makefiles" \
+cmake -S . -B build/macos -G Xcode \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=26
-cmake --build build/macos --target engine-macos
-open build/macos/engine-macos.app
+cmake --build build/macos --target engine-macos engine-metal-integration-tests
+open build/macos/EngineMacOS.xcodeproj
 ```
+
+Run the app from the generated Xcode development scheme to enable Metal API Validation before Metal device creation. The backend cannot query or enable API Validation at runtime. Running the built app directly (for example with `open build/macos/engine-macos.app`) does not apply the Xcode scheme diagnostic setting.
 
 Run the app-to-engine lifecycle tests with:
 
@@ -70,6 +72,6 @@ These dependencies are distinct:
 
 The current CMake app is a native window and `MTKView` host; rendering is not currently implemented. The existing D3D11 engine cannot simply be linked unchanged. The agreed direction is a portable C++ engine with backend-neutral graphics interfaces and isolated graphics backend libraries. The app owns the native window and event loop, supplies its render surface to the engine, and remains a thin host.
 
-The portable core includes public math and CPU scene/mesh/material data. Engine now uses the graphics API to initialize a device/swapchain and record a single UV-triangle draw, exercised with fake graphics objects; this path has not been wired to the Metal library or used to render pixels. It does not migrate legacy serialization, property/editor bindings, or a complete scene graph. Later stages will inventory the original engine features and migrate selected scene and rendering behavior, prioritizing dissertation-critical work without assuming one-to-one parity. DirectXMath and Windows services must be separated or replaced where needed. D3D11 will not be ported: its existing projects remain temporary migration reference and will be retired after a review of migrated behavior and Windows-project impact. D3D12 and Vulkan are future evaluation targets, not current implementation commitments.
+The portable core includes public math and CPU scene/mesh/material data. Engine initializes the graphics device and swapchain, records the UV-triangle draw, and the macOS host connects that path to the Metal backend and its MSL shader library. Portable tests exercise the engine with fake graphics objects; a hardware-backed Metal integration test also exercises adapter/device creation, buffer and texture resources, graphics and compute pipelines, command submission, synchronization, and buffer copies. The app's on-screen presentation path is implemented but should still be exercised on the target display with Metal API Validation enabled through its Xcode scheme. This work does not migrate legacy serialization, property/editor bindings, or a complete scene graph. Later stages will inventory the original engine features and migrate selected scene and rendering behavior, prioritizing dissertation-critical work without assuming one-to-one parity. DirectXMath and Windows services must be separated or replaced where needed. D3D11 will not be ported: its existing projects remain temporary migration reference and will be retired after a review of migrated behavior and Windows-project impact. D3D12 and Vulkan are future evaluation targets, not current implementation commitments.
 
 See the [Technical Design](docs/macos-metal-engine-tdd.md) for the module structure, feature disposition, migration stages, and acceptance criteria.

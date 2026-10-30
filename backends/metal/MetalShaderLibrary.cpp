@@ -1,10 +1,12 @@
-#import <Foundation/Foundation.h>
-
 #include "MetalShaderLibrary.h"
 
 #include "Core/Types.h"
 #include "Graphics/Device.h"
 
+#include <Foundation/Foundation.hpp>
+
+#include <fstream>
+#include <iterator>
 #include <utility>
 
 namespace Engine {
@@ -12,22 +14,31 @@ namespace Metal {
 
 bool MetalShaderLibrary::Load(Error &error)
 {
-    NSURL *libraryURL = [NSBundle.mainBundle URLForResource:@"default" withExtension:@"metallib"];
-    if (libraryURL == nil) {
+    NS::SharedPtr<NS::String> name =
+        NS::RetainPtr(NS::String::string("default", NS::UTF8StringEncoding));
+    NS::SharedPtr<NS::String> extension =
+        NS::RetainPtr(NS::String::string("metallib", NS::UTF8StringEncoding));
+    NS::SharedPtr<NS::Bundle> bundle = NS::RetainPtr(NS::Bundle::mainBundle());
+    NS::SharedPtr<NS::URL> libraryURL =
+        NS::RetainPtr(bundle->URLForResource(name.get(), extension.get()));
+    if (!libraryURL) {
         error.message = "The bundled Metal shader library is missing.";
         return false;
     }
 
-    NSError *libraryError = nil;
-    NSData *libraryData = [NSData dataWithContentsOfURL:libraryURL options:0 error:&libraryError];
-    if (libraryData == nil || libraryData.length == 0) {
-        error.message = libraryError.localizedDescription.UTF8String
-            ?: "Failed to read the bundled Metal shader library.";
+    std::ifstream libraryFile(libraryURL->fileSystemRepresentation(), std::ios::binary);
+    if (!libraryFile) {
+        error.message = "Failed to open the bundled Metal shader library.";
         return false;
     }
 
-    const std::uint8_t *bytes = static_cast<const std::uint8_t *>(libraryData.bytes);
-    m_ShaderBytecode.assign(bytes, bytes + libraryData.length);
+    m_ShaderBytecode.assign(
+        std::istreambuf_iterator<char>(libraryFile),
+        std::istreambuf_iterator<char>());
+    if (m_ShaderBytecode.empty()) {
+        error.message = "The bundled Metal shader library is empty.";
+        return false;
+    }
     return true;
 }
 
@@ -38,8 +49,10 @@ bool MetalShaderLibrary::RequestGraphicsShaders(
     GraphicsShaderPair &shaders,
     Error &error)
 {
-    (void)type;
-    (void)name;
+    if (type != ShaderProgramType::Mesh || name != "uv-triangle") {
+        error.message = "The requested Metal graphics shader program is unsupported.";
+        return false;
+    }
 
     if (m_ShaderBytecode.empty() && !Load(error)) {
         return false;

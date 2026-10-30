@@ -14,6 +14,10 @@ add_executable(graphics-api-tests graphics_api_tests.cpp)
 target_link_libraries(graphics-api-tests PRIVATE engine)
 add_test(NAME graphics-api COMMAND graphics-api-tests)
 
+add_executable(adapter-selection-tests adapter_selection_tests.cpp)
+target_link_libraries(adapter-selection-tests PRIVATE engine)
+add_test(NAME adapter-selection COMMAND adapter-selection-tests)
+
 add_test(
     NAME portable-core-independent-build
     COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target engine

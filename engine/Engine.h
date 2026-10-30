@@ -21,6 +21,7 @@ class GraphicsInstance;
 class GraphicsPipeline;
 class Swapchain;
 class CommandQueue;
+class Adapter;
 }
 
 class Surface : public Graphics::PresentationSurface
@@ -67,7 +68,8 @@ private:
 
     Engine(
         std::shared_ptr<Graphics::GraphicsInstance> graphicsInstance,
-        std::shared_ptr<ShaderLibrary> shaderLibrary);
+        std::shared_ptr<ShaderLibrary> shaderLibrary,
+        std::shared_ptr<Graphics::Adapter> preferredAdapter);
     bool InitializeGraphics(Surface &surface, Error &error);
     bool DrawFrame(Error &error);
     static bool Draw(void *context, Error &error);
@@ -80,6 +82,7 @@ private:
 
     std::shared_ptr<Graphics::GraphicsInstance> m_GraphicsInstance;
     std::shared_ptr<ShaderLibrary> m_ShaderLibrary;
+    std::shared_ptr<Graphics::Adapter> m_PreferredAdapter;
     std::shared_ptr<Graphics::Device> m_Device;
     std::shared_ptr<Graphics::CommandQueue> m_GraphicsQueue;
     std::shared_ptr<Graphics::Swapchain> m_Swapchain;

@@ -4,7 +4,9 @@ This repository is a hobby renderer used for educational purposes. It consists o
 
 ## General
 - The Engine should always remain platform agnostic and should not contain any platform specific code. 
-- The front end and back end are responsible for providing the engine with the necessary platform specific functionality. 
+- The front end and back end are responsible for providing the engine with the necessary platform specific functionality.
+- Backend implementation and platform integration code must use C++ (`.cpp`); keep Objective-C++ confined to the macOS front end when AppKit interop requires it.
+- Put each class or cohesive component in its own focused header/source file; keep unrelated implementations out of monolithic files.
 - The graphics components, resources, buffers, textures, shaders, etc... should all be built modularly so that we can easily iterate on graphics features.
 - The codebase should target c++20 and use modern C++ features where appropriate.
 - Write simple, well-documented code and add comments only when they add real value.
@@ -14,7 +16,7 @@ This repository is a hobby renderer used for educational purposes. It consists o
 ```text
 AssetConverter/       Existing asset converter; leave its implementation independent.
 backends/             Top level for all graphics backends.
-  metal/              Metal renderer, Metal surface adapter, and Metal shaders.
+  metal/              C++ Metal backend, surface integration, and native Metal shaders.
 build/                Generated build output; do not place source files here.
 docs/                 Project documentation.
 engine/               Platform-neutral engine library.
@@ -27,7 +29,7 @@ CMakeLists.txt        Defines the engine, backend, front-end, and test targets.
 ```
 
 - Keep reusable, platform-neutral code in `engine/`; it builds as the static `engine` library and must not link graphics or platform frameworks.
-- Put each graphics backend in its own `backends/<name>/` folder and static library. The current `backends/metal/` implementation builds as `engine-backend-metal` and links to `engine`.
+- Put each graphics backend in its own `backends/<name>/` folder and static library. The current `backends/metal/` implementation builds as `engine-backend-metal`, uses vendored Apple metal-cpp, contains only C++ sources, and links to `engine`.
 - Keep host/window/event-loop code in the matching front end. The macOS front end lives in `macOS/` and links the engine and the backend it uses.
 - Add future platform front ends alongside `macOS/`; do not move their host code into `engine/`.
 
@@ -48,7 +50,7 @@ CMakeLists.txt        Defines the engine, backend, front-end, and test targets.
 ### Runtime
 - CMake for build system.
 - We will support only modern graphics APIs, specifically Directx 12, Metal and Vulkan.
-- We will use a single shader language, HLSL, and compile it to the appropriate target for each graphics API.
+- Shader artifacts may be backend-specific. The current Metal backend uses native MSL compiled to a bundled metallib; do not add an HLSL translation toolchain unless the shader workflow is deliberately revisited.
 
 ### Testing
-Use CTest to run tests. Keep portable engine logic testable without a graphics device; use fakes for renderer and platform lifecycle tests. Add backend integration tests only when the required graphics API is available. Prefer Catch2 if a test framework becomes worthwhile; avoid creating a custom framework.
+Use CTest to run tests. Keep portable engine logic testable without a graphics device; use fakes for renderer and platform lifecycle tests. Add backend integration tests only when the required graphics API is available. Metal API Validation is enabled through the generated Xcode development scheme and must be active before Metal device creation; the backend cannot query or enable it at runtime. Prefer Catch2 if a test framework becomes worthwhile; avoid creating a custom framework.

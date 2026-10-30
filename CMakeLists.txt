@@ -41,47 +41,65 @@ if(BUILD_TESTING)
 endif()
 
 if(APPLE)
+    if(CMAKE_VERSION VERSION_LESS 3.25)
+        message(FATAL_ERROR "The Metal development scheme requires CMake 3.25 or newer to enable Metal API Validation.")
+    endif()
+
     enable_language(OBJCXX)
     set(CMAKE_OBJCXX_STANDARD 11)
     set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
     set(CMAKE_OBJCXX_EXTENSIONS OFF)
 
     find_library(APPKIT_FRAMEWORK AppKit REQUIRED)
+    find_library(FOUNDATION_FRAMEWORK Foundation REQUIRED)
     find_library(METAL_FRAMEWORK Metal REQUIRED)
     find_library(METALKIT_FRAMEWORK MetalKit REQUIRED)
+    find_library(QUARTZCORE_FRAMEWORK QuartzCore REQUIRED)
     find_program(XCRUN_EXECUTABLE xcrun REQUIRED)
 
     file(GLOB_RECURSE METAL_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.mm"
+        "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.mm"
+        "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/*.m"
     )
     add_library(engine-backend-metal STATIC ${METAL_SOURCES})
-    
+
     target_include_directories(engine-backend-metal PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal"
+        "${CMAKE_CURRENT_SOURCE_DIR}/third_party/metal-cpp"
     )
     target_compile_options(engine-backend-metal PRIVATE
         -Wall
         -Wextra
         -Werror
-        "$<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>"
     )
+    foreach(METAL_SOURCE IN LISTS METAL_SOURCES)
+        if(METAL_SOURCE MATCHES "\\.(mm|m)$")
+            message(FATAL_ERROR "The Metal backend must contain only C++ sources: ${METAL_SOURCE}")
+        endif()
+    endforeach()
     target_link_libraries(engine-backend-metal
-        PUBLIC engine ${METALKIT_FRAMEWORK}
-        PRIVATE ${APPKIT_FRAMEWORK} ${METAL_FRAMEWORK}
+        PUBLIC engine
+        PRIVATE ${FOUNDATION_FRAMEWORK} ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK}
     )
 
     add_executable(engine-macos MACOSX_BUNDLE macOS/main.mm)
     set_target_properties(engine-macos PROPERTIES
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.donnaysplash.engine"
         MACOSX_BUNDLE_BUNDLE_NAME "Engine"
+        XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.donnaysplash.engine"
+        XCODE_GENERATE_SCHEME YES
+        XCODE_SCHEME_ENABLE_GPU_API_VALIDATION YES
     )
     target_compile_options(engine-macos PRIVATE
         -Wall
         -Wextra
         -Werror
-        "$<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>"
     )
-    target_link_libraries(engine-macos PRIVATE engine-backend-metal ${APPKIT_FRAMEWORK})
+    target_link_libraries(engine-macos
+        PRIVATE engine-backend-metal ${APPKIT_FRAMEWORK} ${METALKIT_FRAMEWORK}
+    )
 
     set(METAL_SHADER "${CMAKE_CURRENT_SOURCE_DIR}/backends/metal/Scene.metal")
     set(METAL_AIR "${CMAKE_CURRENT_BINARY_DIR}/Scene.air")
@@ -105,6 +123,21 @@ if(APPLE)
         MACOSX_PACKAGE_LOCATION Resources
     )
     target_sources(engine-macos PRIVATE "${METAL_LIBRARY}")
+
+    if(BUILD_TESTING)
+        add_executable(engine-metal-integration-tests engine/tests/metal_backend_tests.cpp)
+        target_link_libraries(engine-metal-integration-tests PRIVATE engine-backend-metal)
+        add_dependencies(engine-metal-integration-tests engine-macos)
+        target_compile_options(engine-metal-integration-tests PRIVATE -Wall -Wextra -Werror)
+        target_compile_definitions(engine-metal-integration-tests PRIVATE
+            METAL_SHADER_LIBRARY_PATH="${METAL_LIBRARY}"
+        )
+        set_target_properties(engine-metal-integration-tests PROPERTIES
+            XCODE_GENERATE_SCHEME YES
+            XCODE_SCHEME_ENABLE_GPU_API_VALIDATION YES
+        )
+        add_test(NAME metal-backend-integration COMMAND engine-metal-integration-tests)
+    endif()
 else()
     message(STATUS "Building the portable engine library only; the Metal host requires macOS.")
 endif()

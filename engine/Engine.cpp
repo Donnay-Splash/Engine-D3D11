@@ -21,6 +21,7 @@
 #include "Graphics/TextureView.h"
 #include "ShaderLibrary.h"
 
+#include <algorithm>
 #include <cstring>
 #include <cstddef>
 #include <mutex>
@@ -93,9 +94,11 @@ struct Engine::ErrorRelay
 
 Engine::Engine(
     std::shared_ptr<Graphics::GraphicsInstance> graphicsInstance,
-    std::shared_ptr<ShaderLibrary> shaderLibrary)
+    std::shared_ptr<ShaderLibrary> shaderLibrary,
+    std::shared_ptr<Graphics::Adapter> preferredAdapter)
     : m_GraphicsInstance(std::move(graphicsInstance)),
       m_ShaderLibrary(std::move(shaderLibrary)),
+      m_PreferredAdapter(std::move(preferredAdapter)),
       m_Surface(nullptr),
       m_Size({0, 0}),
       m_ErrorRelay(),
@@ -158,21 +161,47 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
         return false;
     }
 
-    std::shared_ptr<Graphics::Adapter> selectedAdapter;
-    for (const std::shared_ptr<Graphics::Adapter> &adapter : adapters) {
-        if (adapter == nullptr) {
-            continue;
-        }
-        const std::vector<Graphics::QueueType> &queueTypes =
-            adapter->Capabilities().queueTypes;
-        for (Graphics::QueueType queueType : queueTypes) {
-            if (queueType == Graphics::QueueType::Graphics) {
-                selectedAdapter = adapter;
+    std::shared_ptr<Graphics::Adapter> selectedAdapter = m_PreferredAdapter;
+    if (selectedAdapter != nullptr) {
+        bool isEnumeratedAdapter = false;
+        for (const std::shared_ptr<Graphics::Adapter> &adapter : adapters) {
+            if (adapter == selectedAdapter) {
+                isEnumeratedAdapter = true;
                 break;
             }
         }
-        if (selectedAdapter != nullptr) {
-            break;
+        if (!isEnumeratedAdapter) {
+            error.message = "The selected graphics adapter was not enumerated by this instance.";
+            return false;
+        }
+    } else {
+        for (const std::shared_ptr<Graphics::Adapter> &adapter : adapters) {
+            if (adapter == nullptr) {
+                continue;
+            }
+            const std::vector<Graphics::QueueType> &queueTypes =
+                adapter->Capabilities().queueTypes;
+            for (Graphics::QueueType queueType : queueTypes) {
+                if (queueType == Graphics::QueueType::Graphics) {
+                    selectedAdapter = adapter;
+                    break;
+                }
+            }
+            if (selectedAdapter != nullptr) {
+                break;
+            }
+        }
+    }
+
+    if (selectedAdapter != nullptr) {
+        const std::vector<Graphics::QueueType> &queueTypes =
+            selectedAdapter->Capabilities().queueTypes;
+        const bool supportsGraphics = std::find(
+            queueTypes.begin(), queueTypes.end(), Graphics::QueueType::Graphics)
+            != queueTypes.end();
+        if (!supportsGraphics) {
+            error.message = "The selected graphics adapter has no graphics queue.";
+            return false;
         }
     }
     if (selectedAdapter == nullptr) {
@@ -484,10 +513,14 @@ bool Engine::ReportFailure(const Error &error)
 
 std::unique_ptr<Engine> EngineFactory::create(
     std::shared_ptr<Graphics::GraphicsInstance> graphicsInstance,
-    std::shared_ptr<ShaderLibrary> shaderLibrary)
+    std::shared_ptr<ShaderLibrary> shaderLibrary,
+    std::shared_ptr<Graphics::Adapter> preferredAdapter)
 {
     return std::unique_ptr<Engine>(
-        new Engine(std::move(graphicsInstance), std::move(shaderLibrary)));
+        new Engine(
+            std::move(graphicsInstance),
+            std::move(shaderLibrary),
+            std::move(preferredAdapter)));
 }
 
 } // namespace Engine

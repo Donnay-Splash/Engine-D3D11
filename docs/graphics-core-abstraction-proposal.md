@@ -1,6 +1,6 @@
 # Portable graphics-core abstraction proposal
 
-**Status:** Portable interfaces and a single-mesh frontend recording path are implemented; no GPU backend implements the graphics contracts yet. This document remains the design reference.
+**Status:** Portable interfaces, the first Metal backend, and a single-mesh frontend path are implemented. This proposal remains the design reference for backend-neutral API trade-offs; the implementation and test status is tracked in the macOS Metal engine design.
 
 ## Executive summary
 
@@ -8,13 +8,13 @@ The portable engine should describe *what work is required*—resource usage, bi
 
 Recommended first principles:
 
-1. Distinguish GPU `Graphics::Device` from the former `Engine::Device`. The old lifecycle interface is no longer used by `Engine`; the legacy `Renderer` declaration and Metal implementation remain unintegrated and are not the lower-level GPU device represented by `MTLDevice`, `ID3D12Device`, or `VkDevice`.
+1. Distinguish GPU `Graphics::Device` from the former `Engine::Device`. The old lifecycle interface is no longer used by `Engine`; the legacy `Renderer` bridge is not the lower-level GPU device represented by `MTLDevice`, `ID3D12Device`, or `VkDevice`.
 2. Model modern command recording, queue submission, and completion separately. `CommandContext` should be a scoped recorder, not a D3D11-style persistent immediate context.
 3. Use `std::shared_ptr<Resource>` as the public ownership model, as requested. Keep a resource's backend state, descriptors, and associated allocations alive until GPU completion for the resource's final use is known. A fixed one-frame delay is not a completion guarantee.
 4. Separate resource storage from resource views, shader artifacts from pipeline state, and the host `Surface` from image acquisition and presentation.
 5. Keep feature availability, allocation intent, and synchronization scope explicit. No single common feature set or one-to-one native handle abstraction is assumed.
 
-This proposal fits the repository's established split: portable C++ in `engine/`, backend code in separate libraries, and a thin OS host. The current Metal backend still contains legacy device and queue setup in [MetalRenderer.mm](../backends/metal/MetalRenderer.mm); it does not implement the new contracts. The macOS factory injects a Metal shader library, which loads the bundled `default.metallib` and creates the current mesh shader pair, but does not yet provide a graphics instance. The existing [macOS Metal engine design](./macos-metal-engine-tdd.md) says D3D12 and Vulkan are future evaluation targets and warns against recreating D3D11's immediate-context/resource API.
+This proposal fits the repository's established split: portable C++ in `engine/`, backend code in separate libraries, and a thin OS host. The current Metal backend implements the graphics contracts in C++ using vendored metal-cpp headers; its factory provides a graphics instance and a shader library that loads the bundled `default.metallib`. The legacy renderer is excluded from the active build. The existing [macOS Metal engine design](./macos-metal-engine-tdd.md) says D3D12 and Vulkan are future evaluation targets and warns against recreating D3D11's immediate-context/resource API.
 
 ## What the APIs actually expose
 
@@ -154,20 +154,19 @@ This is the target interface layout. The first portable abstract interfaces have
 
 No new public class file is proposed for adapter capabilities, usage flags, load/store operations, surface size, or format descriptions; those remain value types. Avoid creating a concrete class for every buffer role (vertex/index/uniform) until behavior requires one—use usage flags/views where native APIs share the same storage object.
 
-The portable API now includes `PresentationSurface`, `Device::CreateSwapchain`, pipeline binding-layout association, and explicit render-pass viewport state. Graphics queues are required to support copy encoders so this initial frontend can stage its mesh without requiring a separate copy queue; queue submission dependencies express upload-before-draw ordering. The Engine frontend records a three-vertex position/UV mesh draw and asynchronous upload dependency using these declarations. These are contracts only: there is no backend implementation, and the API still does not implement GPU-completion retirement or establish native presentation behavior. Completion-based destruction remains mandatory when GPU objects are implemented.
+The portable API now includes `PresentationSurface`, `Device::CreateSwapchain`, pipeline binding-layout association, and explicit render-pass viewport state. Graphics queues are required to support copy encoders so this initial frontend can stage its mesh without requiring a separate copy queue; queue submission dependencies express upload-before-draw ordering. The Engine frontend records a three-vertex position/UV mesh draw and asynchronous upload dependency using these declarations. The Metal backend implements resource retention through command completion and swapchain presentation. Hardware tests verify offscreen draw and compute submission, copies, and synchronization; running the app with API Validation is still required to exercise window presentation.
 
 ### Backend implementation layout
 
-Backend classes belong outside `engine/Graphics/` and never leak native types into portable headers. Split the current monolithic Metal implementation into per-class Objective-C++ modules under `backends/metal/Graphics/` as the Metal backend adopts the interfaces. Future D3D12 and Vulkan implementations follow the same ownership boundaries under `backends/d3d12/Graphics/` and `backends/vulkan/Graphics/`; their files are only created when those backends are approved.
+Backend classes belong outside `engine/Graphics/` and never leak native types into portable headers. The current Metal backend is implemented in C++ under `backends/metal/`; keep Objective-C++ confined to the AppKit frontend bridge. Future D3D12 and Vulkan implementations should follow the same ownership boundaries under `backends/d3d12/` and `backends/vulkan/`; their files are only created when those backends are approved.
 
-Expected Metal implementation areas include instance/adapter selection, device, queue/context/command buffer, render/compute/copy encoders, buffer/texture/view/sampler, shader/pipeline/binding, allocator/retirement, and swapchain/presentation. The current `MetalRenderer.mm` is not an implementation of these interfaces; split or replace it when backend work begins. No claim is made that Metal needs a Vulkan-style global instance or identical objects for every interface.
+The Metal implementation covers instance/adapter selection, device, queues, command recording/submission, render/compute/copy encoders, buffers/textures/views/samplers, shaders/pipelines/bindings, allocation, and swapchain/presentation. The shared abstraction still must not imply that Metal needs a Vulkan-style global instance or identical native objects for every interface.
 
 ## Recommended implementation order
 
 1. **Frontend draw contract (implemented):** Engine selects an adapter from an injected `GraphicsInstance`, owns a device and swapchain, and records a triangle draw through the portable command API. The `Renderer` lifecycle dependency has been removed from Engine.
-2. **Backend first render path:** implement queue, command context/buffer, submission completion, `Resource`, `Buffer`, `Texture`, views, allocator intent, and completion-based retirement. Validate a clear plus depth-tested mesh before adding abstractions not required by that path.
-3. **Backend draw contract:** implement shader-pair resolution, `BindingLayout`/`BindingSet`, graphics pipeline, render-pass encoder, and swapchain/presentation; validate resize and device/surface failure behavior.
-4. **Compute and portability proof:** add compute/copy encoders and explicit resource dependency tracking when the first real feature needs them. Validate the API against a small D3D12 and Vulkan mapping before claiming portability; record capability gaps instead of silently widening the common API.
+2. **Metal backend first render path (implemented):** queue, command context/buffer, submission completion, resources/views, allocation, shader bindings, graphics pipeline, render-pass encoder, and swapchain/presentation are implemented. Hardware tests validate an offscreen render; run the app with API Validation to validate display presentation.
+3. **Compute and copy path (implemented):** Metal compute and copy encoders, explicit submission dependencies, and synchronization are implemented and covered by hardware tests. Validate the API against D3D12 and Vulkan mappings before claiming portability; record capability gaps instead of silently widening the common API.
 5. **Follow-on services:** consider transient aliasing, timestamp/query pools, indirect draws, debug labels/validation, multi-queue transfer/compute, and render-graph scheduling as separately justified slices.
 
 ## Additional core concepts not named in the request
@@ -197,14 +196,14 @@ observed. The transform block contains identity world/view/projection
 matrices, while the shader pair is requested by program type and name through
 an injected abstract service.
 
-The validation uses portable fake interfaces only. It proves descriptor,
-stream, command-order, dependency, resize, and error-reporting behavior; it
-does not prove GPU visibility, shader/constant-buffer layout, copy support on a
-Graphics queue, or presentation semantics. The placeholder shader library has
-no catalog, compiler, reflection, or implementation. The portable
-`PresentationSurface` currently exposes drawable extent only; backend surface
-identity remains private to the implementing object and requires a concrete
-backend contract before rendering can work.
+Portable fake tests prove descriptor, stream, command-order, dependency, resize,
+and error-reporting behavior. Hardware-backed Metal tests additionally verify
+shader/constant-buffer layout, graphics and compute execution, copy results,
+and synchronization. They do not prove window presentation. The shader library
+has no general catalog, compiler, or reflection; the current Metal library
+resolves the engine's named mesh program. The portable `PresentationSurface`
+exposes drawable extent only; backend surface identity stays private to the
+implementing object.
 
 ## Research limitations
 

@@ -11,6 +11,7 @@ namespace Graphics {
 struct ComputePipelineDesc
 {
     std::shared_ptr<Shader> shader;
+    std::shared_ptr<BindingLayout> bindingLayout;
 };
 
 class ComputePipeline : public Pipeline

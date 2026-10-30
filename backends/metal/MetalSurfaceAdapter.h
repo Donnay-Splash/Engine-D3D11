@@ -1,16 +1,25 @@
-#ifndef ENGINE_MACOS_METAL_SURFACE_ADAPTER_H
-#define ENGINE_MACOS_METAL_SURFACE_ADAPTER_H
-
-#import <MetalKit/MetalKit.h>
+#pragma once
 
 #include "Engine.h"
+
+#include <memory>
+
+namespace CA {
+class MetalLayer;
+}
 
 namespace Engine {
 namespace Metal {
 
-std::unique_ptr<Surface> CreateMetalSurface(MTKView *view);
+class MetalSurfaceAdapter : public Surface
+{
+public:
+    virtual CA::MetalLayer *Layer() const noexcept = 0;
+};
+
+std::unique_ptr<Surface> CreateMetalSurface(CA::MetalLayer *layer);
+bool DispatchMetalDraw(Surface &surface, Error &error);
+bool DispatchMetalResize(Surface &surface, Size size, Error &error);
 
 } // namespace Metal
 } // namespace Engine
-
-#endif

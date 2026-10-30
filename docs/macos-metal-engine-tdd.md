@@ -35,8 +35,8 @@ macOS AppKit host
   - performs bootstrap and connects the surface to the engine
               |
               v
-macOS host/surface adapter (.mm; Apple-specific)
-  - translates host surface lifecycle and drawable/resize events
+macOS frontend bridge (.mm; Apple-specific)
+  - owns AppKit/MetalKit integration and exposes a narrow native-layer seam
               |
               v
 Engine facade (C++; static link target)
@@ -52,14 +52,14 @@ Portable graphics API (C++)
     resources, bindings, pipelines, and presentation contracts
               ^
               |
-Metal backend (.mm/C++ and MSL; implementation in progress)
-  - Metal device, queue, resources, shader/pipeline state, command encoding,
-    render targets, and presentation
+Metal backend (.cpp/metal-cpp and MSL)
+  - adapter/device, resources, shader/pipeline state, command encoding,
+    render targets, synchronization, and drawable presentation
 ```
 
-The exact CMake target names and whether the Metal implementation is a transitive static target or part of a final static engine target are implementation details. The required property is that the portable core can be built independently, while the macOS application links the engine implementation it needs. Keep Objective-C/Objective-C++, AppKit, Metal, and MetalKit out of the portable core and its public headers.
+The portable core can be built independently, while the macOS application links the engine implementation it needs. Keep Objective-C/Objective-C++, AppKit, Metal, and MetalKit out of the portable core and its public headers. Metal backend implementation and platform integration use C++ and metal-cpp; Objective-C++ is confined to the macOS frontend bridge.
 
-The portable graphics API describes shared rendering intent and required capabilities without exposing Metal or D3D types or backend resource handles. It should not force every native concept into a one-to-one wrapper. The former `Engine::Device` renderer-lifecycle interface is retired, and `Engine` no longer depends on the temporary `Engine::Renderer` bridge. The new GPU-facing type is `Engine::Graphics::Device`; the legacy renderer and Metal implementation remain unintegrated until the Metal backend adopts the component API.
+The portable graphics API describes shared rendering intent and required capabilities without exposing Metal or D3D types or backend resource handles. It should not force every native concept into a one-to-one wrapper. The former `Engine::Device` renderer-lifecycle interface is retired, and `Engine` no longer depends on the temporary `Engine::Renderer` bridge. The new GPU-facing type is `Engine::Graphics::Device`; the legacy renderer is not part of the active CMake build, and the Metal backend implements the component API.
 
 The interface should be reviewed against likely D3D12/Vulkan concerns as implementation choices arise, especially resource lifetime, command submission, synchronization, shader stages, and render-target formats. That review is a constraint on avoidable coupling, not a requirement to invent a multi-backend framework before a second backend exists.
 
@@ -67,7 +67,7 @@ The interface should be reviewed against likely D3D12/Vulkan concerns as impleme
 
 1. The host creates the AppKit application, window, and native render surface/view.
 2. The host calls the macOS-specific adapter to connect that surface to the engine. This is the platform-specific initialization seam; the portable engine interface remains C++ and backend-neutral.
-3. Engine obtains a `GraphicsInstance` and placeholder shader library from its factory, selects a graphics-capable adapter, creates its `Graphics::Device`, and owns the swapchain. A backend will supply the actual implementations later.
+3. Engine obtains a `GraphicsInstance` and shader library from its factory, selects the preferred or first graphics-capable adapter, creates its `Graphics::Device`, and owns the swapchain.
 4. The host runs the native AppKit event loop. The engine layer owns frame rendering/scheduling through the attached surface; the app does not call a D3D-style `Frame()` method every iteration.
 5. Surface resize is delivered through the host adapter; draw callbacks are notifications only. Engine acquires/presents swapchain images through the graphics API.
 6. Shutdown stops rendering and releases engine resources before the host tears down its window and surface.
@@ -84,7 +84,9 @@ The interface must state lifecycle ordering, surface ownership, resize behavior,
 
 The host surface implements the typed `Graphics::PresentationSurface` contract and sends frame notifications; it does not acquire or pass a native drawable to portable Engine code. Engine owns swapchain acquisition, render-pass recording, submission, and presentation. The host retains ownership of the view and adapter, and the surface must outlive the engine because the engine keeps a non-owning attachment. `Engine::Shutdown` stops surface callbacks before releasing graphics resources.
 
-The current single-mesh frontend path creates a three-vertex equilateral mesh with separate position and UV buffers, requests a shader pair by program type/name, writes identity world/view/projection matrices to a uniform buffer, and records a draw of three vertices. Upload uses staging buffers and an explicit submission dependency. Portable fake graphics objects exercise this path; no graphics backend implements the contracts yet. The macOS factory currently provides no `GraphicsInstance` or shader library, so Engine initialization fails explicitly until the Metal backend is migrated. This does not claim a visible triangle.
+The current frontend path creates a three-vertex mesh with separate position and UV buffers, requests a shader pair by program type/name, writes identity world/view/projection matrices to a uniform buffer, and records a draw of three vertices. Upload uses staging buffers and an explicit submission dependency. Portable fake graphics objects exercise this path; the macOS host connects it to Metal and schedules rendering on the AppKit event loop. Apple-only Metal integration tests execute graphics and compute work against actual Metal hardware, verify buffer-copy results, and exercise resources and synchronization. Those tests do not verify window presentation or substitute for running the app with Metal API Validation.
+
+Metal API Validation is enabled through the generated Xcode development scheme using CMake's `XCODE_SCHEME_ENABLE_GPU_API_VALIDATION` property. It must be active before Metal device creation; Metal exposes no public device-level runtime query or switch for this diagnostic. Launch through the generated Xcode scheme during development. The backend cannot detect or assert that API Validation is active.
 
 ## Build and platform structure
 
@@ -95,16 +97,17 @@ The current single-mesh frontend path creates a three-vertex equilateral mesh wi
 - Keep the existing command-line bootstrap distinct from the GUI app unless a later decision deliberately removes it.
 - Do not include legacy D3D11 sources or Windows libraries in the new CMake target source/link lists.
 
-The validated baseline is Apple Silicon arm64, macOS 26.6.1, Xcode 26.6, macOS SDK 26.5, CMake 4.4.4, GNU Make 3.81, and Metal Toolchain 17F109. macOS 13.1 is the current provisional deployment floor, not a support promise; revalidate the baseline and deployment target before publishing support claims. The current CMake setup uses:
+The validated build baseline is Apple Silicon arm64, macOS 26.6.1, Xcode 26.6, macOS SDK 26.5, CMake 4.4.4, and Metal Toolchain 17F109. The CMake project currently targets macOS 26; revalidate the toolchain and deployment target before publishing support claims. The current CMake setup uses:
 
 ```sh
-cmake -S . -B build/macos -G "Unix Makefiles" \
+cmake -S . -B build/macos -G Xcode \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=13.1
-cmake --build build/macos
+  -DCMAKE_OSX_DEPLOYMENT_TARGET=26
+cmake --build build/macos --target engine-macos engine-metal-integration-tests
+ctest --test-dir build/macos -C Debug --output-on-failure
 ```
 
-AppKit, Metal, and MetalKit come from the Apple SDK. The CMake build packages the existing MSL shader and links the separate GUI host. CTest includes lifecycle failure handling and a fake-driven graphics test for mesh streams, draw recording, upload dependencies, resize, and presentation errors. These tests validate the portable frontend only; they do not replace GPU runtime checks on hardware. See the README for current configure/build/run instructions.
+AppKit, Metal, and MetalKit come from the Apple SDK. The CMake build compiles and packages the MSL shader library and links the separate GUI host. CTest includes portable lifecycle and graphics tests plus a hardware-backed Metal integration test. Launch the app or integration-test target from its generated Xcode scheme to run Metal API Validation; invoking the test directly through CTest does not enable the Xcode scheme diagnostic setting. See the README for current configure/build/run instructions.
 
 ## Legacy feature inventory and disposition
 
@@ -176,19 +179,15 @@ libraries, and can be built directly as `engine-core`.
 - Render a mesh selected/created through the engine scene path, with camera transforms and depth.
 - Make shader compilation/loading an explicit CMake/runtime path with useful diagnostics.
 
-**Acceptance:** engine-owned scene data, not hard-coded host geometry, produces a visible Metal-rendered mesh. This is a later milestone, not current behavior.
+**Current implementation:** the engine-owned UV triangle is rendered through the Metal graphics backend, and the hardware-backed integration test exercises graphics and compute submission. The app builds with a generated API-Validation-enabled Xcode scheme. Window presentation should still be exercised on the target display through that scheme.
 
-The target first scene slice keeps the portable structure-of-arrays mesh contract
+The next scene slice keeps the portable structure-of-arrays mesh contract
 (`positions`, optional vertex attributes, and 32-bit indices), adds a portable
 camera view transform and left-handed perspective parameters, and builds one
-engine-owned cube scene. The app-facing lifecycle already uses graphics-component
-initialization and presentation; a backend must implement those components before
-the existing app can render. The engine passes its CPU scene and camera into the
-internal backend; Metal owns the vertex/normal/index
-buffers, shader pipeline, depth state, and depth texture. The Engine facade now
-uses graphics-component initialization and presentation instead of the former
-renderer lifecycle bridge, but the frontend contract still has no working GPU
-backend. This slice intentionally renders one scene object; multi-object/material
+engine-owned cube scene. The engine passes its CPU scene and camera into the
+internal backend; Metal owns the vertex/normal/index buffers, shader pipeline,
+depth state, and depth texture. This slice intentionally renders one scene object;
+multi-object/material
 pipelines and a general scene traversal contract remain future work.
 
 ### 5. Select and migrate original rendering features
@@ -236,5 +235,5 @@ pipelines and a general scene traversal contract remain future work.
 - Renderer coupling is broad: scene nodes, components, resources, pass ordering, and shader binding currently include D3D11 concepts. Do not mistake swapping `D3DClass` for a completed port.
 - Matrix conventions and shader-facing layouts can change visible results. Test them before moving complex rendering passes.
 - HLSL conversion may be lossy or have stage/resource limitations. Keep the workflow provisional until representative shaders compile and match behavior.
-- The current arm64/macOS 13.1 baseline is not a release support commitment. Revisit hardware, deployment target, and tool versions before publishing support claims.
+- The current arm64/macOS 26 baseline is not a release support commitment. Revisit hardware, deployment target, and tool versions before publishing support claims.
 - Preserve the existing Windows projects during the migration, but do not present them as a supported future renderer. D3D12 and Vulkan remain future candidates, not current work.

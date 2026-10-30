@@ -1,12 +1,17 @@
-#ifndef ENGINE_MACOS_METAL_FRAME_H
-#define ENGINE_MACOS_METAL_FRAME_H
+#pragma once
 
-#import <MetalKit/MetalKit.h>
+#include <Foundation/NSSharedPtr.hpp>
+#include <Metal/MTLRenderPass.hpp>
+#include <QuartzCore/CAMetalDrawable.hpp>
+
+namespace Engine {
+namespace Metal {
 
 struct MetalFrame
 {
-    __strong id<CAMetalDrawable> drawable;
-    __strong MTLRenderPassDescriptor *renderPass;
+    NS::SharedPtr<CA::MetalDrawable> drawable;
+    NS::SharedPtr<MTL::RenderPassDescriptor> renderPass;
 };
 
-#endif
+} // namespace Metal
+} // namespace Engine
