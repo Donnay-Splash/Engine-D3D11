@@ -5,6 +5,7 @@
 
 #include <Foundation/Foundation.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <utility>
@@ -17,21 +18,18 @@ bool MetalShaderLibrary::Load(const std::string &entryPoint, const std::string &
 {
     // Files follow the shader-compiler output convention: <Shader>_<entry>.<extension>.
     const std::string fileName = "Scene_" + entryPoint;
-    NS::SharedPtr<NS::String> name =
-        NS::RetainPtr(NS::String::string(fileName.c_str(), NS::UTF8StringEncoding));
-    NS::SharedPtr<NS::String> nativeExtension =
-        NS::RetainPtr(NS::String::string(extension.c_str(), NS::UTF8StringEncoding));
-    NS::SharedPtr<NS::String> subdirectory =
-        NS::RetainPtr(NS::String::string("shaders", NS::UTF8StringEncoding));
     NS::SharedPtr<NS::Bundle> bundle = NS::RetainPtr(NS::Bundle::mainBundle());
-    NS::SharedPtr<NS::URL> libraryURL = NS::RetainPtr(
-        bundle->URLForResource(name.get(), nativeExtension.get(), subdirectory.get()));
-    if (!libraryURL) {
+    NS::String *resourcePath = bundle == nullptr ? nullptr : bundle->resourcePath();
+    const char *resourceDirectory =
+        resourcePath == nullptr ? nullptr : resourcePath->utf8String();
+    if (resourceDirectory == nullptr) {
         error.message = "A bundled Metal shader artifact is missing; run shader-compiler.";
         return false;
     }
 
-    std::ifstream libraryFile(libraryURL->fileSystemRepresentation(), std::ios::binary);
+    const std::filesystem::path artifactPath =
+        std::filesystem::path(resourceDirectory) / "shaders" / (fileName + "." + extension);
+    std::ifstream libraryFile(artifactPath, std::ios::binary);
     if (!libraryFile) {
         error.message = "Failed to open the bundled Metal shader library.";
         return false;

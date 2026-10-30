@@ -2,14 +2,21 @@
 
 #include "ShaderCompilerConfig.h"
 
-#include <cstdlib>
+#include <cerrno>
+#include <cstring>
 #include <filesystem>
+#include <iomanip>
 #include <iostream>
+#include <spawn.h>
 #include <string>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <vector>
 
 namespace fs = std::filesystem;
 using ShaderCompiler::Config;
+
+extern char **environ;
 
 namespace {
 
@@ -21,21 +28,42 @@ void PrintUsage()
                  "  --dry-run  print the commands without running them\n";
 }
 
-std::string Quote(const std::string &argument)
-{
-    return "\"" + argument + "\"";
-}
-
 bool Run(const std::vector<std::string> &arguments, bool dryRun)
 {
-    std::string command;
-    for (const std::string &argument : arguments) {
-        if (!argument.empty()) {
-            command += (command.empty() ? "" : " ") + Quote(argument);
-        }
+    if (arguments.empty()) {
+        return false;
     }
-    std::cout << command << '\n';
-    return dryRun || std::system(command.c_str()) == 0;
+
+    for (std::size_t index = 0; index < arguments.size(); ++index) {
+        std::cout << (index == 0 ? "" : " ") << std::quoted(arguments[index]);
+    }
+    std::cout << '\n';
+    if (dryRun) {
+        return true;
+    }
+
+    std::vector<char *> argv;
+    argv.reserve(arguments.size() + 1);
+    for (const std::string &argument : arguments) {
+        argv.push_back(const_cast<char *>(argument.c_str()));
+    }
+    argv.push_back(nullptr);
+
+    pid_t process = 0;
+    const int spawnError =
+        posix_spawnp(&process, arguments.front().c_str(), nullptr, nullptr, argv.data(), environ);
+    if (spawnError != 0) {
+        std::cerr << "Failed to start " << std::quoted(arguments.front()) << ": "
+                  << std::strerror(spawnError) << '\n';
+        return false;
+    }
+
+    int status = 0;
+    pid_t waited = 0;
+    do {
+        waited = waitpid(process, &status, 0);
+    } while (waited == -1 && errno == EINTR);
+    return waited == process && WIFEXITED(status) && WEXITSTATUS(status) == 0;
 }
 
 std::string ProfileFor(const std::string &stage, const std::string &model)
