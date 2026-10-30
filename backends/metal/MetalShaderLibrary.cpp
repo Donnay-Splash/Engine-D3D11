@@ -12,17 +12,22 @@
 namespace Engine {
 namespace Metal {
 
-bool MetalShaderLibrary::Load(Error &error)
+bool MetalShaderLibrary::Load(const std::string &entryPoint, std::vector<std::uint8_t> &bytecode,
+                              Error &error)
 {
+    // File names follow the shader-compiler output convention: <Shader>_<entry>.metallib.
+    const std::string fileName = "Scene_" + entryPoint;
     NS::SharedPtr<NS::String> name =
-        NS::RetainPtr(NS::String::string("default", NS::UTF8StringEncoding));
+        NS::RetainPtr(NS::String::string(fileName.c_str(), NS::UTF8StringEncoding));
     NS::SharedPtr<NS::String> extension =
         NS::RetainPtr(NS::String::string("metallib", NS::UTF8StringEncoding));
+    NS::SharedPtr<NS::String> subdirectory =
+        NS::RetainPtr(NS::String::string("shaders", NS::UTF8StringEncoding));
     NS::SharedPtr<NS::Bundle> bundle = NS::RetainPtr(NS::Bundle::mainBundle());
-    NS::SharedPtr<NS::URL> libraryURL =
-        NS::RetainPtr(bundle->URLForResource(name.get(), extension.get()));
+    NS::SharedPtr<NS::URL> libraryURL = NS::RetainPtr(
+        bundle->URLForResource(name.get(), extension.get(), subdirectory.get()));
     if (!libraryURL) {
-        error.message = "The bundled Metal shader library is missing.";
+        error.message = "A bundled Metal shader library is missing; run shader-compiler.";
         return false;
     }
 
@@ -32,10 +37,10 @@ bool MetalShaderLibrary::Load(Error &error)
         return false;
     }
 
-    m_ShaderBytecode.assign(
+    bytecode.assign(
         std::istreambuf_iterator<char>(libraryFile),
         std::istreambuf_iterator<char>());
-    if (m_ShaderBytecode.empty()) {
+    if (bytecode.empty()) {
         error.message = "The bundled Metal shader library is empty.";
         return false;
     }
@@ -54,7 +59,10 @@ bool MetalShaderLibrary::RequestGraphicsShaders(
         return false;
     }
 
-    if (m_ShaderBytecode.empty() && !Load(error)) {
+    std::vector<std::uint8_t> vertexBytecode;
+    std::vector<std::uint8_t> fragmentBytecode;
+    if (!Load("mesh_vertex", vertexBytecode, error) ||
+        !Load("mesh_fragment", fragmentBytecode, error)) {
         return false;
     }
 
@@ -62,7 +70,7 @@ bool MetalShaderLibrary::RequestGraphicsShaders(
     vertexDescription.stage = Graphics::ShaderStage::Vertex;
     vertexDescription.entryPoint = "mesh_vertex";
     vertexDescription.format = "metallib";
-    vertexDescription.bytecode = m_ShaderBytecode;
+    vertexDescription.bytecode = std::move(vertexBytecode);
     std::shared_ptr<Graphics::Shader> vertex =
         device.CreateShader(vertexDescription, error);
     if (vertex == nullptr) {
@@ -76,7 +84,7 @@ bool MetalShaderLibrary::RequestGraphicsShaders(
     fragmentDescription.stage = Graphics::ShaderStage::Fragment;
     fragmentDescription.entryPoint = "mesh_fragment";
     fragmentDescription.format = "metallib";
-    fragmentDescription.bytecode = m_ShaderBytecode;
+    fragmentDescription.bytecode = std::move(fragmentBytecode);
     std::shared_ptr<Graphics::Shader> fragment =
         device.CreateShader(fragmentDescription, error);
     if (fragment == nullptr) {

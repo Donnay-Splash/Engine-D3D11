@@ -10,6 +10,7 @@ This repository is a hobby renderer used for educational purposes. It consists o
 - The graphics components, resources, buffers, textures, shaders, etc... should all be built modularly so that we can easily iterate on graphics features.
 - The codebase should target c++20 and use modern C++ features where appropriate.
 - Write simple, well-documented code and add comments only when they add real value.
+- Log any risk or assumption you could not verify (for example, behavior untestable on the current platform) as a GitHub issue with `gh` (see `docs/agents/issue-tracker.md`), labelled `needs-triage`, instead of only mentioning it in prose.
 
 ## Repository Layout
 
@@ -17,10 +18,12 @@ This repository is a hobby renderer used for educational purposes. It consists o
 AssetConverter/       Existing asset converter; leave its implementation independent.
 backends/             Top level for all graphics backends.
   metal/              C++ Metal backend, surface integration, and native Metal shaders.
+tools/ShaderCompiler/ Shader build command line tool and its config.
 build/                Generated build output; do not place source files here.
 docs/                 Project documentation.
 engine/               Platform-neutral engine library.
   Core/               Portable math and scene data.
+  shaders/            HLSL shader sources.
   tests/              Engine lifecycle and portable-core tests.
 macOS/                AppKit front end; links the engine and selected backend libraries.
 .github/
@@ -50,7 +53,7 @@ CMakeLists.txt        Defines the engine, backend, front-end, and test targets.
 ### Runtime
 - CMake for build system.
 - We will support only modern graphics APIs, specifically Directx 12, Metal and Vulkan.
-- Shader artifacts may be backend-specific. The current Metal backend uses native MSL compiled to a bundled metallib; do not add an HLSL translation toolchain unless the shader workflow is deliberately revisited.
+- Shader artifacts may be backend-specific. Shaders are authored only in HLSL under `engine/shaders` and built by `tools/ShaderCompiler` (dxc to DXIL, then Apple's metal-shaderconverter to metallib); CMake does not build shaders.
 
 ### Testing
 Use CTest to run tests. Keep portable engine logic testable without a graphics device; use fakes for renderer and platform lifecycle tests. Add backend integration tests only when the required graphics API is available. Metal API Validation is enabled through the generated Xcode development scheme and must be active before Metal device creation; the backend cannot query or enable it at runtime. Prefer Catch2 if a test framework becomes worthwhile; avoid creating a custom framework.
