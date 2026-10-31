@@ -79,8 +79,6 @@ std::optional<Config> LoadConfig(const std::filesystem::path &path, std::string 
         if (section == Section::Settings) {
             if (key == "dxc") {
                 config.dxc = value;
-            } else if (key == "metalShaderConverter") {
-                config.metalShaderConverter = value;
             } else if (key == "shaderModel") {
                 config.shaderModel = value;
             } else if (key == "outputDirectory") {
@@ -89,8 +87,6 @@ std::optional<Config> LoadConfig(const std::filesystem::path &path, std::string 
                 config.includeDirectory = resolve(value);
             } else if (key == "dxcArgs") {
                 config.dxcArgs = Split(value);
-            } else if (key == "metalArgs") {
-                config.metalArgs = Split(value);
             } else {
                 return fail("unknown setting '" + key + "'");
             }
@@ -104,14 +100,13 @@ std::optional<Config> LoadConfig(const std::filesystem::path &path, std::string 
             shader.source = resolve(value);
         } else if (key == "entry") {
             std::vector<std::string> tokens = Split(value);
-            if (tokens.size() < 2 ||
+            if (tokens.size() != 2 ||
                 (tokens[0] != "vs" && tokens[0] != "ps" && tokens[0] != "cs")) {
-                return fail("entry must be '<vs|ps|cs> <entryPoint> [args...]'");
+                return fail("entry must be '<vs|ps|cs> <entryPoint>'");
             }
             EntryPoint entry;
             entry.stage = tokens[0];
             entry.name = tokens[1];
-            entry.metalArgs.assign(tokens.begin() + 2, tokens.end());
             shader.entries.push_back(std::move(entry));
         } else {
             return fail("unknown shader key '" + key + "'");

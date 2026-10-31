@@ -1,6 +1,7 @@
-// Command line shader build tool: HLSL -> DXIL (dxc) -> metallib (metal-shaderconverter).
+// Shader build tool: HLSL -> DXIL (dxc) -> metallib (Metal Shader Converter library).
 
 #include "ShaderCompilerConfig.h"
+#include "MetalShaderConverter.h"
 
 #include <cerrno>
 #include <cstring>
@@ -143,17 +144,11 @@ int main(int argc, char **argv)
             if (!buildMetal) {
                 continue;
             }
-            std::vector<std::string> converter = {
-                config->metalShaderConverter,
-                dxilPath.string(),
-                "-o", (metalDirectory / (baseName + ".metallib")).string(),
-                "--output-reflection-file",
-                (metalDirectory / (baseName + ".json")).string(),
-            };
-            converter.insert(converter.end(), config->metalArgs.begin(), config->metalArgs.end());
-            converter.insert(converter.end(), entry.metalArgs.begin(), entry.metalArgs.end());
-            if (!Run(converter, dryRun)) {
-                std::cerr << "metal-shaderconverter failed for " << baseName << '\n';
+            std::string conversionError;
+            if (!ShaderCompiler::ConvertDxilToMetal(
+                    dxilPath, entry.name, entry.stage, metalDirectory / (baseName + ".metallib"),
+                    metalDirectory / (baseName + ".json"), dryRun, conversionError)) {
+                std::cerr << conversionError << '\n';
                 return 1;
             }
         }
