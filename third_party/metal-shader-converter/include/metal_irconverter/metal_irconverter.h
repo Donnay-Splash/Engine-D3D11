@@ -371,7 +371,7 @@ enum IRErrorCode
     IRErrorCodeInvalidRaytracingUserAttributeSize,
     IRErrorCodeIncorrectHitgroupType,
     IRErrorCodeFP64Usage,
-    
+
     IRErrorCodeUnknown = 0x7FFFFFFF
 };
 
@@ -413,7 +413,7 @@ typedef enum IRBytecodeOwnership
 {
     /** Do not take ownership. */
     IRBytecodeOwnershipNone,
-    
+
     /** Copy the bytecode. */
     IRBytecodeOwnershipCopy
 } IRBytecodeOwnership;
@@ -806,7 +806,7 @@ typedef enum IRGPUFamily
     IRGPUFamilyApple8  = 1008,
     IRGPUFamilyApple9  = 1009,
     IRGPUFamilyApple10 = 1010,
-    
+
     IRGPUFamilyMetal3  = 5001
 } IRGPUFamily;
 
@@ -857,7 +857,7 @@ void IRCompilerSetMinimumDeploymentTarget(IRCompiler* compiler, IROperatingSyste
  * @param compiler compiler to configure.
  * @param spaceValue the register space that function constant cbuffer resources are defined in, set to UINT32_MAX to disable
  */
- 
+
 void IRCompilerSetFunctionConstantResourceSpace(IRCompiler* compiler, uint32_t spaceValue);
 
 /**
@@ -867,7 +867,7 @@ void IRCompilerSetFunctionConstantResourceSpace(IRCompiler* compiler, uint32_t s
  * @param compiler compiler to configure.
  * @param spaceValue the register space that framebuffer fetch texture2d resources are defined in, set to UINT32_MAX to disable
  */
- 
+
 void IRCompilerSetFramebufferFetchResourceSpace(IRCompiler* compiler, uint32_t spaceValue);
 
 // Metallib manipulation
@@ -957,7 +957,7 @@ typedef enum IRFunctionConstantType
     IRFunctionConstantTypeInt    = 29,
     IRFunctionConstantTypeInt4   = 32,
     IRFunctionConstantTypeFloat  = 3,
-    
+
 } IRFunctionConstantType;
 
 typedef struct IRFunctionConstant
@@ -1060,13 +1060,13 @@ typedef struct IRGSInfo_1_0
 {
     IRVertexOutputInfo_1_0* vertex_outputs;
     size_t num_vertex_outputs;
-    
+
     bool is_passthrough;
-    
+
     //Only valid if the GS shader is passthrough
     int32_t rt_array_index_record_id;
     int32_t viewport_array_index_record_id;
-    
+
     IRInputPrimitive input_primitive;
     uint32_t max_input_primitives_per_mesh_threadgroup;
     uint32_t max_payload_size_in_bytes;
@@ -1092,15 +1092,15 @@ typedef struct IRHSInfo_1_0
     const char* patch_constant_function;
     uint32_t static_payload_size;
     uint32_t payload_size_per_patch;
-    
+
     uint32_t input_control_point_count;
     uint32_t output_control_point_count;
     uint32_t output_control_point_size;
-    
+
     IRTessellatorDomain tessellator_domain;
     IRTessellatorPartitioning tessellator_partitioning;
     IRTessellatorOutputPrimitive tessellator_output_primitive;
-    
+
     bool tessellation_type_half;
     float max_tessellation_factor;
 } IRHSInfo_1_0;
