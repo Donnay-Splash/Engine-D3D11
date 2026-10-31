@@ -157,6 +157,23 @@ enum class ResourceUsage
     Present
 };
 
+constexpr std::uint32_t BytesPerPixel(TextureFormat format)
+{
+    switch (format) {
+    case TextureFormat::R8Unorm:
+        return 1;
+    case TextureFormat::RGBA8Unorm:
+    case TextureFormat::BGRA8Unorm:
+    case TextureFormat::Depth32Float:
+        return 4;
+    case TextureFormat::RGBA16Float:
+        return 8;
+    case TextureFormat::Unknown:
+        break;
+    }
+    return 0;
+}
+
 constexpr BufferUsage operator|(BufferUsage lhs, BufferUsage rhs)
 {
     return static_cast<BufferUsage>(

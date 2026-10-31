@@ -14,6 +14,7 @@
 #include "Graphics/Device.h"
 #include "Graphics/GraphicsInstance.h"
 #include "Graphics/GraphicsPipeline.h"
+#include "Graphics/OffscreenSwapchain.h"
 #include "Graphics/RenderPassEncoder.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Swapchain.h"
@@ -47,6 +48,9 @@ static_assert(offsetof(MeshTransforms, view) == sizeof(float) * 16,
     "View transform must immediately follow world transform.");
 static_assert(offsetof(MeshTransforms, projection) == sizeof(float) * 32,
     "Projection transform must immediately follow view transform.");
+
+// Deliberately loud so a cleared-but-undrawn frame is obvious in captured output.
+constexpr float kClearColor[4] = {1.0f, 0.0f, 0.8f, 1.0f};
 
 } // namespace
 
@@ -126,7 +130,7 @@ bool Engine::Initialize(Surface &surface, ErrorHandler errorHandler, Error &erro
 
     m_Surface = &surface;
     m_ErrorRelay = std::shared_ptr<ErrorRelay>(new ErrorRelay(errorHandler));
-    if (!InitializeGraphics(surface, error)) {
+    if (!InitializeGraphics(&surface, surface.DrawableSize(), error)) {
         Shutdown();
         return false;
     }
@@ -151,7 +155,41 @@ bool Engine::Initialize(Surface &surface, ErrorHandler errorHandler, Error &erro
     return true;
 }
 
-bool Engine::InitializeGraphics(Surface &surface, Error &error)
+bool Engine::InitializeHeadless(Size size, ErrorHandler errorHandler, Error &error)
+{
+    if (m_Initialized) {
+        error.message = "The engine is already initialized.";
+        return false;
+    }
+    if (m_GraphicsInstance == nullptr || m_ShaderLibrary == nullptr) {
+        error.message = "The engine requires a graphics instance and shader library.";
+        return false;
+    }
+
+    m_ErrorRelay = std::shared_ptr<ErrorRelay>(new ErrorRelay(errorHandler));
+    if (!InitializeGraphics(nullptr, size, error)) {
+        Shutdown();
+        return false;
+    }
+    m_Initialized = true;
+    return true;
+}
+
+bool Engine::RenderHeadlessFrame(Error &error)
+{
+    if (m_OffscreenSwapchain == nullptr) {
+        error.message = "The engine is not running in headless mode.";
+        return false;
+    }
+    return Draw(this, error);
+}
+
+bool Engine::CaptureHeadlessImage(Graphics::CapturedImage &image) const
+{
+    return m_OffscreenSwapchain != nullptr && m_OffscreenSwapchain->LatestImage(image);
+}
+
+bool Engine::InitializeGraphics(Surface *surface, Size size, Error &error)
 {
     std::vector<std::shared_ptr<Graphics::Adapter>> adapters;
     if (!m_GraphicsInstance->EnumerateAdapters(adapters, error)) {
@@ -222,17 +260,23 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
         return false;
     }
 
-    m_Size = surface.DrawableSize();
+    m_Size = size;
     if (m_Size.width == 0 || m_Size.height == 0) {
-        error.message = "The render surface has no drawable extent.";
+        error.message = "The render target has no drawable extent.";
         return false;
     }
     Graphics::SwapchainDesc swapchainDescription;
     swapchainDescription.extent = {m_Size.width, m_Size.height, 1};
-    m_Swapchain = m_Device->CreateSwapchain(surface, swapchainDescription, error);
+    if (surface != nullptr) {
+        m_Swapchain = m_Device->CreateSwapchain(*surface, swapchainDescription, error);
+    } else {
+        m_OffscreenSwapchain =
+            Graphics::OffscreenSwapchain::Create(m_Device, swapchainDescription, error);
+        m_Swapchain = m_OffscreenSwapchain;
+    }
     if (m_Swapchain == nullptr) {
         if (error.message.empty()) {
-            error.message = "Failed to create a swapchain for the render surface.";
+            error.message = "Failed to create a swapchain for the render target.";
         }
         return false;
     }
@@ -361,6 +405,7 @@ void Engine::Shutdown() noexcept
     m_TransformBuffer.reset();
     m_Mesh = Mesh();
     m_Swapchain.reset();
+    m_OffscreenSwapchain.reset();
     m_GraphicsQueue.reset();
     m_Device.reset();
     m_Size = {0, 0};
@@ -412,10 +457,10 @@ bool Engine::DrawFrame(Error &error)
     colorAttachment.view = colorView;
     colorAttachment.loadAction = Graphics::LoadAction::Clear;
     colorAttachment.storeAction = Graphics::StoreAction::Store;
-    colorAttachment.clearColor[0] = 0.08f;
-    colorAttachment.clearColor[1] = 0.09f;
-    colorAttachment.clearColor[2] = 0.12f;
-    colorAttachment.clearColor[3] = 1.0f;
+    colorAttachment.clearColor[0] = kClearColor[0];
+    colorAttachment.clearColor[1] = kClearColor[1];
+    colorAttachment.clearColor[2] = kClearColor[2];
+    colorAttachment.clearColor[3] = kClearColor[3];
     Graphics::RenderPassDesc renderPassDescription;
     renderPassDescription.colorAttachments.push_back(colorAttachment);
     renderPassDescription.extent = {m_Size.width, m_Size.height, 1};
