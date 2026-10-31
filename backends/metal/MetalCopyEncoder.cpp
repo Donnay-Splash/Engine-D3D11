@@ -55,5 +55,40 @@ bool MetalCopyEncoder::CopyBuffer(const std::shared_ptr<Buffer> &source, std::si
     return true;
 }
 
+bool MetalCopyEncoder::CopyTextureToBuffer(const std::shared_ptr<Texture> &source,
+                                           const std::shared_ptr<Buffer> &destination,
+                                           std::size_t destinationOffset,
+                                           std::uint32_t bytesPerRow, Extent3D extent, Error &error)
+{
+    auto sourceTexture = std::dynamic_pointer_cast<MetalTexture>(source);
+    auto destinationBuffer = std::dynamic_pointer_cast<MetalBuffer>(destination);
+    if (ended_ || sourceTexture == nullptr || destinationBuffer == nullptr) {
+        SetError(error, "The Metal texture copy requires a Metal texture and buffer.");
+        return false;
+    }
+    const TextureDesc &texture = sourceTexture->Description();
+    const std::uint32_t pixelSize = BytesPerPixel(texture.format);
+    const std::size_t rowBytes = static_cast<std::size_t>(extent.width) * pixelSize;
+    const std::size_t imageBytes = static_cast<std::size_t>(bytesPerRow) * extent.height;
+    if (extent.width == 0 || extent.height == 0 || extent.depth != 1 ||
+        extent.width > texture.extent.width || extent.height > texture.extent.height ||
+        bytesPerRow < rowBytes || destinationOffset > destinationBuffer->Description().size ||
+        imageBytes > destinationBuffer->Description().size - destinationOffset ||
+        !HasBits(static_cast<std::uint32_t>(texture.usage),
+                 static_cast<std::uint32_t>(TextureUsage::CopySource)) ||
+        !HasBits(static_cast<std::uint32_t>(destinationBuffer->Description().usage),
+                 static_cast<std::uint32_t>(BufferUsage::CopyDestination))) {
+        SetError(error, "The Metal texture copy range or usage is invalid.");
+        return false;
+    }
+    encoder_->copyFromTexture(sourceTexture->Native(), 0, 0, MTL::Origin::Make(0, 0, 0),
+                              MTL::Size::Make(extent.width, extent.height, 1),
+                              destinationBuffer->Native(), destinationOffset, bytesPerRow,
+                              imageBytes);
+    context_->Keep(source);
+    context_->Keep(destination);
+    return true;
+}
+
 } // namespace Metal
 } // namespace Engine

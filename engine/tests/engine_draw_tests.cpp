@@ -398,6 +398,26 @@ public:
         return true;
     }
 
+    bool CopyTextureToBuffer(
+        const std::shared_ptr<Engine::Graphics::Texture> &,
+        const std::shared_ptr<Engine::Graphics::Buffer> &destination,
+        std::size_t destinationOffset,
+        std::uint32_t bytesPerRow,
+        Engine::Graphics::Extent3D extent,
+        Engine::Error &error) override
+    {
+        auto destinationBuffer = std::dynamic_pointer_cast<FakeBuffer>(destination);
+        const std::size_t size = static_cast<std::size_t>(bytesPerRow) * extent.height;
+        if (destinationBuffer == nullptr
+            || destinationOffset + size > destinationBuffer->Bytes().size()) {
+            error.message = "fake texture copy out of range";
+            return false;
+        }
+        std::memset(destinationBuffer->Bytes().data() + destinationOffset, 0xAB, size);
+        state_->events.push_back("copy.texture");
+        return true;
+    }
+
 private:
     std::shared_ptr<FakeState> state_;
 };
@@ -600,10 +620,10 @@ public:
     }
 
     std::shared_ptr<Engine::Graphics::Texture> CreateTexture(
-        const Engine::Graphics::TextureDesc &,
+        const Engine::Graphics::TextureDesc &description,
         Engine::Error &) override
     {
-        return nullptr;
+        return std::make_shared<FakeTexture>(description);
     }
 
     std::shared_ptr<Engine::Graphics::Shader> CreateShader(
@@ -623,12 +643,12 @@ public:
     }
 
     std::shared_ptr<Engine::Graphics::TextureView> CreateTextureView(
-        const std::shared_ptr<Engine::Graphics::Texture> &,
+        const std::shared_ptr<Engine::Graphics::Texture> &texture,
         const Engine::Graphics::ResourceRange &,
         Engine::Graphics::TextureFormat,
         Engine::Error &) override
     {
-        return nullptr;
+        return std::make_shared<FakeTextureView>(texture);
     }
 
     std::shared_ptr<Engine::Graphics::Sampler> CreateSampler(
@@ -947,10 +967,42 @@ void engineRecordsAThreeVertexUvMeshDraw()
     engine->Shutdown();
 }
 
+void headlessEngineRendersToAnOffscreenTextureAndCapturesIt()
+{
+    auto state = std::make_shared<FakeState>();
+    auto device = std::make_shared<FakeDevice>(state);
+    std::vector<std::shared_ptr<Engine::Graphics::Adapter>> adapters = {
+        std::make_shared<FakeAdapter>(state, device, true),
+    };
+    auto graphicsInstance = std::make_shared<FakeGraphicsInstance>(std::move(adapters));
+    std::unique_ptr<Engine::Engine> engine = Engine::EngineFactory::create(
+        graphicsInstance, std::make_shared<FakeShaderLibrary>());
+    Engine::Error error;
+    Engine::Graphics::CapturedImage image;
+
+    check(!engine->RenderHeadlessFrame(error), "headless render requires headless initialization");
+    check(engine->InitializeHeadless({64, 32}, [](const Engine::Error &) {}, error),
+        "headless initialization should succeed");
+    check(!engine->CaptureHeadlessImage(image), "no image exists before the first frame");
+    check(engine->RenderHeadlessFrame(error), "headless frame should render");
+    check(state->drawVertexCount == 3, "headless frame should draw the mesh");
+    check(state->presentCount == 0, "headless frame should not use a window swapchain");
+    check(std::find(state->events.begin(), state->events.end(), "copy.texture")
+            != state->events.end(),
+        "headless present should copy the frame into a readback buffer");
+    check(engine->CaptureHeadlessImage(image), "headless frame should be capturable");
+    check(image.width == 64 && image.height == 32
+            && image.pixels.size() == 64u * 32u * 4u && image.pixels[0] == 0xAB,
+        "captured image should carry the readback contents");
+    engine->Shutdown();
+    check(!engine->CaptureHeadlessImage(image), "shutdown should release the capture target");
+}
+
 } // namespace
 
 int main()
 {
+    headlessEngineRendersToAnOffscreenTextureAndCapturesIt();
     surfaceStartupFailureCleansUpEngineResources();
     engineRecordsAThreeVertexUvMeshDraw();
 }

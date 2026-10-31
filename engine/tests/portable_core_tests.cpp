@@ -2,8 +2,12 @@
 #include "Core/Mesh.h"
 #include "Core/Types.h"
 #include "Graphics/Buffer.h"
+#include "Graphics/PngEncoder.h"
 
+#include <algorithm>
 #include <cstdint>
+#include <iterator>
+#include <vector>
 #include <cstddef>
 #include <cmath>
 #include <memory>
@@ -125,10 +129,32 @@ void rowVectorTransformsAndProjectionUseDocumentedConventions()
         "public matrices must have contiguous row-major float storage");
 }
 
+void pngEncoderWritesAValidStoredImage()
+{
+    Engine::Graphics::CapturedImage image;
+    image.width = 2;
+    image.height = 1;
+    image.format = Engine::Graphics::TextureFormat::BGRA8Unorm;
+    image.pixels = {0, 0, 255, 255, 255, 0, 0, 255};
+    const std::vector<std::uint8_t> png = Engine::Graphics::EncodePng(image);
+    const std::uint8_t signature[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
+    check(png.size() > 8 && std::equal(signature, signature + 8, png.begin()),
+        "PNG output must start with the PNG signature");
+    // IHDR payload begins at byte 16: width then height, big endian.
+    check(png[19] == 2 && png[23] == 1, "PNG header must record the image size");
+    // The red BGRA pixel must be written as RGB (255, 0, 0).
+    const std::uint8_t red[3] = {255, 0, 0};
+    check(png.end() != std::search(png.begin(), png.end(), red, red + 3),
+        "PNG data must contain the swizzled red pixel");
+    image.format = Engine::Graphics::TextureFormat::Unknown;
+    check(Engine::Graphics::EncodePng(image).empty(), "unsupported formats must not encode");
+}
+
 } // namespace
 
 int main()
 {
+    pngEncoderWritesAValidStoredImage();
     meshRequiresValidMatchingVertexStreams();
     rowVectorTransformsAndProjectionUseDocumentedConventions();
 }

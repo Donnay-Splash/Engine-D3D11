@@ -116,7 +116,26 @@ if(APPLE)
         VERBATIM
     )
 
+    add_executable(engine-headless MACOSX_BUNDLE macOS/HeadlessMain.cpp)
+    set_target_properties(engine-headless PROPERTIES
+        MACOSX_BUNDLE_BUNDLE_NAME "EngineHeadless"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.donnaysplash.engine.headless"
+        XCODE_GENERATE_SCHEME YES
+        XCODE_SCHEME_ENABLE_GPU_API_VALIDATION YES
+    )
+    target_compile_options(engine-headless PRIVATE -Wall -Wextra -Werror)
+    target_link_libraries(engine-headless PRIVATE engine-backend-metal)
+    add_custom_command(TARGET engine-headless POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory
+            "${SHADER_OUTPUT_DIR}/metal"
+            "$<TARGET_BUNDLE_CONTENT_DIR:engine-headless>/Resources/shaders"
+        VERBATIM
+    )
+
     if(BUILD_TESTING)
+        # Renders a frame offscreen and writes build/artifacts/headless.png for inspection.
+        add_test(NAME headless-render
+            COMMAND engine-headless --output "${CMAKE_CURRENT_SOURCE_DIR}/build/artifacts/headless.png")
         add_executable(engine-metal-integration-tests backends/metal/tests/metal_backend_tests.cpp)
         target_link_libraries(engine-metal-integration-tests PRIVATE engine-backend-metal)
         add_dependencies(engine-metal-integration-tests engine-macos)

@@ -2,6 +2,7 @@
 
 #include "Core/Mesh.h"
 #include "Core/Types.h"
+#include "Graphics/CapturedImage.h"
 #include "Graphics/PresentationSurface.h"
 
 #include <cstdint>
@@ -19,6 +20,7 @@ class BufferView;
 class Device;
 class GraphicsInstance;
 class GraphicsPipeline;
+class OffscreenSwapchain;
 class Swapchain;
 class CommandQueue;
 class Adapter;
@@ -61,6 +63,11 @@ public:
     Engine &operator=(const Engine &) = delete;
 
     bool Initialize(Surface &surface, ErrorHandler errorHandler, Error &error);
+    // Headless mode runs the same frame flow as a windowed engine, but renders into an
+    // offscreen texture. Drive it with RenderHeadlessFrame and read the result back.
+    bool InitializeHeadless(Size size, ErrorHandler errorHandler, Error &error);
+    bool RenderHeadlessFrame(Error &error);
+    bool CaptureHeadlessImage(Graphics::CapturedImage &image) const;
     void Shutdown() noexcept;
 
 private:
@@ -70,7 +77,7 @@ private:
         std::shared_ptr<Graphics::GraphicsInstance> graphicsInstance,
         std::shared_ptr<ShaderLibrary> shaderLibrary,
         std::shared_ptr<Graphics::Adapter> preferredAdapter);
-    bool InitializeGraphics(Surface &surface, Error &error);
+    bool InitializeGraphics(Surface *surface, Size size, Error &error);
     bool DrawFrame(Error &error);
     static bool Draw(void *context, Error &error);
     static bool Resize(void *context, Size size, Error &error);
@@ -86,6 +93,7 @@ private:
     std::shared_ptr<Graphics::Device> m_Device;
     std::shared_ptr<Graphics::CommandQueue> m_GraphicsQueue;
     std::shared_ptr<Graphics::Swapchain> m_Swapchain;
+    std::shared_ptr<Graphics::OffscreenSwapchain> m_OffscreenSwapchain;
     std::shared_ptr<Graphics::GraphicsPipeline> m_GraphicsPipeline;
     std::shared_ptr<Graphics::BindingSet> m_Bindings;
     std::shared_ptr<Graphics::Buffer> m_TransformBuffer;

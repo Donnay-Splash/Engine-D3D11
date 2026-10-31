@@ -45,7 +45,16 @@ for _ in $(seq 1 30); do
 done
 [[ -n "$runId" ]] || { echo "No workflow run found for $branch" >&2; exit 1; }
 
-if gh run watch "$runId" --exit-status; then
+status=0
+gh run watch "$runId" --exit-status || status=$?
+
+# Headless renders are uploaded as an artefact; fetch them for inspection (best effort).
+rm -rf build/artifacts-remote
+if gh run download "$runId" -n headless-render -D build/artifacts-remote >/dev/null 2>&1; then
+  echo "Headless render artefacts downloaded to build/artifacts-remote"
+fi
+
+if [[ "$status" -eq 0 ]]; then
   echo "Remote macOS validation PASSED"
 else
   echo "Remote macOS validation FAILED; failing logs:" >&2
