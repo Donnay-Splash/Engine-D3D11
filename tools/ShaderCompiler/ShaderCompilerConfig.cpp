@@ -78,7 +78,11 @@ std::optional<Config> LoadConfig(const std::filesystem::path &path, std::string 
 
         if (section == Section::Settings) {
             if (key == "dxc") {
-                config.dxc = value;
+                // A bare command name is looked up on PATH; anything with a directory is
+                // relative to the config file.
+                config.dxc = value.find('/') == std::string::npos
+                                 ? value
+                                 : resolve(value).string();
             } else if (key == "shaderModel") {
                 config.shaderModel = value;
             } else if (key == "outputDirectory") {

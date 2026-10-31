@@ -11,3 +11,7 @@ The five triage labels are `needs-triage`, `needs-info`, `ready-for-agent`, `rea
 ### Domain docs
 
 Single-context: use the repo-root `GLOSSARY.md` and `docs/adr/`. See `docs/agents/domain.md`.
+
+### Commit and push
+
+Cloud agent work must be committed and pushed to its own unique branch frequently. See `.github/copilot-instructions.md`.

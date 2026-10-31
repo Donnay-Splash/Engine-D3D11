@@ -245,3 +245,6 @@ _Pvt_Extensions
 # Assets
 Assets
 *.diagsession
+
+# Vendored third-party binaries
+!/third_party/**/bin/

@@ -13,8 +13,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install DXC
-        run: brew install dxc
+      - name: Check vendored DXC
+        run: third_party/dxc/macos/bin/dxc --version
 
       - name: Configure
         run: >

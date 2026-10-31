@@ -468,7 +468,7 @@ MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Err
                                             : attribute.format == VertexFormat::Float4 ? 16
                                             : attribute.format == VertexFormat::UInt32 ? 4
                                                                                        : 0;
-        if (attribute.location >= vertexAttributeLocations.size() ||
+        if (attribute.location >= vertexAttributeLocations.size() - kIRStageInAttributeStartIndex ||
             attribute.bufferSlot >= vertexBufferLayouts.size() ||
             vertexAttributeLocations[attribute.location] ||
             vertexBufferLayouts[attribute.bufferSlot] == nullptr || attributeSize == 0 ||
@@ -480,7 +480,7 @@ MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Err
         }
         vertexAttributeLocations[attribute.location] = true;
         MTL::VertexAttributeDescriptor *nativeAttribute =
-            vertexDescriptor->attributes()->object(attribute.location);
+            vertexDescriptor->attributes()->object(kIRStageInAttributeStartIndex + attribute.location);
         nativeAttribute->setFormat(ToMetal(attribute.format));
         nativeAttribute->setBufferIndex(VertexBufferIndex(attribute.bufferSlot));
         nativeAttribute->setOffset(attribute.offset);
