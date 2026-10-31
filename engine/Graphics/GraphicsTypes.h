@@ -157,7 +157,7 @@ enum class ResourceUsage
     Present
 };
 
-constexpr std::uint32_t BytesPerPixel(TextureFormat format)
+inline std::uint32_t BytesPerPixel(TextureFormat format)
 {
     switch (format) {
     case TextureFormat::R8Unorm:
