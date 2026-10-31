@@ -5,7 +5,13 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 if [[ "$(uname)" == "Darwin" ]]; then
-  cmake -B build && cmake --build build
+  cmake -B build -DCMAKE_BUILD_TYPE=Debug
+  cmake --build build --target shader-compiler --config Debug --parallel
+  shaderCompiler="$(find build -type f -name shader-compiler -perm -111 -print -quit)"
+  [[ -n "$shaderCompiler" ]] || { echo "shader-compiler executable not found" >&2; exit 1; }
+  "$shaderCompiler" --config tools/ShaderCompiler/shaders.cfg
+  cmake --build build --config Debug --parallel
+  ctest --test-dir build --build-config Debug --output-on-failure
   exit $?
 fi
 

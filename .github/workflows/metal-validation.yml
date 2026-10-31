@@ -13,14 +13,26 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install DXC
+        run: brew install dxc
+
       - name: Configure
         run: >
           cmake -B build
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=Debug
           -DCMAKE_OSX_DEPLOYMENT_TARGET=26.0
 
+      - name: Build shader compiler
+        run: cmake --build build --target shader-compiler --config Debug --parallel
+
+      - name: Compile Metal shaders
+        run: |
+          shader_compiler="$(find build -type f -name shader-compiler -perm -111 -print -quit)"
+          test -n "$shader_compiler"
+          "$shader_compiler" --config tools/ShaderCompiler/shaders.cfg
+
       - name: Build
-        run: cmake --build build --parallel
+        run: cmake --build build --config Debug --parallel
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --build-config Debug --output-on-failure

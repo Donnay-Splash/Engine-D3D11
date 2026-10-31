@@ -11,7 +11,6 @@ struct EntryPoint
 {
     std::string stage; // vs, ps or cs
     std::string name;
-    std::vector<std::string> metalArgs;
 };
 
 struct ShaderSource
@@ -24,12 +23,10 @@ struct ShaderSource
 struct Config
 {
     std::string dxc = "dxc";
-    std::string metalShaderConverter = "metal-shaderconverter";
     std::string shaderModel = "6_6";
     std::filesystem::path outputDirectory;
     std::filesystem::path includeDirectory;
     std::vector<std::string> dxcArgs;
-    std::vector<std::string> metalArgs;
     std::vector<ShaderSource> shaders;
 };
 

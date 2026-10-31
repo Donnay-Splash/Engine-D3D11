@@ -53,7 +53,7 @@ CMakeLists.txt        Defines the engine, backend, front-end, and test targets.
 ### Runtime
 - CMake for build system.
 - We will support only modern graphics APIs, specifically Directx 12, Metal and Vulkan.
-- Shader artifacts may be backend-specific. Shaders are authored only in HLSL under `engine/shaders` and built by `tools/ShaderCompiler` (dxc to DXIL, then Apple's metal-shaderconverter to metallib); CMake does not build shaders.
+- Shader artifacts may be backend-specific. Shaders are authored only in HLSL under `engine/shaders` and built by `tools/ShaderCompiler` (DXC to DXIL, then the vendored Apple Metal Shader Converter library to metallib); CMake does not build shaders automatically.
 
 ### Testing
 Use CTest to run tests. Keep portable engine logic testable without a graphics device; use fakes for renderer and platform lifecycle tests. Add backend integration tests only when the required graphics API is available. Metal API Validation is enabled through the generated Xcode development scheme and must be active before Metal device creation; the backend cannot query or enable it at runtime. Prefer Catch2 if a test framework becomes worthwhile; avoid creating a custom framework.

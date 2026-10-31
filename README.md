@@ -12,9 +12,9 @@ To be continued...
 
 ## macOS app setup
 
-The CMake `engine-macos` target builds a native `.app` with an AppKit window and a Metal presentation surface. The portable C++ engine builds as the static `engine` library. The Metal backend is implemented in C++ with Apple's vendored metal-cpp headers; Objective-C++ remains in the macOS frontend for AppKit integration. Shaders are authored in HLSL (`engine/shaders`) and built by the standalone [shader-compiler](tools/ShaderCompiler/README.md) tool (HLSL to DXIL with `dxc`, then DXIL to metallib with Apple's `metal-shaderconverter`); CMake does not build shaders. The backend enumerates Metal adapters and creates the device used by Engine. Hardware-backed Metal integration tests are available on macOS with a Metal-capable device. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md) and the [graphics-core abstraction proposal](docs/graphics-core-abstraction-proposal.md).
+The CMake `engine-macos` target builds a native `.app` with an AppKit window and a Metal presentation surface. The portable C++ engine builds as the static `engine` library. The Metal backend is implemented in C++ with Apple's vendored metal-cpp headers; Objective-C++ remains in the macOS frontend for AppKit integration. Shaders are authored in HLSL (`engine/shaders`) and built by the [shader-compiler](tools/ShaderCompiler/README.md) tool (HLSL to DXIL with `dxc`, then DXIL to metallib with the vendored Apple Metal Shader Converter library); CMake does not build shaders automatically. The backend enumerates Metal adapters and creates the device used by Engine. Hardware-backed Metal integration tests are available on macOS with a Metal-capable device. The architecture and migration are described in the [macOS Metal engine Technical Design](docs/macos-metal-engine-tdd.md) and the [graphics-core abstraction proposal](docs/graphics-core-abstraction-proposal.md).
 
-Install Xcode Command Line Tools or Xcode, CMake, and Make. The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
+Install Xcode Command Line Tools or Xcode, CMake, Make, and DXC (`brew install dxc`). The Apple SDK supplies AppKit, Metal, and MetalKit as system frameworks. Verify the toolchain with:
 
 ```sh
 xcode-select -p
@@ -24,17 +24,19 @@ clang --version
 cmake --version
 make --version
 xcrun --find metal
-xcrun --find metal-shaderconverter
 dxc --version
 ```
 
-Build the shaders first (see the shader-compiler README), then configure with the Xcode generator, then build and open the project from the repository root:
+Configure with the Xcode generator, build and run the shaders, then build and open the project from the repository root:
 
 ```sh
 cmake -S . -B build/macos -G Xcode \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=26
-cmake --build build/macos --target engine-macos engine-metal-integration-tests
+cmake --build build/macos --target shader-compiler --config Debug
+shader_compiler="$(find build/macos -type f -name shader-compiler -perm -111 -print -quit)"
+"$shader_compiler" --config tools/ShaderCompiler/shaders.cfg
+cmake --build build/macos --config Debug --target engine-macos engine-metal-integration-tests
 open build/macos/EngineMacOS.xcodeproj
 ```
 
