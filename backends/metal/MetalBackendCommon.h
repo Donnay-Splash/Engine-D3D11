@@ -54,6 +54,8 @@ using namespace Graphics;
 constexpr std::uint32_t kVertexBufferBase = 16;
 constexpr std::uint32_t kMaxVertexBufferSlots = 31 - kVertexBufferBase;
 constexpr std::uint32_t kIRArgumentBufferBindPoint = 2;
+// Metal Shader Converter's vertex-fetch stage-in places input element N at attribute 11 + N.
+constexpr std::uint32_t kIRStageInAttributeStartIndex = 11;
 
 constexpr std::uint32_t VertexBufferIndex(std::uint32_t slot)
 {

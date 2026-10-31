@@ -95,6 +95,7 @@ if(APPLE)
         XCODE_SCHEME_ENABLE_GPU_API_VALIDATION YES
     )
     target_compile_options(engine-macos PRIVATE
+        -fobjc-arc
         -Wall
         -Wextra
         -Werror

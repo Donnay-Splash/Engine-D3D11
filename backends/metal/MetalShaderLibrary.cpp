@@ -19,7 +19,7 @@ bool MetalShaderLibrary::Load(const std::string &entryPoint, const std::string &
     // Files follow the shader-compiler output convention: <Shader>_<entry>.<extension>.
     const std::string fileName = "Scene_" + entryPoint;
     NS::SharedPtr<NS::Bundle> bundle = NS::RetainPtr(NS::Bundle::mainBundle());
-    NS::String *resourcePath = bundle == nullptr ? nullptr : bundle->resourcePath();
+    NS::String *resourcePath = bundle.get() == nullptr ? nullptr : bundle->resourcePath();
     const char *resourceDirectory =
         resourcePath == nullptr ? nullptr : resourcePath->utf8String();
     if (resourceDirectory == nullptr) {
