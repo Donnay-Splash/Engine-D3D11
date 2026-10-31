@@ -5,7 +5,6 @@ converted to a `.metallib` with the vendored Apple Metal Shader Converter librar
 build shaders automatically.
 
 ```sh
-brew install dxc
 cmake --build build/macos --target shader-compiler
 shader_compiler="$(find build/macos -type f -name shader-compiler -perm -111 -print -quit)"
 "$shader_compiler" --config tools/ShaderCompiler/shaders.cfg
@@ -24,4 +23,6 @@ Shader Converter C API and dynamic library are vendored under `third_party/metal
 the shader compiler links them directly on macOS and writes the converter's reflection JSON next to
 each metallib.
 
-Requires `dxc` on `PATH` (or set in the config). Metal conversion is available on macOS.
+Uses the vendored DXC in `third_party/dxc/macos` by default (`dxc` in the config; paths containing a
+`/` are relative to the config file, bare names are looked up on `PATH`). Metal conversion is
+available on macOS.

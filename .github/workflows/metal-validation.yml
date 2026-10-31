@@ -13,15 +13,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install DXC
-        run: |
-          curl -fsSL -o vulkan-sdk.zip https://sdk.lunarg.com/sdk/download/latest/mac/vulkan-sdk.zip
-          unzip -q vulkan-sdk.zip
-          sudo ./vulkansdk-macOS-*.app/Contents/MacOS/vulkansdk-macOS-* --root "$HOME/VulkanSDK" --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.core
-          dxcBin="$HOME/VulkanSDK/macOS/bin/dxc"
-          test -x "$dxcBin"
-          echo "$(dirname "$dxcBin")" >> "$GITHUB_PATH"
-          "$dxcBin" --version
+      - name: Check vendored DXC
+        run: third_party/dxc/macos/bin/dxc --version
 
       - name: Configure
         run: >

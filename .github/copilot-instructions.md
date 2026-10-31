@@ -60,3 +60,6 @@ Use CTest to run tests. Keep portable engine logic testable without a graphics d
 
 ## Validation
 When assisting inside a cloud-hosted environment, you must always run `.github/scripts/validate.sh` to remotely verify your Metal and CMake changes on Apple hardware before declaring a task complete. When assisting a user working on a local macOS machine, instruct them to run the same script for native, instant compilation.
+
+## Cloud agent work must be committed and pushed
+Cloud-hosted sessions can die without warning, so uncommitted or unpushed work is lost. In a cloud-hosted environment, work on your own uniquely named branch and commit and push to it (`git push -u origin <branch>`) after every meaningful step and before running long operations or validation, not just at the end. Never leave changes only in the working tree or only in local commits. Do not push to shared branches such as `Metal`.
