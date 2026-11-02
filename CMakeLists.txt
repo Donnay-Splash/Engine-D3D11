@@ -109,10 +109,13 @@ if(APPLE)
     set(SHADER_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/shaders" CACHE PATH
         "Directory the shader-compiler tool writes its output to")
     file(MAKE_DIRECTORY "${SHADER_OUTPUT_DIR}/metal")
-    add_custom_command(TARGET engine-macos POST_BUILD
+    # A separate target (not POST_BUILD) so shader-only changes still reach the bundle when the
+    # executable does not relink.
+    add_custom_target(engine-macos-shaders ALL
         COMMAND "${CMAKE_COMMAND}" -E copy_directory
             "${SHADER_OUTPUT_DIR}/metal"
             "$<TARGET_BUNDLE_CONTENT_DIR:engine-macos>/Resources/shaders"
+        DEPENDS engine-macos
         VERBATIM
     )
 
@@ -126,10 +129,11 @@ if(APPLE)
     target_compile_options(engine-headless PRIVATE -Wall -Wextra -Werror)
     target_include_directories(engine-headless SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb")
     target_link_libraries(engine-headless PRIVATE engine-backend-metal)
-    add_custom_command(TARGET engine-headless POST_BUILD
+    add_custom_target(engine-headless-shaders ALL
         COMMAND "${CMAKE_COMMAND}" -E copy_directory
             "${SHADER_OUTPUT_DIR}/metal"
             "$<TARGET_BUNDLE_CONTENT_DIR:engine-headless>/Resources/shaders"
+        DEPENDS engine-headless
         VERBATIM
     )
 

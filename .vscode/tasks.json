@@ -53,7 +53,7 @@
                 "--build",
                 "${workspaceFolder}/build/macos",
                 "--target",
-                "engine-macos"
+                "engine-macos-shaders"
             ],
             "dependsOn": [
                 "Configure macOS engine",
