@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     std::unique_ptr<Engine::Engine> engine = Engine::Metal::CreateEngine();
     Engine::HeadlessSurface surface({512, 512});
     Engine::EngineConfig config;
-    config.swapchainMode = Engine::SwapchainMode::Headless;
+    config.swapchainMode = Engine::Graphics::SwapchainMode::Headless;
     Engine::Error error;
     if (engine == nullptr
         || !engine->Initialize(

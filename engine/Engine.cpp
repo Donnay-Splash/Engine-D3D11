@@ -14,7 +14,7 @@
 #include "Graphics/Device.h"
 #include "Graphics/GraphicsInstance.h"
 #include "Graphics/GraphicsPipeline.h"
-#include "Graphics/OffscreenSwapchain.h"
+#include "Graphics/SwapchainFactory.h"
 #include "Graphics/RenderPassEncoder.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Swapchain.h"
@@ -241,11 +241,8 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
     }
     Graphics::SwapchainDesc swapchainDescription;
     swapchainDescription.extent = {m_Size.width, m_Size.height, 1};
-    if (m_Config.swapchainMode == SwapchainMode::Headless) {
-        m_Swapchain = Graphics::OffscreenSwapchain::Create(m_Device, swapchainDescription, error);
-    } else {
-        m_Swapchain = m_Device->CreateSwapchain(surface, swapchainDescription, error);
-    }
+    m_Swapchain = Graphics::CreateSwapchain(
+        m_Device, surface, swapchainDescription, m_Config.swapchainMode, error);
     if (m_Swapchain == nullptr) {
         if (error.message.empty()) {
             error.message = "Failed to create a swapchain for the render target.";

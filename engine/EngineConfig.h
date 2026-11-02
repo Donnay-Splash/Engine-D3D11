@@ -1,18 +1,12 @@
 #pragma once
 
-namespace Engine {
+#include "Graphics/Swapchain.h"
 
-enum class SwapchainMode
-{
-    // Present to the window surface supplied to Engine::Initialize.
-    Window,
-    // Render into an offscreen texture that can be read back with Engine::CaptureImage.
-    Headless,
-};
+namespace Engine {
 
 struct EngineConfig
 {
-    SwapchainMode swapchainMode = SwapchainMode::Window;
+    Graphics::SwapchainMode swapchainMode = Graphics::SwapchainMode::Window;
 };
 
 } // namespace Engine

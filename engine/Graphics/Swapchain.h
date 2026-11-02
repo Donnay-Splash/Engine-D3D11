@@ -13,6 +13,14 @@ namespace Graphics {
 
 class Submission;
 
+enum class SwapchainMode
+{
+    // Present to a window surface.
+    Window,
+    // Render into an offscreen texture that can be read back with CaptureLatestImage.
+    Headless,
+};
+
 struct SwapchainDesc
 {
     Extent3D extent;

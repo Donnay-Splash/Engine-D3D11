@@ -983,7 +983,7 @@ void headlessEngineRendersToAnOffscreenTextureAndCapturesIt()
 
     Engine::HeadlessSurface surface({64, 32});
     Engine::EngineConfig config;
-    config.swapchainMode = Engine::SwapchainMode::Headless;
+    config.swapchainMode = Engine::Graphics::SwapchainMode::Headless;
 
     check(!surface.RenderFrame(error), "headless surface cannot render before the engine starts it");
     check(engine->Initialize(surface, config, [](const Engine::Error &) {}, error),
