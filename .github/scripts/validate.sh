@@ -28,6 +28,14 @@ git read-tree HEAD
 git add -A
 tree="$(git write-tree)"
 unset GIT_INDEX_FILE
+
+# Identical content already passed: answer instantly without a remote run.
+passMarker="build/validate-cache/$tree.passed"
+if [[ -z "${VALIDATE_FORCE:-}" && -f "$passMarker" ]]; then
+  echo "Tree $tree already passed remote validation; skipping (VALIDATE_FORCE=1 to rerun)"
+  echo "Remote macOS validation PASSED (cached)"
+  exit 0
+fi
 commit="$(git commit-tree "$tree" -p HEAD -m "agent-validate: snapshot for remote Metal validation")"
 
 git push origin "$commit:refs/heads/$branch"
@@ -37,16 +45,16 @@ cleanup() { git push origin --delete "$branch" >/dev/null 2>&1 || true; }
 trap 'cleanup; rm -f "$tmpIndex"' EXIT
 
 runId=""
-for _ in $(seq 1 30); do
+for _ in $(seq 1 90); do
   runId="$(gh run list --branch "$branch" --limit 1 \
     --json databaseId --jq '.[0].databaseId // empty')"
   [[ -n "$runId" ]] && break
-  sleep 3
+  sleep 1
 done
 [[ -n "$runId" ]] || { echo "No workflow run found for $branch" >&2; exit 1; }
 
 status=0
-gh run watch "$runId" --exit-status || status=$?
+gh run watch "$runId" --interval 2 --exit-status || status=$?
 
 # Headless renders are uploaded as an artefact; fetch them for inspection (best effort).
 rm -rf build/artifacts-remote
@@ -55,6 +63,7 @@ if gh run download "$runId" -n headless-render -D build/artifacts-remote >/dev/n
 fi
 
 if [[ "$status" -eq 0 ]]; then
+  mkdir -p build/validate-cache && touch "$passMarker"
   echo "Remote macOS validation PASSED"
 else
   echo "Remote macOS validation FAILED; failing logs:" >&2
