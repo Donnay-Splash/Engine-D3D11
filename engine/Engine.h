@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Core/Mesh.h"
+#include "Core/Scene.h"
 #include "Core/Types.h"
 #include "EngineConfig.h"
 #include "Graphics/CapturedImage.h"
 #include "Graphics/PresentationSurface.h"
+#include "Rendering/SceneRenderer.h"
 
 #include <cstdint>
 #include <functional>
@@ -69,6 +70,9 @@ public:
     bool CaptureImage(Graphics::CapturedImage &image) const;
     void Shutdown() noexcept;
 
+    // Instances in the scene are drawn every frame.
+    Scene &GetScene() noexcept { return m_Scene; }
+
 private:
     struct ErrorRelay;
 
@@ -92,18 +96,14 @@ private:
     std::shared_ptr<Graphics::Device> m_Device;
     std::shared_ptr<Graphics::CommandQueue> m_GraphicsQueue;
     std::shared_ptr<Graphics::Swapchain> m_Swapchain;
-    std::shared_ptr<Graphics::GraphicsPipeline> m_GraphicsPipeline;
-    std::shared_ptr<Graphics::BindingSet> m_Bindings;
-    std::shared_ptr<Graphics::Buffer> m_TransformBuffer;
-    std::shared_ptr<Graphics::BufferView> m_TransformBufferView;
-    Mesh m_Mesh;
+    SceneRenderer m_SceneRenderer;
+    Scene m_Scene;
     EngineConfig m_Config;
     Surface *m_Surface;
     Size m_Size;
     std::shared_ptr<ErrorRelay> m_ErrorRelay;
     bool m_Initialized;
     bool m_SurfaceStarted;
-    bool m_TransformBufferPrepared;
 };
 
 } // namespace engine

@@ -888,13 +888,10 @@ void engineRecordsAThreeVertexUvMeshDraw()
     check(state->pipeline->Description().vertexAttributes.size() == 2,
         "triangle pipeline should consume position and UV attributes");
 
-    std::shared_ptr<FakeBuffer> transformBuffer;
     std::shared_ptr<FakeBuffer> positionBuffer;
     std::shared_ptr<FakeBuffer> uvBuffer;
     for (const std::shared_ptr<FakeBuffer> &buffer : state->buffers) {
-        if (buffer->Description().usage == Engine::Graphics::BufferUsage::Uniform) {
-            transformBuffer = buffer;
-        } else if (buffer->Description().usage
+        if (buffer->Description().usage
             == (Engine::Graphics::BufferUsage::Vertex
                 | Engine::Graphics::BufferUsage::CopyDestination)) {
             if (positionBuffer == nullptr) {
@@ -904,17 +901,8 @@ void engineRecordsAThreeVertexUvMeshDraw()
             }
         }
     }
-    check(transformBuffer != nullptr && positionBuffer != nullptr && uvBuffer != nullptr,
-        "engine should allocate its transform block and two GPU vertex streams");
-    float transforms[48] = {};
-    std::memcpy(transforms, transformBuffer->Bytes().data(), sizeof(transforms));
-    for (std::size_t matrix = 0; matrix < 3; ++matrix) {
-        for (std::size_t element = 0; element < 16; ++element) {
-            const float expected = element % 5 == 0 ? 1.0f : 0.0f;
-            check(transforms[matrix * 16 + element] == expected,
-                "world, view, and projection identities should be stored in the uniform buffer");
-        }
-    }
+    check(positionBuffer != nullptr && uvBuffer != nullptr,
+        "engine should allocate two GPU vertex streams");
     float positions[9] = {};
     float uvs[6] = {};
     std::memcpy(positions, positionBuffer->Bytes().data(), sizeof(positions));
@@ -927,6 +915,22 @@ void engineRecordsAThreeVertexUvMeshDraw()
         "UV stream should cover all three triangle corners");
 
     check(surface.Draw(error), "surface draw callback should record the mesh");
+    std::shared_ptr<FakeBuffer> transformBuffer;
+    for (const std::shared_ptr<FakeBuffer> &buffer : state->buffers) {
+        if (buffer->Description().usage == Engine::Graphics::BufferUsage::Uniform) {
+            transformBuffer = buffer;
+        }
+    }
+    check(transformBuffer != nullptr, "the first draw should allocate a transform block");
+    float transforms[48] = {};
+    std::memcpy(transforms, transformBuffer->Bytes().data(), sizeof(transforms));
+    for (std::size_t matrix = 0; matrix < 3; ++matrix) {
+        for (std::size_t element = 0; element < 16; ++element) {
+            const float expected = element % 5 == 0 ? 1.0f : 0.0f;
+            check(transforms[matrix * 16 + element] == expected,
+                "world, view, and projection identities should be stored in the uniform buffer");
+        }
+    }
     check(state->drawVertexCount == 3, "draw should submit exactly three vertices");
     check(state->boundSlots == std::vector<std::uint32_t>({0, 1}),
         "draw should bind both vertex streams");
@@ -1003,10 +1007,64 @@ void headlessEngineRendersToAnOffscreenTextureAndCapturesIt()
     check(!engine->CaptureImage(image), "shutdown should release the capture target");
 }
 
+void engineDrawsEveryPartOfEveryModelInstance()
+{
+    auto state = std::make_shared<FakeState>();
+    auto device = std::make_shared<FakeDevice>(state);
+    std::vector<std::shared_ptr<Engine::Graphics::Adapter>> adapters = {
+        std::make_shared<FakeAdapter>(state, device, true),
+    };
+    auto graphicsInstance = std::make_shared<FakeGraphicsInstance>(std::move(adapters));
+    auto shaderLibrary = std::make_shared<FakeShaderLibrary>();
+    std::unique_ptr<Engine::Engine> engine =
+        Engine::EngineFactory::create(graphicsInstance, shaderLibrary);
+    FakeSurface surface;
+    Engine::Error error;
+    check(engine->Initialize(surface, {}, [](const Engine::Error &) {}, error),
+        "engine initialization should succeed");
+
+    Engine::Scene &scene = engine->GetScene();
+    check(scene.Instances().size() == 1, "engine should start with a default instance");
+    const std::shared_ptr<Engine::ModelInstance> defaultInstance = scene.Instances().front();
+    const Engine::ModelPart defaultPart = defaultInstance->GetModel()->Parts().front();
+
+    auto twoPartModel = std::make_shared<Engine::Model>();
+    check(twoPartModel->AddPart(defaultPart, error) && twoPartModel->AddPart(defaultPart, error),
+        "model parts should be added");
+    auto moved = std::make_shared<Engine::ModelInstance>(twoPartModel);
+    moved->SetPosition({2.0f, 0.0f, 0.0f});
+    check(moved->GetMaterialInstance(1).SetVector4(
+              Engine::Material::kBaseColor, {1.0f, 0.0f, 0.0f, 1.0f}, error),
+        "per-instance override should apply");
+    scene.Add(moved);
+
+    check(surface.Draw(error), "multi-instance draw should succeed");
+    const auto drawCount = std::count(state->events.begin(), state->events.end(), "draw");
+    check(drawCount == 3, "one draw per model part per instance expected");
+    const auto pipelineCount = std::count(state->events.begin(), state->events.end(), "pipeline");
+    check(pipelineCount == 1, "draws sharing a pipeline should set it once");
+    std::size_t uniformBuffers = 0;
+    for (const std::shared_ptr<FakeBuffer> &buffer : state->buffers) {
+        if (buffer->Description().usage == Engine::Graphics::BufferUsage::Uniform) {
+            ++uniformBuffers;
+        }
+    }
+    check(uniformBuffers == 3, "each draw should own a transform block");
+    check(surface.Draw(error), "second frame should succeed");
+
+    scene.Clear();
+    state->events.clear();
+    check(surface.Draw(error), "empty scene should still render");
+    check(std::count(state->events.begin(), state->events.end(), "draw") == 0,
+        "empty scene should draw nothing");
+    engine->Shutdown();
+}
+
 } // namespace
 
 int main()
 {
+    engineDrawsEveryPartOfEveryModelInstance();
     headlessEngineRendersToAnOffscreenTextureAndCapturesIt();
     surfaceStartupFailureCleansUpEngineResources();
     engineRecordsAThreeVertexUvMeshDraw();

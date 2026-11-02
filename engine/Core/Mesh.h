@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Math.h"
 #include "Graphics/Buffer.h"
 #include "Graphics/Submission.h"
 
@@ -35,12 +36,15 @@ public:
         std::vector<std::shared_ptr<Graphics::Submission>> &waitFor,
         Error &error);
 
+    void SetLocalBounds(const Maths::Bounds &bounds) noexcept { m_LocalBounds = bounds; }
+    const Maths::Bounds &LocalBounds() const noexcept { return m_LocalBounds; }
     const std::vector<VertexStream> &VertexStreams() const noexcept;
     std::uint32_t VertexCount() const noexcept;
 
 private:
     std::vector<VertexStream> m_VertexStreams;
     std::vector<PendingUpload> m_PendingUploads;
+    Maths::Bounds m_LocalBounds;
 };
 
 } // namespace Engine

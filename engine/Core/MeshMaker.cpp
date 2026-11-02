@@ -186,6 +186,10 @@ bool MeshMaker::CreateUniformTriangle(Graphics::Device &device, Mesh &mesh, Erro
     if (!generatedMesh.AddPendingUpload(std::move(pendingUpload), error)) {
         return false;
     }
+    Maths::Bounds bounds;
+    bounds.include({-0.5f, -0.28867513f, 0.0f});
+    bounds.include({0.5f, 0.57735027f, 0.0f});
+    generatedMesh.SetLocalBounds(bounds);
     mesh = std::move(generatedMesh);
     return true;
 }
