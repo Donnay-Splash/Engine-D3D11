@@ -1,5 +1,8 @@
 #include "Core/Math.h"
 #include "Core/Mesh.h"
+#include "Core/Model.h"
+#include "Core/ModelInstance.h"
+#include "Core/Scene.h"
 #include "Core/Types.h"
 #include "Graphics/Buffer.h"
 
@@ -128,10 +131,65 @@ void rowVectorTransformsAndProjectionUseDocumentedConventions()
         "public matrices must have contiguous row-major float storage");
 }
 
+void materialInstancesOverrideOnlyTheirOwnParameters()
+{
+    Engine::Error error;
+    auto material = Engine::Material::CreateFlatColor("flat", {0.1f, 0.2f, 0.3f, 1.0f});
+    Engine::MaterialInstance first(material);
+    Engine::MaterialInstance second(material);
+
+    check(!first.SetVector4("missing", {}, error) && !error.message.empty(),
+        "unknown parameters should be rejected");
+    check(first.SetVector4(Engine::Material::kBaseColor, {1.0f, 0.0f, 0.0f, 1.0f}, error),
+        "known parameters should be overridable");
+    check(first.IsOverridden(Engine::Material::kBaseColor)
+            && !second.IsOverridden(Engine::Material::kBaseColor),
+        "overrides should be per instance");
+    check(first.GetVector4(Engine::Material::kBaseColor)->x == 1.0f
+            && second.GetVector4(Engine::Material::kBaseColor)->x == 0.1f,
+        "instances should fall back to material defaults");
+    first.ClearOverride(Engine::Material::kBaseColor);
+    check(first.ResolveParameters().front().x == 0.1f, "clearing should restore the default");
+}
+
+void modelInstancesComposeModelsMaterialsAndPlacement()
+{
+    Engine::Error error;
+    Engine::Model model;
+    auto material = Engine::Material::CreateFlatColor("flat", {1.0f, 1.0f, 1.0f, 1.0f});
+    check(!model.AddPart({nullptr, material}, error), "parts require a mesh");
+    auto mesh = std::make_shared<Engine::Mesh>();
+    Engine::Maths::Bounds bounds;
+    bounds.include({-1.0f, 0.0f, 0.0f});
+    bounds.include({1.0f, 2.0f, 0.0f});
+    mesh->SetLocalBounds(bounds);
+    check(model.AddPart({mesh, material}, error) && model.AddPart({mesh, material}, error),
+        "valid parts should be accepted");
+    check(model.Parts().size() == 2 && model.LocalBounds().maximum().y == 2.0f,
+        "model should aggregate parts and bounds");
+
+    Engine::ModelInstance instance(std::make_shared<Engine::Model>(model));
+    instance.SetPosition({3.0f, 4.0f, 5.0f});
+    const Engine::Maths::Matrix4 world = instance.WorldMatrix();
+    check(close(world.transform({0.0f, 0.0f, 0.0f, 1.0f}).x, 3.0f)
+            && close(world.transform({0.0f, 0.0f, 0.0f, 1.0f}).z, 5.0f),
+        "world matrix should translate by the instance position");
+    check(instance.GetMaterialInstance(0).GetMaterial() == material,
+        "each part should get a material instance");
+
+    Engine::Scene scene;
+    auto shared = std::make_shared<Engine::ModelInstance>(std::make_shared<Engine::Model>(model));
+    scene.Add(shared);
+    check(scene.Instances().size() == 1 && scene.Remove(shared) && !scene.Remove(shared),
+        "scene should add and remove instances");
+}
+
 } // namespace
 
 int main()
 {
+    materialInstancesOverrideOnlyTheirOwnParameters();
+    modelInstancesComposeModelsMaterialsAndPlacement();
     meshRequiresValidMatchingVertexStreams();
     rowVectorTransformsAndProjectionUseDocumentedConventions();
 }

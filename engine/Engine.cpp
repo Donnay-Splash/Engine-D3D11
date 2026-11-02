@@ -2,6 +2,10 @@
 
 #include "Core/Math.h"
 #include "Core/MeshMaker.h"
+#include "Core/Model.h"
+#include "Core/ModelInstance.h"
+#include "Core/Scene.h"
+#include "Rendering/SceneRenderer.h"
 #include "EngineFactory.h"
 #include "Graphics/Adapter.h"
 #include "Graphics/BindingLayout.h"
@@ -32,22 +36,6 @@
 
 namespace Engine {
 namespace {
-
-struct alignas(16) MeshTransforms
-{
-    Maths::Matrix4 world;
-    Maths::Matrix4 view;
-    Maths::Matrix4 projection;
-};
-
-static_assert(std::is_standard_layout<MeshTransforms>::value,
-    "Transform uniforms must have standard layout.");
-static_assert(sizeof(MeshTransforms) == sizeof(float) * 48,
-    "Transform uniforms must contain three packed matrices.");
-static_assert(offsetof(MeshTransforms, view) == sizeof(float) * 16,
-    "View transform must immediately follow world transform.");
-static_assert(offsetof(MeshTransforms, projection) == sizeof(float) * 32,
-    "Projection transform must immediately follow view transform.");
 
 // Deliberately loud so a cleared-but-undrawn frame is obvious in captured output.
 constexpr float kClearColor[4] = {1.0f, 0.0f, 0.8f, 1.0f};
@@ -103,14 +91,20 @@ Engine::Engine(
     : m_GraphicsInstance(std::move(graphicsInstance)),
       m_ShaderLibrary(std::move(shaderLibrary)),
       m_PreferredAdapter(std::move(preferredAdapter)),
+      m_SceneRenderer(new SceneRenderer()),
+      m_Scene(new Scene()),
       m_Config(),
       m_Surface(nullptr),
       m_Size({0, 0}),
       m_ErrorRelay(),
       m_Initialized(false),
-      m_SurfaceStarted(false),
-      m_TransformBufferPrepared(false)
+      m_SurfaceStarted(false)
 {
+}
+
+Scene &Engine::GetScene() noexcept
+{
+    return *m_Scene;
 }
 
 Engine::~Engine()
@@ -265,96 +259,28 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
         return false;
     }
 
-    Graphics::BindingLayoutDesc bindingLayoutDescription;
-    bindingLayoutDescription.bindings.push_back({
-        0,
-        Graphics::BindingType::UniformBuffer,
-        1,
-        Graphics::ShaderStage::Vertex,
-    });
-    std::shared_ptr<Graphics::BindingLayout> bindingLayout =
-        m_Device->CreateBindingLayout(bindingLayoutDescription, error);
-    if (bindingLayout == nullptr) {
+    if (!m_SceneRenderer->Initialize(
+            m_Device, shaders, m_Swapchain->Description().format, error)) {
         if (error.message.empty()) {
-            error.message = "Failed to create the transform binding layout.";
-        }
-        return false;
-    }
-    m_Bindings = m_Device->CreateBindingSet(bindingLayout, error);
-    if (m_Bindings == nullptr) {
-        if (error.message.empty()) {
-            error.message = "Failed to create the transform binding set.";
+            error.message = "Failed to initialize the scene renderer.";
         }
         return false;
     }
 
-    Graphics::BufferDesc transformDescription;
-    transformDescription.size = sizeof(MeshTransforms);
-    transformDescription.usage = Graphics::BufferUsage::Uniform;
-    transformDescription.memoryType = Graphics::MemoryType::Upload;
-    m_TransformBuffer = m_Device->CreateBuffer(transformDescription, error);
-    if (m_TransformBuffer == nullptr) {
-        if (error.message.empty()) {
-            error.message = "Failed to create the transform uniform buffer.";
-        }
-        return false;
-    }
-    const MeshTransforms transforms;
-    void *transformData = nullptr;
-    if (!m_TransformBuffer->Map(transformData, error)) {
-        return false;
-    }
-    if (transformData == nullptr) {
-        m_TransformBuffer->Unmap();
-        error.message = "The transform uniform buffer returned no mapped memory.";
-        return false;
-    }
-    std::memcpy(transformData, &transforms, sizeof(transforms));
-    m_TransformBuffer->Unmap();
-
-    m_TransformBufferView = m_Device->CreateBufferView(
-        m_TransformBuffer, 0, sizeof(MeshTransforms), error);
-    if (m_TransformBufferView == nullptr) {
-        if (error.message.empty()) {
-            error.message = "Failed to create a view of the transform uniform buffer.";
-        }
-        return false;
-    }
-    if (!m_Bindings->SetBuffer(0, 0, m_TransformBufferView, error)) {
-        if (error.message.empty()) {
-            error.message = "Failed to bind the transform uniform buffer.";
-        }
-        return false;
-    }
-
-    if (!MeshMaker::CreateUniformTriangle(*m_Device, m_Mesh, error)) {
+    auto mesh = std::make_shared<Mesh>();
+    if (!MeshMaker::CreateUniformTriangle(*m_Device, *mesh, error)) {
         if (error.message.empty()) {
             error.message = "Failed to create the uniform triangle mesh.";
         }
         return false;
     }
-
-    Graphics::GraphicsPipelineDesc pipelineDescription;
-    pipelineDescription.shaders = {shaders.vertex, shaders.fragment};
-    pipelineDescription.bindingLayout = bindingLayout;
-    pipelineDescription.vertexAttributes = {
-        {0, 0, Graphics::VertexFormat::Float3, 0},
-        {1, 1, Graphics::VertexFormat::Float2, 0},
-    };
-    pipelineDescription.vertexBuffers = {
-        {0, static_cast<std::uint32_t>(sizeof(float) * 3)},
-        {1, static_cast<std::uint32_t>(sizeof(float) * 2)},
-    };
-    pipelineDescription.topology = Graphics::PrimitiveTopology::TriangleList;
-    pipelineDescription.cullMode = Graphics::CullMode::None;
-    pipelineDescription.colorFormats = {m_Swapchain->Description().format};
-    m_GraphicsPipeline = m_Device->CreateGraphicsPipeline(pipelineDescription, error);
-    if (m_GraphicsPipeline == nullptr) {
-        if (error.message.empty()) {
-            error.message = "Failed to create the mesh graphics pipeline.";
-        }
+    auto model = std::make_shared<Model>();
+    if (!model->AddPart(
+            {std::move(mesh), Material::CreateFlatColor("default", {1.0f, 1.0f, 1.0f, 1.0f})},
+            error)) {
         return false;
     }
+    m_Scene->Add(std::make_shared<ModelInstance>(std::move(model)));
     return true;
 }
 
@@ -368,16 +294,12 @@ void Engine::Shutdown() noexcept
         m_SurfaceStarted = false;
     }
     m_Initialized = false;
-    m_GraphicsPipeline.reset();
-    m_Bindings.reset();
-    m_TransformBufferView.reset();
-    m_TransformBuffer.reset();
-    m_Mesh = Mesh();
+    m_Scene->Clear();
+    m_SceneRenderer->Shutdown();
     m_Swapchain.reset();
     m_GraphicsQueue.reset();
     m_Device.reset();
     m_Size = {0, 0};
-    m_TransformBufferPrepared = false;
     m_Surface = nullptr;
     m_ErrorRelay.reset();
 }
@@ -407,7 +329,7 @@ bool Engine::DrawFrame(Error &error)
     }
 
     std::vector<std::shared_ptr<Graphics::Submission>> waitFor;
-    if (!m_Mesh.CollectPendingUploads(waitFor, error)) {
+    if (!m_SceneRenderer->CollectPendingUploads(*m_Scene, waitFor, error)) {
         return fail("A mesh vertex upload failed.");
     }
     std::shared_ptr<Graphics::SwapchainImage> image =
@@ -438,35 +360,23 @@ bool Engine::DrawFrame(Error &error)
     if (context == nullptr) {
         return fail("Failed to create a graphics command context.");
     }
-    if (!m_TransformBufferPrepared) {
-        Graphics::ResourceBarrierDesc transformBarrier;
-        transformBarrier.before = Graphics::ResourceUsage::Undefined;
-        transformBarrier.after = Graphics::ResourceUsage::UniformBuffer;
-        if (!context->Barrier(m_TransformBuffer, transformBarrier, error)) {
-            return fail("Failed to prepare the transform uniform buffer.");
-        }
+    if (!m_SceneRenderer->Prepare(*m_Scene, *context, error)) {
+        return fail("Failed to prepare the scene draws.");
     }
     std::unique_ptr<Graphics::RenderPassEncoder> renderPass =
         context->BeginRenderPass(renderPassDescription, error);
     if (renderPass == nullptr) {
         return fail("Failed to begin the mesh render pass.");
     }
-    if (!renderPass->SetPipeline(m_GraphicsPipeline, error)
-        || !renderPass->SetBindingSet(0, m_Bindings, error)
-        || !renderPass->SetViewport({
+    if (!renderPass->SetViewport({
             0.0f, 0.0f,
             static_cast<float>(m_Size.width),
             static_cast<float>(m_Size.height),
             0.0f, 1.0f,
-        }, error)) {
-        return fail("Failed to configure the mesh render pass.");
+        }, error)
+        || !m_SceneRenderer->Record(*renderPass, error)) {
+        return fail("Failed to record the scene draws.");
     }
-    for (const VertexStream &stream : m_Mesh.VertexStreams()) {
-        if (!renderPass->SetVertexBuffer(stream.slot, stream.buffer, 0, error)) {
-            return fail("Failed to bind a mesh vertex stream.");
-        }
-    }
-    renderPass->Draw(m_Mesh.VertexCount());
     if (!renderPass->End(error)) {
         return fail("Failed to end the mesh render pass.");
     }
@@ -480,7 +390,7 @@ bool Engine::DrawFrame(Error &error)
     if (submission == nullptr) {
         return fail("Failed to submit the mesh draw.");
     }
-    m_TransformBufferPrepared = true;
+    m_SceneRenderer->MarkSubmitted();
     if (!m_Swapchain->Present(image, submission, error)) {
         return fail("Failed to present the rendered mesh.");
     }

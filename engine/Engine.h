@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core/Mesh.h"
 #include "Core/Types.h"
 #include "EngineConfig.h"
 #include "Graphics/CapturedImage.h"
@@ -13,6 +12,8 @@
 namespace Engine {
 
 class Engine;
+class Scene;
+class SceneRenderer;
 class ShaderLibrary;
 namespace Graphics {
 class BindingSet;
@@ -69,6 +70,10 @@ public:
     bool CaptureImage(Graphics::CapturedImage &image) const;
     void Shutdown() noexcept;
 
+    // Instances in the scene are drawn every frame.
+    // Headers reachable from here must stay C++11: the macOS front end compiles as Objective-C++11.
+    Scene &GetScene() noexcept;
+
 private:
     struct ErrorRelay;
 
@@ -92,18 +97,14 @@ private:
     std::shared_ptr<Graphics::Device> m_Device;
     std::shared_ptr<Graphics::CommandQueue> m_GraphicsQueue;
     std::shared_ptr<Graphics::Swapchain> m_Swapchain;
-    std::shared_ptr<Graphics::GraphicsPipeline> m_GraphicsPipeline;
-    std::shared_ptr<Graphics::BindingSet> m_Bindings;
-    std::shared_ptr<Graphics::Buffer> m_TransformBuffer;
-    std::shared_ptr<Graphics::BufferView> m_TransformBufferView;
-    Mesh m_Mesh;
+    std::unique_ptr<SceneRenderer> m_SceneRenderer;
+    std::unique_ptr<Scene> m_Scene;
     EngineConfig m_Config;
     Surface *m_Surface;
     Size m_Size;
     std::shared_ptr<ErrorRelay> m_ErrorRelay;
     bool m_Initialized;
     bool m_SurfaceStarted;
-    bool m_TransformBufferPrepared;
 };
 
 } // namespace engine
