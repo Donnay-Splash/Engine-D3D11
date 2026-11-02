@@ -4,6 +4,8 @@
 #include "Core/MeshMaker.h"
 #include "Core/Model.h"
 #include "Core/ModelInstance.h"
+#include "Core/Scene.h"
+#include "Rendering/SceneRenderer.h"
 #include "EngineFactory.h"
 #include "Graphics/Adapter.h"
 #include "Graphics/BindingLayout.h"
@@ -89,6 +91,8 @@ Engine::Engine(
     : m_GraphicsInstance(std::move(graphicsInstance)),
       m_ShaderLibrary(std::move(shaderLibrary)),
       m_PreferredAdapter(std::move(preferredAdapter)),
+      m_SceneRenderer(new SceneRenderer()),
+      m_Scene(new Scene()),
       m_Config(),
       m_Surface(nullptr),
       m_Size({0, 0}),
@@ -96,6 +100,11 @@ Engine::Engine(
       m_Initialized(false),
       m_SurfaceStarted(false)
 {
+}
+
+Scene &Engine::GetScene() noexcept
+{
+    return *m_Scene;
 }
 
 Engine::~Engine()
@@ -250,7 +259,7 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
         return false;
     }
 
-    if (!m_SceneRenderer.Initialize(
+    if (!m_SceneRenderer->Initialize(
             m_Device, shaders, m_Swapchain->Description().format, error)) {
         if (error.message.empty()) {
             error.message = "Failed to initialize the scene renderer.";
@@ -271,7 +280,7 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
             error)) {
         return false;
     }
-    m_Scene.Add(std::make_shared<ModelInstance>(std::move(model)));
+    m_Scene->Add(std::make_shared<ModelInstance>(std::move(model)));
     return true;
 }
 
@@ -285,8 +294,8 @@ void Engine::Shutdown() noexcept
         m_SurfaceStarted = false;
     }
     m_Initialized = false;
-    m_Scene.Clear();
-    m_SceneRenderer.Shutdown();
+    m_Scene->Clear();
+    m_SceneRenderer->Shutdown();
     m_Swapchain.reset();
     m_GraphicsQueue.reset();
     m_Device.reset();
@@ -320,7 +329,7 @@ bool Engine::DrawFrame(Error &error)
     }
 
     std::vector<std::shared_ptr<Graphics::Submission>> waitFor;
-    if (!m_SceneRenderer.CollectPendingUploads(m_Scene, waitFor, error)) {
+    if (!m_SceneRenderer->CollectPendingUploads(*m_Scene, waitFor, error)) {
         return fail("A mesh vertex upload failed.");
     }
     std::shared_ptr<Graphics::SwapchainImage> image =
@@ -351,7 +360,7 @@ bool Engine::DrawFrame(Error &error)
     if (context == nullptr) {
         return fail("Failed to create a graphics command context.");
     }
-    if (!m_SceneRenderer.Prepare(m_Scene, *context, error)) {
+    if (!m_SceneRenderer->Prepare(*m_Scene, *context, error)) {
         return fail("Failed to prepare the scene draws.");
     }
     std::unique_ptr<Graphics::RenderPassEncoder> renderPass =
@@ -365,7 +374,7 @@ bool Engine::DrawFrame(Error &error)
             static_cast<float>(m_Size.height),
             0.0f, 1.0f,
         }, error)
-        || !m_SceneRenderer.Record(*renderPass, error)) {
+        || !m_SceneRenderer->Record(*renderPass, error)) {
         return fail("Failed to record the scene draws.");
     }
     if (!renderPass->End(error)) {
@@ -381,7 +390,7 @@ bool Engine::DrawFrame(Error &error)
     if (submission == nullptr) {
         return fail("Failed to submit the mesh draw.");
     }
-    m_SceneRenderer.MarkSubmitted();
+    m_SceneRenderer->MarkSubmitted();
     if (!m_Swapchain->Present(image, submission, error)) {
         return fail("Failed to present the rendered mesh.");
     }

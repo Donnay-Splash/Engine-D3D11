@@ -1,11 +1,9 @@
 #pragma once
 
-#include "Core/Scene.h"
 #include "Core/Types.h"
 #include "EngineConfig.h"
 #include "Graphics/CapturedImage.h"
 #include "Graphics/PresentationSurface.h"
-#include "Rendering/SceneRenderer.h"
 
 #include <cstdint>
 #include <functional>
@@ -14,6 +12,8 @@
 namespace Engine {
 
 class Engine;
+class Scene;
+class SceneRenderer;
 class ShaderLibrary;
 namespace Graphics {
 class BindingSet;
@@ -71,7 +71,8 @@ public:
     void Shutdown() noexcept;
 
     // Instances in the scene are drawn every frame.
-    Scene &GetScene() noexcept { return m_Scene; }
+    // Headers reachable from here must stay C++11: the macOS front end compiles as Objective-C++11.
+    Scene &GetScene() noexcept;
 
 private:
     struct ErrorRelay;
@@ -96,8 +97,8 @@ private:
     std::shared_ptr<Graphics::Device> m_Device;
     std::shared_ptr<Graphics::CommandQueue> m_GraphicsQueue;
     std::shared_ptr<Graphics::Swapchain> m_Swapchain;
-    SceneRenderer m_SceneRenderer;
-    Scene m_Scene;
+    std::unique_ptr<SceneRenderer> m_SceneRenderer;
+    std::unique_ptr<Scene> m_Scene;
     EngineConfig m_Config;
     Surface *m_Surface;
     Size m_Size;

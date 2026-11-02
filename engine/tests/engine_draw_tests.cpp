@@ -1,5 +1,8 @@
 #include "Core/Math.h"
 #include "Engine.h"
+#include "Core/Model.h"
+#include "Core/ModelInstance.h"
+#include "Core/Scene.h"
 #include "HeadlessSurface.h"
 #include "EngineFactory.h"
 #include "Graphics/Adapter.h"
