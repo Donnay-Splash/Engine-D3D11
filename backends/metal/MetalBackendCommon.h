@@ -141,23 +141,6 @@ inline MTL::PixelFormat ToMetal(TextureFormat format)
     return MTL::PixelFormatInvalid;
 }
 
-inline std::size_t BytesPerPixel(TextureFormat format)
-{
-    switch (format) {
-    case TextureFormat::R8Unorm:
-        return 1;
-    case TextureFormat::RGBA8Unorm:
-    case TextureFormat::BGRA8Unorm:
-    case TextureFormat::Depth32Float:
-        return 4;
-    case TextureFormat::RGBA16Float:
-        return 8;
-    case TextureFormat::Unknown:
-        return 0;
-    }
-    return 0;
-}
-
 inline MTL::StorageMode StorageModeFor(MemoryType type)
 {
     return type == MemoryType::DeviceLocal ? MTL::StorageModePrivate : MTL::StorageModeShared;

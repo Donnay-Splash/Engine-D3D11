@@ -14,6 +14,7 @@
 #include "Graphics/Device.h"
 #include "Graphics/GraphicsInstance.h"
 #include "Graphics/GraphicsPipeline.h"
+#include "Graphics/SwapchainFactory.h"
 #include "Graphics/RenderPassEncoder.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Swapchain.h"
@@ -47,6 +48,9 @@ static_assert(offsetof(MeshTransforms, view) == sizeof(float) * 16,
     "View transform must immediately follow world transform.");
 static_assert(offsetof(MeshTransforms, projection) == sizeof(float) * 32,
     "Projection transform must immediately follow view transform.");
+
+// Deliberately loud so a cleared-but-undrawn frame is obvious in captured output.
+constexpr float kClearColor[4] = {1.0f, 0.0f, 0.8f, 1.0f};
 
 } // namespace
 
@@ -99,6 +103,7 @@ Engine::Engine(
     : m_GraphicsInstance(std::move(graphicsInstance)),
       m_ShaderLibrary(std::move(shaderLibrary)),
       m_PreferredAdapter(std::move(preferredAdapter)),
+      m_Config(),
       m_Surface(nullptr),
       m_Size({0, 0}),
       m_ErrorRelay(),
@@ -113,7 +118,8 @@ Engine::~Engine()
     Shutdown();
 }
 
-bool Engine::Initialize(Surface &surface, ErrorHandler errorHandler, Error &error)
+bool Engine::Initialize(
+    Surface &surface, const EngineConfig &config, ErrorHandler errorHandler, Error &error)
 {
     if (m_Initialized) {
         error.message = "The engine is already initialized.";
@@ -124,6 +130,7 @@ bool Engine::Initialize(Surface &surface, ErrorHandler errorHandler, Error &erro
         return false;
     }
 
+    m_Config = config;
     m_Surface = &surface;
     m_ErrorRelay = std::shared_ptr<ErrorRelay>(new ErrorRelay(errorHandler));
     if (!InitializeGraphics(surface, error)) {
@@ -149,6 +156,11 @@ bool Engine::Initialize(Surface &surface, ErrorHandler errorHandler, Error &erro
         return false;
     }
     return true;
+}
+
+bool Engine::CaptureImage(Graphics::CapturedImage &image) const
+{
+    return m_Swapchain != nullptr && m_Swapchain->CaptureLatestImage(image);
 }
 
 bool Engine::InitializeGraphics(Surface &surface, Error &error)
@@ -224,15 +236,16 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
 
     m_Size = surface.DrawableSize();
     if (m_Size.width == 0 || m_Size.height == 0) {
-        error.message = "The render surface has no drawable extent.";
+        error.message = "The render target has no drawable extent.";
         return false;
     }
     Graphics::SwapchainDesc swapchainDescription;
     swapchainDescription.extent = {m_Size.width, m_Size.height, 1};
-    m_Swapchain = m_Device->CreateSwapchain(surface, swapchainDescription, error);
+    m_Swapchain = Graphics::CreateSwapchain(
+        m_Device, surface, swapchainDescription, m_Config.swapchainMode, error);
     if (m_Swapchain == nullptr) {
         if (error.message.empty()) {
-            error.message = "Failed to create a swapchain for the render surface.";
+            error.message = "Failed to create a swapchain for the render target.";
         }
         return false;
     }
@@ -412,10 +425,10 @@ bool Engine::DrawFrame(Error &error)
     colorAttachment.view = colorView;
     colorAttachment.loadAction = Graphics::LoadAction::Clear;
     colorAttachment.storeAction = Graphics::StoreAction::Store;
-    colorAttachment.clearColor[0] = 0.08f;
-    colorAttachment.clearColor[1] = 0.09f;
-    colorAttachment.clearColor[2] = 0.12f;
-    colorAttachment.clearColor[3] = 1.0f;
+    colorAttachment.clearColor[0] = kClearColor[0];
+    colorAttachment.clearColor[1] = kClearColor[1];
+    colorAttachment.clearColor[2] = kClearColor[2];
+    colorAttachment.clearColor[3] = kClearColor[3];
     Graphics::RenderPassDesc renderPassDescription;
     renderPassDescription.colorAttachments.push_back(colorAttachment);
     renderPassDescription.extent = {m_Size.width, m_Size.height, 1};

@@ -2,6 +2,8 @@
 
 #include "Core/Mesh.h"
 #include "Core/Types.h"
+#include "EngineConfig.h"
+#include "Graphics/CapturedImage.h"
 #include "Graphics/PresentationSurface.h"
 
 #include <cstdint>
@@ -60,7 +62,11 @@ public:
     Engine(const Engine &) = delete;
     Engine &operator=(const Engine &) = delete;
 
-    bool Initialize(Surface &surface, ErrorHandler errorHandler, Error &error);
+    bool Initialize(
+        Surface &surface, const EngineConfig &config, ErrorHandler errorHandler, Error &error);
+    // Copies the most recently presented frame. Returns false if none is available or the
+    // swapchain does not support capture.
+    bool CaptureImage(Graphics::CapturedImage &image) const;
     void Shutdown() noexcept;
 
 private:
@@ -91,6 +97,7 @@ private:
     std::shared_ptr<Graphics::Buffer> m_TransformBuffer;
     std::shared_ptr<Graphics::BufferView> m_TransformBufferView;
     Mesh m_Mesh;
+    EngineConfig m_Config;
     Surface *m_Surface;
     Size m_Size;
     std::shared_ptr<ErrorRelay> m_ErrorRelay;

@@ -10,6 +10,8 @@ This repository is a hobby renderer used for educational purposes. It consists o
 - The graphics components, resources, buffers, textures, shaders, etc... should all be built modularly so that we can easily iterate on graphics features.
 - The codebase should target c++20 and use modern C++ features where appropriate.
 - Write simple, well-documented code and add comments only when they add real value.
+- Prefer simple, cross-platform, header-only libraries (for example the stb libraries in `third_party/stb`) for anything outside core rendering, such as image processing, GUI, audio and testing. Do not hand-roll encoders/decoders or similar utilities, and avoid heavyweight dependencies.
+- Express new modes and variants as configuration, not as parallel code paths. Extend an existing entry point with a config parameter (see `EngineConfig`) and choose the implementation behind a shared interface (for example the swapchain) at the point where it is created. Do not add mode-specific duplicates of public methods such as `InitializeHeadless` or `RenderHeadlessFrame`, and keep changes to `Engine.cpp` small. Put variant-specific behaviour in its own class (for example `OffscreenSwapchain`, `HeadlessSurface`) and drive it from the front end.
 - Log any risk or assumption you could not verify (for example, behavior untestable on the current platform) as a GitHub issue with `gh` (see `docs/agents/issue-tracker.md`), labelled `needs-triage`, instead of only mentioning it in prose.
 
 ## Repository Layout

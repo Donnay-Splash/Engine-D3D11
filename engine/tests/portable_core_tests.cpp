@@ -3,7 +3,10 @@
 #include "Core/Types.h"
 #include "Graphics/Buffer.h"
 
+#include <algorithm>
 #include <cstdint>
+#include <iterator>
+#include <vector>
 #include <cstddef>
 #include <cmath>
 #include <memory>

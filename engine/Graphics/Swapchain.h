@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CapturedImage.h"
 #include "GraphicsTypes.h"
 #include "Resource.h"
 #include "SwapchainImage.h"
@@ -11,6 +12,14 @@ struct Error;
 namespace Graphics {
 
 class Submission;
+
+enum class SwapchainMode
+{
+    // Present to a window surface.
+    Window,
+    // Render into an offscreen texture that can be read back with CaptureLatestImage.
+    Headless,
+};
 
 struct SwapchainDesc
 {
@@ -29,6 +38,9 @@ public:
         const std::shared_ptr<Submission> &submission,
         ::Engine::Error &error) = 0;
     virtual bool Resize(Extent3D extent, ::Engine::Error &error) = 0;
+    // Copies the most recently presented frame to CPU memory. Returns false when no frame is
+    // available or the swapchain does not support capture.
+    virtual bool CaptureLatestImage(CapturedImage &) const { return false; }
 };
 
 } // namespace Graphics

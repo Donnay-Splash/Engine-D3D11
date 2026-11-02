@@ -36,3 +36,11 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --build-config Debug --output-on-failure
+
+      - name: Upload headless render artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: headless-render
+          path: build/artifacts/
+          if-no-files-found: warn
