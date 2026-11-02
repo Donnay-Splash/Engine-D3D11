@@ -26,3 +26,8 @@ each metallib.
 Uses the vendored DXC in `third_party/dxc/macos` by default (`dxc` in the config; paths containing a
 `/` are relative to the config file, bare names are looked up on `PATH`). Metal conversion is
 available on macOS.
+
+Builds are incremental: an entry is skipped when its outputs are newer than the HLSL source, the
+config file, the DXC binary and every header it includes. Header dependencies are recorded by dxc
+(`-MF`) in `dxil/<Shader>_<entry>.d` after each successful build. The VS Code "Launch macOS app"
+configuration runs this via the "Build macOS shaders" task before building the app.

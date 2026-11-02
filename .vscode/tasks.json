@@ -19,6 +19,33 @@
             "problemMatcher": []
         },
         {
+            "label": "Build shader compiler",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build/macos",
+                "--target",
+                "shader-compiler"
+            ],
+            "dependsOn": "Configure macOS engine",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Build macOS shaders",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/macos/tools/ShaderCompiler/shader-compiler",
+            "args": [
+                "--config",
+                "${workspaceFolder}/tools/ShaderCompiler/shaders.cfg"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "Build shader compiler",
+            "problemMatcher": []
+        },
+        {
             "label": "Build macOS app",
             "type": "shell",
             "command": "cmake",
@@ -28,7 +55,10 @@
                 "--target",
                 "engine-macos"
             ],
-            "dependsOn": "Configure macOS engine",
+            "dependsOn": [
+                "Configure macOS engine",
+                "Build macOS shaders"
+            ],
             "dependsOrder": "sequence",
             "group": {
                 "kind": "build",
