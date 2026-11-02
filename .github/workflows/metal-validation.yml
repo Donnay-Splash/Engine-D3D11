@@ -10,8 +10,28 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Restore incremental build
+        id: cache
+        uses: actions/cache@v4
         with:
-          submodules: recursive
+          path: |
+            build
+            .built-index
+          key: build-${{ github.sha }}
+          restore-keys: build-
+
+      # A fresh checkout gives every file a new mtime, which forces a full rebuild.
+      # Age all files, then touch only what changed since the cached build.
+      - name: Restore source timestamps
+        run: |
+          git ls-files -z | xargs -0 touch -t 200001010000
+          git ls-files -s > "$RUNNER_TEMP/now.idx"
+          if [[ -f .built-index ]]; then
+            comm -13 <(sort .built-index) <(sort "$RUNNER_TEMP/now.idx") | cut -f2 | xargs -I{} touch "{}"
+          else
+            git ls-files -z | xargs -0 touch
+          fi
 
       - name: Check vendored DXC
         run: third_party/dxc/macos/bin/dxc --version
@@ -36,6 +56,9 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --build-config Debug --output-on-failure
+
+      - name: Record built commit
+        run: git ls-files -s > .built-index
 
       - name: Upload headless render artefacts
         if: always()

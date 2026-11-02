@@ -17,7 +17,10 @@ fi
 
 command -v gh >/dev/null || { echo "gh CLI is required" >&2; exit 1; }
 
-branch="agent-validate/$(date -u +%Y%m%d-%H%M%S)-$$"
+# Stable per-branch ref: GitHub Actions caches are scoped to the ref, so reusing it
+# lets each run restore the previous incremental build.
+current="$(git branch --show-current)"
+branch="agent-validate/${current//[^A-Za-z0-9._-]/-}"
 
 # Snapshot the working tree (incl. uncommitted/untracked files) into a commit
 # using a temporary index, so the user's branch, index and HEAD stay untouched.
@@ -28,25 +31,22 @@ git read-tree HEAD
 git add -A
 tree="$(git write-tree)"
 unset GIT_INDEX_FILE
-commit="$(git commit-tree "$tree" -p HEAD -m "agent-validate: snapshot for remote Metal validation")"
+commit="$(git commit-tree "$tree" -p HEAD -m "agent-validate: snapshot $(date -u +%FT%T.%N)")"
 
-git push origin "$commit:refs/heads/$branch"
+git push --force origin "$commit:refs/heads/$branch"
 echo "Pushed $branch ($commit)"
 
-cleanup() { git push origin --delete "$branch" >/dev/null 2>&1 || true; }
-trap 'cleanup; rm -f "$tmpIndex"' EXIT
-
 runId=""
-for _ in $(seq 1 30); do
-  runId="$(gh run list --branch "$branch" --limit 1 \
+for _ in $(seq 1 90); do
+  runId="$(gh run list --branch "$branch" --commit "$commit" --limit 1 \
     --json databaseId --jq '.[0].databaseId // empty')"
   [[ -n "$runId" ]] && break
-  sleep 3
+  sleep 1
 done
 [[ -n "$runId" ]] || { echo "No workflow run found for $branch" >&2; exit 1; }
 
 status=0
-gh run watch "$runId" --exit-status || status=$?
+gh run watch "$runId" --interval 2 --exit-status || status=$?
 
 # Headless renders are uploaded as an artefact; fetch them for inspection (best effort).
 rm -rf build/artifacts-remote
