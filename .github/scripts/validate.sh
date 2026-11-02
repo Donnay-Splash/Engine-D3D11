@@ -29,15 +29,6 @@ git add -A
 tree="$(git write-tree)"
 unset GIT_INDEX_FILE
 
-# Identical content already passed: answer instantly without a remote run.
-passMarker="build/validate-cache/$tree.passed"
-if [[ -z "${VALIDATE_FORCE:-}" && -f "$passMarker" ]]; then
-  echo "Tree $tree already passed remote validation; skipping (VALIDATE_FORCE=1 to rerun)"
-  echo "Remote macOS validation PASSED (cached)"
-  exit 0
-fi
-commit="$(git commit-tree "$tree" -p HEAD -m "agent-validate: snapshot for remote Metal validation")"
-
 git push origin "$commit:refs/heads/$branch"
 echo "Pushed $branch ($commit)"
 
@@ -63,7 +54,6 @@ if gh run download "$runId" -n headless-render -D build/artifacts-remote >/dev/n
 fi
 
 if [[ "$status" -eq 0 ]]; then
-  mkdir -p build/validate-cache && touch "$passMarker"
   echo "Remote macOS validation PASSED"
 else
   echo "Remote macOS validation FAILED; failing logs:" >&2
