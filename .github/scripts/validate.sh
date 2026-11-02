@@ -28,6 +28,7 @@ git read-tree HEAD
 git add -A
 tree="$(git write-tree)"
 unset GIT_INDEX_FILE
+commit="$(git commit-tree "$tree" -p HEAD -m "agent-validate: snapshot for remote Metal validation")"
 
 git push origin "$commit:refs/heads/$branch"
 echo "Pushed $branch ($commit)"
