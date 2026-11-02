@@ -1,5 +1,6 @@
 #include "Core/Math.h"
 #include "Engine.h"
+#include "HeadlessSurface.h"
 #include "EngineFactory.h"
 #include "Graphics/Adapter.h"
 #include "Graphics/BindingLayout.h"
@@ -848,7 +849,7 @@ void surfaceStartupFailureCleansUpEngineResources()
     surface.startSucceeds = false;
     Engine::Error error;
 
-    check(!engine->Initialize(surface, [](const Engine::Error &) {}, error),
+    check(!engine->Initialize(surface, {}, [](const Engine::Error &) {}, error),
         "surface startup failure should fail initialization");
     check(error.message == "fake surface startup failed",
         "surface startup error should remain visible");
@@ -873,7 +874,7 @@ void engineRecordsAThreeVertexUvMeshDraw()
     Engine::Error error;
     int errorReports = 0;
 
-    check(engine->Initialize(surface, [&errorReports](const Engine::Error &) {
+    check(engine->Initialize(surface, {}, [&errorReports](const Engine::Error &) {
         ++errorReports;
     }, error), "engine initialization should succeed");
     check(state->deviceCreateCount == 1,
@@ -980,22 +981,26 @@ void headlessEngineRendersToAnOffscreenTextureAndCapturesIt()
     Engine::Error error;
     Engine::Graphics::CapturedImage image;
 
-    check(!engine->RenderHeadlessFrame(error), "headless render requires headless initialization");
-    check(engine->InitializeHeadless({64, 32}, [](const Engine::Error &) {}, error),
+    Engine::HeadlessSurface surface({64, 32});
+    Engine::EngineConfig config;
+    config.swapchainMode = Engine::SwapchainMode::Headless;
+
+    check(!surface.RenderFrame(error), "headless surface cannot render before the engine starts it");
+    check(engine->Initialize(surface, config, [](const Engine::Error &) {}, error),
         "headless initialization should succeed");
-    check(!engine->CaptureHeadlessImage(image), "no image exists before the first frame");
-    check(engine->RenderHeadlessFrame(error), "headless frame should render");
+    check(!engine->CaptureImage(image), "no image exists before the first frame");
+    check(surface.RenderFrame(error), "headless frame should render");
     check(state->drawVertexCount == 3, "headless frame should draw the mesh");
     check(state->presentCount == 0, "headless frame should not use a window swapchain");
     check(std::find(state->events.begin(), state->events.end(), "copy.texture")
             != state->events.end(),
         "headless present should copy the frame into a readback buffer");
-    check(engine->CaptureHeadlessImage(image), "headless frame should be capturable");
+    check(engine->CaptureImage(image), "headless frame should be capturable");
     check(image.width == 64 && image.height == 32
             && image.pixels.size() == 64u * 32u * 4u && image.pixels[0] == 0xAB,
         "captured image should carry the readback contents");
     engine->Shutdown();
-    check(!engine->CaptureHeadlessImage(image), "shutdown should release the capture target");
+    check(!engine->CaptureImage(image), "shutdown should release the capture target");
 }
 
 } // namespace

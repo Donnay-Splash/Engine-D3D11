@@ -34,7 +34,7 @@ void missingGraphicsServicesFailBeforeSurfaceStartup()
     NeverStartedSurface surface;
     Engine::Error error;
 
-    check(!engine->Initialize(surface, [](const Engine::Error &) {}, error));
+    check(!engine->Initialize(surface, {}, [](const Engine::Error &) {}, error));
     check(error.message == "The engine requires a graphics instance and shader library.");
     check(!surface.started);
 }

@@ -5,15 +5,21 @@
 #include "Core/Types.h"
 #include "Engine.h"
 #include "Graphics/CapturedImage.h"
-#include "Graphics/PngEncoder.h"
+#include "HeadlessSurface.h"
 #include "MacEngine.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
 
 namespace {
 
@@ -30,6 +36,39 @@ Pixel pixelAt(const Engine::Graphics::CapturedImage &image, std::uint32_t x, std
         return {p[2], p[1], p[0]};
     }
     return {p[0], p[1], p[2]};
+}
+
+// Writes the frame as an RGBA PNG and verifies the file decodes back to the same size.
+bool savePng(const Engine::Graphics::CapturedImage &image, const std::filesystem::path &output)
+{
+    std::vector<std::uint8_t> rgba(static_cast<std::size_t>(image.width) * image.height * 4);
+    for (std::uint32_t y = 0; y < image.height; ++y) {
+        for (std::uint32_t x = 0; x < image.width; ++x) {
+            const Pixel pixel = pixelAt(image, x, y);
+            std::uint8_t *out = rgba.data() + (static_cast<std::size_t>(y) * image.width + x) * 4;
+            out[0] = pixel.r;
+            out[1] = pixel.g;
+            out[2] = pixel.b;
+            out[3] = 255;
+        }
+    }
+    if (output.has_parent_path()) {
+        std::filesystem::create_directories(output.parent_path());
+    }
+    const std::string path = output.string();
+    if (!stbi_write_png(path.c_str(), static_cast<int>(image.width), static_cast<int>(image.height),
+            4, rgba.data(), static_cast<int>(image.width * 4))) {
+        return false;
+    }
+    int width = 0;
+    int height = 0;
+    int channels = 0;
+    stbi_uc *decoded = stbi_load(path.c_str(), &width, &height, &channels, 4);
+    const bool valid = decoded != nullptr && width == static_cast<int>(image.width)
+        && height == static_cast<int>(image.height)
+        && std::equal(rgba.begin(), rgba.end(), decoded);
+    stbi_image_free(decoded);
+    return valid;
 }
 
 bool sameColor(Pixel a, Pixel b)
@@ -49,10 +88,14 @@ int main(int argc, char **argv)
     }
 
     std::unique_ptr<Engine::Engine> engine = Engine::Metal::CreateEngine();
+    Engine::HeadlessSurface surface({512, 512});
+    Engine::EngineConfig config;
+    config.swapchainMode = Engine::SwapchainMode::Headless;
     Engine::Error error;
     if (engine == nullptr
-        || !engine->InitializeHeadless(
-            {512, 512},
+        || !engine->Initialize(
+            surface,
+            config,
             [](const Engine::Error &runtimeError) {
                 std::cerr << "Engine runtime failure: " << runtimeError.message << '\n';
             },
@@ -60,30 +103,20 @@ int main(int argc, char **argv)
         std::cerr << "Headless initialization failed: " << error.message << '\n';
         return EXIT_FAILURE;
     }
-    if (!engine->RenderHeadlessFrame(error)) {
+    if (!surface.RenderFrame(error)) {
         std::cerr << "Headless render failed: " << error.message << '\n';
         return EXIT_FAILURE;
     }
 
     Engine::Graphics::CapturedImage image;
-    if (!engine->CaptureHeadlessImage(image)) {
+    if (!engine->CaptureImage(image)) {
         std::cerr << "No frame was captured.\n";
         return EXIT_FAILURE;
     }
     engine->Shutdown();
 
-    const std::vector<std::uint8_t> png = Engine::Graphics::EncodePng(image);
-    if (png.empty()) {
-        std::cerr << "Failed to encode the captured frame.\n";
-        return EXIT_FAILURE;
-    }
-    if (output.has_parent_path()) {
-        std::filesystem::create_directories(output.parent_path());
-    }
-    std::ofstream file(output, std::ios::binary);
-    file.write(reinterpret_cast<const char *>(png.data()), static_cast<std::streamsize>(png.size()));
-    if (!file) {
-        std::cerr << "Failed to write " << output << '\n';
+    if (!savePng(image, output)) {
+        std::cerr << "Failed to write a valid PNG to " << output << '\n';
         return EXIT_FAILURE;
     }
 

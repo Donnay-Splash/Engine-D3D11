@@ -127,6 +127,7 @@
     Engine::Error error = {};
     const bool initialized = m_Engine->Initialize(
         *m_Surface,
+        Engine::EngineConfig{},
         [weakSelf](const Engine::Error &runtimeError) {
             EngineAppDelegate *strongSelf = weakSelf;
             if (strongSelf == nil) {

@@ -188,7 +188,7 @@ bool OffscreenSwapchain::Resize(Extent3D extent, ::Engine::Error &error)
     return true;
 }
 
-bool OffscreenSwapchain::LatestImage(CapturedImage &image) const
+bool OffscreenSwapchain::CaptureLatestImage(CapturedImage &image) const
 {
     if (!m_HasLatest) {
         return false;

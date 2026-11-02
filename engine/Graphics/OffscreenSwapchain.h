@@ -34,7 +34,7 @@ public:
     bool Resize(Extent3D extent, ::Engine::Error &error) override;
 
     // Returns false when no frame has been presented yet.
-    bool LatestImage(CapturedImage &image) const;
+    bool CaptureLatestImage(CapturedImage &image) const override;
 
 private:
     OffscreenSwapchain(std::shared_ptr<Device> device, SwapchainDesc description);

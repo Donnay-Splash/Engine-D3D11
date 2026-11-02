@@ -100,7 +100,7 @@ bool InitializeWith(
     std::unique_ptr<Engine::Engine> engine = Engine::EngineFactory::create(
         instance, std::make_shared<TestShaderLibrary>(), preferredAdapter);
     TestSurface surface;
-    return engine->Initialize(surface, {}, error);
+    return engine->Initialize(surface, {}, {}, error);
 }
 
 void RejectAdapterFromAnotherInstance()

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CapturedImage.h"
 #include "GraphicsTypes.h"
 #include "Resource.h"
 #include "SwapchainImage.h"
@@ -29,6 +30,9 @@ public:
         const std::shared_ptr<Submission> &submission,
         ::Engine::Error &error) = 0;
     virtual bool Resize(Extent3D extent, ::Engine::Error &error) = 0;
+    // Copies the most recently presented frame to CPU memory. Returns false when no frame is
+    // available or the swapchain does not support capture.
+    virtual bool CaptureLatestImage(CapturedImage &) const { return false; }
 };
 
 } // namespace Graphics

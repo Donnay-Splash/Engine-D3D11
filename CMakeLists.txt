@@ -124,6 +124,7 @@ if(APPLE)
         XCODE_SCHEME_ENABLE_GPU_API_VALIDATION YES
     )
     target_compile_options(engine-headless PRIVATE -Wall -Wextra -Werror)
+    target_include_directories(engine-headless SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb")
     target_link_libraries(engine-headless PRIVATE engine-backend-metal)
     add_custom_command(TARGET engine-headless POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E copy_directory

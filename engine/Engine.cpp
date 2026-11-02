@@ -103,6 +103,7 @@ Engine::Engine(
     : m_GraphicsInstance(std::move(graphicsInstance)),
       m_ShaderLibrary(std::move(shaderLibrary)),
       m_PreferredAdapter(std::move(preferredAdapter)),
+      m_Config(),
       m_Surface(nullptr),
       m_Size({0, 0}),
       m_ErrorRelay(),
@@ -117,7 +118,8 @@ Engine::~Engine()
     Shutdown();
 }
 
-bool Engine::Initialize(Surface &surface, ErrorHandler errorHandler, Error &error)
+bool Engine::Initialize(
+    Surface &surface, const EngineConfig &config, ErrorHandler errorHandler, Error &error)
 {
     if (m_Initialized) {
         error.message = "The engine is already initialized.";
@@ -128,9 +130,10 @@ bool Engine::Initialize(Surface &surface, ErrorHandler errorHandler, Error &erro
         return false;
     }
 
+    m_Config = config;
     m_Surface = &surface;
     m_ErrorRelay = std::shared_ptr<ErrorRelay>(new ErrorRelay(errorHandler));
-    if (!InitializeGraphics(&surface, surface.DrawableSize(), error)) {
+    if (!InitializeGraphics(surface, error)) {
         Shutdown();
         return false;
     }
@@ -155,41 +158,12 @@ bool Engine::Initialize(Surface &surface, ErrorHandler errorHandler, Error &erro
     return true;
 }
 
-bool Engine::InitializeHeadless(Size size, ErrorHandler errorHandler, Error &error)
+bool Engine::CaptureImage(Graphics::CapturedImage &image) const
 {
-    if (m_Initialized) {
-        error.message = "The engine is already initialized.";
-        return false;
-    }
-    if (m_GraphicsInstance == nullptr || m_ShaderLibrary == nullptr) {
-        error.message = "The engine requires a graphics instance and shader library.";
-        return false;
-    }
-
-    m_ErrorRelay = std::shared_ptr<ErrorRelay>(new ErrorRelay(errorHandler));
-    if (!InitializeGraphics(nullptr, size, error)) {
-        Shutdown();
-        return false;
-    }
-    m_Initialized = true;
-    return true;
+    return m_Swapchain != nullptr && m_Swapchain->CaptureLatestImage(image);
 }
 
-bool Engine::RenderHeadlessFrame(Error &error)
-{
-    if (m_OffscreenSwapchain == nullptr) {
-        error.message = "The engine is not running in headless mode.";
-        return false;
-    }
-    return Draw(this, error);
-}
-
-bool Engine::CaptureHeadlessImage(Graphics::CapturedImage &image) const
-{
-    return m_OffscreenSwapchain != nullptr && m_OffscreenSwapchain->LatestImage(image);
-}
-
-bool Engine::InitializeGraphics(Surface *surface, Size size, Error &error)
+bool Engine::InitializeGraphics(Surface &surface, Error &error)
 {
     std::vector<std::shared_ptr<Graphics::Adapter>> adapters;
     if (!m_GraphicsInstance->EnumerateAdapters(adapters, error)) {
@@ -260,19 +234,17 @@ bool Engine::InitializeGraphics(Surface *surface, Size size, Error &error)
         return false;
     }
 
-    m_Size = size;
+    m_Size = surface.DrawableSize();
     if (m_Size.width == 0 || m_Size.height == 0) {
         error.message = "The render target has no drawable extent.";
         return false;
     }
     Graphics::SwapchainDesc swapchainDescription;
     swapchainDescription.extent = {m_Size.width, m_Size.height, 1};
-    if (surface != nullptr) {
-        m_Swapchain = m_Device->CreateSwapchain(*surface, swapchainDescription, error);
+    if (m_Config.swapchainMode == SwapchainMode::Headless) {
+        m_Swapchain = Graphics::OffscreenSwapchain::Create(m_Device, swapchainDescription, error);
     } else {
-        m_OffscreenSwapchain =
-            Graphics::OffscreenSwapchain::Create(m_Device, swapchainDescription, error);
-        m_Swapchain = m_OffscreenSwapchain;
+        m_Swapchain = m_Device->CreateSwapchain(surface, swapchainDescription, error);
     }
     if (m_Swapchain == nullptr) {
         if (error.message.empty()) {
@@ -405,7 +377,6 @@ void Engine::Shutdown() noexcept
     m_TransformBuffer.reset();
     m_Mesh = Mesh();
     m_Swapchain.reset();
-    m_OffscreenSwapchain.reset();
     m_GraphicsQueue.reset();
     m_Device.reset();
     m_Size = {0, 0};
