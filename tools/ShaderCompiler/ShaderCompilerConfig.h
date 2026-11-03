@@ -7,27 +7,16 @@
 
 namespace ShaderCompiler {
 
-struct EntryPoint
-{
-    std::string stage; // vs, ps or cs
-    std::string name;
-};
-
-struct ShaderSource
-{
-    std::string name;
-    std::filesystem::path source;
-    std::vector<EntryPoint> entries;
-};
-
 struct Config
 {
     std::string dxc = "dxc";
     std::string shaderModel = "6_6";
     std::filesystem::path outputDirectory;
     std::filesystem::path includeDirectory;
+    // Engine program config (ShaderPrograms.cfg); it decides which entries get built and is
+    // copied to the output.
+    std::filesystem::path programsFile;
     std::vector<std::string> dxcArgs;
-    std::vector<ShaderSource> shaders;
 };
 
 // Parses the config file; on failure returns nullopt and fills error.

@@ -28,6 +28,7 @@
 #include "Graphics/Swapchain.h"
 #include "Graphics/Texture.h"
 #include "Graphics/TextureView.h"
+#include "Graphics/ShaderReflection.h"
 #include "ShaderLibrary.h"
 
 #include <algorithm>
@@ -287,7 +288,13 @@ public:
         const std::shared_ptr<Engine::Graphics::BufferView> &view,
         Engine::Error &error) override
     {
-        if (binding != 0 || arrayElement != 0 || view == nullptr) {
+        const auto &declared = layout_->Bindings();
+        const bool inLayout = std::any_of(
+            declared.begin(), declared.end(),
+            [binding](const Engine::Graphics::BindingDesc &desc) {
+                return desc.binding == binding;
+            });
+        if (!inLayout || arrayElement != 0 || view == nullptr) {
             error.message = "fake buffer binding invalid";
             return false;
         }
@@ -777,21 +784,38 @@ private:
 class FakeShaderLibrary final : public Engine::ShaderLibrary
 {
 public:
-    bool RequestGraphicsShaders(
-        Engine::Graphics::Device &,
-        Engine::ShaderProgramType type,
-        const std::string &name,
-        Engine::GraphicsShaderPair &shaders,
-        Engine::Error &error) override
+    bool LoadProgramConfig(std::string &text, Engine::Error &) override
     {
-        if (type != Engine::ShaderProgramType::Mesh || name != "uv-triangle") {
-            error.message = "unexpected shader request";
-            return false;
-        }
-        shaders.vertex = std::make_shared<FakeShader>(Engine::Graphics::ShaderStage::Vertex);
-        shaders.fragment = std::make_shared<FakeShader>(Engine::Graphics::ShaderStage::Fragment);
+        text = programConfig;
         return true;
     }
+
+    bool RequestShader(
+        Engine::Graphics::Device &,
+        const Engine::ShaderRef &ref,
+        Engine::Graphics::ShaderStage stage,
+        Engine::LoadedShader &loaded,
+        Engine::Error &error) override
+    {
+        requests.push_back(ref.source + ":" + ref.entry);
+        const std::string &json = stage == Engine::Graphics::ShaderStage::Vertex
+            ? vertexReflection
+            : fragmentReflection;
+        loaded.shader = std::make_shared<FakeShader>(stage);
+        return Engine::Graphics::ParseShaderReflection(json, loaded.reflection, error);
+    }
+
+    std::string programConfig =
+        "[program]\nname = Mesh\nvertex = Scene:mesh_vertex\nfragment = Other:mesh_fragment\n";
+    std::string vertexReflection =
+        R"({"stage": "vertex",
+            "vertexInputs": [
+              {"semantic": "POSITION0", "format": "float3", "location": 0},
+              {"semantic": "TEXCOORD0", "format": "float2", "location": 1}],
+            "bindings": [{"binding": 3, "type": "uniformBuffer", "arrayCount": 1, "name": ""}]})";
+    std::string fragmentReflection =
+        R"({"stage": "fragment", "vertexInputs": [], "bindings": []})";
+    std::vector<std::string> requests;
 };
 
 class FakeSurface final : public Engine::Surface
@@ -882,14 +906,7 @@ void engineRecordsAThreeVertexUvMeshDraw()
     }, error), "engine initialization should succeed");
     check(state->deviceCreateCount == 1,
         "engine should create a device from the first graphics-capable adapter");
-    check(state->pipeline != nullptr, "engine should create a graphics pipeline");
-    check(state->pipeline->Description().bindingLayout != nullptr,
-        "graphics pipeline should identify its binding layout");
-    check(state->pipeline->Description().topology
-            == Engine::Graphics::PrimitiveTopology::TriangleList,
-        "triangle pipeline should use triangle-list topology");
-    check(state->pipeline->Description().vertexAttributes.size() == 2,
-        "triangle pipeline should consume position and UV attributes");
+    check(state->pipeline == nullptr, "pipelines should be created lazily, not at startup");
 
     std::shared_ptr<FakeBuffer> positionBuffer;
     std::shared_ptr<FakeBuffer> uvBuffer;
@@ -918,6 +935,23 @@ void engineRecordsAThreeVertexUvMeshDraw()
         "UV stream should cover all three triangle corners");
 
     check(surface.Draw(error), "surface draw callback should record the mesh");
+    check(state->pipeline != nullptr, "the first draw should create a graphics pipeline");
+    check(state->pipeline->Description().bindingLayout != nullptr,
+        "graphics pipeline should identify its binding layout");
+    check(state->pipeline->Description().bindingLayout->Bindings().size() == 1
+            && state->pipeline->Description().bindingLayout->Bindings()[0].binding == 3
+            && state->pipeline->Description().bindingLayout->Bindings()[0].visibility
+                == Engine::Graphics::ShaderStage::Vertex,
+        "binding layout should come from the shader reflection");
+    check(state->pipeline->Description().topology
+            == Engine::Graphics::PrimitiveTopology::TriangleList,
+        "triangle pipeline should use triangle-list topology");
+    check(state->pipeline->Description().vertexAttributes.size() == 2,
+        "triangle pipeline should consume position and UV attributes");
+    check(shaderLibrary->requests
+            == std::vector<std::string>({"Scene:mesh_vertex", "Other:mesh_fragment"}),
+        "each stage should be loaded once from its own source");
+
     std::shared_ptr<FakeBuffer> transformBuffer;
     for (const std::shared_ptr<FakeBuffer> &buffer : state->buffers) {
         if (buffer->Description().usage == Engine::Graphics::BufferUsage::Uniform) {
@@ -1063,10 +1097,83 @@ void engineDrawsEveryPartOfEveryModelInstance()
     engine->Shutdown();
 }
 
+std::unique_ptr<Engine::Engine> makeEngine(
+    const std::shared_ptr<FakeState> &state,
+    const std::shared_ptr<FakeShaderLibrary> &shaderLibrary)
+{
+    auto device = std::make_shared<FakeDevice>(state);
+    std::vector<std::shared_ptr<Engine::Graphics::Adapter>> adapters = {
+        std::make_shared<FakeAdapter>(state, device, true),
+    };
+    return Engine::EngineFactory::create(
+        std::make_shared<FakeGraphicsInstance>(std::move(adapters)), shaderLibrary);
+}
+
+void pipelineUsesOnlyTheMeshStreamsTheShaderReads()
+{
+    auto state = std::make_shared<FakeState>();
+    auto shaderLibrary = std::make_shared<FakeShaderLibrary>();
+    shaderLibrary->vertexReflection =
+        R"({"stage": "vertex",
+            "vertexInputs": [{"semantic": "TEXCOORD0", "format": "float2", "location": 0}],
+            "bindings": [{"binding": 0, "type": "uniformBuffer", "arrayCount": 1, "name": ""}]})";
+    auto engine = makeEngine(state, shaderLibrary);
+    FakeSurface surface;
+    Engine::Error error;
+    check(engine->Initialize(surface, {}, [](const Engine::Error &) {}, error),
+        "engine initialization should succeed");
+    check(surface.Draw(error), "draw should succeed with a subset of streams");
+    check(state->pipeline->Description().vertexAttributes.size() == 1
+            && state->pipeline->Description().vertexAttributes[0].location == 0
+            && state->pipeline->Description().vertexAttributes[0].bufferSlot == 1,
+        "the pipeline should map the UV stream to the shader's location");
+    check(state->pipeline->Description().vertexBuffers.size() == 1,
+        "the pipeline should not include unused streams");
+    check(state->boundSlots == std::vector<std::uint32_t>({1}),
+        "only the stream the pipeline reads should be bound");
+    engine->Shutdown();
+}
+
+void drawFailsWhenTheMeshLacksARequiredStream()
+{
+    auto state = std::make_shared<FakeState>();
+    auto shaderLibrary = std::make_shared<FakeShaderLibrary>();
+    shaderLibrary->vertexReflection =
+        R"({"stage": "vertex",
+            "vertexInputs": [{"semantic": "NORMAL0", "format": "float3", "location": 0}],
+            "bindings": [{"binding": 0, "type": "uniformBuffer", "arrayCount": 1, "name": ""}]})";
+    auto engine = makeEngine(state, shaderLibrary);
+    FakeSurface surface;
+    Engine::Error error;
+    check(engine->Initialize(surface, {}, [](const Engine::Error &) {}, error),
+        "initialization does not need a mesh");
+    check(!surface.Draw(error), "a missing vertex stream should fail the draw");
+    check(error.message.find("NORMAL0") != std::string::npos,
+        "the error should name the missing semantic");
+    engine->Shutdown();
+}
+
+void drawFailsForAnUnknownMaterialProgram()
+{
+    auto state = std::make_shared<FakeState>();
+    auto shaderLibrary = std::make_shared<FakeShaderLibrary>();
+    shaderLibrary->programConfig = "[program]\nname = Other\nvertex = A:b\n";
+    auto engine = makeEngine(state, shaderLibrary);
+    FakeSurface surface;
+    Engine::Error error;
+    check(engine->Initialize(surface, {}, [](const Engine::Error &) {}, error),
+        "programs are resolved on first use, not at initialization");
+    check(!surface.Draw(error), "a material naming an unknown program should fail the draw");
+    check(error.message.find("Mesh") != std::string::npos, "the error should name the program");
+}
+
 } // namespace
 
 int main()
 {
+    pipelineUsesOnlyTheMeshStreamsTheShaderReads();
+    drawFailsWhenTheMeshLacksARequiredStream();
+    drawFailsForAnUnknownMaterialProgram();
     engineDrawsEveryPartOfEveryModelInstance();
     headlessEngineRendersToAnOffscreenTextureAndCapturesIt();
     surfaceStartupFailureCleansUpEngineResources();

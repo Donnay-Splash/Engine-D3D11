@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace Engine {
@@ -14,6 +15,8 @@ struct Error;
 
 struct VertexStream
 {
+    // Upper-case HLSL semantic with index, e.g. "POSITION0"; matched against shader inputs.
+    std::string semantic;
     std::uint32_t slot = 0;
     Graphics::VertexFormat format = Graphics::VertexFormat::Float3;
     std::uint32_t stride = 0;
@@ -39,6 +42,7 @@ public:
     void SetLocalBounds(const Maths::Bounds &bounds) noexcept { m_LocalBounds = bounds; }
     const Maths::Bounds &LocalBounds() const noexcept { return m_LocalBounds; }
     const std::vector<VertexStream> &VertexStreams() const noexcept;
+    const VertexStream *FindStream(const std::string &semantic) const noexcept;
     std::uint32_t VertexCount() const noexcept;
 
 private:

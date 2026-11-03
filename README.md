@@ -35,7 +35,7 @@ cmake -S . -B build/macos -G Xcode \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=26
 cmake --build build/macos --target shader-compiler --config Debug
 shader_compiler="$(find build/macos -type f -name shader-compiler -perm -111 -print -quit)"
-"$shader_compiler" --config tools/ShaderCompiler/shaders.cfg
+"$shader_compiler" --config tools/ShaderCompiler/ShaderCompiler.cfg
 cmake --build build/macos --config Debug --target engine-macos engine-metal-integration-tests
 open build/macos/EngineMacOS.xcodeproj
 ```

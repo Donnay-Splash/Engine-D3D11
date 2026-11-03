@@ -2,8 +2,12 @@
 
 #include "ShaderCompilerConfig.h"
 #include "MetalShaderConverter.h"
+#include "Core/Types.h"
+#include "PortableReflection.h"
+#include "ShaderProgramCatalog.h"
 
 #include <cerrno>
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -146,6 +150,68 @@ bool IsUpToDate(const std::vector<fs::path> &outputs, const fs::path &depFile,
     return true;
 }
 
+struct BuildEntry
+{
+    std::string source;
+    std::string entry;
+    std::string stage; // vs, ps or cs
+};
+
+// Reads the program config, collects the distinct entries it names (and only those), and
+// copies the config next to the compiled artifacts.
+bool ProcessPrograms(const Config &config, const fs::path &outputDirectory, bool dryRun,
+                     std::vector<BuildEntry> &entries, std::string &error)
+{
+    std::ifstream file(config.programsFile);
+    if (!file) {
+        error = "Cannot open programs file: " + config.programsFile.string();
+        return false;
+    }
+    std::stringstream text;
+    text << file.rdbuf();
+
+    Engine::ShaderProgramCatalog catalog;
+    Engine::Error parseError;
+    if (!Engine::ShaderProgramCatalog::Parse(text.str(), catalog, parseError)) {
+        error = parseError.message;
+        return false;
+    }
+
+    const auto add = [&entries](const Engine::ShaderRef &ref, const char *stage) {
+        const auto same = [&](const BuildEntry &existing) {
+            return existing.source == ref.source && existing.entry == ref.entry;
+        };
+        if (std::none_of(entries.begin(), entries.end(), same)) {
+            entries.push_back({ref.source, ref.entry, stage});
+            return true;
+        }
+        // The same entry cannot be compiled for two stages.
+        return std::any_of(entries.begin(), entries.end(), [&](const BuildEntry &existing) {
+            return same(existing) && existing.stage == stage;
+        });
+    };
+    for (const auto &[name, program] : catalog.Programs()) {
+        const bool valid = (!program.vertex || add(*program.vertex, "vs")) &&
+                           (!program.fragment || add(*program.fragment, "ps")) &&
+                           (!program.compute || add(*program.compute, "cs"));
+        if (!valid) {
+            error = "Program " + name + ": an entry is used for more than one stage.";
+            return false;
+        }
+    }
+
+    if (!dryRun) {
+        std::error_code ec;
+        fs::copy_file(config.programsFile, outputDirectory / "ShaderPrograms.cfg",
+                      fs::copy_options::overwrite_existing, ec);
+        if (ec) {
+            error = "Cannot copy the programs file: " + ec.message();
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace
 
 int main(int argc, char **argv)
@@ -193,20 +259,39 @@ int main(int argc, char **argv)
         }
     }
 
-    for (const auto &shader : config->shaders) {
-        for (const auto &entry : shader.entries) {
-            const std::string baseName = shader.name + "_" + entry.name;
+    if (config->includeDirectory.empty()) {
+        std::cerr << "Config is missing settings.includeDirectory (where <source>.hlsl lives)\n";
+        return 1;
+    }
+    std::vector<BuildEntry> entries;
+    if (!ProcessPrograms(*config, buildMetal ? metalDirectory : dxilDirectory, dryRun, entries,
+                         error)) {
+        std::cerr << error << '\n';
+        return 1;
+    }
+
+    {
+        for (const auto &entry : entries) {
+            const fs::path sourcePath = config->includeDirectory / (entry.source + ".hlsl");
+            if (!fs::exists(sourcePath)) {
+                std::cerr << "Shader source not found: " << sourcePath << '\n';
+                return 1;
+            }
+            const std::string baseName = entry.source + "_" + entry.entry;
             const fs::path dxilPath = dxilDirectory / (baseName + ".dxil");
             const fs::path depPath = dxilDirectory / (baseName + ".d");
             const fs::path metallibPath = metalDirectory / (baseName + ".metallib");
             const fs::path reflectionPath = metalDirectory / (baseName + ".json");
+            const fs::path portableReflectionPath =
+                metalDirectory / (baseName + ".reflection.json");
 
             std::vector<fs::path> outputs = {dxilPath};
             if (buildMetal) {
                 outputs.push_back(metallibPath);
                 outputs.push_back(reflectionPath);
+                outputs.push_back(portableReflectionPath);
             }
-            std::vector<fs::path> extraInputs = {shader.source, configPath};
+            std::vector<fs::path> extraInputs = {sourcePath, configPath};
             if (config->dxc.find('/') != std::string::npos) {
                 extraInputs.emplace_back(config->dxc);
             }
@@ -219,7 +304,7 @@ int main(int argc, char **argv)
             std::vector<std::string> dxc = {
                 config->dxc,
                 "-T", ProfileFor(entry.stage, config->shaderModel),
-                "-E", entry.name,
+                "-E", entry.entry,
                 "-Fo", dxilPath.string(),
             };
             if (!config->includeDirectory.empty()) {
@@ -227,7 +312,7 @@ int main(int argc, char **argv)
                 dxc.push_back(config->includeDirectory.string());
             }
             dxc.insert(dxc.end(), config->dxcArgs.begin(), config->dxcArgs.end());
-            dxc.push_back(shader.source.string());
+            dxc.push_back(sourcePath.string());
 
             // Same arguments with -MF and no -Fo: dxc then only records the header dependencies.
             std::vector<std::string> dependencyArguments = {dxc.front()};
@@ -250,9 +335,27 @@ int main(int argc, char **argv)
             }
             std::string conversionError;
             if (!ShaderCompiler::ConvertDxilToMetal(
-                    dxilPath, entry.name, entry.stage, metallibPath, reflectionPath, dryRun, conversionError)) {
+                    dxilPath, entry.entry, entry.stage, metallibPath, reflectionPath, dryRun, conversionError)) {
                 std::cerr << conversionError << '\n';
                 return 1;
+            }
+            if (!dryRun) {
+                std::ifstream metalReflection(reflectionPath);
+                std::stringstream metalJson;
+                metalJson << metalReflection.rdbuf();
+                std::string portableJson;
+                std::string reflectionError;
+                if (!ShaderCompiler::BuildPortableReflection(
+                        metalJson.str(), entry.stage, portableJson, reflectionError)) {
+                    std::cerr << baseName << ": " << reflectionError << '\n';
+                    return 1;
+                }
+                std::ofstream portableFile(portableReflectionPath, std::ios::binary);
+                portableFile << portableJson;
+                if (!portableFile) {
+                    std::cerr << "Cannot write " << portableReflectionPath << '\n';
+                    return 1;
+                }
             }
         }
     }

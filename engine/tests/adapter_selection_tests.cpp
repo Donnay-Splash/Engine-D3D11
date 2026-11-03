@@ -63,11 +63,16 @@ private:
 class TestShaderLibrary final : public Engine::ShaderLibrary
 {
 public:
-    bool RequestGraphicsShaders(
+    bool LoadProgramConfig(std::string &, Engine::Error &) override
+    {
+        return false;
+    }
+
+    bool RequestShader(
         Engine::Graphics::Device &,
-        Engine::ShaderProgramType,
-        const std::string &,
-        Engine::GraphicsShaderPair &,
+        const Engine::ShaderRef &,
+        Engine::Graphics::ShaderStage,
+        Engine::LoadedShader &,
         Engine::Error &) override
     {
         return false;

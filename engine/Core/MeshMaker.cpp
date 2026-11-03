@@ -23,6 +23,7 @@ struct PreparedStream
 
 bool prepareStream(
     Graphics::Device &device,
+    const char *semantic,
     std::uint32_t slot,
     Graphics::VertexFormat format,
     std::uint32_t stride,
@@ -68,6 +69,7 @@ bool prepareStream(
         return false;
     }
 
+    prepared.stream.semantic = semantic;
     prepared.stream.slot = slot;
     prepared.stream.format = format;
     prepared.stream.stride = stride;
@@ -124,10 +126,10 @@ bool MeshMaker::CreateUniformTriangle(Graphics::Device &device, Mesh &mesh, Erro
     PreparedStream uvStream;
     Mesh generatedMesh;
     if (!prepareStream(
-            device, 0, Graphics::VertexFormat::Float3, sizeof(float) * 3,
+            device, "POSITION0", 0, Graphics::VertexFormat::Float3, sizeof(float) * 3,
             positions, sizeof(positions), positionStream, error)
         || !prepareStream(
-            device, 1, Graphics::VertexFormat::Float2, sizeof(float) * 2,
+            device, "TEXCOORD0", 1, Graphics::VertexFormat::Float2, sizeof(float) * 2,
             textureCoordinates, sizeof(textureCoordinates), uvStream, error)) {
         return false;
     }

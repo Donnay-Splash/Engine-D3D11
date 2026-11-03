@@ -33,7 +33,8 @@ bool Mesh::AddVertexStream(const VertexStream &stream, Error &error)
         stream.buffer == nullptr
             ? 0
             : static_cast<std::uint32_t>(stream.buffer->Description().usage);
-    if (stream.buffer == nullptr || stream.vertexCount == 0 || stream.stride == 0
+    if (stream.buffer == nullptr || stream.semantic.empty() || stream.vertexCount == 0
+        || stream.stride == 0
         || formatSize == 0 || stream.stride < formatSize
         || (bufferUsage & static_cast<std::uint32_t>(Graphics::BufferUsage::Vertex)) == 0
         || stream.vertexCount > std::numeric_limits<std::size_t>::max() / stream.stride
@@ -49,6 +50,10 @@ bool Mesh::AddVertexStream(const VertexStream &stream, Error &error)
     for (const VertexStream &existing : m_VertexStreams) {
         if (existing.slot == stream.slot) {
             error.message = "Mesh vertex stream slots must be unique.";
+            return false;
+        }
+        if (existing.semantic == stream.semantic) {
+            error.message = "Mesh vertex stream semantics must be unique.";
             return false;
         }
     }
@@ -95,6 +100,14 @@ bool Mesh::CollectPendingUploads(
 const std::vector<VertexStream> &Mesh::VertexStreams() const noexcept
 {
     return m_VertexStreams;
+}
+
+const VertexStream *Mesh::FindStream(const std::string &semantic) const noexcept
+{
+    const auto found = std::find_if(
+        m_VertexStreams.begin(), m_VertexStreams.end(),
+        [&semantic](const VertexStream &stream) { return stream.semantic == semantic; });
+    return found == m_VertexStreams.end() ? nullptr : &*found;
 }
 
 std::uint32_t Mesh::VertexCount() const noexcept

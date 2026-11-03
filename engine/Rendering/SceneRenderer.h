@@ -6,6 +6,7 @@
 #include "Graphics/Buffer.h"
 #include "Graphics/GraphicsTypes.h"
 #include "Rendering/FrameConstants.h"
+#include "Rendering/PipelineCache.h"
 #include "ShaderLibrary.h"
 
 #include <map>
@@ -35,7 +36,7 @@ public:
 
     bool Initialize(
         std::shared_ptr<Graphics::Device> device,
-        GraphicsShaderPair shaders,
+        std::shared_ptr<ShaderLibrary> shaderLibrary,
         Graphics::TextureFormat colorFormat,
         Error &error);
     void Shutdown() noexcept;
@@ -57,6 +58,7 @@ private:
         std::shared_ptr<Graphics::Buffer> buffer;
         std::shared_ptr<Graphics::BufferView> bufferView;
         std::shared_ptr<Graphics::BindingSet> bindings;
+        std::shared_ptr<const ShaderProgram> program; // whose layout `bindings` was created for
         MeshTransforms contents;
         bool written = false;
         bool prepared = false; // the one-time uniform barrier has been submitted
@@ -69,18 +71,12 @@ private:
         std::size_t slot = 0;
     };
 
-    using PipelineKey = std::pair<Graphics::CullMode, Graphics::PrimitiveTopology>;
-
-    bool CreateSlot(Error &error);
+    bool CreateSlot(std::shared_ptr<const ShaderProgram> program, DrawSlot &slot, Error &error);
     bool WriteSlot(DrawSlot &slot, const MeshTransforms &transforms, Error &error);
-    std::shared_ptr<Graphics::GraphicsPipeline> GetPipeline(
-        const PipelineKey &key, Error &error);
 
     std::shared_ptr<Graphics::Device> m_Device;
-    GraphicsShaderPair m_Shaders;
+    PipelineCache m_PipelineCache;
     Graphics::TextureFormat m_ColorFormat{};
-    std::shared_ptr<Graphics::BindingLayout> m_BindingLayout;
-    std::map<PipelineKey, std::shared_ptr<Graphics::GraphicsPipeline>> m_Pipelines;
     std::vector<DrawSlot> m_Slots;
     std::vector<DrawItem> m_DrawItems;
 };

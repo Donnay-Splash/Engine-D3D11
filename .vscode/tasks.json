@@ -37,7 +37,7 @@
             "command": "${workspaceFolder}/build/macos/tools/ShaderCompiler/shader-compiler",
             "args": [
                 "--config",
-                "${workspaceFolder}/tools/ShaderCompiler/shaders.cfg"
+                "${workspaceFolder}/tools/ShaderCompiler/ShaderCompiler.cfg"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

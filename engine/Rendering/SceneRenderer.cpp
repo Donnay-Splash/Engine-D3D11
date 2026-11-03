@@ -1,5 +1,6 @@
 #include "Rendering/SceneRenderer.h"
 
+#include "Core/Material.h"
 #include "Graphics/BindingLayout.h"
 #include "Graphics/BindingSet.h"
 #include "Graphics/Buffer.h"
@@ -23,44 +24,27 @@ SceneRenderer::~SceneRenderer()
 
 bool SceneRenderer::Initialize(
     std::shared_ptr<Graphics::Device> device,
-    GraphicsShaderPair shaders,
+    std::shared_ptr<ShaderLibrary> shaderLibrary,
     Graphics::TextureFormat colorFormat,
     Error &error)
 {
-    if (device == nullptr || shaders.vertex == nullptr || shaders.fragment == nullptr) {
-        error.message = "The scene renderer requires a device and a shader pair.";
+    if (device == nullptr || shaderLibrary == nullptr) {
+        error.message = "The scene renderer requires a device and a shader library.";
         return false;
     }
-    Graphics::BindingLayoutDesc layoutDescription;
-    layoutDescription.bindings.push_back({
-        0,
-        Graphics::BindingType::UniformBuffer,
-        1,
-        Graphics::ShaderStage::Vertex,
-    });
-    std::shared_ptr<Graphics::BindingLayout> layout =
-        device->CreateBindingLayout(layoutDescription, error);
-    if (layout == nullptr) {
-        if (error.message.empty()) {
-            error.message = "Failed to create the transform binding layout.";
-        }
+    if (!m_PipelineCache.Initialize(device, std::move(shaderLibrary), error)) {
         return false;
     }
     m_Device = std::move(device);
-    m_Shaders = std::move(shaders);
     m_ColorFormat = colorFormat;
-    m_BindingLayout = std::move(layout);
-    return GetPipeline({Graphics::CullMode::None, Graphics::PrimitiveTopology::TriangleList}, error)
-        != nullptr;
+    return true;
 }
 
 void SceneRenderer::Shutdown() noexcept
 {
     m_DrawItems.clear();
     m_Slots.clear();
-    m_Pipelines.clear();
-    m_BindingLayout.reset();
-    m_Shaders = GraphicsShaderPair();
+    m_PipelineCache.Shutdown();
     m_Device.reset();
 }
 
@@ -84,41 +68,53 @@ bool SceneRenderer::CollectPendingUploads(
     return true;
 }
 
-bool SceneRenderer::CreateSlot(Error &error)
+bool SceneRenderer::CreateSlot(
+    std::shared_ptr<const ShaderProgram> program, DrawSlot &slot, Error &error)
 {
-    DrawSlot slot;
-    Graphics::BufferDesc description;
-    description.size = sizeof(MeshTransforms);
-    description.usage = Graphics::BufferUsage::Uniform;
-    description.memoryType = Graphics::MemoryType::Upload;
-    slot.buffer = m_Device->CreateBuffer(description, error);
+    // The renderer supplies the transform constants, so the program must reflect a uniform
+    // buffer for them.
+    const std::optional<Graphics::BindingDesc> transformBinding =
+        program->FindBinding(Graphics::BindingType::UniformBuffer);
+    if (!transformBinding) {
+        error.message = "Shader program '" + program->name + "' has no uniform buffer binding "
+            "for the mesh transforms.";
+        return false;
+    }
     if (slot.buffer == nullptr) {
-        if (error.message.empty()) {
-            error.message = "Failed to create the transform uniform buffer.";
+        Graphics::BufferDesc description;
+        description.size = sizeof(MeshTransforms);
+        description.usage = Graphics::BufferUsage::Uniform;
+        description.memoryType = Graphics::MemoryType::Upload;
+        slot.buffer = m_Device->CreateBuffer(description, error);
+        if (slot.buffer == nullptr) {
+            if (error.message.empty()) {
+                error.message = "Failed to create the transform uniform buffer.";
+            }
+            return false;
         }
-        return false;
-    }
-    slot.bufferView = m_Device->CreateBufferView(slot.buffer, 0, sizeof(MeshTransforms), error);
-    if (slot.bufferView == nullptr) {
-        if (error.message.empty()) {
-            error.message = "Failed to create a view of the transform uniform buffer.";
+        slot.bufferView =
+            m_Device->CreateBufferView(slot.buffer, 0, sizeof(MeshTransforms), error);
+        if (slot.bufferView == nullptr) {
+            if (error.message.empty()) {
+                error.message = "Failed to create a view of the transform uniform buffer.";
+            }
+            return false;
         }
-        return false;
     }
-    slot.bindings = m_Device->CreateBindingSet(m_BindingLayout, error);
+    slot.bindings = m_Device->CreateBindingSet(program->BindingLayout(), error);
     if (slot.bindings == nullptr) {
         if (error.message.empty()) {
             error.message = "Failed to create the transform binding set.";
         }
         return false;
     }
-    if (!slot.bindings->SetBuffer(0, 0, slot.bufferView, error)) {
+    if (!slot.bindings->SetBuffer(transformBinding->binding, 0, slot.bufferView, error)) {
         if (error.message.empty()) {
             error.message = "Failed to bind the transform uniform buffer.";
         }
         return false;
     }
-    m_Slots.push_back(std::move(slot));
+    slot.program = std::move(program);
     return true;
 }
 
@@ -145,39 +141,6 @@ bool SceneRenderer::WriteSlot(DrawSlot &slot, const MeshTransforms &transforms, 
     return true;
 }
 
-std::shared_ptr<Graphics::GraphicsPipeline> SceneRenderer::GetPipeline(
-    const PipelineKey &key, Error &error)
-{
-    const auto found = m_Pipelines.find(key);
-    if (found != m_Pipelines.end()) {
-        return found->second;
-    }
-    Graphics::GraphicsPipelineDesc description;
-    description.shaders = {m_Shaders.vertex, m_Shaders.fragment};
-    description.bindingLayout = m_BindingLayout;
-    description.vertexAttributes = {
-        {0, 0, Graphics::VertexFormat::Float3, 0},
-        {1, 1, Graphics::VertexFormat::Float2, 0},
-    };
-    description.vertexBuffers = {
-        {0, static_cast<std::uint32_t>(sizeof(float) * 3)},
-        {1, static_cast<std::uint32_t>(sizeof(float) * 2)},
-    };
-    description.topology = key.second;
-    description.cullMode = key.first;
-    description.colorFormats = {m_ColorFormat};
-    std::shared_ptr<Graphics::GraphicsPipeline> pipeline =
-        m_Device->CreateGraphicsPipeline(description, error);
-    if (pipeline == nullptr) {
-        if (error.message.empty()) {
-            error.message = "Failed to create the mesh graphics pipeline.";
-        }
-        return nullptr;
-    }
-    m_Pipelines.emplace(key, pipeline);
-    return pipeline;
-}
-
 bool SceneRenderer::Prepare(const Scene &scene, Graphics::CommandContext &context, Error &error)
 {
     if (m_Device == nullptr) {
@@ -192,11 +155,19 @@ bool SceneRenderer::Prepare(const Scene &scene, Graphics::CommandContext &contex
             if (part.mesh->VertexCount() == 0) {
                 continue;
             }
-            const std::size_t slotIndex = m_DrawItems.size();
-            if (slotIndex == m_Slots.size() && !CreateSlot(error)) {
+            std::shared_ptr<const ShaderProgram> program =
+                m_PipelineCache.GetProgram(part.material->ShaderProgram(), error);
+            if (program == nullptr) {
                 return false;
             }
+            const std::size_t slotIndex = m_DrawItems.size();
+            if (slotIndex == m_Slots.size()) {
+                m_Slots.emplace_back();
+            }
             DrawSlot &slot = m_Slots[slotIndex];
+            if (slot.program != program && !CreateSlot(program, slot, error)) {
+                return false;
+            }
             MeshTransforms transforms;
             transforms.world = world;
             transforms.view = camera.view;
@@ -217,7 +188,11 @@ bool SceneRenderer::Prepare(const Scene &scene, Graphics::CommandContext &contex
             }
             DrawItem item;
             item.mesh = part.mesh;
-            item.pipeline = GetPipeline({part.material->CullMode(), part.material->Topology()}, error);
+            PipelineState state;
+            state.cullMode = part.material->CullMode();
+            state.topology = part.material->Topology();
+            state.colorFormats = {m_ColorFormat};
+            item.pipeline = m_PipelineCache.GetPipeline(*program, *part.mesh, state, error);
             if (item.pipeline == nullptr) {
                 return false;
             }
@@ -241,9 +216,14 @@ bool SceneRenderer::Record(Graphics::RenderPassEncoder &renderPass, Error &error
         if (!renderPass.SetBindingSet(0, m_Slots[item.slot].bindings, error)) {
             return false;
         }
-        for (const VertexStream &stream : item.mesh->VertexStreams()) {
-            if (!renderPass.SetVertexBuffer(stream.slot, stream.buffer, 0, error)) {
-                return false;
+        // Bind only the streams the pipeline reads.
+        for (const Graphics::VertexBufferLayoutDesc &buffer :
+             item.pipeline->Description().vertexBuffers) {
+            for (const VertexStream &stream : item.mesh->VertexStreams()) {
+                if (stream.slot == buffer.bufferSlot
+                    && !renderPass.SetVertexBuffer(stream.slot, stream.buffer, 0, error)) {
+                    return false;
+                }
             }
         }
         renderPass.Draw(item.mesh->VertexCount());

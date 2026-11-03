@@ -49,7 +49,7 @@ jobs:
         run: |
           shader_compiler="$(find build -type f -name shader-compiler -perm -111 -print -quit)"
           test -n "$shader_compiler"
-          "$shader_compiler" --config tools/ShaderCompiler/shaders.cfg
+          "$shader_compiler" --config tools/ShaderCompiler/ShaderCompiler.cfg
 
       - name: Build
         run: cmake --build build --config Debug --parallel

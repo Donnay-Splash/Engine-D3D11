@@ -244,23 +244,8 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
         return false;
     }
 
-    GraphicsShaderPair shaders;
-    if (!m_ShaderLibrary->RequestGraphicsShaders(
-            *m_Device, ShaderProgramType::Mesh, "uv-triangle", shaders, error)) {
-        if (error.message.empty()) {
-            error.message = "Failed to request the UV mesh shader pair.";
-        }
-        return false;
-    }
-    if (shaders.vertex == nullptr || shaders.fragment == nullptr
-        || shaders.vertex->Stage() != Graphics::ShaderStage::Vertex
-        || shaders.fragment->Stage() != Graphics::ShaderStage::Fragment) {
-        error.message = "The shader library returned an invalid mesh shader pair.";
-        return false;
-    }
-
     if (!m_SceneRenderer->Initialize(
-            m_Device, shaders, m_Swapchain->Description().format, error)) {
+            m_Device, m_ShaderLibrary, m_Swapchain->Description().format, error)) {
         if (error.message.empty()) {
             error.message = "Failed to initialize the scene renderer.";
         }

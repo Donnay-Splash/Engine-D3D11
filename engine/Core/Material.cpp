@@ -8,11 +8,13 @@ Material::Material(
     std::string name,
     std::vector<MaterialParameter> parameters,
     Graphics::CullMode cullMode,
-    Graphics::PrimitiveTopology topology)
+    Graphics::PrimitiveTopology topology,
+    std::string shaderProgram)
     : m_Name(std::move(name)),
       m_Parameters(std::move(parameters)),
       m_CullMode(cullMode),
-      m_Topology(topology)
+      m_Topology(topology),
+      m_ShaderProgram(std::move(shaderProgram))
 {
 }
 

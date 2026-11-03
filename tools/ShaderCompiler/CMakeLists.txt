@@ -3,8 +3,18 @@ add_executable(shader-compiler
     main.cpp
     MetalShaderConverter.cpp
     MetalShaderConverter.h
+    PortableReflection.cpp
+    PortableReflection.h
     ShaderCompilerConfig.cpp
     ShaderCompilerConfig.h
+    # Parses ShaderPrograms.cfg so the compiler validates it with the engine's own parser.
+    "${PROJECT_SOURCE_DIR}/engine/ShaderProgramCatalog.cpp"
+)
+target_include_directories(shader-compiler PRIVATE
+    "${PROJECT_SOURCE_DIR}/engine"
+)
+target_include_directories(shader-compiler SYSTEM PRIVATE
+    "${PROJECT_SOURCE_DIR}/third_party"
 )
 target_compile_options(shader-compiler PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>

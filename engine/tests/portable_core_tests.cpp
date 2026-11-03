@@ -5,6 +5,8 @@
 #include "Core/Scene.h"
 #include "Core/Types.h"
 #include "Graphics/Buffer.h"
+#include "Graphics/ShaderReflection.h"
+#include "ShaderProgramCatalog.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -61,6 +63,7 @@ void meshRequiresValidMatchingVertexStreams()
     positionDescription.size = sizeof(float) * 9;
     positionDescription.usage = BufferUsage::Vertex;
     Engine::VertexStream positions;
+    positions.semantic = "POSITION0";
     positions.slot = 0;
     positions.format = VertexFormat::Float3;
     positions.stride = sizeof(float) * 3;
@@ -72,6 +75,7 @@ void meshRequiresValidMatchingVertexStreams()
     uvDescription.size = sizeof(float) * 4;
     uvDescription.usage = BufferUsage::Vertex;
     Engine::VertexStream uvs;
+    uvs.semantic = "TEXCOORD0";
     uvs.slot = 1;
     uvs.format = VertexFormat::Float2;
     uvs.stride = sizeof(float) * 2;
@@ -184,10 +188,71 @@ void modelInstancesComposeModelsMaterialsAndPlacement()
         "scene should add and remove instances");
 }
 
+void shaderProgramCatalogParsesSourceAndEntryPerStage()
+{
+    Engine::ShaderProgramCatalog catalog;
+    Engine::Error error;
+    check(Engine::ShaderProgramCatalog::Parse(
+              "# comment\n[program]\nname = Mesh\nvertex = A:vs_main  # trailing\n"
+              "fragment = B:ps_main\n[program]\nname = Depth\nvertex = A:vs_depth\n",
+              catalog, error),
+        "a valid program config should parse");
+    const Engine::ShaderProgramDesc *mesh = catalog.Find("Mesh");
+    check(mesh != nullptr && mesh->vertex && mesh->vertex->source == "A" && mesh->vertex->entry == "vs_main"
+            && mesh->fragment && mesh->fragment->source == "B"
+            && mesh->fragment->entry == "ps_main",
+        "stages may come from different sources");
+    const Engine::ShaderProgramDesc *depth = catalog.Find("Depth");
+    check(depth != nullptr && !depth->fragment, "the fragment stage is optional");
+    check(catalog.Find("Missing") == nullptr, "unknown programs are not found");
+
+    Engine::ShaderProgramCatalog rejected;
+    check(!Engine::ShaderProgramCatalog::Parse("[program]\nname = X\nvertex = nocolon\n",
+              rejected, error),
+        "a stage without source:entry should be rejected");
+    check(!Engine::ShaderProgramCatalog::Parse("[program]\nname = X\n", rejected, error),
+        "a program without a vertex stage should be rejected");
+    check(!Engine::ShaderProgramCatalog::Parse(
+              "[program]\nname = X\nvertex = A:b\n[program]\nname = X\nvertex = A:c\n",
+              rejected, error),
+        "duplicate program names should be rejected");
+}
+
+void shaderReflectionParsesInputsAndBindings()
+{
+    using namespace Engine::Graphics;
+    ShaderReflection reflection;
+    Engine::Error error;
+    check(ParseShaderReflection(
+              R"({"stage": "vertex",
+                  "vertexInputs": [{"semantic": "POSITION0", "format": "float3", "location": 0}],
+                  "bindings": [{"binding": 2, "type": "storageBuffer", "arrayCount": 4,
+                                "name": ""}]})",
+              reflection, error),
+        "valid reflection should parse");
+    check(reflection.stage == ShaderStage::Vertex && reflection.vertexInputs.size() == 1
+            && reflection.vertexInputs[0].semantic == "POSITION0"
+            && reflection.vertexInputs[0].format == VertexFormat::Float3,
+        "vertex inputs should be parsed");
+    check(reflection.bindings.size() == 1 && reflection.bindings[0].binding == 2
+            && reflection.bindings[0].type == BindingType::StorageBuffer
+            && reflection.bindings[0].arrayCount == 4
+            && reflection.bindings[0].visibility == ShaderStage::Vertex,
+        "bindings should take the shader's stage as visibility");
+    check(!ParseShaderReflection("not json", reflection, error), "invalid JSON is rejected");
+    check(!ParseShaderReflection(
+              R"({"stage": "vertex", "vertexInputs": [], "bindings": [
+                  {"binding": 0, "type": "bogus", "arrayCount": 1, "name": ""}]})",
+              reflection, error),
+        "unknown binding types are rejected");
+}
+
 } // namespace
 
 int main()
 {
+    shaderProgramCatalogParsesSourceAndEntryPerStage();
+    shaderReflectionParsesInputsAndBindings();
     materialInstancesOverrideOnlyTheirOwnParameters();
     modelInstancesComposeModelsMaterialsAndPlacement();
     meshRequiresValidMatchingVertexStreams();

@@ -7,7 +7,7 @@ build shaders automatically.
 ```sh
 cmake --build build/macos --target shader-compiler
 shader_compiler="$(find build/macos -type f -name shader-compiler -perm -111 -print -quit)"
-"$shader_compiler" --config tools/ShaderCompiler/shaders.cfg
+"$shader_compiler" --config tools/ShaderCompiler/ShaderCompiler.cfg
 ```
 
 Options: `--target dxil|metal|all` (default `all`) and `--dry-run` (print commands only).
@@ -17,11 +17,23 @@ Output (see `outputDirectory` in the config, default `build/shaders`):
 used by the Metal backend to encode shader resources. The macOS app bundles `metal/` into
 `Resources/shaders`; the Metal integration tests read it from the same directory.
 
-`shaders.cfg` lists the DXC executable, shader model, directories and, per `[shader]`, the source
-and its `entry = <vs|ps|cs> <name>` lines. Paths are relative to the config file. The Metal
-Shader Converter C API and dynamic library are vendored under `third_party/metal-shader-converter`;
-the shader compiler links them directly on macOS and writes the converter's reflection JSON next to
-each metallib.
+For every entry the Metal path also writes `metal/<Shader>_<entry>.reflection.json`, a
+backend-neutral description (vertex inputs by semantic, resource bindings by type) that the engine
+uses to build binding layouts and pipeline vertex layouts; its schema is documented in
+`engine/Graphics/ShaderReflection.h`. Today it is derived from the Metal converter's reflection, so
+`SRV` resources are reported as sampled textures and unnamed.
+
+`ShaderCompiler.cfg` only parameterises the compiler: the DXC executable, shader model, output
+directory, `includeDirectory` (where `<source>.hlsl` lives), the `programs` file and extra DXC
+arguments. Paths are relative to the config file.
+
+`engine/shaders/ShaderPrograms.cfg` is the single place that defines shaders. Each `[program]`
+names `vertex`/`fragment` or `compute` stages as `<source>:<entry>`; `<source>` is the HLSL file name
+without its extension. The compiler builds exactly the entries named there (nothing else is
+compiled), and copies the file to `metal/ShaderPrograms.cfg` so the runtime reads the same config.
+The Metal Shader Converter C API and dynamic library are vendored under
+`third_party/metal-shader-converter`; the compiler links them directly on macOS and writes the
+converter's reflection JSON next to each metallib.
 
 Uses the vendored DXC in `third_party/dxc/macos` by default (`dxc` in the config; paths containing a
 `/` are relative to the config file, bare names are looked up on `PATH`). Metal conversion is

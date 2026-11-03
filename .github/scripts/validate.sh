@@ -9,7 +9,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
   cmake --build build --target shader-compiler --config Debug --parallel
   shaderCompiler="$(find build -type f -name shader-compiler -perm -111 -print -quit)"
   [[ -n "$shaderCompiler" ]] || { echo "shader-compiler executable not found" >&2; exit 1; }
-  "$shaderCompiler" --config tools/ShaderCompiler/shaders.cfg
+  "$shaderCompiler" --config tools/ShaderCompiler/ShaderCompiler.cfg
   cmake --build build --config Debug --parallel
   ctest --test-dir build --build-config Debug --output-on-failure
   exit $?

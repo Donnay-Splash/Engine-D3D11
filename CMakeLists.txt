@@ -18,6 +18,7 @@ file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
 list(FILTER ENGINE_SOURCES EXCLUDE REGEX "/engine/tests/")
 add_library(engine STATIC ${ENGINE_SOURCES})
 target_include_directories(engine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/engine")
+target_include_directories(engine SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 target_compile_options(engine PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Graphics/Shader.h"
+#include "Graphics/ShaderReflection.h"
+#include "ShaderProgramCatalog.h"
 
 #include <memory>
 #include <string>
@@ -12,26 +14,27 @@ namespace Graphics {
 class Device;
 }
 
-enum class ShaderProgramType
+struct LoadedShader
 {
-    Mesh
+    std::shared_ptr<Graphics::Shader> shader;
+    Graphics::ShaderReflection reflection;
 };
 
-struct GraphicsShaderPair
-{
-    std::shared_ptr<Graphics::Shader> vertex;
-    std::shared_ptr<Graphics::Shader> fragment;
-};
-
+// Supplies compiled shader artifacts. The backend owns where they live and what format
+// they take; the engine only names them by source and entry point.
 class ShaderLibrary
 {
 public:
     virtual ~ShaderLibrary() = default;
-    virtual bool RequestGraphicsShaders(
+
+    // Returns the text of ShaderPrograms.cfg.
+    virtual bool LoadProgramConfig(std::string &text, Error &error) = 0;
+
+    virtual bool RequestShader(
         Graphics::Device &device,
-        ShaderProgramType type,
-        const std::string &name,
-        GraphicsShaderPair &shaders,
+        const ShaderRef &ref,
+        Graphics::ShaderStage stage,
+        LoadedShader &loaded,
         Error &error) = 0;
 };
 

@@ -41,7 +41,7 @@ std::optional<Config> LoadConfig(const std::filesystem::path &path, std::string 
     };
 
     Config config;
-    enum class Section { None, Settings, Shader } section = Section::None;
+    bool inSettings = false;
     std::string line;
     int lineNumber = 0;
     const auto fail = [&](const std::string &message) {
@@ -60,60 +60,35 @@ std::optional<Config> LoadConfig(const std::filesystem::path &path, std::string 
             continue;
         }
         if (line == "[settings]") {
-            section = Section::Settings;
-            continue;
-        }
-        if (line == "[shader]") {
-            section = Section::Shader;
-            config.shaders.emplace_back();
+            inSettings = true;
             continue;
         }
 
         const auto equals = line.find('=');
-        if (equals == std::string::npos || section == Section::None) {
+        if (equals == std::string::npos || !inSettings) {
             return fail("expected a section header or 'key = value'");
         }
         const std::string key = Trim(line.substr(0, equals));
         const std::string value = Trim(line.substr(equals + 1));
 
-        if (section == Section::Settings) {
-            if (key == "dxc") {
-                // A bare command name is looked up on PATH; anything with a directory is
-                // relative to the config file.
-                config.dxc = value.find('/') == std::string::npos
-                                 ? value
-                                 : resolve(value).string();
-            } else if (key == "shaderModel") {
-                config.shaderModel = value;
-            } else if (key == "outputDirectory") {
-                config.outputDirectory = resolve(value);
-            } else if (key == "includeDirectory") {
-                config.includeDirectory = resolve(value);
-            } else if (key == "dxcArgs") {
-                config.dxcArgs = Split(value);
-            } else {
-                return fail("unknown setting '" + key + "'");
-            }
-            continue;
-        }
-
-        ShaderSource &shader = config.shaders.back();
-        if (key == "name") {
-            shader.name = value;
-        } else if (key == "source") {
-            shader.source = resolve(value);
-        } else if (key == "entry") {
-            std::vector<std::string> tokens = Split(value);
-            if (tokens.size() != 2 ||
-                (tokens[0] != "vs" && tokens[0] != "ps" && tokens[0] != "cs")) {
-                return fail("entry must be '<vs|ps|cs> <entryPoint>'");
-            }
-            EntryPoint entry;
-            entry.stage = tokens[0];
-            entry.name = tokens[1];
-            shader.entries.push_back(std::move(entry));
+        if (key == "dxc") {
+            // A bare command name is looked up on PATH; anything with a directory is
+            // relative to the config file.
+            config.dxc = value.find('/') == std::string::npos
+                             ? value
+                             : resolve(value).string();
+        } else if (key == "shaderModel") {
+            config.shaderModel = value;
+        } else if (key == "outputDirectory") {
+            config.outputDirectory = resolve(value);
+        } else if (key == "includeDirectory") {
+            config.includeDirectory = resolve(value);
+        } else if (key == "programs") {
+            config.programsFile = resolve(value);
+        } else if (key == "dxcArgs") {
+            config.dxcArgs = Split(value);
         } else {
-            return fail("unknown shader key '" + key + "'");
+            return fail("unknown setting '" + key + "'");
         }
     }
 
@@ -121,11 +96,9 @@ std::optional<Config> LoadConfig(const std::filesystem::path &path, std::string 
         error = "Config is missing settings.outputDirectory";
         return std::nullopt;
     }
-    for (const ShaderSource &shader : config.shaders) {
-        if (shader.name.empty() || shader.source.empty() || shader.entries.empty()) {
-            error = "Every [shader] needs a name, a source and at least one entry";
-            return std::nullopt;
-        }
+    if (config.programsFile.empty()) {
+        error = "Config is missing settings.programs";
+        return std::nullopt;
     }
     return config;
 }

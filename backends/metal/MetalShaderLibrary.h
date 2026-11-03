@@ -12,16 +12,18 @@ namespace Metal {
 class MetalShaderLibrary final : public ShaderLibrary
 {
 public:
-    bool RequestGraphicsShaders(
+    bool LoadProgramConfig(std::string &text, Error &error) override;
+
+    bool RequestShader(
         Graphics::Device &device,
-        ShaderProgramType type,
-        const std::string &name,
-        GraphicsShaderPair &shaders,
+        const ShaderRef &ref,
+        Graphics::ShaderStage stage,
+        LoadedShader &loaded,
         Error &error) override;
 
 private:
-    static bool Load(const std::string &entryPoint, const std::string &extension,
-                     std::vector<std::uint8_t> &data, Error &error);
+    // Reads <bundle resources>/shaders/<fileName>.
+    static bool Load(const std::string &fileName, std::vector<std::uint8_t> &data, Error &error);
 };
 
 } // namespace Metal
