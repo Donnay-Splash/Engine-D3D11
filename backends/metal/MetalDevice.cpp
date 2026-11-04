@@ -342,6 +342,7 @@ std::shared_ptr<Sampler> MetalDevice::CreateSampler(const SamplerDesc &descripti
     descriptor->setMagFilter(filter(description.magFilter));
     descriptor->setSAddressMode(ToMetal(description.addressU));
     descriptor->setTAddressMode(ToMetal(description.addressV));
+    descriptor->setSupportArgumentBuffers(true);
     descriptor->setRAddressMode(ToMetal(description.addressW));
     MTL::SamplerState *sampler = device_->newSamplerState(descriptor.get());
     if (sampler == nullptr) {
