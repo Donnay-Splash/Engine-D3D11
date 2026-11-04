@@ -9,6 +9,7 @@
 #include "Core/Types.h"
 #include "Graphics/Buffer.h"
 #include "Graphics/ShaderReflection.h"
+#include "Rendering/ImageLoader.h"
 #include "ShaderProgramCatalog.h"
 
 #include <algorithm>
@@ -363,9 +364,35 @@ void shaderReflectionParsesInputsAndBindings()
 
 } // namespace
 
+void imageLoaderDecodesToRgba8()
+{
+    // 2x2 RGBA PNG: red, green / blue, half-transparent white.
+    const std::uint8_t png[] = {
+        0x89, 0x50, 0x4e, 0x47, 0xd, 0xa, 0x1a, 0xa, 0x0, 0x0, 0x0, 0xd, 0x49, 0x48, 0x44, 0x52,
+        0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x2, 0x8, 0x6, 0x0, 0x0, 0x0, 0x72, 0xb6, 0xd, 0x24,
+        0x0, 0x0, 0x0, 0x13, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0xf8, 0xcf, 0xc0, 0xf0,
+        0x1f, 0xc, 0x81, 0x34, 0x8, 0x34, 0x0, 0x0, 0x49, 0x49, 0x9, 0x78, 0x28, 0xa0, 0xdb,
+        0x77, 0x0, 0x0, 0x0, 0x0, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82};
+    Engine::Image image;
+    Engine::Error error;
+    check(Engine::ImageLoader::Decode(png, sizeof(png), image, error), "valid PNG should decode");
+    check(image.width == 2 && image.height == 2 && image.pixels.size() == 16,
+            "decoded image should be 2x2 RGBA8");
+    check(image.pixels[0] == 255 && image.pixels[1] == 0 && image.pixels[4] == 0
+                && image.pixels[5] == 255 && image.pixels[8] == 0 && image.pixels[10] == 255
+                && image.pixels[15] == 128,
+            "decoded pixels should keep their order and alpha");
+    Engine::Error badError;
+    const std::uint8_t garbage[] = {1, 2, 3, 4};
+    check(!Engine::ImageLoader::Decode(garbage, sizeof(garbage), image, badError)
+                && !badError.message.empty(),
+            "invalid data should fail with a message");
+}
+
 int main()
 {
     shaderProgramCatalogParsesSourceAndEntryPerStage();
+    imageLoaderDecodesToRgba8();
     shaderReflectionParsesInputsAndBindings();
     materialLayoutIsDerivedFromReflectionAndPacksValues();
     materialInstancesOverrideOnlyTheirOwnParameters();
