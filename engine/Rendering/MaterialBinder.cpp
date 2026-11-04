@@ -3,6 +3,7 @@
 #include "Graphics/BufferView.h"
 #include "Graphics/CommandContext.h"
 #include "Graphics/Device.h"
+#include "Rendering/CommonTextures.h"
 #include "Rendering/ShaderProgram.h"
 
 #include <cstring>
@@ -21,7 +22,7 @@ std::size_t alignedBufferSize(std::uint32_t size)
 
 bool MaterialBinder::Initialize(
     std::shared_ptr<Graphics::Device> device,
-    std::shared_ptr<Graphics::TextureView> fallbackTexture,
+    const CommonTextures &commonTextures,
     Error &error)
 {
     if (device == nullptr) {
@@ -29,14 +30,14 @@ bool MaterialBinder::Initialize(
         return false;
     }
     m_Device = std::move(device);
-    m_FallbackTexture = std::move(fallbackTexture);
+    m_CommonTextures = &commonTextures;
     return true;
 }
 
 void MaterialBinder::Shutdown() noexcept
 {
     m_Entries.clear();
-    m_FallbackTexture.reset();
+    m_CommonTextures = nullptr;
     m_Device.reset();
 }
 
@@ -46,6 +47,19 @@ void MaterialBinder::BeginFrame()
     for (auto it = m_Entries.begin(); it != m_Entries.end();) {
         it = it->second.lastUsedFrame + 1 < m_Frame ? m_Entries.erase(it) : std::next(it);
     }
+}
+
+MaterialTexture MaterialBinder::DefaultTextureFor(DefaultTexture texture) const
+{
+    switch (texture) {
+    case DefaultTexture::Black:
+        return m_CommonTextures->Black();
+    case DefaultTexture::FlatNormal:
+        return m_CommonTextures->FlatNormal();
+    case DefaultTexture::White:
+        break;
+    }
+    return m_CommonTextures->White();
 }
 
 bool MaterialBinder::CreateEntry(
@@ -132,7 +146,7 @@ bool MaterialBinder::Update(
         }
         MaterialTexture texture = std::get<MaterialTexture>(values[index]);
         if (texture == nullptr) {
-            texture = m_FallbackTexture;
+            texture = DefaultTextureFor(parameter.defaultTexture);
         }
         if (texture == nullptr) {
             error.message = "Material texture '" + parameter.name

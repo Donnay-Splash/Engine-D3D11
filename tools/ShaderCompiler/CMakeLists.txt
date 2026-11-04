@@ -1,6 +1,8 @@
 # Standalone shader build tool; not linked into the engine. Shaders are built by running it.
 add_executable(shader-compiler
     main.cpp
+    DefaultAnnotations.cpp
+    DefaultAnnotations.h
     DxcBufferLayout.cpp
     DxcBufferLayout.h
     MetalShaderConverter.cpp
@@ -23,6 +25,22 @@ target_compile_options(shader-compiler PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Werror>
 )
+
+if(BUILD_TESTING)
+    add_executable(shader-compiler-annotation-tests
+        DefaultAnnotationTests.cpp
+        DefaultAnnotations.cpp
+    )
+    target_include_directories(shader-compiler-annotation-tests SYSTEM PRIVATE
+        "${PROJECT_SOURCE_DIR}/third_party"
+    )
+    target_compile_options(shader-compiler-annotation-tests PRIVATE
+        $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>
+        $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>
+        $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Werror>
+    )
+    add_test(NAME shader-compiler-annotations COMMAND shader-compiler-annotation-tests)
+endif()
 
 if(APPLE)
     set(METAL_SHADER_CONVERTER_ROOT "${PROJECT_SOURCE_DIR}/third_party/metal-shader-converter")

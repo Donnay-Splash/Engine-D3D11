@@ -58,6 +58,20 @@ bool parseBindingType(const std::string &text, BindingType &type)
     return true;
 }
 
+std::size_t valueComponentCount(ShaderValueType type)
+{
+    switch (type) {
+    case ShaderValueType::Float2:
+        return 2;
+    case ShaderValueType::Float3:
+        return 3;
+    case ShaderValueType::Float4:
+        return 4;
+    default:
+        return 1;
+    }
+}
+
 bool parseValueType(const std::string &text, ShaderValueType &type)
 {
     if (text == "bool") {
@@ -131,9 +145,20 @@ bool ParseShaderReflection(std::string_view json, ShaderReflection &reflection, 
                         error.message = "The shader reflection has an invalid buffer member.";
                         return false;
                     }
+                    if (item.contains("default")) {
+                        member.defaultValue = item.at("default").get<std::vector<float>>();
+                        if (member.defaultValue.size() != valueComponentCount(member.type)) {
+                            error.message = "The shader reflection has a default of the wrong size.";
+                            return false;
+                        }
+                    }
                     block.members.push_back(std::move(member));
                 }
                 parsed.uniformBlocks.push_back(std::move(block));
+            }
+            if (entry.contains("default")) {
+                parsed.textureDefaults.push_back(
+                    {binding.set, binding.binding, entry.at("default").get<std::string>()});
             }
             parsed.bindings.push_back(std::move(binding));
         }

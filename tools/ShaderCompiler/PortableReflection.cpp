@@ -1,5 +1,6 @@
 #include "PortableReflection.h"
 
+#include "DefaultAnnotations.h"
 #include "DxcBufferLayout.h"
 
 #include <nlohmann/json.hpp>
@@ -58,9 +59,17 @@ unsigned MemberType(const std::string &hlslType, std::string &portable)
     return 0;
 }
 
+std::vector<DefaultAnnotation>::const_iterator FindAnnotation(
+    const std::vector<DefaultAnnotation> &defaults, const std::string &name)
+{
+    return std::find_if(defaults.begin(), defaults.end(),
+                        [&name](const DefaultAnnotation &item) { return item.name == name; });
+}
+
 // Members of an engine-owned buffer (set 0) may be anything; material buffers (set 1 and up)
 // must be scalars and vectors so the engine can expose them as parameters.
-bool BuildMembers(const DxcBufferBlock &block, unsigned set, nlohmann::json &members,
+bool BuildMembers(const DxcBufferBlock &block, unsigned set,
+                  const std::vector<DefaultAnnotation> &defaults, nlohmann::json &members,
                   std::string &error)
 {
     members = nlohmann::json::array();
@@ -76,8 +85,13 @@ bool BuildMembers(const DxcBufferBlock &block, unsigned set, nlohmann::json &mem
                     "." + member.name + ".";
             return false;
         }
-        members.push_back(
-            {{"name", member.name}, {"type", type}, {"offset", member.offset}, {"size", size}});
+        nlohmann::json entry = {
+            {"name", member.name}, {"type", type}, {"offset", member.offset}, {"size", size}};
+        const auto annotation = FindAnnotation(defaults, member.name);
+        if (annotation != defaults.end() && !BuildValueDefault(*annotation, type, entry["default"], error)) {
+            return false;
+        }
+        members.push_back(std::move(entry));
     }
     return true;
 }
@@ -94,8 +108,9 @@ bool KindMatches(const std::string &metalType, const std::string &dxcKind)
 } // namespace
 
 bool BuildPortableReflection(const std::string &metalReflectionJson, const std::string &stage,
-                             const std::string &dxcDisassembly, std::string &portableJson,
-                             std::string &error)
+                             const std::string &dxcDisassembly,
+                             const std::vector<DefaultAnnotation> &defaults,
+                             std::string &portableJson, std::string &error)
 {
     const nlohmann::json metal = nlohmann::json::parse(metalReflectionJson, nullptr, false);
     if (!metal.is_object()) {
@@ -156,13 +171,20 @@ bool BuildPortableReflection(const std::string &metalReflectionJson, const std::
                                           {"type", type},
                                           {"arrayCount", size / kDescriptorSize},
                                           {"name", name}};
+                if (type == "sampledTexture" && space != 0) {
+                    const auto annotation = FindAnnotation(defaults, name);
+                    if (annotation != defaults.end() &&
+                        !BuildTextureDefault(*annotation, binding["default"], error)) {
+                        return false;
+                    }
+                }
                 if (type == "uniformBuffer") {
                     const auto block = std::find_if(
                         blocks.begin(), blocks.end(),
                         [&name](const DxcBufferBlock &item) { return item.name == name; });
                     nlohmann::json members;
                     if (block != blocks.end()) {
-                        if (!BuildMembers(*block, space, members, error)) {
+                        if (!BuildMembers(*block, space, defaults, members, error)) {
                             return false;
                         }
                         if (!members.empty()) {

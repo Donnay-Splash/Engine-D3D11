@@ -32,6 +32,44 @@ bool fail(Error &error, const std::string &message)
     return false;
 }
 
+MaterialValue valueFromDefaults(MaterialValueType type, const std::vector<float> &numbers)
+{
+    if (numbers.empty()) {
+        return DefaultValueFor(type);
+    }
+    switch (type) {
+    case MaterialValueType::Bool:
+        return numbers[0] != 0.0f;
+    case MaterialValueType::Int:
+        return static_cast<std::int32_t>(numbers[0]);
+    case MaterialValueType::Float:
+        return numbers[0];
+    case MaterialValueType::Float2:
+        return Maths::Vector2{numbers[0], numbers[1]};
+    case MaterialValueType::Float3:
+        return Maths::Vector3{numbers[0], numbers[1], numbers[2]};
+    case MaterialValueType::Float4:
+        return Maths::Vector4{numbers[0], numbers[1], numbers[2], numbers[3]};
+    case MaterialValueType::Texture:
+        break;
+    }
+    return DefaultValueFor(type);
+}
+
+bool parseDefaultTexture(const std::string &name, DefaultTexture &texture)
+{
+    if (name == "white") {
+        texture = DefaultTexture::White;
+    } else if (name == "black") {
+        texture = DefaultTexture::Black;
+    } else if (name == "normal") {
+        texture = DefaultTexture::FlatNormal;
+    } else {
+        return false;
+    }
+    return true;
+}
+
 } // namespace
 
 MaterialValue DefaultValueFor(MaterialValueType type)
@@ -96,6 +134,13 @@ bool MaterialLayout::Build(
             parameter.type = MaterialValueType::Texture;
             parameter.binding = binding.binding;
             parameter.defaultValue = DefaultValueFor(parameter.type);
+            for (const Graphics::ShaderTextureDefault &item : stage->textureDefaults) {
+                if (item.set == binding.set && item.binding == binding.binding
+                    && !parseDefaultTexture(item.texture, parameter.defaultTexture)) {
+                    return fail(error, "Material texture '" + binding.name
+                        + "' has an unknown default '" + item.texture + "'.");
+                }
+            }
             built->m_Parameters.push_back(std::move(parameter));
         }
 
@@ -129,7 +174,7 @@ bool MaterialLayout::Build(
                 parameter.name = member.name;
                 parameter.type = type;
                 parameter.offset = member.offset;
-                parameter.defaultValue = DefaultValueFor(type);
+                parameter.defaultValue = valueFromDefaults(type, member.defaultValue);
                 built->m_Parameters.push_back(std::move(parameter));
             }
         }

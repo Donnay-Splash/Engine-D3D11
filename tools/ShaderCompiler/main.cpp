@@ -3,6 +3,7 @@
 #include "ShaderCompilerConfig.h"
 #include "MetalShaderConverter.h"
 #include "Core/Types.h"
+#include "DefaultAnnotations.h"
 #include "PortableReflection.h"
 #include "ShaderProgramCatalog.h"
 
@@ -348,10 +349,15 @@ int main(int argc, char **argv)
                 std::ifstream disassemblyFile(disassemblyPath);
                 std::stringstream disassembly;
                 disassembly << disassemblyFile.rdbuf();
+                std::ifstream sourceFile(sourcePath);
+                std::stringstream source;
+                source << sourceFile.rdbuf();
+                std::vector<ShaderCompiler::DefaultAnnotation> defaults;
                 std::string portableJson;
                 std::string reflectionError;
-                if (!ShaderCompiler::BuildPortableReflection(
-                        metalJson.str(), entry.stage, disassembly.str(), portableJson,
+                if (!ShaderCompiler::ParseDefaultAnnotations(source.str(), defaults, reflectionError)
+                    || !ShaderCompiler::BuildPortableReflection(
+                        metalJson.str(), entry.stage, disassembly.str(), defaults, portableJson,
                         reflectionError)) {
                     std::cerr << baseName << ": " << reflectionError << '\n';
                     return 1;

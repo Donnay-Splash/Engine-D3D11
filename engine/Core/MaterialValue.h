@@ -20,7 +20,15 @@ enum class MaterialValueType
     Texture,
 };
 
-// A null texture means "use the engine's default white texture".
+// Engine-provided textures a material texture parameter can default to.
+enum class DefaultTexture
+{
+    White,
+    Black,
+    FlatNormal,
+};
+
+// A null texture means "use the parameter's default texture".
 using MaterialTexture = std::shared_ptr<Graphics::TextureView>;
 
 // Alternatives are in MaterialValueType order, so index() is the value's type.

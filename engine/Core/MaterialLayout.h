@@ -24,6 +24,8 @@ struct MaterialParameter
     // Texture binding in the material set; unused for buffer values.
     std::uint32_t binding = 0;
     MaterialValue defaultValue;
+    // What an unset texture parameter shows; unused for buffer values.
+    DefaultTexture defaultTexture = DefaultTexture::White;
 };
 
 // The parameters a shader program exposes to materials, derived from reflection: the
@@ -61,7 +63,7 @@ private:
     std::uint32_t m_BufferBinding = 0;
 };
 
-// The zero value of a type, used until shaders can declare defaults.
+// The zero value of a type, used when a shader declares no default.
 MaterialValue DefaultValueFor(MaterialValueType type);
 
 } // namespace Engine

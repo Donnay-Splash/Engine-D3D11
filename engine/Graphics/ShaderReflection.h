@@ -36,6 +36,16 @@ struct ShaderBufferMember
     ShaderValueType type = ShaderValueType::Float;
     std::uint32_t offset = 0;
     std::uint32_t size = 0;
+    // From an `@default` annotation: one number per component (bool as 0 or 1); empty if none.
+    std::vector<float> defaultValue;
+};
+
+// From an `@default(white|black|normal)` annotation on a material texture.
+struct ShaderTextureDefault
+{
+    std::uint32_t set = 0;
+    std::uint32_t binding = 0;
+    std::string texture;
 };
 
 struct ShaderUniformBlock
@@ -54,7 +64,8 @@ struct ShaderUniformBlock
 //    "bindings": [{"binding", "set" (optional, default 0), "type": "uniformBuffer|storageBuffer|
 //                  sampledTexture|storageTexture|sampler", "arrayCount", "name",
 //                  "size" and "members": [{"name", "type": "bool|int|float|float2|float3|float4",
-//                  "offset", "size"}] for uniform buffers}]}
+//                  "offset", "size", "default" (optional numbers)}] for uniform buffers,
+//                  "default": "white|black|normal" (optional) for material textures}]}
 struct ShaderReflection
 {
     ShaderStage stage = ShaderStage::None;
@@ -63,6 +74,7 @@ struct ShaderReflection
     std::vector<BindingDesc> bindings;
     // Member layouts of the uniform buffers that declare one.
     std::vector<ShaderUniformBlock> uniformBlocks;
+    std::vector<ShaderTextureDefault> textureDefaults;
 };
 
 bool ParseShaderReflection(std::string_view json, ShaderReflection &reflection, Error &error);

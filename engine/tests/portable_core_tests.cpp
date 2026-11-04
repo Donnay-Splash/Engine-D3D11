@@ -220,6 +220,39 @@ void materialInstancesOverrideOnlyTheirOwnParameters()
     check(!first.IsOverridden("tint"), "clearing should restore the default");
 }
 
+constexpr const char *kDefaultsReflectionJson = R"({
+  "stage": "fragment", "vertexInputs": [], "bindings": [
+    {"binding": 1, "set": 1, "type": "sampledTexture", "arrayCount": 1, "name": "normalMap",
+     "default": "normal"},
+    {"binding": 0, "set": 1, "type": "uniformBuffer", "arrayCount": 1,
+     "name": "MaterialParams", "size": 32,
+     "members": [
+       {"name": "enabled", "type": "bool", "offset": 0, "size": 4, "default": [1]},
+       {"name": "count", "type": "int", "offset": 4, "size": 4, "default": [3]},
+       {"name": "tint", "type": "float4", "offset": 16, "size": 16, "default": [1, 0.5, 0.25, 1]}]}]})";
+
+void materialDefaultsComeFromReflection()
+{
+    Engine::Graphics::ShaderReflection reflection;
+    Engine::Error error;
+    check(Engine::Graphics::ParseShaderReflection(kDefaultsReflectionJson, reflection, error),
+        "reflection with defaults should parse");
+    std::shared_ptr<const Engine::MaterialLayout> layout;
+    check(Engine::MaterialLayout::Build({&reflection}, layout, error), "layout should build");
+    Engine::MaterialInstance instance(std::make_shared<Engine::Material>("test", layout));
+    check(std::get<bool>(*instance.Get("enabled")) && std::get<std::int32_t>(*instance.Get("count")) == 3
+            && std::get<Engine::Maths::Vector4>(*instance.Get("tint")).y == 0.5f,
+        "unset parameters should use the shader's defaults");
+    check(layout->Parameters()[layout->Find("normalMap").value()].defaultTexture
+            == Engine::DefaultTexture::FlatNormal,
+        "texture defaults should come from reflection");
+
+    std::string wrongSize = kDefaultsReflectionJson;
+    wrongSize.replace(wrongSize.find("[1, 0.5, 0.25, 1]"), 17, "[1, 0.5]");
+    check(!Engine::Graphics::ParseShaderReflection(wrongSize, reflection, error),
+        "a default with the wrong component count should be rejected");
+}
+
 void materialLayoutRejectsInconsistentStages()
 {
     Engine::Graphics::ShaderReflection vertex;
@@ -396,6 +429,7 @@ int main()
     shaderReflectionParsesInputsAndBindings();
     materialLayoutIsDerivedFromReflectionAndPacksValues();
     materialInstancesOverrideOnlyTheirOwnParameters();
+    materialDefaultsComeFromReflection();
     materialLayoutRejectsInconsistentStages();
     modelInstancesComposeModelsMaterialsAndPlacement();
     meshRequiresValidMatchingVertexStreams();

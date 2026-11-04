@@ -12,14 +12,14 @@ SamplerState linearRepeat : register(s0, space0);
 // reflects these so materials can set them by name.
 cbuffer MaterialParams : register(b0, space1)
 {
-    bool useTexture;
-    int mode; // 0 plain, 1 grayscale
-    float intensity;
-    float4 tint;
-    float2 uvScale;
+    bool useTexture; // @default(true)
+    int mode; // @default(0) 0 plain, 1 grayscale
+    float intensity; // @default(1)
+    float4 tint; // @default(1, 1, 1, 1)
+    float2 uvScale; // @default(1, 1)
 };
 
-Texture2D baseTexture : register(t0, space1);
+Texture2D baseTexture : register(t0, space1); // @default(white)
 
 struct MeshVertexInput
 {

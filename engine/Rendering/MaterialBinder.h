@@ -15,6 +15,7 @@ class CommandContext;
 class Device;
 } // namespace Graphics
 
+class CommonTextures;
 struct ShaderProgram;
 
 // Owns the GPU side of material instances: a uniform buffer and a material-set binding set
@@ -23,11 +24,11 @@ struct ShaderProgram;
 class MaterialBinder
 {
 public:
-    // `fallbackTexture` is bound for texture parameters that are not set, so no descriptor
-    // is ever left unbound.
+    // Texture parameters that are not set get their default common texture, so no descriptor
+    // is ever left unbound. `commonTextures` must outlive the binder.
     bool Initialize(
         std::shared_ptr<Graphics::Device> device,
-        std::shared_ptr<Graphics::TextureView> fallbackTexture,
+        const CommonTextures &commonTextures,
         Error &error);
     void Shutdown() noexcept;
 
@@ -60,10 +61,11 @@ private:
         Graphics::CommandContext &context,
         Entry &entry,
         Error &error);
+    MaterialTexture DefaultTextureFor(DefaultTexture texture) const;
     bool Update(const MaterialInstance &instance, const MaterialLayout &layout, Entry &entry, Error &error);
 
     std::shared_ptr<Graphics::Device> m_Device;
-    std::shared_ptr<Graphics::TextureView> m_FallbackTexture;
+    const CommonTextures *m_CommonTextures = nullptr;
     std::map<const MaterialInstance *, Entry> m_Entries;
     std::uint64_t m_Frame = 0;
 };
