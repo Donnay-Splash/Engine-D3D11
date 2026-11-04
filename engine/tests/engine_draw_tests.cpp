@@ -338,9 +338,11 @@ public:
         return description_;
     }
 
+    using Engine::Graphics::GraphicsPipeline::Layout;
+
     std::shared_ptr<Engine::Graphics::BindingLayout> Layout() const override
     {
-        return description_.bindingLayout;
+        return Layout(0);
     }
 
 private:
@@ -936,11 +938,11 @@ void engineRecordsAThreeVertexUvMeshDraw()
 
     check(surface.Draw(error), "surface draw callback should record the mesh");
     check(state->pipeline != nullptr, "the first draw should create a graphics pipeline");
-    check(state->pipeline->Description().bindingLayout != nullptr,
+    check(state->pipeline->Layout(0) != nullptr,
         "graphics pipeline should identify its binding layout");
-    check(state->pipeline->Description().bindingLayout->Bindings().size() == 1
-            && state->pipeline->Description().bindingLayout->Bindings()[0].binding == 3
-            && state->pipeline->Description().bindingLayout->Bindings()[0].visibility
+    check(state->pipeline->Layout(0)->Bindings().size() == 1
+            && state->pipeline->Layout(0)->Bindings()[0].binding == 3
+            && state->pipeline->Layout(0)->Bindings()[0].visibility
                 == Engine::Graphics::ShaderStage::Vertex,
         "binding layout should come from the shader reflection");
     check(state->pipeline->Description().topology
@@ -1070,9 +1072,8 @@ void engineDrawsEveryPartOfEveryModelInstance()
         "model parts should be added");
     auto moved = std::make_shared<Engine::ModelInstance>(twoPartModel);
     moved->SetPosition({2.0f, 0.0f, 0.0f});
-    check(moved->GetMaterialInstance(1).SetVector4(
-              Engine::Material::kBaseColor, {1.0f, 0.0f, 0.0f, 1.0f}, error),
-        "per-instance override should apply");
+    check(!moved->GetMaterialInstance(1).SetVector4("tint", {}, error),
+        "a material without parameters rejects overrides");
     scene.Add(moved);
 
     check(surface.Draw(error), "multi-instance draw should succeed");

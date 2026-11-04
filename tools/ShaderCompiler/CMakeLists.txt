@@ -1,6 +1,8 @@
 # Standalone shader build tool; not linked into the engine. Shaders are built by running it.
 add_executable(shader-compiler
     main.cpp
+    DxcBufferLayout.cpp
+    DxcBufferLayout.h
     MetalShaderConverter.cpp
     MetalShaderConverter.h
     PortableReflection.cpp

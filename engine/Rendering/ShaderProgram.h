@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/MaterialLayout.h"
 #include "Graphics/BindingLayout.h"
 #include "Graphics/GraphicsPipeline.h"
 #include "Graphics/ShaderReflection.h"
@@ -19,13 +20,17 @@ struct ShaderProgram
     // Shaders and binding layout are already filled in.
     Graphics::GraphicsPipelineDesc pipelineTemplate;
     std::vector<Graphics::ShaderVertexInput> vertexInputs;
+    // Parameters materials can set on this program; null when it has none.
+    std::shared_ptr<const MaterialLayout> materialLayout;
 
-    std::shared_ptr<Graphics::BindingLayout> BindingLayout() const
+    // Layout of a binding set, or null when the program has no bindings in it.
+    std::shared_ptr<Graphics::BindingLayout> BindingLayout(std::uint32_t set = 0) const
     {
-        return pipelineTemplate.bindingLayout;
+        const auto &layouts = pipelineTemplate.bindingLayouts;
+        return set < layouts.size() ? layouts[set] : nullptr;
     }
 
-    // First reflected binding of the given type, if the program has one.
+    // First reflected binding of the given type in the engine set, if the program has one.
     std::optional<Graphics::BindingDesc> FindBinding(Graphics::BindingType type) const;
 };
 

@@ -153,7 +153,7 @@ bool RunMetalIntegrationTests()
     }
 
     const BindingLayoutDesc computeLayoutDescription{{
-        {0, BindingType::StorageBuffer, 1, ShaderStage::Compute},
+        {0, BindingType::StorageBuffer, 1, ShaderStage::Compute, 0, {}},
     }};
     const std::shared_ptr<BindingLayout> computeLayout =
         device->CreateBindingLayout(computeLayoutDescription, error);
@@ -236,7 +236,7 @@ bool RunMetalIntegrationTests()
     }
 
     const BindingLayoutDesc bindingLayoutDescription{{
-        {0, BindingType::UniformBuffer, 1, ShaderStage::Vertex},
+        {0, BindingType::UniformBuffer, 1, ShaderStage::Vertex, 0, {}},
     }};
     const std::shared_ptr<BindingLayout> bindingLayout =
         device->CreateBindingLayout(bindingLayoutDescription, error);
@@ -314,7 +314,7 @@ bool RunMetalIntegrationTests()
 
     GraphicsPipelineDesc pipelineDescription;
     pipelineDescription.shaders = {vertexShader, fragmentShader};
-    pipelineDescription.bindingLayout = bindingLayout;
+    pipelineDescription.bindingLayouts = {bindingLayout};
     pipelineDescription.vertexAttributes = {
         {0, 0, VertexFormat::Float3, 0},
         {1, 0, VertexFormat::Float2, 12},

@@ -259,6 +259,10 @@ struct BindingDesc
     BindingType type = BindingType::UniformBuffer;
     std::uint32_t arrayCount = 1;
     ShaderStage visibility = ShaderStage::None;
+    // HLSL register space. Set 0 is engine data, set 1 is material data.
+    std::uint32_t set = 0;
+    // Shader declaration name; empty when the layout is built by hand.
+    std::string name;
 };
 
 struct VertexAttributeDesc

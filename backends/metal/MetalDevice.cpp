@@ -402,8 +402,12 @@ std::shared_ptr<GraphicsPipeline>
 MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Error &error)
 {
     AutoreleasePool pool;
-    auto bindingLayout = std::dynamic_pointer_cast<MetalBindingLayout>(description.bindingLayout);
-    if (description.shaders.size() != 2 || description.colorFormats.empty() ||
+    bool layoutsValid = true;
+    for (const std::shared_ptr<BindingLayout> &layout : description.bindingLayouts) {
+        layoutsValid = layoutsValid &&
+            (layout == nullptr || std::dynamic_pointer_cast<MetalBindingLayout>(layout) != nullptr);
+    }
+    if (!layoutsValid || description.shaders.size() != 2 || description.colorFormats.empty() ||
         description.colorFormats.size() > 8 || description.sampleCount == 0 ||
         !device_->supportsTextureSampleCount(description.sampleCount) ||
         !IsValidTopology(description.topology) ||
@@ -411,8 +415,7 @@ MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Err
          description.cullMode != CullMode::Back) ||
         !IsValidCompareFunction(description.depthStencil.depthCompare) ||
         (description.depthStencilFormat != TextureFormat::Unknown &&
-         description.depthStencilFormat != TextureFormat::Depth32Float) ||
-        (description.bindingLayout != nullptr && bindingLayout == nullptr)) {
+         description.depthStencilFormat != TextureFormat::Depth32Float)) {
         SetError(error, "The Metal graphics pipeline description is invalid.");
         return nullptr;
     }

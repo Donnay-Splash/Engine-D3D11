@@ -21,7 +21,7 @@ const GraphicsPipelineDesc &MetalGraphicsPipeline::Description() const noexcept
 
 std::shared_ptr<BindingLayout> MetalGraphicsPipeline::Layout() const
 {
-    return description_.bindingLayout;
+    return GraphicsPipeline::Layout(0);
 }
 
 MTL::RenderPipelineState *MetalGraphicsPipeline::Native() const noexcept

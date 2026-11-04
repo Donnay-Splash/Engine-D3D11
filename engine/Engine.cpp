@@ -261,7 +261,7 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
     }
     auto model = std::make_shared<Model>();
     if (!model->AddPart(
-            {std::move(mesh), Material::CreateFlatColor("default", {1.0f, 1.0f, 1.0f, 1.0f})},
+            {std::move(mesh), std::make_shared<Material>("default")},
             error)) {
         return false;
     }

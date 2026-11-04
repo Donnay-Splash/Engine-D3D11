@@ -279,13 +279,14 @@ int main(int argc, char **argv)
             }
             const std::string baseName = entry.source + "_" + entry.entry;
             const fs::path dxilPath = dxilDirectory / (baseName + ".dxil");
+            const fs::path disassemblyPath = dxilDirectory / (baseName + ".dxil.txt");
             const fs::path depPath = dxilDirectory / (baseName + ".d");
             const fs::path metallibPath = metalDirectory / (baseName + ".metallib");
             const fs::path reflectionPath = metalDirectory / (baseName + ".json");
             const fs::path portableReflectionPath =
                 metalDirectory / (baseName + ".reflection.json");
 
-            std::vector<fs::path> outputs = {dxilPath};
+            std::vector<fs::path> outputs = {dxilPath, disassemblyPath};
             if (buildMetal) {
                 outputs.push_back(metallibPath);
                 outputs.push_back(reflectionPath);
@@ -306,6 +307,7 @@ int main(int argc, char **argv)
                 "-T", ProfileFor(entry.stage, config->shaderModel),
                 "-E", entry.entry,
                 "-Fo", dxilPath.string(),
+                "-Fc", disassemblyPath.string(),
             };
             if (!config->includeDirectory.empty()) {
                 dxc.push_back("-I");
@@ -317,7 +319,7 @@ int main(int argc, char **argv)
             // Same arguments with -MF and no -Fo: dxc then only records the header dependencies.
             std::vector<std::string> dependencyArguments = {dxc.front()};
             for (std::size_t i = 1; i < dxc.size(); ++i) {
-                if (dxc[i] == "-Fo") {
+                if (dxc[i] == "-Fo" || dxc[i] == "-Fc") {
                     ++i;
                     continue;
                 }
@@ -343,10 +345,14 @@ int main(int argc, char **argv)
                 std::ifstream metalReflection(reflectionPath);
                 std::stringstream metalJson;
                 metalJson << metalReflection.rdbuf();
+                std::ifstream disassemblyFile(disassemblyPath);
+                std::stringstream disassembly;
+                disassembly << disassemblyFile.rdbuf();
                 std::string portableJson;
                 std::string reflectionError;
                 if (!ShaderCompiler::BuildPortableReflection(
-                        metalJson.str(), entry.stage, portableJson, reflectionError)) {
+                        metalJson.str(), entry.stage, disassembly.str(), portableJson,
+                        reflectionError)) {
                     std::cerr << baseName << ": " << reflectionError << '\n';
                     return 1;
                 }
