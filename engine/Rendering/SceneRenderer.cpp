@@ -39,7 +39,9 @@ bool SceneRenderer::Initialize(
     if (!m_Samplers.Initialize(*device, error)
         || !m_CommonTextures.Initialize(*device, error)
         || !m_MaterialBinder.Initialize(device, m_CommonTextures, error)) {
+        m_MaterialBinder.Shutdown();
         m_CommonTextures.Shutdown();
+        m_Samplers.Shutdown();
         m_PipelineCache.Shutdown();
         return false;
     }
