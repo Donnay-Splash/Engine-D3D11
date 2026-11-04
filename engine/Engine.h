@@ -22,6 +22,7 @@ class BufferView;
 class Device;
 class GraphicsInstance;
 class GraphicsPipeline;
+class Submission;
 class Swapchain;
 class CommandQueue;
 class Adapter;
@@ -96,6 +97,7 @@ private:
     std::shared_ptr<Graphics::Adapter> m_PreferredAdapter;
     std::shared_ptr<Graphics::Device> m_Device;
     std::shared_ptr<Graphics::CommandQueue> m_GraphicsQueue;
+    std::shared_ptr<Graphics::Submission> m_LastSubmission;
     std::shared_ptr<Graphics::Swapchain> m_Swapchain;
     std::unique_ptr<SceneRenderer> m_SceneRenderer;
     std::unique_ptr<Scene> m_Scene;

@@ -2,16 +2,28 @@
 
 #include "Core/Types.h"
 
+#include <atomic>
 #include <cassert>
 #include <utility>
 
 namespace Engine {
+
+namespace {
+
+std::uint64_t nextVersion()
+{
+    static std::atomic<std::uint64_t> s_Counter{0};
+    return ++s_Counter;
+}
+
+} // namespace
 
 MaterialInstance::MaterialInstance(std::shared_ptr<const Material> material)
     : m_Material(std::move(material))
 {
     assert(m_Material != nullptr);
     m_Overrides.resize(m_Material->ParameterCount());
+    m_Version = nextVersion();
 }
 
 bool MaterialInstance::Set(const std::string &name, MaterialValue value, Error &error)
@@ -28,7 +40,7 @@ bool MaterialInstance::Set(const std::string &name, MaterialValue value, Error &
         return false;
     }
     m_Overrides[*index] = std::move(value);
-    ++m_Version;
+    m_Version = nextVersion();
     return true;
 }
 
@@ -76,7 +88,7 @@ void MaterialInstance::ClearOverride(const std::string &name)
     if (const std::optional<std::size_t> index = layout->Find(name)) {
         if (m_Overrides[*index].has_value()) {
             m_Overrides[*index].reset();
-            ++m_Version;
+            m_Version = nextVersion();
         }
     }
 }

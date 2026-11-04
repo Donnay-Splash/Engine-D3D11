@@ -28,7 +28,7 @@ bool MatchesType(const BindingDesc &binding, const std::string &type)
     case BindingType::SampledTexture:
         return type == "SRV";
     case BindingType::Sampler:
-        return type == "SMP";
+        return type == "SMP" || type == "Sampler";
     }
     return false;
 }
@@ -38,7 +38,7 @@ const MetalBindingLocation *FindLocation(const MetalShader &shader, const Bindin
 {
     const MetalBindingLocation *match = nullptr;
     for (const MetalBindingLocation &location : shader.BindingLocations()) {
-        if (location.slot != binding.binding || location.space != 0 ||
+        if (location.slot != binding.binding || location.space != binding.set ||
             !MatchesType(binding, location.type)) {
             continue;
         }
@@ -98,7 +98,7 @@ bool EncodeDescriptor(const BindingDesc &binding, const BindingValue &value,
 MetalBindingSet::MetalBindingSet(std::shared_ptr<BindingLayout> layout) : layout_(std::move(layout))
 {
     for (const BindingDesc &binding : layout_->Bindings()) {
-        values_[binding.binding].resize(binding.arrayCount);
+        values_[Key(binding.binding, ResourceClassOf(binding.type))].resize(binding.arrayCount);
     }
 }
 
@@ -110,7 +110,8 @@ std::shared_ptr<BindingLayout> MetalBindingSet::Layout() const
 bool MetalBindingSet::SetBuffer(std::uint32_t binding, std::uint32_t arrayElement,
                                 const std::shared_ptr<BufferView> &view, Error &error)
 {
-    const BindingDesc *description = Find(binding, arrayElement, error);
+    const BindingDesc *description =
+        Find(binding, MetalResourceClass::Buffer, arrayElement, error);
     if (description == nullptr) {
         return false;
     }
@@ -132,14 +133,15 @@ bool MetalBindingSet::SetBuffer(std::uint32_t binding, std::uint32_t arrayElemen
         SetError(error, "The buffer usage does not match the binding declaration.");
         return false;
     }
-    values_[binding][arrayElement].buffer = view;
+    values_[Key(binding, MetalResourceClass::Buffer)][arrayElement].buffer = view;
     return true;
 }
 
 bool MetalBindingSet::SetTexture(std::uint32_t binding, std::uint32_t arrayElement,
                                  const std::shared_ptr<TextureView> &view, Error &error)
 {
-    const BindingDesc *description = Find(binding, arrayElement, error);
+    const BindingDesc *description =
+        Find(binding, MetalResourceClass::Texture, arrayElement, error);
     if (description == nullptr) {
         return false;
     }
@@ -161,14 +163,15 @@ bool MetalBindingSet::SetTexture(std::uint32_t binding, std::uint32_t arrayEleme
         SetError(error, "The texture usage does not match the binding declaration.");
         return false;
     }
-    values_[binding][arrayElement].texture = view;
+    values_[Key(binding, MetalResourceClass::Texture)][arrayElement].texture = view;
     return true;
 }
 
 bool MetalBindingSet::SetSampler(std::uint32_t binding, std::uint32_t arrayElement,
                                  const std::shared_ptr<Sampler> &sampler, Error &error)
 {
-    const BindingDesc *description = Find(binding, arrayElement, error);
+    const BindingDesc *description =
+        Find(binding, MetalResourceClass::Sampler, arrayElement, error);
     if (description == nullptr) {
         return false;
     }
@@ -177,20 +180,37 @@ bool MetalBindingSet::SetSampler(std::uint32_t binding, std::uint32_t arrayEleme
         SetError(error, "The binding and sampler do not match.");
         return false;
     }
-    values_[binding][arrayElement].sampler = sampler;
+    values_[Key(binding, MetalResourceClass::Sampler)][arrayElement].sampler = sampler;
     return true;
 }
 
-const std::vector<BindingValue> *MetalBindingSet::Values(std::uint32_t binding) const
+const std::vector<BindingValue> *MetalBindingSet::Values(const BindingDesc &binding) const
 {
-    const auto found = values_.find(binding);
+    const auto found = values_.find(Key(binding.binding, ResourceClassOf(binding.type)));
     return found == values_.end() ? nullptr : &found->second;
 }
 
 bool MetalBindingSet::EncodeArgumentBuffer(
     MTL::Device *device, const std::vector<std::shared_ptr<MetalShader>> &shaders,
-    NS::SharedPtr<MTL::Buffer> &argumentBuffer, Error &error) const
+    const std::vector<std::shared_ptr<MetalBindingSet>> &sets,
+    NS::SharedPtr<MTL::Buffer> &argumentBuffer, Error &error)
 {
+    // Calls fn(set, binding) for each layout binding of every bound set visible to `stage`.
+    const auto forEachBinding = [&sets](std::uint32_t stage, auto &&fn) {
+        for (const std::shared_ptr<MetalBindingSet> &set : sets) {
+            if (set == nullptr) {
+                continue;
+            }
+            for (const BindingDesc &binding : set->layout_->Bindings()) {
+                if ((static_cast<std::uint32_t>(binding.visibility) & stage) != 0 &&
+                    !fn(*set, binding)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
     std::size_t argumentBufferSize = 0;
     for (const std::shared_ptr<MetalShader> &shader : shaders) {
         if (shader == nullptr) {
@@ -198,10 +218,7 @@ bool MetalBindingSet::EncodeArgumentBuffer(
             return false;
         }
         const std::uint32_t stage = static_cast<std::uint32_t>(shader->Stage());
-        for (const BindingDesc &binding : layout_->Bindings()) {
-            if ((static_cast<std::uint32_t>(binding.visibility) & stage) == 0) {
-                continue;
-            }
+        const bool ranges = forEachBinding(stage, [&](const MetalBindingSet &, const BindingDesc &binding) {
             const MetalBindingLocation *location = FindLocation(*shader, binding, error);
             if (location == nullptr) {
                 return false;
@@ -215,16 +232,18 @@ bool MetalBindingSet::EncodeArgumentBuffer(
                 return false;
             }
             argumentBufferSize = std::max(argumentBufferSize, location->offset + requiredSize);
+            return true;
+        });
+        if (!ranges) {
+            return false;
         }
         for (const MetalBindingLocation &location : shader->BindingLocations()) {
-            if (location.space != 0 ||
-                std::none_of(layout_->Bindings().begin(), layout_->Bindings().end(),
-                             [&location, stage](const BindingDesc &binding) {
-                                 return binding.binding == location.slot &&
-                                        (static_cast<std::uint32_t>(binding.visibility) & stage) !=
-                                            0 &&
-                                        MatchesType(binding, location.type);
-                             })) {
+            const bool covered = !forEachBinding(
+                stage, [&](const MetalBindingSet &, const BindingDesc &binding) {
+                    return !(binding.binding == location.slot && binding.set == location.space &&
+                             MatchesType(binding, location.type));
+                });
+            if (!covered) {
                 SetError(error, "The Metal binding layout does not cover every reflected shader resource.");
                 return false;
             }
@@ -247,12 +266,9 @@ bool MetalBindingSet::EncodeArgumentBuffer(
 
     for (const std::shared_ptr<MetalShader> &shader : shaders) {
         const std::uint32_t stage = static_cast<std::uint32_t>(shader->Stage());
-        for (const BindingDesc &binding : layout_->Bindings()) {
-            if ((static_cast<std::uint32_t>(binding.visibility) & stage) == 0) {
-                continue;
-            }
+        const bool written = forEachBinding(stage, [&](const MetalBindingSet &set, const BindingDesc &binding) {
             const MetalBindingLocation *location = FindLocation(*shader, binding, error);
-            const std::vector<BindingValue> *values = Values(binding.binding);
+            const std::vector<BindingValue> *values = set.Values(binding);
             if (location == nullptr || values == nullptr) {
                 return false;
             }
@@ -266,16 +282,21 @@ bool MetalBindingSet::EncodeArgumentBuffer(
                 std::memcpy(static_cast<std::uint8_t *>(argumentBuffer->contents()) + offset,
                             &descriptor, sizeof(descriptor));
             }
+            return true;
+        });
+        if (!written) {
+            return false;
         }
     }
     return true;
 }
 
-const BindingDesc *MetalBindingSet::Find(std::uint32_t binding, std::uint32_t arrayElement,
-                                         Error &error) const
+const BindingDesc *MetalBindingSet::Find(std::uint32_t binding, MetalResourceClass resourceClass,
+                                         std::uint32_t arrayElement, Error &error) const
 {
     auto *layout = dynamic_cast<MetalBindingLayout *>(layout_.get());
-    const BindingDesc *description = layout == nullptr ? nullptr : layout->Find(binding);
+    const BindingDesc *description =
+        layout == nullptr ? nullptr : layout->Find(binding, resourceClass);
     if (description == nullptr || arrayElement >= description->arrayCount) {
         SetError(error, "The binding index or array element is outside the layout.");
         return nullptr;

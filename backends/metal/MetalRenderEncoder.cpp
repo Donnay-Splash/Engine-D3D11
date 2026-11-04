@@ -60,6 +60,7 @@ bool MetalRenderEncoder::SetPipeline(const std::shared_ptr<GraphicsPipeline> &pi
         break;
     }
     pipeline_ = std::move(metalPipeline);
+    bindingsDirty_ = true;
     context_->Keep(pipeline_);
     return true;
 }
@@ -67,16 +68,43 @@ bool MetalRenderEncoder::SetPipeline(const std::shared_ptr<GraphicsPipeline> &pi
 bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
                                        const std::shared_ptr<BindingSet> &bindings, Error &error)
 {
-    if (ended_ || pipeline_ == nullptr || index != 0 || bindings == nullptr ||
-        pipeline_->Layout() == nullptr || bindings->Layout() != pipeline_->Layout()) {
+    auto metalSet = std::dynamic_pointer_cast<MetalBindingSet>(bindings);
+    if (ended_ || pipeline_ == nullptr || bindings == nullptr ||
+        bindings->Layout() == nullptr || bindings->Layout() != pipeline_->Layout(index)) {
         SetError(error, "The render binding set is invalid or does not match the pipeline layout.");
         return false;
     }
-    auto metalSet = std::dynamic_pointer_cast<MetalBindingSet>(bindings);
-    auto metalLayout = std::dynamic_pointer_cast<MetalBindingLayout>(bindings->Layout());
-    if (metalSet == nullptr || metalLayout == nullptr) {
+    if (metalSet == nullptr) {
         SetError(error, "The binding set is not owned by the Metal backend.");
         return false;
+    }
+    if (sets_.size() <= index) {
+        sets_.resize(index + 1);
+    }
+    sets_[index] = std::move(metalSet);
+    bindingsDirty_ = true;
+    context_->Keep(bindings);
+    return true;
+}
+
+bool MetalRenderEncoder::FlushBindings(Error &error)
+{
+    if (!bindingsDirty_) {
+        return true;
+    }
+    const std::vector<std::shared_ptr<BindingLayout>> &required =
+        pipeline_->Description().bindingLayouts;
+    std::vector<std::shared_ptr<MetalBindingSet>> sets(required.size());
+    for (std::size_t index = 0; index < required.size(); ++index) {
+        if (required[index] == nullptr) {
+            continue;
+        }
+        if (index >= sets_.size() || sets_[index] == nullptr ||
+            sets_[index]->Layout() != required[index]) {
+            SetError(error, "The render pipeline requires a binding set that is not bound.");
+            return false;
+        }
+        sets[index] = sets_[index];
     }
     std::vector<std::shared_ptr<MetalShader>> shaders;
     for (const std::shared_ptr<Shader> &shader : pipeline_->Description().shaders) {
@@ -88,19 +116,24 @@ bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
         shaders.push_back(std::move(metalShader));
     }
     NS::SharedPtr<MTL::Buffer> argumentBuffer;
-    if (!metalSet->EncodeArgumentBuffer(context_->Device(), shaders, argumentBuffer, error)) {
+    if (!MetalBindingSet::EncodeArgumentBuffer(context_->Device(), shaders, sets, argumentBuffer,
+                                               error)) {
         return false;
     }
     encoder_->setVertexBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
     encoder_->setFragmentBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
     context_->KeepNativeResource(argumentBuffer.get());
 
-    for (const BindingDesc &binding : metalLayout->Bindings()) {
+    for (const std::shared_ptr<MetalBindingSet> &metalSet : sets) {
+    if (metalSet == nullptr) {
+        continue;
+    }
+    for (const BindingDesc &binding : metalSet->Layout()->Bindings()) {
         if ((static_cast<std::uint32_t>(binding.visibility) &
              static_cast<std::uint32_t>(ShaderStage::Vertex | ShaderStage::Fragment)) == 0) {
             continue;
         }
-        const std::vector<BindingValue> *values = metalSet->Values(binding.binding);
+        const std::vector<BindingValue> *values = metalSet->Values(binding);
         if (values == nullptr) {
             SetError(error, "The render binding set is missing a declared binding.");
             return false;
@@ -158,7 +191,8 @@ bool MetalRenderEncoder::SetBindingSet(std::uint32_t index,
             }
         }
     }
-    context_->Keep(bindings);
+    }
+    bindingsDirty_ = false;
     return true;
 }
 
@@ -221,6 +255,11 @@ void MetalRenderEncoder::Draw(std::uint32_t vertexCount, std::uint32_t instanceC
             "A Metal draw call requires an active pass, pipeline, and nonzero counts.");
         return;
     }
+    Error bindError;
+    if (!FlushBindings(bindError)) {
+        context_->DeferError(bindError.message.c_str());
+        return;
+    }
     encoder_->drawPrimitives(ToMetal(pipeline_->Description().topology), firstVertex, vertexCount,
                              instanceCount, firstInstance);
 }
@@ -240,6 +279,11 @@ void MetalRenderEncoder::DrawIndexed(std::uint32_t indexCount, std::uint32_t ins
     if (offset > indexBuffer_->Description().size ||
         static_cast<std::size_t>(indexCount) * stride > indexBuffer_->Description().size - offset) {
         context_->DeferError("The Metal indexed draw exceeds the index buffer.");
+        return;
+    }
+    Error bindError;
+    if (!FlushBindings(bindError)) {
+        context_->DeferError(bindError.message.c_str());
         return;
     }
     encoder_->drawIndexedPrimitives(

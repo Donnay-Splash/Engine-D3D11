@@ -40,13 +40,14 @@ public:
     // Values for every parameter in layout order, defaults filled in.
     std::vector<MaterialValue> ResolveValues() const;
 
-    // Increases whenever any value changes, so GPU copies can tell they are stale.
+    // Changes whenever any value changes; drawn from a process-wide counter, so two
+    // instances never share a version unless they hold identical values.
     std::uint64_t Version() const noexcept { return m_Version; }
 
 private:
     std::shared_ptr<const Material> m_Material;
     std::vector<std::optional<MaterialValue>> m_Overrides;
-    std::uint64_t m_Version = 1;
+    std::uint64_t m_Version = 0;
 };
 
 } // namespace Engine

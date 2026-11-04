@@ -261,7 +261,8 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
     }
     auto model = std::make_shared<Model>();
     if (!model->AddPart(
-            {std::move(mesh), std::make_shared<Material>("default")},
+            {std::move(mesh), std::make_shared<Material>(
+                "default", m_SceneRenderer->MaterialLayoutFor(Material::kDefaultShaderProgram, error))},
             error)) {
         return false;
     }
@@ -279,6 +280,11 @@ void Engine::Shutdown() noexcept
         m_SurfaceStarted = false;
     }
     m_Initialized = false;
+    if (m_LastSubmission != nullptr) {
+        Error ignored;
+        m_LastSubmission->Wait(ignored);
+        m_LastSubmission.reset();
+    }
     m_Scene->Clear();
     m_SceneRenderer->Shutdown();
     m_Swapchain.reset();
@@ -311,6 +317,15 @@ bool Engine::DrawFrame(Error &error)
     };
     if (m_Size.width == 0 || m_Size.height == 0) {
         return true;
+    }
+
+    // One frame in flight: the CPU rewrites upload-memory constants below, so the GPU must be
+    // done with the previous frame. See issue #30 for overlapping this with an async copy queue.
+    if (m_LastSubmission != nullptr) {
+        if (!m_LastSubmission->Wait(error)) {
+            return fail("Failed to wait for the previous frame.");
+        }
+        m_LastSubmission.reset();
     }
 
     std::vector<std::shared_ptr<Graphics::Submission>> waitFor;
@@ -375,6 +390,7 @@ bool Engine::DrawFrame(Error &error)
     if (submission == nullptr) {
         return fail("Failed to submit the mesh draw.");
     }
+    m_LastSubmission = submission;
     m_SceneRenderer->MarkSubmitted();
     if (!m_Swapchain->Present(image, submission, error)) {
         return fail("Failed to present the rendered mesh.");

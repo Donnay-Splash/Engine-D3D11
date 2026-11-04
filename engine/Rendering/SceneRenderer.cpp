@@ -9,6 +9,7 @@
 #include "Graphics/Device.h"
 #include "Graphics/GraphicsPipeline.h"
 #include "Graphics/RenderPassEncoder.h"
+#include "Graphics/Sampler.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Submission.h"
 
@@ -35,6 +36,11 @@ bool SceneRenderer::Initialize(
     if (!m_PipelineCache.Initialize(device, std::move(shaderLibrary), error)) {
         return false;
     }
+    if (!m_Samplers.Initialize(*device, error)
+        || !m_MaterialBinder.Initialize(device, nullptr, error)) {
+        m_PipelineCache.Shutdown();
+        return false;
+    }
     m_Device = std::move(device);
     m_ColorFormat = colorFormat;
     return true;
@@ -44,6 +50,8 @@ void SceneRenderer::Shutdown() noexcept
 {
     m_DrawItems.clear();
     m_Slots.clear();
+    m_MaterialBinder.Shutdown();
+    m_Samplers.Shutdown();
     m_PipelineCache.Shutdown();
     m_Device.reset();
 }
@@ -66,6 +74,14 @@ bool SceneRenderer::CollectPendingUploads(
         }
     }
     return true;
+}
+
+std::shared_ptr<const MaterialLayout> SceneRenderer::MaterialLayoutFor(
+    const std::string &programName, Error &error)
+{
+    const std::shared_ptr<const ShaderProgram> program =
+        m_PipelineCache.GetProgram(programName, error);
+    return program == nullptr ? nullptr : program->materialLayout;
 }
 
 bool SceneRenderer::CreateSlot(
@@ -114,6 +130,24 @@ bool SceneRenderer::CreateSlot(
         }
         return false;
     }
+    // Samplers are engine owned; the shader selects one by name.
+    for (const Graphics::BindingDesc &binding : program->BindingLayout(0)->Bindings()) {
+        if (binding.type != Graphics::BindingType::Sampler) {
+            continue;
+        }
+        const std::shared_ptr<Graphics::Sampler> sampler = m_Samplers.Find(binding.name);
+        if (sampler == nullptr) {
+            error.message = "Shader program '" + program->name + "' declares sampler '"
+                + binding.name + "', which is not an engine sampler.";
+            return false;
+        }
+        if (!slot.bindings->SetSampler(binding.binding, 0, sampler, error)) {
+            if (error.message.empty()) {
+                error.message = "Failed to bind engine sampler '" + binding.name + "'.";
+            }
+            return false;
+        }
+    }
     slot.program = std::move(program);
     return true;
 }
@@ -148,10 +182,13 @@ bool SceneRenderer::Prepare(const Scene &scene, Graphics::CommandContext &contex
         return false;
     }
     m_DrawItems.clear();
+    m_MaterialBinder.BeginFrame();
     const Camera &camera = scene.GetCamera();
     for (const std::shared_ptr<ModelInstance> &instance : scene.Instances()) {
         const Maths::Matrix4 world = instance->WorldMatrix();
-        for (const ModelPart &part : instance->GetModel()->Parts()) {
+        const std::vector<ModelPart> &parts = instance->GetModel()->Parts();
+        for (std::size_t partIndex = 0; partIndex < parts.size(); ++partIndex) {
+            const ModelPart &part = parts[partIndex];
             if (part.mesh->VertexCount() == 0) {
                 continue;
             }
@@ -196,6 +233,11 @@ bool SceneRenderer::Prepare(const Scene &scene, Graphics::CommandContext &contex
             if (item.pipeline == nullptr) {
                 return false;
             }
+            item.materialBindings = m_MaterialBinder.Acquire(
+                instance->GetMaterialInstance(partIndex), *program, context, error);
+            if (program->materialLayout != nullptr && item.materialBindings == nullptr) {
+                return false;
+            }
             item.slot = slotIndex;
             m_DrawItems.push_back(std::move(item));
         }
@@ -214,6 +256,10 @@ bool SceneRenderer::Record(Graphics::RenderPassEncoder &renderPass, Error &error
             boundPipeline = item.pipeline.get();
         }
         if (!renderPass.SetBindingSet(0, m_Slots[item.slot].bindings, error)) {
+            return false;
+        }
+        if (item.materialBindings != nullptr
+            && !renderPass.SetBindingSet(MaterialLayout::kMaterialSet, item.materialBindings, error)) {
             return false;
         }
         // Bind only the streams the pipeline reads.

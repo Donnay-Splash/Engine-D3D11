@@ -13,6 +13,7 @@ public:
 
     const GraphicsPipelineDesc &Description() const noexcept override;
 
+    using GraphicsPipeline::Layout;
     std::shared_ptr<BindingLayout> Layout() const override;
 
     MTL::RenderPipelineState *Native() const noexcept;

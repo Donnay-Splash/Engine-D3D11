@@ -113,6 +113,20 @@ private:
     Engine::Graphics::TextureDesc description_;
 };
 
+class FakeSampler final : public Engine::Graphics::Sampler
+{
+public:
+    explicit FakeSampler(const Engine::Graphics::SamplerDesc &description) : description_(description) {}
+
+    const Engine::Graphics::SamplerDesc &Description() const noexcept override
+    {
+        return description_;
+    }
+
+private:
+    Engine::Graphics::SamplerDesc description_;
+};
+
 class FakeTextureView final : public Engine::Graphics::TextureView
 {
 public:
@@ -665,10 +679,10 @@ public:
     }
 
     std::shared_ptr<Engine::Graphics::Sampler> CreateSampler(
-        const Engine::Graphics::SamplerDesc &,
+        const Engine::Graphics::SamplerDesc &description,
         Engine::Error &) override
     {
-        return nullptr;
+        return std::make_shared<FakeSampler>(description);
     }
 
     std::shared_ptr<Engine::Graphics::BindingLayout> CreateBindingLayout(

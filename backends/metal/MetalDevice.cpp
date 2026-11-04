@@ -356,14 +356,19 @@ MetalDevice::CreateBindingLayout(const BindingLayoutDesc &description, Error &er
 {
     std::vector<BindingDesc> sorted = description.bindings;
     std::sort(sorted.begin(), sorted.end(), [](const BindingDesc &lhs, const BindingDesc &rhs) {
-        return lhs.binding < rhs.binding;
+        const auto lhsClass = ResourceClassOf(lhs.type);
+        const auto rhsClass = ResourceClassOf(rhs.type);
+        return lhsClass != rhsClass ? lhsClass < rhsClass : lhs.binding < rhs.binding;
     });
     for (std::size_t index = 0; index < sorted.size(); ++index) {
+        const bool overlapsPrevious =
+            index != 0 &&
+            ResourceClassOf(sorted[index - 1].type) == ResourceClassOf(sorted[index].type) &&
+            static_cast<std::uint64_t>(sorted[index - 1].binding) + sorted[index - 1].arrayCount >
+                sorted[index].binding;
         if (sorted[index].arrayCount == 0 || sorted[index].visibility == ShaderStage::None ||
             static_cast<std::uint64_t>(sorted[index].binding) + sorted[index].arrayCount > 31 ||
-            (index != 0 &&
-             static_cast<std::uint64_t>(sorted[index - 1].binding) + sorted[index - 1].arrayCount >
-                 sorted[index].binding)) {
+            sorted[index].set != sorted[0].set || overlapsPrevious) {
             SetError(error, "The Metal binding layout contains a duplicate or invalid binding.");
             return nullptr;
         }
