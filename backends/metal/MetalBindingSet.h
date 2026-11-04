@@ -24,11 +24,12 @@ public:
 
     const std::vector<BindingValue> *Values(const BindingDesc &binding) const;
 
-    // Metal has one top-level argument buffer for every set; each set's descriptors are
-    // written at the offsets the shader reflection assigns to their (space, slot).
+    // Metal has one top-level argument buffer per shader, shared by every set; each set's
+    // descriptors are written at the offsets that shader's reflection assigns to their
+    // (space, slot). Stages are compiled independently, so each needs its own buffer.
     // `sets` is indexed by set number; entries may be null for sets the pipeline does not use.
     static bool EncodeArgumentBuffer(MTL::Device *device,
-                                     const std::vector<std::shared_ptr<MetalShader>> &shaders,
+                                     const MetalShader &shader,
                                      const std::vector<std::shared_ptr<MetalBindingSet>> &sets,
                                      NS::SharedPtr<MTL::Buffer> &argumentBuffer, Error &error);
 

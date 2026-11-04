@@ -90,5 +90,40 @@ bool MetalCopyEncoder::CopyTextureToBuffer(const std::shared_ptr<Texture> &sourc
     return true;
 }
 
+bool MetalCopyEncoder::CopyBufferToTexture(const std::shared_ptr<Buffer> &source,
+                                           std::size_t sourceOffset, std::uint32_t bytesPerRow,
+                                           const std::shared_ptr<Texture> &destination,
+                                           Extent3D extent, Error &error)
+{
+    auto sourceBuffer = std::dynamic_pointer_cast<MetalBuffer>(source);
+    auto destinationTexture = std::dynamic_pointer_cast<MetalTexture>(destination);
+    if (ended_ || sourceBuffer == nullptr || destinationTexture == nullptr) {
+        SetError(error, "The Metal texture upload requires a Metal buffer and texture.");
+        return false;
+    }
+    const TextureDesc &texture = destinationTexture->Description();
+    const std::size_t rowBytes =
+        static_cast<std::size_t>(extent.width) * BytesPerPixel(texture.format);
+    const std::size_t imageBytes = static_cast<std::size_t>(bytesPerRow) * extent.height;
+    if (extent.width == 0 || extent.height == 0 || extent.depth != 1 ||
+        extent.width > texture.extent.width || extent.height > texture.extent.height ||
+        bytesPerRow < rowBytes || sourceOffset % 4 != 0 ||
+        sourceOffset > sourceBuffer->Description().size ||
+        imageBytes > sourceBuffer->Description().size - sourceOffset ||
+        !HasBits(static_cast<std::uint32_t>(texture.usage),
+                 static_cast<std::uint32_t>(TextureUsage::CopyDestination)) ||
+        !HasBits(static_cast<std::uint32_t>(sourceBuffer->Description().usage),
+                 static_cast<std::uint32_t>(BufferUsage::CopySource))) {
+        SetError(error, "The Metal texture upload range or usage is invalid.");
+        return false;
+    }
+    encoder_->copyFromBuffer(sourceBuffer->Native(), sourceOffset, bytesPerRow, imageBytes,
+                             MTL::Size::Make(extent.width, extent.height, 1),
+                             destinationTexture->Native(), 0, 0, MTL::Origin::Make(0, 0, 0));
+    context_->Keep(source);
+    context_->Keep(destination);
+    return true;
+}
+
 } // namespace Metal
 } // namespace Engine

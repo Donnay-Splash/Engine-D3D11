@@ -20,6 +20,7 @@
 #include "Graphics/Texture.h"
 #include "Graphics/TextureView.h"
 #include "MetalBackend.h"
+#include "Rendering/TextureUpload.h"
 
 #include <algorithm>
 #include <array>
@@ -237,10 +238,25 @@ bool RunMetalIntegrationTests()
 
     const BindingLayoutDesc bindingLayoutDescription{{
         {0, BindingType::UniformBuffer, 1, ShaderStage::Vertex, 0, {}},
+        {0, BindingType::Sampler, 1, ShaderStage::Fragment, 0, {}},
     }};
     const std::shared_ptr<BindingLayout> bindingLayout =
         device->CreateBindingLayout(bindingLayoutDescription, error);
     if (!Check(bindingLayout != nullptr, "Create Metal binding layout", error)) {
+        return false;
+    }
+    const BindingLayoutDesc materialLayoutDescription{{
+        {0, BindingType::UniformBuffer, 1, ShaderStage::Fragment, 1, {}},
+        {0, BindingType::SampledTexture, 1, ShaderStage::Fragment, 1, {}},
+    }};
+    const std::shared_ptr<BindingLayout> materialLayout =
+        device->CreateBindingLayout(materialLayoutDescription, error);
+    if (!Check(materialLayout != nullptr, "Create Metal material binding layout", error)) {
+        return false;
+    }
+    const std::shared_ptr<BindingSet> materialSet =
+        device->CreateBindingSet(materialLayout, error);
+    if (!Check(materialSet != nullptr, "Create Metal material binding set", error)) {
         return false;
     }
     const std::shared_ptr<BindingSet> bindingSet =
@@ -311,10 +327,23 @@ bool RunMetalIntegrationTests()
             "Set Metal uniform binding", error)) {
         return false;
     }
+    const std::shared_ptr<Sampler> sampler = device->CreateSampler(SamplerDesc{}, error);
+    const std::array<std::uint8_t, 4> whitePixel{{255, 255, 255, 255}};
+    const std::shared_ptr<TextureView> whiteTexture = Engine::CreateTexture2D(
+        *device, TextureFormat::RGBA8Unorm, 1, 1, whitePixel.data(), error);
+    if (!Check(sampler != nullptr, "Create Metal sampler", error)
+        || !Check(whiteTexture != nullptr, "Create Metal material texture", error)
+        || !Check(bindingSet->SetSampler(0, 0, sampler, error), "Set Metal sampler", error)
+        || !Check(materialSet->SetBuffer(0, 0, uniformView, error),
+            "Set Metal material buffer", error)
+        || !Check(materialSet->SetTexture(0, 0, whiteTexture, error),
+            "Set Metal material texture", error)) {
+        return false;
+    }
 
     GraphicsPipelineDesc pipelineDescription;
     pipelineDescription.shaders = {vertexShader, fragmentShader};
-    pipelineDescription.bindingLayouts = {bindingLayout};
+    pipelineDescription.bindingLayouts = {bindingLayout, materialLayout};
     pipelineDescription.vertexAttributes = {
         {0, 0, VertexFormat::Float3, 0},
         {1, 0, VertexFormat::Float2, 12},
@@ -376,6 +405,8 @@ bool RunMetalIntegrationTests()
             "Set Metal graphics pipeline", error)
         || !Check(renderEncoder->SetBindingSet(0, bindingSet, error),
             "Set Metal graphics binding set", error)
+        || !Check(renderEncoder->SetBindingSet(1, materialSet, error),
+            "Set Metal material binding set", error)
         || !Check(renderEncoder->SetVertexBuffer(0, vertexBuffer, 0, error),
             "Set Metal vertex buffer", error)
         || !Check(renderEncoder->SetViewport({0, 0, 16, 16, 0, 1}, error),

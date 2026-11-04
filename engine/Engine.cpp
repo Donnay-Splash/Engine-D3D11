@@ -6,6 +6,7 @@
 #include "Core/ModelInstance.h"
 #include "Core/Scene.h"
 #include "Rendering/SceneRenderer.h"
+#include "Rendering/TextureMaker.h"
 #include "EngineFactory.h"
 #include "Graphics/Adapter.h"
 #include "Graphics/BindingLayout.h"
@@ -266,7 +267,23 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
             error)) {
         return false;
     }
-    m_Scene->Add(std::make_shared<ModelInstance>(std::move(model)));
+    auto instance = std::make_shared<ModelInstance>(std::move(model));
+    // The test triangle sets one parameter of every material type, when its program has them.
+    MaterialInstance &material = instance->GetMaterialInstance(0);
+    if (material.GetMaterial()->Layout() != nullptr) {
+        std::shared_ptr<Graphics::TextureView> checkerboard =
+            TextureMaker::CreateCheckerboard(*m_Device, 64, 8, error);
+        if (checkerboard == nullptr
+            || !material.SetBool("useTexture", true, error)
+            || !material.SetInt("mode", 0, error)
+            || !material.SetFloat("intensity", 1.0f, error)
+            || !material.SetVector4("tint", {1.0f, 0.8f, 0.4f, 1.0f}, error)
+            || !material.SetVector2("uvScale", {4.0f, 4.0f}, error)
+            || !material.SetTexture("baseTexture", std::move(checkerboard), error)) {
+            return false;
+        }
+    }
+    m_Scene->Add(std::move(instance));
     return true;
 }
 

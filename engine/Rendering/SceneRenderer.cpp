@@ -37,7 +37,9 @@ bool SceneRenderer::Initialize(
         return false;
     }
     if (!m_Samplers.Initialize(*device, error)
-        || !m_MaterialBinder.Initialize(device, nullptr, error)) {
+        || !m_CommonTextures.Initialize(*device, error)
+        || !m_MaterialBinder.Initialize(device, m_CommonTextures.White(), error)) {
+        m_CommonTextures.Shutdown();
         m_PipelineCache.Shutdown();
         return false;
     }
@@ -51,6 +53,7 @@ void SceneRenderer::Shutdown() noexcept
     m_DrawItems.clear();
     m_Slots.clear();
     m_MaterialBinder.Shutdown();
+    m_CommonTextures.Shutdown();
     m_Samplers.Shutdown();
     m_PipelineCache.Shutdown();
     m_Device.reset();

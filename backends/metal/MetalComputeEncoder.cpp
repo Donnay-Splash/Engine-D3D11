@@ -63,7 +63,7 @@ bool MetalComputeEncoder::SetBindingSet(std::uint32_t index,
         return false;
     }
     NS::SharedPtr<MTL::Buffer> argumentBuffer;
-    if (!MetalBindingSet::EncodeArgumentBuffer(context_->Device(), {shader}, {set},
+    if (!MetalBindingSet::EncodeArgumentBuffer(context_->Device(), *shader, {set},
                                                argumentBuffer, error)) {
         return false;
     }

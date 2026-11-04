@@ -106,23 +106,24 @@ bool MetalRenderEncoder::FlushBindings(Error &error)
         }
         sets[index] = sets_[index];
     }
-    std::vector<std::shared_ptr<MetalShader>> shaders;
     for (const std::shared_ptr<Shader> &shader : pipeline_->Description().shaders) {
         auto metalShader = std::dynamic_pointer_cast<MetalShader>(shader);
         if (metalShader == nullptr) {
             SetError(error, "The render pipeline contains a non-Metal shader.");
             return false;
         }
-        shaders.push_back(std::move(metalShader));
+        NS::SharedPtr<MTL::Buffer> argumentBuffer;
+        if (!MetalBindingSet::EncodeArgumentBuffer(context_->Device(), *metalShader, sets,
+                                                   argumentBuffer, error)) {
+            return false;
+        }
+        if (metalShader->Stage() == ShaderStage::Vertex) {
+            encoder_->setVertexBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
+        } else {
+            encoder_->setFragmentBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
+        }
+        context_->KeepNativeResource(argumentBuffer.get());
     }
-    NS::SharedPtr<MTL::Buffer> argumentBuffer;
-    if (!MetalBindingSet::EncodeArgumentBuffer(context_->Device(), shaders, sets, argumentBuffer,
-                                               error)) {
-        return false;
-    }
-    encoder_->setVertexBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
-    encoder_->setFragmentBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
-    context_->KeepNativeResource(argumentBuffer.get());
 
     for (const std::shared_ptr<MetalBindingSet> &metalSet : sets) {
     if (metalSet == nullptr) {

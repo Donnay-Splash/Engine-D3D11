@@ -31,6 +31,14 @@ public:
         std::uint32_t bytesPerRow,
         Extent3D extent,
         ::Engine::Error &error) = 0;
+    // Copies tightly described rows of a buffer into mip 0, layer 0 of a texture.
+    virtual bool CopyBufferToTexture(
+        const std::shared_ptr<Buffer> &source,
+        std::size_t sourceOffset,
+        std::uint32_t bytesPerRow,
+        const std::shared_ptr<Texture> &destination,
+        Extent3D extent,
+        ::Engine::Error &error) = 0;
 };
 
 } // namespace Graphics

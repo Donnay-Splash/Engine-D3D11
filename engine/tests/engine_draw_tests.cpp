@@ -445,6 +445,25 @@ public:
         return true;
     }
 
+    bool CopyBufferToTexture(
+        const std::shared_ptr<Engine::Graphics::Buffer> &source,
+        std::size_t sourceOffset,
+        std::uint32_t bytesPerRow,
+        const std::shared_ptr<Engine::Graphics::Texture> &,
+        Engine::Graphics::Extent3D extent,
+        Engine::Error &error) override
+    {
+        auto sourceBuffer = std::dynamic_pointer_cast<FakeBuffer>(source);
+        if (sourceBuffer == nullptr
+            || sourceOffset + static_cast<std::size_t>(bytesPerRow) * extent.height
+                > sourceBuffer->Bytes().size()) {
+            error.message = "fake texture upload out of range";
+            return false;
+        }
+        state_->events.push_back("copy.bufferToTexture");
+        return true;
+    }
+
 private:
     std::shared_ptr<FakeState> state_;
 };
@@ -987,7 +1006,8 @@ void engineRecordsAThreeVertexUvMeshDraw()
     check(state->drawVertexCount == 3, "draw should submit exactly three vertices");
     check(state->boundSlots == std::vector<std::uint32_t>({0, 1}),
         "draw should bind both vertex streams");
-    check(state->waitCounts == std::vector<std::size_t>({0, 1}),
+    // Three common-texture uploads (waited on at creation), the mesh upload, then the draw.
+    check(state->waitCounts == std::vector<std::size_t>({0, 0, 0, 0, 1}),
         "draw submission should depend on the asynchronous mesh upload");
     check(std::find(
             state->barrierTargets.begin(), state->barrierTargets.end(),

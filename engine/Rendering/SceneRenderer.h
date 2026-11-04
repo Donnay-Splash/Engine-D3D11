@@ -5,6 +5,7 @@
 #include "Core/Types.h"
 #include "Graphics/Buffer.h"
 #include "Graphics/GraphicsTypes.h"
+#include "Rendering/CommonTextures.h"
 #include "Rendering/EngineSamplers.h"
 #include "Rendering/FrameConstants.h"
 #include "Rendering/MaterialBinder.h"
@@ -57,6 +58,8 @@ public:
     std::shared_ptr<const MaterialLayout> MaterialLayoutFor(
         const std::string &programName, Error &error);
 
+    const CommonTextures &GetCommonTextures() const noexcept { return m_CommonTextures; }
+
     std::size_t DrawCount() const noexcept { return m_DrawItems.size(); }
 
 private:
@@ -85,6 +88,7 @@ private:
     std::shared_ptr<Graphics::Device> m_Device;
     PipelineCache m_PipelineCache;
     EngineSamplers m_Samplers;
+    CommonTextures m_CommonTextures;
     MaterialBinder m_MaterialBinder;
     Graphics::TextureFormat m_ColorFormat{};
     std::vector<DrawSlot> m_Slots;

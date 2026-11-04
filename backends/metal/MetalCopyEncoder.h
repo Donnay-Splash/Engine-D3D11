@@ -24,6 +24,10 @@ public:
                              std::size_t destinationOffset, std::uint32_t bytesPerRow,
                              Extent3D extent, Error &error) override;
 
+    bool CopyBufferToTexture(const std::shared_ptr<Buffer> &source, std::size_t sourceOffset,
+                             std::uint32_t bytesPerRow, const std::shared_ptr<Texture> &destination,
+                             Extent3D extent, Error &error) override;
+
 private:
     std::shared_ptr<MetalCommandContext> context_;
     NS::SharedPtr<MTL::BlitCommandEncoder> encoder_;
