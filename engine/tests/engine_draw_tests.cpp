@@ -113,6 +113,20 @@ private:
     Engine::Graphics::TextureDesc description_;
 };
 
+class FakeSampler final : public Engine::Graphics::Sampler
+{
+public:
+    explicit FakeSampler(const Engine::Graphics::SamplerDesc &description) : description_(description) {}
+
+    const Engine::Graphics::SamplerDesc &Description() const noexcept override
+    {
+        return description_;
+    }
+
+private:
+    Engine::Graphics::SamplerDesc description_;
+};
+
 class FakeTextureView final : public Engine::Graphics::TextureView
 {
 public:
@@ -338,9 +352,11 @@ public:
         return description_;
     }
 
+    using Engine::Graphics::GraphicsPipeline::Layout;
+
     std::shared_ptr<Engine::Graphics::BindingLayout> Layout() const override
     {
-        return description_.bindingLayout;
+        return Layout(0);
     }
 
 private:
@@ -426,6 +442,25 @@ public:
         }
         std::memset(destinationBuffer->Bytes().data() + destinationOffset, 0xAB, size);
         state_->events.push_back("copy.texture");
+        return true;
+    }
+
+    bool CopyBufferToTexture(
+        const std::shared_ptr<Engine::Graphics::Buffer> &source,
+        std::size_t sourceOffset,
+        std::uint32_t bytesPerRow,
+        const std::shared_ptr<Engine::Graphics::Texture> &,
+        Engine::Graphics::Extent3D extent,
+        Engine::Error &error) override
+    {
+        auto sourceBuffer = std::dynamic_pointer_cast<FakeBuffer>(source);
+        if (sourceBuffer == nullptr
+            || sourceOffset + static_cast<std::size_t>(bytesPerRow) * extent.height
+                > sourceBuffer->Bytes().size()) {
+            error.message = "fake texture upload out of range";
+            return false;
+        }
+        state_->events.push_back("copy.bufferToTexture");
         return true;
     }
 
@@ -663,10 +698,10 @@ public:
     }
 
     std::shared_ptr<Engine::Graphics::Sampler> CreateSampler(
-        const Engine::Graphics::SamplerDesc &,
+        const Engine::Graphics::SamplerDesc &description,
         Engine::Error &) override
     {
-        return nullptr;
+        return std::make_shared<FakeSampler>(description);
     }
 
     std::shared_ptr<Engine::Graphics::BindingLayout> CreateBindingLayout(
@@ -936,11 +971,11 @@ void engineRecordsAThreeVertexUvMeshDraw()
 
     check(surface.Draw(error), "surface draw callback should record the mesh");
     check(state->pipeline != nullptr, "the first draw should create a graphics pipeline");
-    check(state->pipeline->Description().bindingLayout != nullptr,
+    check(state->pipeline->Layout(0) != nullptr,
         "graphics pipeline should identify its binding layout");
-    check(state->pipeline->Description().bindingLayout->Bindings().size() == 1
-            && state->pipeline->Description().bindingLayout->Bindings()[0].binding == 3
-            && state->pipeline->Description().bindingLayout->Bindings()[0].visibility
+    check(state->pipeline->Layout(0)->Bindings().size() == 1
+            && state->pipeline->Layout(0)->Bindings()[0].binding == 3
+            && state->pipeline->Layout(0)->Bindings()[0].visibility
                 == Engine::Graphics::ShaderStage::Vertex,
         "binding layout should come from the shader reflection");
     check(state->pipeline->Description().topology
@@ -971,7 +1006,8 @@ void engineRecordsAThreeVertexUvMeshDraw()
     check(state->drawVertexCount == 3, "draw should submit exactly three vertices");
     check(state->boundSlots == std::vector<std::uint32_t>({0, 1}),
         "draw should bind both vertex streams");
-    check(state->waitCounts == std::vector<std::size_t>({0, 1}),
+    // Three common-texture uploads (waited on at creation), the mesh upload, then the draw.
+    check(state->waitCounts == std::vector<std::size_t>({0, 0, 0, 0, 1}),
         "draw submission should depend on the asynchronous mesh upload");
     check(std::find(
             state->barrierTargets.begin(), state->barrierTargets.end(),
@@ -1070,9 +1106,8 @@ void engineDrawsEveryPartOfEveryModelInstance()
         "model parts should be added");
     auto moved = std::make_shared<Engine::ModelInstance>(twoPartModel);
     moved->SetPosition({2.0f, 0.0f, 0.0f});
-    check(moved->GetMaterialInstance(1).SetVector4(
-              Engine::Material::kBaseColor, {1.0f, 0.0f, 0.0f, 1.0f}, error),
-        "per-instance override should apply");
+    check(!moved->GetMaterialInstance(1).SetVector4("tint", {}, error),
+        "a material without parameters rejects overrides");
     scene.Add(moved);
 
     check(surface.Draw(error), "multi-instance draw should succeed");

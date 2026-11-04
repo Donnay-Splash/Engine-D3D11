@@ -63,7 +63,8 @@ bool MetalComputeEncoder::SetBindingSet(std::uint32_t index,
         return false;
     }
     NS::SharedPtr<MTL::Buffer> argumentBuffer;
-    if (!set->EncodeArgumentBuffer(context_->Device(), {shader}, argumentBuffer, error)) {
+    if (!MetalBindingSet::EncodeArgumentBuffer(context_->Device(), *shader, {set},
+                                               argumentBuffer, error)) {
         return false;
     }
     encoder_->setBuffer(argumentBuffer.get(), 0, kIRArgumentBufferBindPoint);
@@ -74,7 +75,7 @@ bool MetalComputeEncoder::SetBindingSet(std::uint32_t index,
              static_cast<std::uint32_t>(ShaderStage::Compute)) == 0) {
             continue;
         }
-        const std::vector<BindingValue> *values = set->Values(binding.binding);
+        const std::vector<BindingValue> *values = set->Values(binding);
         if (values == nullptr) {
             SetError(error, "The compute binding set is missing a declared binding.");
             return false;

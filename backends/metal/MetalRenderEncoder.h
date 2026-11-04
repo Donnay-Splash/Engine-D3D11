@@ -37,7 +37,13 @@ public:
                      std::uint32_t firstInstance) override;
 
 private:
+    // Encodes the argument buffer for every bound set; deferred to draw time so that all
+    // sets are known.
+    bool FlushBindings(Error &error);
+
     std::shared_ptr<MetalCommandContext> context_;
+    std::vector<std::shared_ptr<MetalBindingSet>> sets_;
+    bool bindingsDirty_ = false;
     NS::SharedPtr<MTL::RenderCommandEncoder> encoder_;
     std::vector<TextureFormat> colorFormats_;
     TextureFormat depthFormat_;

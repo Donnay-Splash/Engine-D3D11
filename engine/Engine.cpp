@@ -6,6 +6,7 @@
 #include "Core/ModelInstance.h"
 #include "Core/Scene.h"
 #include "Rendering/SceneRenderer.h"
+#include "Rendering/TextureMaker.h"
 #include "EngineFactory.h"
 #include "Graphics/Adapter.h"
 #include "Graphics/BindingLayout.h"
@@ -261,11 +262,28 @@ bool Engine::InitializeGraphics(Surface &surface, Error &error)
     }
     auto model = std::make_shared<Model>();
     if (!model->AddPart(
-            {std::move(mesh), Material::CreateFlatColor("default", {1.0f, 1.0f, 1.0f, 1.0f})},
+            {std::move(mesh), std::make_shared<Material>(
+                "default", m_SceneRenderer->MaterialLayoutFor(Material::kDefaultShaderProgram, error))},
             error)) {
         return false;
     }
-    m_Scene->Add(std::make_shared<ModelInstance>(std::move(model)));
+    auto instance = std::make_shared<ModelInstance>(std::move(model));
+    // The test triangle sets one parameter of every material type, when its program has them.
+    MaterialInstance &material = instance->GetMaterialInstance(0);
+    if (material.GetMaterial()->Layout() != nullptr) {
+        std::shared_ptr<Graphics::TextureView> checkerboard =
+            TextureMaker::CreateCheckerboard(*m_Device, 64, 8, error);
+        if (checkerboard == nullptr
+            || !material.SetBool("useTexture", true, error)
+            || !material.SetInt("mode", 0, error)
+            || !material.SetFloat("intensity", 1.0f, error)
+            || !material.SetVector4("tint", {1.0f, 0.8f, 0.4f, 1.0f}, error)
+            || !material.SetVector2("uvScale", {4.0f, 4.0f}, error)
+            || !material.SetTexture("baseTexture", std::move(checkerboard), error)) {
+            return false;
+        }
+    }
+    m_Scene->Add(std::move(instance));
     return true;
 }
 
@@ -279,6 +297,11 @@ void Engine::Shutdown() noexcept
         m_SurfaceStarted = false;
     }
     m_Initialized = false;
+    if (m_LastSubmission != nullptr) {
+        Error ignored;
+        m_LastSubmission->Wait(ignored);
+        m_LastSubmission.reset();
+    }
     m_Scene->Clear();
     m_SceneRenderer->Shutdown();
     m_Swapchain.reset();
@@ -311,6 +334,15 @@ bool Engine::DrawFrame(Error &error)
     };
     if (m_Size.width == 0 || m_Size.height == 0) {
         return true;
+    }
+
+    // One frame in flight: the CPU rewrites upload-memory constants below, so the GPU must be
+    // done with the previous frame. See issue #30 for overlapping this with an async copy queue.
+    if (m_LastSubmission != nullptr) {
+        if (!m_LastSubmission->Wait(error)) {
+            return fail("Failed to wait for the previous frame.");
+        }
+        m_LastSubmission.reset();
     }
 
     std::vector<std::shared_ptr<Graphics::Submission>> waitFor;
@@ -375,6 +407,7 @@ bool Engine::DrawFrame(Error &error)
     if (submission == nullptr) {
         return fail("Failed to submit the mesh draw.");
     }
+    m_LastSubmission = submission;
     m_SceneRenderer->MarkSubmitted();
     if (!m_Swapchain->Present(image, submission, error)) {
         return fail("Failed to present the rendered mesh.");

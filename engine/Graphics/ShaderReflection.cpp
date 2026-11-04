@@ -58,6 +58,40 @@ bool parseBindingType(const std::string &text, BindingType &type)
     return true;
 }
 
+std::size_t valueComponentCount(ShaderValueType type)
+{
+    switch (type) {
+    case ShaderValueType::Float2:
+        return 2;
+    case ShaderValueType::Float3:
+        return 3;
+    case ShaderValueType::Float4:
+        return 4;
+    default:
+        return 1;
+    }
+}
+
+bool parseValueType(const std::string &text, ShaderValueType &type)
+{
+    if (text == "bool") {
+        type = ShaderValueType::Bool;
+    } else if (text == "int") {
+        type = ShaderValueType::Int;
+    } else if (text == "float") {
+        type = ShaderValueType::Float;
+    } else if (text == "float2") {
+        type = ShaderValueType::Float2;
+    } else if (text == "float3") {
+        type = ShaderValueType::Float3;
+    } else if (text == "float4") {
+        type = ShaderValueType::Float4;
+    } else {
+        return false;
+    }
+    return true;
+}
+
 } // namespace
 
 bool ParseShaderReflection(std::string_view json, ShaderReflection &reflection, Error &error)
@@ -93,7 +127,40 @@ bool ParseShaderReflection(std::string_view json, ShaderReflection &reflection, 
                 error.message = "The shader reflection has an unknown binding type.";
                 return false;
             }
-            parsed.bindings.push_back(binding);
+            binding.set = entry.value("set", 0u);
+            binding.name = entry.value("name", std::string());
+            if (entry.contains("members")) {
+                ShaderUniformBlock block;
+                block.name = binding.name;
+                block.set = binding.set;
+                block.binding = binding.binding;
+                block.size = entry.at("size").get<std::uint32_t>();
+                for (const nlohmann::json &item : entry.at("members")) {
+                    ShaderBufferMember member;
+                    member.name = item.at("name").get<std::string>();
+                    member.offset = item.at("offset").get<std::uint32_t>();
+                    member.size = item.at("size").get<std::uint32_t>();
+                    if (!parseValueType(item.at("type").get<std::string>(), member.type)
+                        || member.offset + member.size > block.size) {
+                        error.message = "The shader reflection has an invalid buffer member.";
+                        return false;
+                    }
+                    if (item.contains("default")) {
+                        member.defaultValue = item.at("default").get<std::vector<float>>();
+                        if (member.defaultValue.size() != valueComponentCount(member.type)) {
+                            error.message = "The shader reflection has a default of the wrong size.";
+                            return false;
+                        }
+                    }
+                    block.members.push_back(std::move(member));
+                }
+                parsed.uniformBlocks.push_back(std::move(block));
+            }
+            if (entry.contains("default")) {
+                parsed.textureDefaults.push_back(
+                    {binding.set, binding.binding, entry.at("default").get<std::string>()});
+            }
+            parsed.bindings.push_back(std::move(binding));
         }
     } catch (const nlohmann::json::exception &exception) {
         error.message = std::string("The shader reflection is malformed: ") + exception.what();

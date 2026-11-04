@@ -31,6 +31,22 @@ bool loadStage(
     return true;
 }
 
+// Slots are only unique per set and kind of resource: b0, t0 and s0 can all coexist.
+int resourceClass(Graphics::BindingType type)
+{
+    switch (type) {
+    case Graphics::BindingType::UniformBuffer:
+    case Graphics::BindingType::StorageBuffer:
+        return 0;
+    case Graphics::BindingType::SampledTexture:
+    case Graphics::BindingType::StorageTexture:
+        return 1;
+    case Graphics::BindingType::Sampler:
+        return 2;
+    }
+    return 3;
+}
+
 // Merges the bindings of every stage; a binding used by several stages is visible to all.
 bool mergeBindings(
     const std::vector<const Graphics::ShaderReflection *> &stages,
@@ -42,14 +58,16 @@ bool mergeBindings(
             const auto existing = std::find_if(
                 merged.begin(), merged.end(),
                 [&binding](const Graphics::BindingDesc &candidate) {
-                    return candidate.binding == binding.binding;
+                    return candidate.set == binding.set && candidate.binding == binding.binding
+                        && resourceClass(candidate.type) == resourceClass(binding.type);
                 });
             if (existing == merged.end()) {
                 merged.push_back(binding);
             } else if (existing->type != binding.type
                        || existing->arrayCount != binding.arrayCount) {
                 error.message = "Shader stages declare conflicting resources for binding "
-                    + std::to_string(binding.binding) + ".";
+                    + std::to_string(binding.binding) + " in set "
+                    + std::to_string(binding.set) + ".";
                 return false;
             } else {
                 existing->visibility = existing->visibility | binding.visibility;
@@ -142,22 +160,41 @@ std::shared_ptr<ShaderProgram> PipelineCache::ResolveProgram(
     if (desc.fragment) {
         stages.push_back(&fragment.reflection);
     }
-    Graphics::BindingLayoutDesc layoutDescription;
-    if (!mergeBindings(stages, layoutDescription.bindings, error)) {
+    std::vector<Graphics::BindingDesc> merged;
+    if (!mergeBindings(stages, merged, error)) {
         return nullptr;
     }
 
     auto program = std::make_shared<ShaderProgram>();
     program->name = desc.name;
     program->vertexInputs = vertex.reflection.vertexInputs;
+    if (!MaterialLayout::Build(stages, program->materialLayout, error)) {
+        error.message = "Shader program '" + desc.name + "': " + error.message;
+        return nullptr;
+    }
     program->pipelineTemplate.shaders = {vertex.shader};
     if (desc.fragment) {
         program->pipelineTemplate.shaders.push_back(fragment.shader);
     }
-    if (!layoutDescription.bindings.empty()) {
-        program->pipelineTemplate.bindingLayout =
+    // One layout per set; sets without bindings stay null.
+    std::uint32_t setCount = 0;
+    for (const Graphics::BindingDesc &binding : merged) {
+        setCount = std::max(setCount, binding.set + 1);
+    }
+    program->pipelineTemplate.bindingLayouts.resize(setCount);
+    for (std::uint32_t set = 0; set < setCount; ++set) {
+        Graphics::BindingLayoutDesc layoutDescription;
+        for (const Graphics::BindingDesc &binding : merged) {
+            if (binding.set == set) {
+                layoutDescription.bindings.push_back(binding);
+            }
+        }
+        if (layoutDescription.bindings.empty()) {
+            continue;
+        }
+        program->pipelineTemplate.bindingLayouts[set] =
             m_Device->CreateBindingLayout(layoutDescription, error);
-        if (program->pipelineTemplate.bindingLayout == nullptr) {
+        if (program->pipelineTemplate.bindingLayouts[set] == nullptr) {
             if (error.message.empty()) {
                 error.message = "Failed to create the binding layout for program '"
                     + desc.name + "'.";

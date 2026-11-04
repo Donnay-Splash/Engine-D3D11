@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Core/Material.h"
+#include "Core/MaterialValue.h"
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -11,7 +13,8 @@ namespace Engine {
 
 struct Error;
 
-// Per-instance parameter overrides on top of a shared Material.
+// Per-instance parameter overrides on top of a shared Material. Setters fail if the
+// material has no parameter with that name or the value has the wrong type.
 class MaterialInstance
 {
 public:
@@ -19,20 +22,32 @@ public:
 
     const std::shared_ptr<const Material> &GetMaterial() const noexcept { return m_Material; }
 
-    // Fails if the material has no parameter with this name.
+    bool Set(const std::string &name, MaterialValue value, Error &error);
+    bool SetBool(const std::string &name, bool value, Error &error);
+    bool SetInt(const std::string &name, std::int32_t value, Error &error);
+    bool SetFloat(const std::string &name, float value, Error &error);
+    bool SetVector2(const std::string &name, Maths::Vector2 value, Error &error);
+    bool SetVector3(const std::string &name, Maths::Vector3 value, Error &error);
     bool SetVector4(const std::string &name, Maths::Vector4 value, Error &error);
+    bool SetTexture(const std::string &name, MaterialTexture value, Error &error);
+
     void ClearOverride(const std::string &name);
     bool IsOverridden(const std::string &name) const;
 
-    // Override if present, otherwise the material default.
-    std::optional<Maths::Vector4> GetVector4(const std::string &name) const;
+    // Override if present, otherwise the layout default.
+    std::optional<MaterialValue> Get(const std::string &name) const;
 
-    // Values for every material parameter in schema order, defaults filled in.
-    std::vector<Maths::Vector4> ResolveParameters() const;
+    // Values for every parameter in layout order, defaults filled in.
+    std::vector<MaterialValue> ResolveValues() const;
+
+    // Changes whenever any value changes; drawn from a process-wide counter, so two
+    // instances never share a version unless they hold identical values.
+    std::uint64_t Version() const noexcept { return m_Version; }
 
 private:
     std::shared_ptr<const Material> m_Material;
-    std::vector<std::optional<Maths::Vector4>> m_Overrides;
+    std::vector<std::optional<MaterialValue>> m_Overrides;
+    std::uint64_t m_Version = 0;
 };
 
 } // namespace Engine

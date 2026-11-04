@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MetalBackendCommon.h"
+#include "MetalBindingLayout.h"
 
 namespace Engine {
 namespace Metal {
@@ -21,17 +22,28 @@ public:
     bool SetSampler(std::uint32_t binding, std::uint32_t arrayElement,
                     const std::shared_ptr<Sampler> &sampler, Error &error) override;
 
-    const std::vector<BindingValue> *Values(std::uint32_t binding) const;
+    const std::vector<BindingValue> *Values(const BindingDesc &binding) const;
 
-    bool EncodeArgumentBuffer(MTL::Device *device,
-                              const std::vector<std::shared_ptr<MetalShader>> &shaders,
-                              NS::SharedPtr<MTL::Buffer> &argumentBuffer, Error &error) const;
+    // Metal has one top-level argument buffer per shader, shared by every set; each set's
+    // descriptors are written at the offsets that shader's reflection assigns to their
+    // (space, slot). Stages are compiled independently, so each needs its own buffer.
+    // `sets` is indexed by set number; entries may be null for sets the pipeline does not use.
+    static bool EncodeArgumentBuffer(MTL::Device *device,
+                                     const MetalShader &shader,
+                                     const std::vector<std::shared_ptr<MetalBindingSet>> &sets,
+                                     NS::SharedPtr<MTL::Buffer> &argumentBuffer, Error &error);
 
 private:
-    const BindingDesc *Find(std::uint32_t binding, std::uint32_t arrayElement, Error &error) const;
+    static std::uint64_t Key(std::uint32_t binding, MetalResourceClass resourceClass)
+    {
+        return (static_cast<std::uint64_t>(resourceClass) << 32) | binding;
+    }
+
+    const BindingDesc *Find(std::uint32_t binding, MetalResourceClass resourceClass,
+                            std::uint32_t arrayElement, Error &error) const;
 
     std::shared_ptr<BindingLayout> layout_;
-    std::map<std::uint32_t, std::vector<BindingValue>> values_;
+    std::map<std::uint64_t, std::vector<BindingValue>> values_;
 };
 
 } // namespace Metal

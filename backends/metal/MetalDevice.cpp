@@ -342,6 +342,7 @@ std::shared_ptr<Sampler> MetalDevice::CreateSampler(const SamplerDesc &descripti
     descriptor->setMagFilter(filter(description.magFilter));
     descriptor->setSAddressMode(ToMetal(description.addressU));
     descriptor->setTAddressMode(ToMetal(description.addressV));
+    descriptor->setSupportArgumentBuffers(true);
     descriptor->setRAddressMode(ToMetal(description.addressW));
     MTL::SamplerState *sampler = device_->newSamplerState(descriptor.get());
     if (sampler == nullptr) {
@@ -356,14 +357,19 @@ MetalDevice::CreateBindingLayout(const BindingLayoutDesc &description, Error &er
 {
     std::vector<BindingDesc> sorted = description.bindings;
     std::sort(sorted.begin(), sorted.end(), [](const BindingDesc &lhs, const BindingDesc &rhs) {
-        return lhs.binding < rhs.binding;
+        const auto lhsClass = ResourceClassOf(lhs.type);
+        const auto rhsClass = ResourceClassOf(rhs.type);
+        return lhsClass != rhsClass ? lhsClass < rhsClass : lhs.binding < rhs.binding;
     });
     for (std::size_t index = 0; index < sorted.size(); ++index) {
+        const bool overlapsPrevious =
+            index != 0 &&
+            ResourceClassOf(sorted[index - 1].type) == ResourceClassOf(sorted[index].type) &&
+            static_cast<std::uint64_t>(sorted[index - 1].binding) + sorted[index - 1].arrayCount >
+                sorted[index].binding;
         if (sorted[index].arrayCount == 0 || sorted[index].visibility == ShaderStage::None ||
             static_cast<std::uint64_t>(sorted[index].binding) + sorted[index].arrayCount > 31 ||
-            (index != 0 &&
-             static_cast<std::uint64_t>(sorted[index - 1].binding) + sorted[index - 1].arrayCount >
-                 sorted[index].binding)) {
+            sorted[index].set != sorted[0].set || overlapsPrevious) {
             SetError(error, "The Metal binding layout contains a duplicate or invalid binding.");
             return nullptr;
         }
@@ -402,8 +408,12 @@ std::shared_ptr<GraphicsPipeline>
 MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Error &error)
 {
     AutoreleasePool pool;
-    auto bindingLayout = std::dynamic_pointer_cast<MetalBindingLayout>(description.bindingLayout);
-    if (description.shaders.size() != 2 || description.colorFormats.empty() ||
+    bool layoutsValid = true;
+    for (const std::shared_ptr<BindingLayout> &layout : description.bindingLayouts) {
+        layoutsValid = layoutsValid &&
+            (layout == nullptr || std::dynamic_pointer_cast<MetalBindingLayout>(layout) != nullptr);
+    }
+    if (!layoutsValid || description.shaders.size() != 2 || description.colorFormats.empty() ||
         description.colorFormats.size() > 8 || description.sampleCount == 0 ||
         !device_->supportsTextureSampleCount(description.sampleCount) ||
         !IsValidTopology(description.topology) ||
@@ -411,8 +421,7 @@ MetalDevice::CreateGraphicsPipeline(const GraphicsPipelineDesc &description, Err
          description.cullMode != CullMode::Back) ||
         !IsValidCompareFunction(description.depthStencil.depthCompare) ||
         (description.depthStencilFormat != TextureFormat::Unknown &&
-         description.depthStencilFormat != TextureFormat::Depth32Float) ||
-        (description.bindingLayout != nullptr && bindingLayout == nullptr)) {
+         description.depthStencilFormat != TextureFormat::Depth32Float)) {
         SetError(error, "The Metal graphics pipeline description is invalid.");
         return nullptr;
     }

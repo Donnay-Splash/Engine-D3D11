@@ -5,11 +5,15 @@
 #include "Core/Types.h"
 #include "Graphics/Buffer.h"
 #include "Graphics/GraphicsTypes.h"
+#include "Rendering/CommonTextures.h"
+#include "Rendering/EngineSamplers.h"
 #include "Rendering/FrameConstants.h"
+#include "Rendering/MaterialBinder.h"
 #include "Rendering/PipelineCache.h"
 #include "ShaderLibrary.h"
 
 #include <map>
+#include <string>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -50,6 +54,12 @@ public:
     // Call once the frame's command buffer has been submitted.
     void MarkSubmitted() noexcept;
 
+    // Layout of the material parameters of a shader program, for creating Materials.
+    std::shared_ptr<const MaterialLayout> MaterialLayoutFor(
+        const std::string &programName, Error &error);
+
+    const CommonTextures &GetCommonTextures() const noexcept { return m_CommonTextures; }
+
     std::size_t DrawCount() const noexcept { return m_DrawItems.size(); }
 
 private:
@@ -68,6 +78,7 @@ private:
     {
         std::shared_ptr<Mesh> mesh;
         std::shared_ptr<Graphics::GraphicsPipeline> pipeline;
+        std::shared_ptr<Graphics::BindingSet> materialBindings; // null without material resources
         std::size_t slot = 0;
     };
 
@@ -76,6 +87,9 @@ private:
 
     std::shared_ptr<Graphics::Device> m_Device;
     PipelineCache m_PipelineCache;
+    EngineSamplers m_Samplers;
+    CommonTextures m_CommonTextures;
+    MaterialBinder m_MaterialBinder;
     Graphics::TextureFormat m_ColorFormat{};
     std::vector<DrawSlot> m_Slots;
     std::vector<DrawItem> m_DrawItems;
